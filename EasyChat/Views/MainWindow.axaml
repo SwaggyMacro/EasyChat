@@ -1,0 +1,165 @@
+<suki:SukiWindow xmlns="https://github.com/avaloniaui"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:vm="using:EasyChat.ViewModels"
+                 xmlns:lang="clr-namespace:EasyChat.Lang"
+                 xmlns:suki="https://github.com/kikipoulet/SukiUI"
+                 xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+                 xmlns:converters="clr-namespace:EasyChat.Converters"
+                 IsTitleBarVisible="{Binding TitleBarVisible, Mode=TwoWay}"
+                 Width="1120"
+                 Height="700"
+                 x:Class="EasyChat.Views.MainWindow"
+                 x:DataType="vm:MainWindowViewModel"
+                 Icon="/Assets/easychat-logo.ico"
+                 WindowStartupLocation="CenterScreen"
+                 Title="EasyChat">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <!-- ReSharper disable once Xaml.ConstructorWarning -->
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <suki:SukiWindow.LogoContent>
+        <avalonia:MaterialIcon Width="20"
+                               Height="20"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource SukiPrimaryColor}"
+                               Kind="Translate">
+            <avalonia:MaterialIcon.Transitions>
+                <Transitions>
+                    <BrushTransition Property="Foreground" Duration="{DynamicResource ShortAnimationDuration}" />
+                </Transitions>
+            </avalonia:MaterialIcon.Transitions>
+        </avalonia:MaterialIcon>
+    </suki:SukiWindow.LogoContent>
+
+
+    <suki:SukiWindow.Hosts>
+        <suki:SukiToastHost Manager="{Binding ToastManager}" />
+        <suki:SukiDialogHost Manager="{Binding DialogManager}" />
+    </suki:SukiWindow.Hosts>
+
+    <suki:SukiWindow.MenuItems>
+        <MenuItem Header="{x:Static lang:Resources.ToggleMode}">
+            <MenuItem Command="{Binding ToggleBaseThemeCommand}" Header="{Binding BaseTheme}">
+                <MenuItem.Icon>
+                    <avalonia:MaterialIcon Kind="Lightbulb" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Command="{Binding ToggleTitleBarCommand}"
+                      Header="{x:Static lang:Resources.TitleBar}"
+                      ToolTip.Tip="{x:Static lang:Resources.TitleBarTip}">
+                <MenuItem.Icon>
+                    <avalonia:MaterialIcon
+                        Kind="{Binding TitleBarVisible, Converter={x:Static converters:BoolToIconConverters.Visibility}}" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="{x:Static lang:Resources.FullScreen}"
+                      PointerPressed="MakeFullScreenPressed"
+                      ToolTip.Tip="{x:Static lang:Resources.FullScreenTip}">
+                <MenuItem.Icon>
+                    <avalonia:MaterialIcon Kind="Fullscreen" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </MenuItem>
+        <MenuItem Header="{x:Static lang:Resources.Theme}">
+            <MenuItem Click="ThemeMenuItem_OnClick"
+                      Header="{x:Static lang:Resources.SwitchTo}"
+                      ItemsSource="{Binding Themes}">
+                <MenuItem.Icon>
+                    <avalonia:MaterialIcon Kind="Color" />
+                </MenuItem.Icon>
+                <MenuItem.DataTemplates>
+                    <DataTemplate DataType="{x:Type suki:SukiColorTheme}">
+                        <TextBlock Foreground="{Binding PrimaryBrush}" Text="{Binding DisplayName}" />
+                    </DataTemplate>
+                </MenuItem.DataTemplates>
+            </MenuItem>
+            <MenuItem Header="-" />
+            <MenuItem Command="{Binding CreateCustomThemeCommand}" Header="{x:Static lang:Resources.CreateCustom}">
+                <MenuItem.Icon>
+                    <avalonia:MaterialIcon Kind="Colorize" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </MenuItem>
+    </suki:SukiWindow.MenuItems>
+
+    <suki:SukiSideMenu IsSearchEnabled="True"
+                       ItemsSource="{Binding Pages}" SelectedItem="{Binding ActivePage}">
+
+        <suki:SukiSideMenu.Styles>
+            <Style Selector="Image.AppIcon">
+                <Setter Property="Transitions">
+                    <Transitions>
+                        <DoubleTransition Property="Opacity" Duration="0.1" />
+                    </Transitions>
+                </Setter>
+                <Style Selector="^:pointerover">
+                    <Setter Property="Opacity" Value="0.5" />
+                </Style>
+            </Style>
+        </suki:SukiSideMenu.Styles>
+        <suki:SukiSideMenu.ItemTemplate>
+            <DataTemplate>
+                <suki:SukiSideMenuItem Header="{Binding DisplayName}">
+                    <suki:SukiSideMenuItem.Icon>
+                        <avalonia:MaterialIcon Kind="{Binding Icon}" />
+                    </suki:SukiSideMenuItem.Icon>
+                </suki:SukiSideMenuItem>
+            </DataTemplate>
+        </suki:SukiSideMenu.ItemTemplate>
+
+        <!-- <suki:SukiSideMenu.HeaderContent> -->
+        <!--     <TextBlock HorizontalAlignment="Center" Text="{x:Static lang:Resources.AppName}" FontWeight="Bold" FontSize="20"/> -->
+        <!-- </suki:SukiSideMenu.HeaderContent> -->
+        <suki:SukiSideMenu.HeaderContent>
+            <StackPanel>
+                <Image Width="80"
+                       Height="80"
+                       Margin="30,10,30,30"
+                       Classes="AppIcon"
+                       Source="/Assets/easychat-logo.png"
+                       PointerPressed="InputElement_OnPointerPressed"
+                       Cursor="Hand"
+                       ToolTip.ShowDelay="0"
+                       ToolTip.Tip="{x:Static lang:Resources.ToggleMenuTip}" />
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0 -20 0 0"
+                           Text="{x:Static lang:Resources.AppName}" FontWeight="Bold" />
+            </StackPanel>
+        </suki:SukiSideMenu.HeaderContent>
+
+        <suki:SukiSideMenu.FooterContent>
+            <StackPanel>
+                <!-- <TextBlock HorizontalAlignment="Center" Text="{x:Static lang:Resources.Copyright}" /> -->
+                <TextBlock HorizontalAlignment="Center" Text="@ SwaggyMacro" />
+                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                    <StackPanel.Styles>
+                        <Style Selector="Button">
+                            <Setter Property="Command" Value="{Binding OpenUrlCommand}" />
+                        </Style>
+                        <Style Selector="avalonia|MaterialIcon">
+                            <Setter Property="Width" Value="25" />
+                            <Setter Property="Height" Value="25" />
+                        </Style>
+                    </StackPanel.Styles>
+                    <!-- ReSharper disable once Xaml.StyleClassNotFound -->
+                    <Button Classes="Basic"
+                            Cursor="Hand"
+                            CommandParameter="https://github.com/SwaggyMacro/EasyChat"
+                            ToolTip.Tip="{x:Static lang:Resources.OpenOnGithub}">
+                        <avalonia:MaterialIcon Kind="Github" />
+                    </Button>
+                    <!-- ReSharper disable once Xaml.StyleClassNotFound -->
+                    <Button Classes="Basic"
+                            Cursor="Hand"
+                            CommandParameter="https://github.com/SwaggyMacro/EasyChat"
+                            ToolTip.Tip="{x:Static lang:Resources.OpenOnOfficialSite}">
+                        <avalonia:MaterialIcon Kind="Web" />
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </suki:SukiSideMenu.FooterContent>
+    </suki:SukiSideMenu>
+</suki:SukiWindow>

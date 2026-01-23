@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyChat", "EasyChat\EasyChat.csproj", "{2FE74219-8A51-49DB-B079-B922C964CA47}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyChat.Tests", "EasyChat.Tests\EasyChat.Tests.csproj", "{57604A8D-0CAC-407D-A808-964F451BAF0C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2FE74219-8A51-49DB-B079-B922C964CA47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FE74219-8A51-49DB-B079-B922C964CA47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FE74219-8A51-49DB-B079-B922C964CA47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FE74219-8A51-49DB-B079-B922C964CA47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57604A8D-0CAC-407D-A808-964F451BAF0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57604A8D-0CAC-407D-A808-964F451BAF0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57604A8D-0CAC-407D-A808-964F451BAF0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57604A8D-0CAC-407D-A808-964F451BAF0C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

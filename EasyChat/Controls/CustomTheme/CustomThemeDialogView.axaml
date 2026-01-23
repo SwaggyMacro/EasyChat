@@ -1,0 +1,68 @@
+<UserControl x:Class="EasyChat.Controls.CustomTheme.CustomThemeDialogView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:lang="clr-namespace:EasyChat.Lang"
+             xmlns:customTheme="clr-namespace:EasyChat.Controls.CustomTheme"
+             xmlns:converters="clr-namespace:EasyChat.Converters"
+             d:DesignHeight="550"
+             d:DesignWidth="400"
+             x:DataType="customTheme:CustomThemeDialogViewModel"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <converters:ColorToHexConverter x:Key="ColorToHexConverter" />
+    </UserControl.Resources>
+    <suki:GroupBox Header="{x:Static lang:Resources.CreateCustom}">
+        <StackPanel Spacing="20">
+            <StackPanel Spacing="5">
+                <TextBlock Text="{x:Static lang:Resources.ThemeName}" FontWeight="DemiBold" />
+                <TextBox Text="{Binding DisplayName}" />
+            </StackPanel>
+            
+            <StackPanel Spacing="5">
+                <TextBlock Text="{x:Static lang:Resources.PrimaryColor}" FontWeight="DemiBold" />
+                <Grid ColumnDefinitions="*, Auto">
+                    <TextBox Text="{Binding PrimaryColor, Converter={StaticResource ColorToHexConverter}}" />
+                    <Button Grid.Column="1" Width="35" Height="35" Margin="10,0,0,0" 
+                            CornerRadius="20" BorderThickness="1" BorderBrush="#33000000">
+                        <Button.Background>
+                            <SolidColorBrush Color="{Binding PrimaryColor}" />
+                        </Button.Background>
+                        <Button.Flyout>
+                            <Flyout Placement="Bottom">
+                                <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
+                                    <ColorView Color="{Binding PrimaryColor}" IsAlphaEnabled="True" ColorSpectrumShape="Ring" />
+                                </Border>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+                </Grid>
+            </StackPanel>
+
+            <StackPanel Spacing="5">
+                <TextBlock Text="{x:Static lang:Resources.AccentColor}" FontWeight="DemiBold" />
+                <Grid ColumnDefinitions="*, Auto">
+                    <TextBox Text="{Binding AccentColor, Converter={StaticResource ColorToHexConverter}}" />
+                    <Button Grid.Column="1" Width="35" Height="35" Margin="10,0,0,0" 
+                            CornerRadius="20" BorderThickness="1" BorderBrush="#33000000">
+                        <Button.Background>
+                            <SolidColorBrush Color="{Binding AccentColor}" />
+                        </Button.Background>
+                        <Button.Flyout>
+                            <Flyout Placement="Bottom">
+                                <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
+                                    <ColorView Color="{Binding AccentColor}" IsAlphaEnabled="True" ColorSpectrumShape="Ring" />
+                                </Border>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+                </Grid>
+            </StackPanel>
+
+            <Button Command="{Binding TryCreateThemeCommand}" Classes="Flat" Content="{x:Static lang:Resources.Create}" />
+            <Button Command="{Binding CancelCommand}" Content="{x:Static lang:Resources.Cancel}" />
+        </StackPanel>
+    </suki:GroupBox>
+</UserControl>

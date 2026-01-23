@@ -1,0 +1,19 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="EasyChat.App"
+             xmlns:local="using:EasyChat"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             RequestedThemeVariant="Default">
+    <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+    <Application.DataTemplates>
+        <local:ViewLocator />
+    </Application.DataTemplates>
+
+    <Application.Styles>
+        <suki:SukiTheme ThemeColor="Blue" />
+        <avalonia:MaterialIconStyles />
+        <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+    </Application.Styles>
+</Application>

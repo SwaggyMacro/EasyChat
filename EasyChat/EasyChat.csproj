@@ -1,0 +1,111 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <ApplicationIcon>Assets\easychat-logo.ico</ApplicationIcon>
+
+        <!-- NetBeauty Settings -->
+        <DisableBeauty>True</DisableBeauty>
+        <BeautySharedRuntimeMode>False</BeautySharedRuntimeMode>
+        <BeautyLibsDir Condition="$(BeautySharedRuntimeMode) == 'True'">../libraries</BeautyLibsDir>
+        <BeautyLibsDir Condition="$(BeautySharedRuntimeMode) != 'True'">./libraries</BeautyLibsDir>
+
+        <!-- Files to hide from end users (e.g., runtime or config files). Only supported on Windows. -->
+        <BeautyHiddens>hostfxr;hostpolicy;*.deps.json;*.runtimeconfig*.json</BeautyHiddens>
+
+        <!-- Only run NetBeauty on publish (set to True to skip on build). -->
+        <BeautyOnPublishOnly>False</BeautyOnPublishOnly>
+
+        <!-- Loader version policy: auto, with, or without. -->
+        <BeautyNBLoaderVerPolicy>auto</BeautyNBLoaderVerPolicy>
+
+        <!-- Enable debugging support for third-party debuggers (e.g., dnSpy). -->
+        <BeautyEnableDebugging>False</BeautyEnableDebugging>
+
+        <!-- Use the patch to minimize file count (SCD mode only). Set to False to disable. -->
+        <BeautyUsePatch>True</BeautyUsePatch>
+
+        <!-- Log verbosity: Error, Detail, or Info. -->
+        <BeautyLogLevel>Info</BeautyLogLevel>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Folder Include="Assets\Images\" />
+        <Folder Include="Models\" />
+        <AvaloniaResource Include="Assets\**" />
+        <Folder Include="Styles\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AutoMapper" Version="16.0.0" />
+        <PackageReference Include="Avalonia" Version="11.3.11" />
+        <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.3.11" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.11" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.11" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.11" />
+        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.11" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.8" />
+        <PackageReference Include="DeepL.net" Version="1.11.0" />
+        <PackageReference Include="GlobalHotKeys.Windows" Version="0.1.0" />
+        <PackageReference Include="HotAvalonia" Version="3.0.2" />
+        <PackageReference Include="Material.Icons" Version="2.1.10" />
+        <PackageReference Include="Material.Icons.Avalonia" Version="2.1.10" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="OpenAI" Version="2.1.0" />
+        <PackageReference Include="OpenCvSharp4.Extensions" Version="4.10.0.20241108" />
+        <PackageReference Include="OpenCvSharp4.Windows" Version="4.10.0.20241108" />
+        <PackageReference Include="RestSharp" Version="112.1.0" />
+        <PackageReference Include="Sdcb.PaddleInference" Version="3.0.1" />
+        <PackageReference Include="Sdcb.PaddleInference.runtime.win64.mkl" Version="3.1.0.54" />
+        <PackageReference Include="Sdcb.PaddleOCR" Version="3.0.1" />
+        <PackageReference Include="Sdcb.PaddleOCR.Models.Local" Version="3.0.1" />
+        <PackageReference Include="SukiUI" Version="6.0.3" />
+        
+        <!-- Logging -->
+        <PackageReference Include="Serilog" Version="4.2.0" />
+        <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.0" />
+        <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <UpToDateCheckInput Remove="Assets\Styles\ButtonStyles.axaml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="Views\Dialogs\ShortcutEditDialogView.axaml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Views\Dialogs\ShortcutEditDialogView.axaml.cs">
+        <DependentUpon>ShortcutEditDialogView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\Pages\ShortcutView.axaml.cs">
+        <DependentUpon>ShortcutView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Lang\Resources.resx">
+        <Generator>PublicResXFileCodeGenerator</Generator>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Lang\Resources.zh.resx">
+        <Generator>PublicResXFileCodeGenerator</Generator>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="Resources.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>Resources.resx</DependentUpon>
+        </Compile>
+    </ItemGroup>
+</Project>

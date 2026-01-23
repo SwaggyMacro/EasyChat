@@ -1,0 +1,41 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             xmlns:viewModels="clr-namespace:EasyChat.ViewModels.Pages"
+             xmlns:lang="clr-namespace:EasyChat.Lang"
+             x:DataType="viewModels:AboutViewModel"
+             x:Class="EasyChat.Views.Pages.AboutView">
+    <StackPanel Margin="0 30 0 30">
+        <Image Source="/Assets/easychat-logo.png" MaxWidth="150" MaxHeight="150" />
+        <ScrollViewer>
+            <StackPanel>
+                <TextBlock HorizontalAlignment="Center" Margin="0 5" FontSize="18" FontWeight="Bold"
+                           Text="{x:Static lang:Resources.AppName}" />
+                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Center" FontFamily="Bold"
+                           Text="{x:Static lang:Resources.AboutLine1}" />
+                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Center" FontFamily="Bold"
+                           Text="{x:Static lang:Resources.AboutLine2}" />
+                <TextBlock HorizontalAlignment="Center" FontFamily="Bold" FontSize="18"
+                           Margin="0 20 0 5">
+                    ThirdParty Library
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Center" FontFamily="Bold">
+                    AvaloniaUI/Avalonia
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Center" FontFamily="Bold">
+                    kikipoulet/SukiUI
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Center" FontFamily="Bold">
+                    sdcb/PaddleSharp
+                </TextBlock>
+            </StackPanel>
+        </ScrollViewer>
+
+        <TextBlock Margin="0 100 0 0" HorizontalAlignment="Center"
+                   VerticalAlignment="Bottom" FontFamily="Bold">
+            @ Copyright 2024
+        </TextBlock>
+    </StackPanel>
+</UserControl>

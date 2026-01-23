@@ -1,0 +1,173 @@
+<UserControl x:Class="EasyChat.Views.Pages.ShortcutView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:lang="clr-namespace:EasyChat.Lang;assembly=EasyChat"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+
+             xmlns:config="clr-namespace:EasyChat.Models.Configuration;assembly=EasyChat"
+             xmlns:controls="clr-namespace:EasyChat.Views.Controls;assembly=EasyChat"
+             xmlns:viewModels="clr-namespace:EasyChat.ViewModels.Pages"
+             x:DataType="viewModels:ShortcutViewModel"
+             mc:Ignorable="d"
+             Focusable="True">
+
+    <StackPanel Spacing="0" Margin="25">
+        <!-- Header -->
+        <TextBlock Text="{x:Static lang:Resources.Shortcut}"
+                   FontSize="28"
+                   FontWeight="Bold"
+                   Margin="0 0 0 20" />
+
+        <!-- Tab Control -->
+        <TabControl>
+            <!-- Basic Hotkeys Tab -->
+            <TabItem Header="{x:Static lang:Resources.BasicShortcuts}">
+                <StackPanel Spacing="15" Margin="0 20">
+
+                    <!-- Basic Shortcuts List -->
+                    <ItemsControl ItemsSource="{Binding BasicShortcuts}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="config:ShortcutEntry">
+                                <suki:GlassCard Margin="0 0 0 10" Padding="18">
+                                    <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                                        <!-- Action Name -->
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding DisplayText}"
+                                                       FontSize="15"
+                                                       FontWeight="SemiBold" />
+                                        </StackPanel>
+
+                                        <!-- Key Combination Display -->
+                                        <controls:KeySequenceDisplay Grid.Column="1"
+                                                                     KeyCombination="{Binding KeyCombination}"
+                                                                     MinWidth="130"
+                                                                     Margin="10 0"
+                                                                     HorizontalAlignment="Center"
+                                                                     VerticalAlignment="Center" />
+
+                                        <!-- Enable Toggle -->
+                                        <ToggleSwitch Grid.Column="2"
+                                                      IsChecked="{Binding IsEnabled}"
+                                                      Margin="10 0" />
+
+                                        <!-- Actions -->
+                                        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="0">
+                                            <Button Classes="Flat"
+                                                    CornerRadius="8,0,0,8"
+                                                    Command="{Binding $parent[ItemsControl].((viewModels:ShortcutViewModel)DataContext).EditEntryCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    ToolTip.Tip="{x:Static lang:Resources.Edit}">
+                                                <Button.Content>
+                                                    <avalonia:MaterialIcon Kind="Pencil" />
+                                                </Button.Content>
+                                            </Button>
+                                            <Button Classes="Flat Danger"
+                                                    CornerRadius="0,8,8,0"
+                                                    Command="{Binding $parent[ItemsControl].((viewModels:ShortcutViewModel)DataContext).RemoveEntryCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    ToolTip.Tip="{x:Static lang:Resources.Delete}">
+                                                <Button.Content>
+                                                    <avalonia:MaterialIcon Kind="TrashCan" />
+                                                </Button.Content>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </suki:GlassCard>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Add Button -->
+                    <Button Classes="Flat"
+                            Command="{Binding AddEntryCommand}"
+                            CommandParameter="Basic"
+                            HorizontalAlignment="Left">
+                        <Button.Content>
+                            <StackPanel Orientation="Horizontal">
+                                <avalonia:MaterialIcon Kind="Plus" />
+                                <TextBlock Margin="5 0 0 0" Text="{x:Static lang:Resources.AddBasicShortcut}" />
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+                </StackPanel>
+            </TabItem>
+
+            <!-- Language Switch Tab -->
+            <TabItem Header="{x:Static lang:Resources.LanguageShortcuts}">
+                <StackPanel Spacing="15" Margin="0 20">
+
+                    <!-- Language Switch Shortcuts -->
+                    <ItemsControl ItemsSource="{Binding LanguageShortcuts}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="config:ShortcutEntry">
+                                <suki:GlassCard Margin="0 0 0 10" Padding="18">
+                                    <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                                        <!-- Parameter Only (no action name) -->
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding ParameterDisplayText}"
+                                                       FontSize="15"
+                                                       FontWeight="SemiBold" />
+                                        </StackPanel>
+
+                                        <!-- Key Combination -->
+                                        <controls:KeySequenceDisplay Grid.Column="1"
+                                                                     KeyCombination="{Binding KeyCombination}"
+                                                                     MinWidth="130"
+                                                                     Margin="10 0"
+                                                                     HorizontalAlignment="Center"
+                                                                     VerticalAlignment="Center" />
+
+                                        <!-- Enable Toggle -->
+                                        <ToggleSwitch Grid.Column="2"
+                                                      IsChecked="{Binding IsEnabled}"
+                                                      Margin="10 0" />
+
+                                        <!-- Actions -->
+                                        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="0">
+                                            <Button Classes="Flat"
+                                                    CornerRadius="8,0,0,8"
+                                                    Command="{Binding $parent[ItemsControl].((viewModels:ShortcutViewModel)DataContext).EditEntryCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    ToolTip.Tip="{x:Static lang:Resources.Edit}">
+                                                <Button.Content>
+                                                    <avalonia:MaterialIcon Kind="Pencil" />
+                                                </Button.Content>
+                                            </Button>
+                                            <Button Classes="Flat Danger"
+                                                    CornerRadius="0,8,8,0"
+                                                    Command="{Binding $parent[ItemsControl].((viewModels:ShortcutViewModel)DataContext).RemoveEntryCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    ToolTip.Tip="{x:Static lang:Resources.Delete}">
+                                                <Button.Content>
+                                                    <avalonia:MaterialIcon Kind="TrashCan" />
+                                                </Button.Content>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </suki:GlassCard>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Add Button -->
+                    <Button Classes="Flat"
+                            Command="{Binding AddEntryCommand}"
+                            CommandParameter="Language"
+                            HorizontalAlignment="Left">
+                        <Button.Content>
+                            <StackPanel Orientation="Horizontal">
+                                <avalonia:MaterialIcon Kind="Plus" />
+                                <TextBlock Margin="5 0 0 0" Text="{x:Static lang:Resources.AddLanguageShortcut}" />
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+
+
+    </StackPanel>
+</UserControl>

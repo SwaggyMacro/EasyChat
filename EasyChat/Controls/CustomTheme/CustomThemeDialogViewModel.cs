@@ -1,0 +1,65 @@
+using System.Reactive;
+using Avalonia.Media;
+using EasyChat.ViewModels;
+using ReactiveUI;
+using SukiUI;
+using SukiUI.Dialogs;
+using SukiUI.Models;
+
+namespace EasyChat.Controls.CustomTheme;
+
+public class CustomThemeDialogViewModel : ViewModelBase
+{
+    private readonly ISukiDialog _dialog;
+    private readonly SukiTheme _theme;
+
+    private Color _accentColor = Colors.Pink;
+
+    private string _displayName = "Pink";
+
+    private Color _primaryColor = Colors.DeepPink;
+
+    public CustomThemeDialogViewModel(SukiTheme theme, ISukiDialog dialog)
+    {
+        _theme = theme;
+        _dialog = dialog;
+
+        TryCreateThemeCommand = ReactiveCommand.Create(TryCreateTheme);
+        CancelCommand = ReactiveCommand.Create(Cancel);
+    }
+
+    public string DisplayName
+    {
+        get => _displayName;
+        set => this.RaiseAndSetIfChanged(ref _displayName, value);
+    }
+
+    public Color PrimaryColor
+    {
+        get => _primaryColor;
+        set => this.RaiseAndSetIfChanged(ref _primaryColor, value);
+    }
+
+    public Color AccentColor
+    {
+        get => _accentColor;
+        set => this.RaiseAndSetIfChanged(ref _accentColor, value);
+    }
+
+    public ReactiveCommand<Unit, Unit> TryCreateThemeCommand { get; }
+    public ReactiveCommand<Unit, Unit> CancelCommand { get; }
+
+    private void TryCreateTheme()
+    {
+        if (string.IsNullOrEmpty(DisplayName)) return;
+        var theme1 = new SukiColorTheme(DisplayName, PrimaryColor, AccentColor);
+        _theme.AddColorTheme(theme1);
+        _theme.ChangeColorTheme(theme1);
+        _dialog.Dismiss();
+    }
+
+    private void Cancel()
+    {
+        _dialog.Dismiss();
+    }
+}

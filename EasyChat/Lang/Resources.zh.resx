@@ -1,0 +1,411 @@
+<root>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <data name="Copyright" xml:space="preserve">
+        <value>©️ EasyChatOrg</value>
+    </data>
+    <data name="AppName" xml:space="preserve">
+        <value>EasyChat</value>
+    </data>
+    <data name="ToggleMode" xml:space="preserve">
+        <value>切换</value>
+    </data>
+    <data name="LightMode" xml:space="preserve">
+        <value>明亮</value>
+    </data>
+    <data name="DarkMode" xml:space="preserve">
+        <value>黑暗</value>
+    </data>
+    <data name="Home" xml:space="preserve">
+        <value>主页</value>
+    </data>
+    <data name="Settings" xml:space="preserve">
+        <value>设置</value>
+    </data>
+    <data name="About" xml:space="preserve">
+        <value>关于</value>
+    </data>
+    <data name="Theme" xml:space="preserve">
+        <value>主题</value>
+    </data>
+    <data name="SwitchTo" xml:space="preserve">
+        <value>切换至...</value>
+    </data>
+    <data name="CreateCustom" xml:space="preserve">
+        <value>自定义</value>
+    </data>
+    <data name="TitleBar" xml:space="preserve">
+        <value>标题栏</value>
+    </data>
+    <data name="FullScreen" xml:space="preserve">
+        <value>全屏</value>
+    </data>
+    <data name="FullScreenTip" xml:space="preserve">
+        <value>全屏APP</value>
+    </data>
+    <data name="TitleBarTip" xml:space="preserve">
+        <value>切换标题栏</value>
+    </data>
+    <data name="ToggleMenuTip" xml:space="preserve">
+        <value>显示/隐藏 顶部菜单</value>
+    </data>
+    <data name="ColorChangedTitle" xml:space="preserve">
+        <value>更换主题色</value>
+    </data>
+    <data name="ColorChangedContent" xml:space="preserve">
+        <value>主题色已切换至</value>
+    </data>
+    <data name="ThemeChangedTitle" xml:space="preserve">
+        <value>主题切换</value>
+    </data>
+    <data name="ThemeChangedContent" xml:space="preserve">
+        <value>主题已切换至</value>
+    </data>
+    <data name="TitleBarTitle" xml:space="preserve">
+        <value>标题栏 </value>
+    </data>
+    <data name="TitleBarContent" xml:space="preserve">
+        <value>窗口标题已 </value>
+    </data>
+    <data name="OpenOnGithub" xml:space="preserve">
+        <value>在 Github 上打开</value>
+    </data>
+    <data name="OpenOnOfficialSite" xml:space="preserve">
+        <value>在 官网 上打开</value>
+    </data>
+    <data name="Create" xml:space="preserve">
+        <value>创建</value>
+    </data>
+    <data name="Cancel" xml:space="preserve">
+        <value>取消</value>
+    </data>
+    <data name="General" xml:space="preserve">
+        <value>常规</value>
+    </data>
+    <data name="Shortcut" xml:space="preserve">
+        <value>热键</value>
+    </data>
+    <data name="AboutLine1" xml:space="preserve">
+        <value>一个用于对话的自动翻译多种语言工具。</value>
+    </data>
+    <data name="AboutLine2" xml:space="preserve">
+        <value>该版本为重构版本，重构自18年开发的交流神器。</value>
+    </data>
+    <data name="Other" xml:space="preserve">
+        <value>其它</value>
+    </data>
+    <data name="AIEngine" xml:space="preserve">
+        <value>大模型</value>
+    </data>
+    <data name="MachineTranslation" xml:space="preserve">
+        <value>机器翻译</value>
+    </data>
+    <data name="TransEngine" xml:space="preserve">
+        <value>翻译引擎</value>
+    </data>
+    <data name="Translation" xml:space="preserve">
+        <value>翻译</value>
+    </data>
+    <data name="Model" xml:space="preserve">
+        <value>模型</value>
+    </data>
+    <data name="DeepL" xml:space="preserve">
+        <value>DeepL</value>
+    </data>
+    <data name="Tencent" xml:space="preserve">
+        <value>腾讯</value>
+    </data>
+    <data name="Google" xml:space="preserve">
+        <value>谷歌</value>
+    </data>
+    <data name="Baidu" xml:space="preserve">
+        <value>百度</value>
+    </data>
+    <data name="Proxy" xml:space="preserve">
+        <value>代理</value>
+    </data>
+    <data name="ProxyType" xml:space="preserve">
+        <value>代理类型</value>
+    </data>
+    <data name="ProxyUrl" xml:space="preserve">
+        <value>代理地址</value>
+    </data>
+    <data name="ProxyTypeQuestion" xml:space="preserve">
+        <value>用来代理翻译API的网络请求，例如OpenAI、Gemini等。</value>
+    </data>
+    <data name="ProxyAddrQuestion" xml:space="preserve">
+        <value>http://username:password@server:port</value>
+    </data>
+    <data name="ApplyTo" xml:space="preserve">
+        <value>作用于</value>
+    </data>
+    <data name="Language" xml:space="preserve">
+        <value>语言</value>
+    </data>
+    <data name="Save" xml:space="preserve">
+        <value>保存</value>
+    </data>
+    <data name="Restore" xml:space="preserve">
+        <value>恢复上次</value>
+    </data>
+    <data name="SaveSuccess" xml:space="preserve">
+        <value>设置已保存!</value>
+    </data>
+    <data name="Success" xml:space="preserve">
+        <value>成功!</value>
+    </data>
+    <data name="RestoreSuccess" xml:space="preserve">
+        <value>已恢复上次配置</value>
+    </data>
+    <data name="RequestError" xml:space="preserve">
+        <value>网络请求错误，请检查网络连接。</value>
+    </data>
+    <data name="TypeSomethingHere" xml:space="preserve">
+        <value>输入想要翻译的文字</value>
+    </data>
+    <data name="TypingViewTitle" xml:space="preserve">
+        <value>输入文字翻译</value>
+    </data>
+    <data name="OcrKey" xml:space="preserve">
+        <value>截图翻译</value>
+    </data>
+    <data name="UsingAiModel" xml:space="preserve">
+        <value>大模型</value>
+    </data>
+    <data name="UsingMachineTransEngine" xml:space="preserve">
+        <value>机器翻译</value>
+    </data>
+    <data name="Action" xml:space="preserve">
+        <value>动作</value>
+    </data>
+    <data name="KeyCombination" xml:space="preserve">
+        <value>快捷键</value>
+    </data>
+    <data name="Enabled" xml:space="preserve">
+        <value>启用</value>
+    </data>
+    <data name="Screenshot" xml:space="preserve">
+        <value>截图</value>
+    </data>
+    <data name="RecordShortcut" xml:space="preserve">
+        <value>录制快捷键</value>
+    </data>
+    <data name="RecordingShortcut" xml:space="preserve">
+        <value>请按下快捷键组合...</value>
+    </data>
+    <data name="Add" xml:space="preserve">
+    <value>添加</value>
+  </data>
+    <data name="Unknown" xml:space="preserve">
+    <value>未知</value>
+  </data>
+    <data name="ClickToRecord" xml:space="preserve">
+    <value>点击录制</value>
+  </data>
+    <data name="NotSet" xml:space="preserve">
+    <value>未设置</value>
+  </data>
+    <data name="Parameter" xml:space="preserve">
+    <value>参数</value>
+  </data>
+    <data name="ParameterHint" xml:space="preserve">
+    <value>参数 (如: zh, en)</value>
+  </data>
+    <data name="BasicShortcuts" xml:space="preserve">
+    <value>基础热键</value>
+  </data>
+    <data name="LanguageShortcuts" xml:space="preserve">
+    <value>语种切换热键</value>
+  </data>
+    <data name="AddBasicShortcut" xml:space="preserve">
+    <value>添加基础热键</value>
+  </data>
+    <data name="AddLanguageShortcut" xml:space="preserve">
+    <value>添加语种切换热键</value>
+  </data>
+    <data name="Edit" xml:space="preserve">
+    <value>编辑</value>
+  </data>
+    <data name="Delete" xml:space="preserve">
+    <value>删除</value>
+  </data>
+    <data name="ActionType" xml:space="preserve">
+    <value>动作类型</value>
+  </data>
+    <data name="Action_ScreenshotTranslate" xml:space="preserve">
+    <value>截图翻译</value>
+  </data>
+    <data name="Action_InputTranslate" xml:space="preserve">
+    <value>输入翻译</value>
+  </data>
+    <data name="Action_SwitchSourceLang" xml:space="preserve">
+    <value>切换源语言</value>
+  </data>
+    <data name="Action_SwitchTargetLang" xml:space="preserve">
+    <value>切换目标语言</value>
+  </data>
+    <data name="Action_SwitchEngineSourceTarget" xml:space="preserve">
+    <value>切换引擎、源及目标语言</value>
+  </data>
+    <data name="Hint_SwitchConfig" xml:space="preserve">
+    <value>引擎,源ID,目标ID (如 Baidu,en,zh-Hans)</value>
+  </data>
+    <data name="ConfirmDeletion" xml:space="preserve">
+    <value>确认删除</value>
+  </data>
+    <data name="AreYouSureDelete" xml:space="preserve">
+    <value>确定要删除此快捷键吗？</value>
+  </data>
+    <data name="AddModel" xml:space="preserve">
+    <value>添加模型</value>
+  </data>
+    <data name="EditModel" xml:space="preserve">
+    <value>编辑模型</value>
+  </data>
+    <data name="DeleteModel" xml:space="preserve">
+    <value>删除模型</value>
+  </data>
+    <data name="ModelName" xml:space="preserve">
+    <value>模型名称</value>
+  </data>
+    <data name="ModelType" xml:space="preserve">
+    <value>模型类型</value>
+  </data>
+    <data name="CustomModel" xml:space="preserve">
+    <value>自定义模型</value>
+  </data>
+    <data name="ConfirmDeleteModel" xml:space="preserve">
+    <value>确定要删除此模型吗？</value>
+  </data>
+    <data name="OpenAI" xml:space="preserve">
+    <value>OpenAI</value>
+  </data>
+    <data name="Gemini" xml:space="preserve">
+    <value>Gemini</value>
+  </data>
+    <data name="Claude" xml:space="preserve">
+    <value>Claude</value>
+  </data>
+    <data name="Keys" xml:space="preserve">
+    <value>密钥</value>
+  </data>
+    <data name="EditKeys" xml:space="preserve">
+    <value>编辑密钥</value>
+  </data>
+    <data name="AddKey" xml:space="preserve">
+  <value>添加密钥</value>
+  </data>
+    <data name="UseProxy" xml:space="preserve">
+  <value>使用代理</value>
+  </data>
+    <data name="TestConnection" xml:space="preserve">
+  <value>测试连接</value>
+  </data>
+    <data name="Testing" xml:space="preserve">
+  <value>测试中...</value>
+  </data>
+    <data name="ConnectionSuccess" xml:space="preserve">
+  <value>连接成功!</value>
+  </data>
+    <data name="ConnectionFailed" xml:space="preserve">
+  <value>连接失败</value>
+  </data>
+    <data name="TargetLang" xml:space="preserve">
+        <value>目标语言</value>
+    </data>
+    <data name="SourceLang" xml:space="preserve">
+        <value>原始语言</value>
+    </data>
+    <data name="Prompts" xml:space="preserve">
+        <value>提示词</value>
+    </data>
+    <data name="AddPrompt" xml:space="preserve">
+        <value>添加提示词</value>
+    </data>
+    <data name="EditPrompt" xml:space="preserve">
+        <value>编辑提示词</value>
+    </data>
+    <data name="PromptName" xml:space="preserve">
+        <value>名称</value>
+    </data>
+    <data name="PromptContent" xml:space="preserve">
+        <value>内容</value>
+    </data>
+    <data name="SetAsDefault" xml:space="preserve">
+        <value>设为默认</value>
+    </data>
+    <data name="DefaultPrompt" xml:space="preserve">
+        <value>默认</value>
+    </data>
+    <data name="ConfirmDeletePrompt" xml:space="preserve">
+        <value>确定要删除此提示词吗？</value>
+    </data>
+    <data name="CannotDeleteLastPrompt" xml:space="preserve">
+        <value>不能删除最后一个提示词。</value>
+    </data>
+    <data name="CannotDeleteDefaultPrompt" xml:space="preserve">
+        <value>不能删除默认提示词。请先将其他提示词设为默认。</value>
+    </data>
+    <data name="PromptParametersHint" xml:space="preserve">
+        <value>支持参数: [SourceLang](源语言), [TargetLang](目标语言), [源语言], [目标语言]</value>
+    </data>
+    <data name="ResultAutoCloseDelay" xml:space="preserve">
+        <value>自动关闭延迟</value>
+    </data>
+    <data name="ResultSettings" xml:space="preserve">
+        <value>结果窗口设置</value>
+    </data>
+    <data name="FontSize" xml:space="preserve">
+        <value>字体大小</value>
+    </data>
+    <data name="EnableAutoReadDelay" xml:space="preserve">
+        <value>自动计算延迟</value>
+    </data>
+    <data name="MsPerChar" xml:space="preserve">
+        <value>毫秒/字</value>
+    </data>
+    <data name="LanguageChanged" xml:space="preserve">
+        <value>语言已更改</value>
+    </data>
+    <data name="RestartToTakeEffect" xml:space="preserve">
+        <value>请重启应用以生效</value>
+    </data>
+    <data name="InputSettings" xml:space="preserve">
+        <value>输入窗口设置</value>
+    </data>
+    <data name="TransparencyLevel" xml:space="preserve">
+        <value>透明度级别</value>
+    </data>
+    <data name="BackgroundColor" xml:space="preserve">
+        <value>背景颜色</value>
+    </data>
+    <data name="FontColor" xml:space="preserve">
+        <value>字体颜色</value>
+    </data>
+    <data name="ThemeName" xml:space="preserve">
+        <value>主题名称</value>
+    </data>
+    <data name="PrimaryColor" xml:space="preserve">
+        <value>主色调</value>
+    </data>
+    <data name="AccentColor" xml:space="preserve">
+        <value>强调色</value>
+    </data>
+    <data name="WindowBackgroundColor" xml:space="preserve">
+        <value>窗口背景颜色</value>
+    </data>
+</root>

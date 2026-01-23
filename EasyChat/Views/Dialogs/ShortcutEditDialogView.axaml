@@ -1,0 +1,183 @@
+<UserControl x:Class="EasyChat.Views.Dialogs.ShortcutEditDialogView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:config="clr-namespace:EasyChat.Models.Configuration;assembly=EasyChat"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:controls="clr-namespace:EasyChat.Views.Controls;assembly=EasyChat"
+             xmlns:lang="clr-namespace:EasyChat.Lang;assembly=EasyChat"
+             xmlns:converts="clr-namespace:EasyChat.Converters;assembly=EasyChat"
+             xmlns:dialogs="clr-namespace:EasyChat.ViewModels.Dialogs"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
+             x:DataType="dialogs:ShortcutEditDialogViewModel"
+             Width="400">
+    <StackPanel Spacing="20">
+        <!-- Action Type Selection -->
+        <StackPanel Spacing="10">
+            <TextBlock Text="{x:Static lang:Resources.ActionType}" FontWeight="SemiBold" />
+            <ComboBox ItemsSource="{Binding AvailableActions}"
+                      SelectedItem="{Binding SelectedAction}"
+                      HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="config:IShortcutActionDefinition">
+                        <TextBlock Text="{Binding DisplayName}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
+
+        <!-- Parameter Input (Standard) -->
+        <StackPanel Spacing="10" IsVisible="{Binding SelectedAction.RequiresParameter}">
+            
+            <!-- Standard Parameter UI -->
+            <StackPanel Spacing="10" IsVisible="{Binding !IsComplexSwitchAction}">
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <TextBlock Text="{x:Static lang:Resources.Parameter}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding SelectedAction.ParameterHint, StringFormat='({0})'}"
+                               FontSize="12"
+                               Opacity="0.7"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+
+                <!-- Helper Text if Options Available -->
+                <ComboBox ItemsSource="{Binding AvailableParameterOptions}"
+                          SelectedItem="{Binding Parameter}"
+                          IsVisible="{Binding AvailableParameterOptions, Converter={x:Static ObjectConverters.IsNotNull}}"
+                          HorizontalAlignment="Stretch" />
+
+                <TextBox Text="{Binding Parameter}"
+                         Watermark="{Binding SelectedAction.ParameterHint}"
+                         IsVisible="{Binding AvailableParameterOptions, Converter={x:Static ObjectConverters.IsNull}}" />
+            </StackPanel>
+
+            <!-- Complex Parameter UI (Engine, Source, Target) -->
+            <StackPanel Spacing="10" IsVisible="{Binding IsComplexSwitchAction}">
+                <!-- Engine -->
+                <StackPanel>
+                    <TextBlock Text="{x:Static lang:Resources.TransEngine}" FontWeight="SemiBold" Margin="0 0 0 5"/>
+                    <ComboBox ItemsSource="{Binding AvailableEngineOptions}"
+                              SelectedItem="{Binding SelectedEngineOption}"
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Panel Width="20" Height="20">
+                                        <Border ClipToBounds="True" CornerRadius="4"
+                                                IsVisible="{Binding Name, Converter={x:Static converts:EngineConverters.HasIcon}}">
+                                            <Image Source="{Binding Name, Converter={x:Static converts:EngineConverters.ToIcon}}"
+                                                   Stretch="UniformToFill" />
+                                        </Border>
+                                        <avalonia:MaterialIcon Kind="Robot" Width="20" Height="20"
+                                                               Foreground="{DynamicResource SukiText}"
+                                                               IsVisible="{Binding Name, Converter={x:Static converts:EngineConverters.HasNoIcon}}" />
+                                    </Panel>
+                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
+                                               Foreground="{DynamicResource SukiText}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+                <Grid ColumnDefinitions="*, 10, *">
+                    <!-- Source -->
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="{x:Static lang:Resources.Action_SwitchSourceLang}" FontWeight="SemiBold" Margin="0 0 0 5"/>
+                        <ComboBox ItemsSource="{Binding AvailableLanguages}"
+                                  SelectedItem="{Binding SelectedSourceLang}"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border ClipToBounds="True" CornerRadius="2" Width="20" Height="14">
+                                            <Image Source="{Binding Icon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
+                                                   Stretch="UniformToFill" />
+                                        </Border>
+                                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource SukiText}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <!-- Target -->
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="{x:Static lang:Resources.Action_SwitchTargetLang}" FontWeight="SemiBold" Margin="0 0 0 5"/>
+                        <ComboBox ItemsSource="{Binding AvailableLanguages}"
+                                  SelectedItem="{Binding SelectedTargetLang}"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border ClipToBounds="True" CornerRadius="2" Width="20" Height="14">
+                                            <Image Source="{Binding Icon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
+                                                   Stretch="UniformToFill" />
+                                        </Border>
+                                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource SukiText}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Hotkey Recording -->
+        <StackPanel Spacing="10">
+            <TextBlock Text="{x:Static lang:Resources.KeyCombination}" FontWeight="SemiBold" />
+            <Button Command="{Binding ToggleRecordingCommand}"
+                    HorizontalAlignment="Stretch" Background="{DynamicResource SukiCardBackground}" BorderThickness="0">
+                <Button.Styles>
+                    <Style Selector="Border.RecordBorder">
+                        <Setter Property="BorderBrush" Value="{DynamicResource SukiLowContrastBorderBrush}" />
+                        <Setter Property="BorderThickness" Value="1" />
+                    </Style>
+                    <Style Selector="Border.RecordBorder.Recording">
+                        <Setter Property="BorderBrush" Value="{DynamicResource SukiPrimaryColor}" />
+                        <Setter Property="BorderThickness" Value="2" />
+                    </Style>
+                </Button.Styles>
+                <Border Classes="RecordBorder"
+                        Classes.Recording="{Binding IsRecording}"
+                        Background="{DynamicResource SukiCardBackground}"
+                        CornerRadius="8"
+                        Padding="15">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <!-- Show KeyCombination if not recording OR if we have valid text -->
+                            <controls:KeySequenceDisplay KeyCombination="{Binding KeyCombination}"
+                                                         IsVisible="{Binding KeyCombination, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                                         HorizontalAlignment="Center" />
+                            <TextBlock Text="{x:Static lang:Resources.RecordingShortcut}"
+                                       IsVisible="{Binding KeyCombination, Converter={x:Static StringConverters.IsNullOrEmpty}}"
+                                       Foreground="{DynamicResource SukiPrimaryColor}"
+                                       FontSize="16"
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+
+                        <avalonia:MaterialIcon Grid.Column="1"
+                                               Kind="Keyboard"
+                                               Opacity="0.5" />
+                    </Grid>
+                </Border>
+            </Button>
+            <TextBlock Text="{x:Static lang:Resources.ClickToRecord}"
+                       FontSize="12"
+                       Opacity="0.6"
+                       HorizontalAlignment="Center" />
+        </StackPanel>
+
+        <!-- Dialog Buttons -->
+        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0 10 0 0">
+            <Button Content="{Binding ButtonText}"
+                    Command="{Binding SaveCommand}"
+                    Classes="Flat" />
+            <Button Content="{x:Static lang:Resources.Cancel}"
+                    Command="{Binding CancelCommand}" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

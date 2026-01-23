@@ -1,0 +1,31 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:suki="https://github.com/kikipoulet/SukiUI"
+        xmlns:lang="clr-namespace:EasyChat.Lang"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="80"
+        Width="400" Height="60"
+        x:Class="EasyChat.Views.Typing.TypingView"
+        WindowStartupLocation="CenterScreen"
+        SystemDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        CornerRadius="10"
+        TransparencyLevelHint="Blur"
+        Background="Transparent"
+        Topmost="True"
+        Title="{x:Static lang:Resources.TranslateToWindow}">
+
+    <Panel>
+        <suki:GlassCard x:Name="MainCard" CornerRadius="10" Padding="0" Background="#CC000000">
+            <TextBox Name="InputBox"
+                     Watermark="{x:Static lang:Resources.InputToTranslate}"
+                     VerticalAlignment="Center"
+                     HorizontalAlignment="Stretch"
+                     Margin="10"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     KeyDown="InputBox_OnKeyDown" />
+        </suki:GlassCard>
+    </Panel>
+</Window>

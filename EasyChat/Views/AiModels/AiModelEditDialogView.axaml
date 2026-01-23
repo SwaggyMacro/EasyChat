@@ -1,0 +1,66 @@
+<UserControl x:Class="EasyChat.Views.AiModels.AiModelEditDialogView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:EasyChat.ViewModels.AiModels"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:lang="clr-namespace:EasyChat.Lang;assembly=EasyChat"
+             xmlns:config="clr-namespace:EasyChat.Models.Configuration;assembly=EasyChat"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="400"
+             x:DataType="viewModels:AiModelEditDialogViewModel"
+             Width="400">
+    <StackPanel Spacing="15">
+        <!-- Model Type Selection -->
+        <StackPanel Spacing="8">
+            <TextBlock Text="{x:Static lang:Resources.ModelType}" FontWeight="SemiBold" />
+            <ComboBox ItemsSource="{Binding AvailableModelTypes}"
+                      SelectedItem="{Binding SelectedModelType}"
+                      HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="config:AiModelType">
+                        <TextBlock Text="{Binding}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
+
+        <!-- Name (for all model types) -->
+        <StackPanel Spacing="8">
+            <TextBlock Text="{x:Static lang:Resources.ModelName}" FontWeight="SemiBold" />
+            <TextBox Text="{Binding Name}"
+                     Watermark="{x:Static lang:Resources.ModelName}"
+                     suki:TextBoxExtensions.AddDeleteButton="True" />
+        </StackPanel>
+
+        <!-- API URL -->
+        <StackPanel Spacing="8">
+            <TextBlock Text="API URL" FontWeight="SemiBold" />
+            <TextBox Text="{Binding ApiUrl}"
+                     Watermark="https://api.example.com"
+                     suki:TextBoxExtensions.AddDeleteButton="True" />
+        </StackPanel>
+
+
+        <!-- Model Selection -->
+        <StackPanel Spacing="8">
+            <TextBlock Text="{x:Static lang:Resources.Model}" FontWeight="SemiBold" />
+            <TextBox Text="{Binding Model}"
+                     Watermark="gpt-4o / gemini-pro / claude-3-opus-20240229"
+                     suki:TextBoxExtensions.AddDeleteButton="True" />
+        </StackPanel>
+        
+        <!-- Use Proxy -->
+        <CheckBox Content="{x:Static lang:Resources.UseProxy}"
+                  IsChecked="{Binding UseProxy}" />
+
+        <!-- Dialog Buttons -->
+        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0 15 0 0">
+            <Button Content="{Binding ButtonText}"
+                    Command="{Binding SaveCommand}"
+                    Classes="Flat" />
+            <Button Content="{x:Static lang:Resources.Cancel}"
+                    Command="{Binding CancelCommand}" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>
