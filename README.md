@@ -50,17 +50,22 @@ EasyChat 是一款基于 Avalonia 开发的跨平台即时翻译工具，是继 
     ![AddAiModel](./docs/screenshot/HowToUse/AddAiModel2.png)
 3.  **设置快捷键**:
     *   **基础热键**: 在设置中添加“截图翻译”和“输入翻译”的全局热键。
-    ![SetHotkey](./docs/screenshot/HowToUse/SetHotkey.png)
+    ![SetHotkey](./docs/screenshot/HowToUse/SetHotKey.png)
     *   **语种切换热键**: 
         *   添加一个新的切换配置。
         *   选择已配置好的翻译引擎。
         *   设定源语言和目标语言（例如：源语言 English -> 目标语言 Chinese）。
         *   *逻辑说明*:在此配置下，截图翻译会将 English 翻译为 Chinese；输入翻译时，你输入 Chinese，软件将其翻译为 English。
-    ![SetHotkey](./docs/screenshot/HowToUse/SetHotkey2.png)
+    ![SetHotkey](./docs/screenshot/HowToUse/SetHotKey2.png)
 4.  **开始使用**:
     *   **截图翻译**: 按下设定的截图翻译热键，框选屏幕区域，等待翻译结果悬浮显示。
     *   **输入翻译**: 在聊天窗口按下输入翻译热键，输入母语文本，等待译文自动发送。
     *   **切换语种**: 在需要切换翻译语种时，按下设定的语种切换热键。
+
+
+### 📹 使用视频  
+
+https://github.com/user-attachments/assets/6ab9b6a3-446d-403a-b37a-d49b39c0f9d3
 
 ### 💡 进阶功能：自定义 Prompt
 目前软件支持大模型提示词（Prompt）配置。你可以针对特定场景优化翻译结果。
