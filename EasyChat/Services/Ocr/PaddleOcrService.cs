@@ -20,14 +20,19 @@ public class PaddleOcrService : IOcrService, IDisposable
 
     public string ServiceName => "PaddleOCR";
 
-    public IReadOnlyList<OcrLanguage> SupportedLanguages { get; } = new[]
-    {
+    public IReadOnlyList<OcrLanguage> SupportedLanguages { get; } =
+    [
         OcrLanguage.ChineseSimplified,
         OcrLanguage.ChineseTraditional,
         OcrLanguage.English,
         OcrLanguage.Japanese,
         OcrLanguage.Korean,
-    };
+        OcrLanguage.Arabic,
+        OcrLanguage.Devanagari,
+        OcrLanguage.Tamil,
+        OcrLanguage.Telugu,
+        OcrLanguage.Kannada
+    ];
 
     private static readonly Dictionary<OcrLanguage, Func<FullOcrModel>> ModelFactories = new()
     {
@@ -41,7 +46,6 @@ public class PaddleOcrService : IOcrService, IDisposable
         [OcrLanguage.Tamil] = () => LocalFullModels.TamilV4,
         [OcrLanguage.Telugu] = () => LocalFullModels.TeluguV4,
         [OcrLanguage.Kannada] = () => LocalFullModels.KannadaV4
-        
     };
 
     public PaddleOcrService(ILogger<PaddleOcrService> logger)
@@ -73,6 +77,7 @@ public class PaddleOcrService : IOcrService, IDisposable
         
         _logger.LogInformation("OCR ({Language}): {CharCount} characters recognized", 
             lang.DisplayName, result.Text.Length);
+        GC.Collect();
         return result.Text;
     }
 
