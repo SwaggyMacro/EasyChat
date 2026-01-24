@@ -1,4 +1,4 @@
-﻿using EasyChat.Constants;
+using EasyChat.Constants;
 using EasyChat.Services.Languages;
 using Newtonsoft.Json;
 using ReactiveUI;
@@ -9,6 +9,7 @@ namespace EasyChat.Models.Configuration;
 public class General : ReactiveObject
 {
     private string _language = "English";
+    private WindowClosingBehavior _closingBehavior = WindowClosingBehavior.Ask;
 
     private string _transEngine = Constant.TransEngineType.Ai;
 
@@ -34,11 +35,19 @@ public class General : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _targetLanguage, value);
     }
 
+
     [JsonProperty]
     public string Language
     {
         get => _language ?? "English";
         set => this.RaiseAndSetIfChanged(ref _language, value ?? "English");
+    }
+
+    [JsonProperty]
+    public WindowClosingBehavior ClosingBehavior
+    {
+        get => _closingBehavior;
+        set => this.RaiseAndSetIfChanged(ref _closingBehavior, value);
     }
 
     [JsonProperty]

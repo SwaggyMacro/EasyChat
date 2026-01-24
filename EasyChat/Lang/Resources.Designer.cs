@@ -1428,5 +1428,109 @@ namespace EasyChat.Lang
                 return ResourceManager.GetString("DeliveryMode_Message", resourceCulture);
             }
         }
+
+        public static string EnableTray
+        {
+            get
+            {
+                return ResourceManager.GetString("EnableTray", resourceCulture);
+            }
+        }
+
+        public static string CloseToTray
+        {
+            get
+            {
+                return ResourceManager.GetString("CloseToTray", resourceCulture);
+            }
+        }
+
+        public static string TrayExit
+        {
+            get
+            {
+                return ResourceManager.GetString("TrayExit", resourceCulture);
+            }
+        }
+
+        public static string TrayShow
+        {
+            get
+            {
+                return ResourceManager.GetString("TrayShow", resourceCulture);
+            }
+        }
+
+        public static string CloseToTrayPromptTitle
+        {
+            get
+            {
+                return ResourceManager.GetString("CloseToTrayPromptTitle", resourceCulture);
+            }
+        }
+
+        public static string CloseToTrayPromptMessage
+        {
+            get
+            {
+                return ResourceManager.GetString("CloseToTrayPromptMessage", resourceCulture);
+            }
+        }
+
+        public static string RememberMyChoice
+        {
+            get
+            {
+                return ResourceManager.GetString("RememberMyChoice", resourceCulture);
+            }
+        }
+
+        public static string MinimizeToTray
+        {
+            get
+            {
+                return ResourceManager.GetString("MinimizeToTray", resourceCulture);
+            }
+        }
+
+        public static string ExitApp
+        {
+            get
+            {
+                return ResourceManager.GetString("ExitApp", resourceCulture);
+            }
+        }
+
+        public static string Option_Ask
+        {
+            get
+            {
+                return ResourceManager.GetString("Option_Ask", resourceCulture);
+            }
+        }
+
+        public static string Option_Exit
+        {
+            get
+            {
+                return ResourceManager.GetString("Option_Exit", resourceCulture);
+            }
+        }
+
+        public static string Option_Minimize
+        {
+            get
+            {
+                return ResourceManager.GetString("Option_Minimize", resourceCulture);
+            }
+        }
+
+        public static string ClosingBehavior
+        {
+            get
+            {
+                return ResourceManager.GetString("ClosingBehavior", resourceCulture);
+            }
+        }
     }
 }

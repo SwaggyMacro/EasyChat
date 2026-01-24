@@ -423,4 +423,43 @@
     <data name="DeliveryMode_Message" xml:space="preserve">
         <value>消息投递 (Compatibility)</value>
     </data>
+    <data name="EnableTray" xml:space="preserve">
+        <value>启用系统托盘</value>
+    </data>
+    <data name="CloseToTray" xml:space="preserve">
+        <value>关闭时最小化到托盘</value>
+    </data>
+    <data name="TrayExit" xml:space="preserve">
+        <value>退出</value>
+    </data>
+    <data name="TrayShow" xml:space="preserve">
+        <value>显示</value>
+    </data>
+    <data name="CloseToTrayPromptTitle" xml:space="preserve">
+        <value>关闭操作</value>
+    </data>
+    <data name="CloseToTrayPromptMessage" xml:space="preserve">
+        <value>您希望最小化到托盘还是直接退出程序？</value>
+    </data>
+    <data name="RememberMyChoice" xml:space="preserve">
+        <value>记住我的选择</value>
+    </data>
+    <data name="MinimizeToTray" xml:space="preserve">
+        <value>最小化到托盘</value>
+    </data>
+    <data name="ExitApp" xml:space="preserve">
+        <value>退出程序</value>
+    </data>
+    <data name="Option_Ask" xml:space="preserve">
+        <value>每次询问</value>
+    </data>
+    <data name="Option_Exit" xml:space="preserve">
+        <value>退出程序</value>
+    </data>
+    <data name="Option_Minimize" xml:space="preserve">
+        <value>最小化到托盘</value>
+    </data>
+    <data name="ClosingBehavior" xml:space="preserve">
+        <value>退出方式</value>
+    </data>
 </root>

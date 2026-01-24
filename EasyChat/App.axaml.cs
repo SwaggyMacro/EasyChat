@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Threading;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using EasyChat.Common;
@@ -17,20 +18,26 @@ using EasyChat.Services.Languages;
 using EasyChat.Services.Languages.Providers;
 using EasyChat.Services.Shortcuts;
 using EasyChat.Services.Shortcuts.Handlers;
-using EasyChat.Mappers;
 using EasyChat.ViewModels;
 using EasyChat.ViewModels.Pages;
 using EasyChat.Views;
 using Microsoft.Extensions.DependencyInjection;
+using ReactiveUI;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using Material.Icons;
 using SukiUI.Dialogs;
 using SukiUI.Toasts;
+
 
 namespace EasyChat;
 
 public class App : Application
 {
+    private TrayIcon? _trayIcon;
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -74,6 +81,9 @@ public class App : Application
 
             // Service Collection
             var services = new ServiceCollection();
+
+            // Application Lifetime
+            services.AddSingleton<IApplicationLifetime>(desktop);
 
             // Logging
             services.AddLogging(builder => builder.AddSerilog(dispose: true));
@@ -156,14 +166,186 @@ public class App : Application
                 DataContext = mainViewModel
             };
 
-            desktop.Exit += (sender, args) =>
+            desktop.Exit += (_, _) =>
             {
+                _trayIcon?.Dispose();
                 provider.GetRequiredService<IHotKeyManager>().Dispose();
                 Log.CloseAndFlush();
                 if (provider is IDisposable disposableProvider) disposableProvider.Dispose();
             };
+
+            // Setup Reactive Tray Icon Management
+            var configService = provider.GetRequiredService<IConfigurationService>();
+            
+            // Initial check
+            UpdateTrayIconState(configService.General.ClosingBehavior);
+
+            // Reactive check
+            configService.General.WhenAnyValue(x => x.ClosingBehavior)
+                .Subscribe(UpdateTrayIconState);
+
+            // Listen for theme changes to update icons
+            this.ActualThemeVariantChanged += (s, e) =>
+            {
+               if (_trayIcon?.Menu != null)
+               {
+                   // Regenerate icons
+                   var menu = _trayIcon.Menu;
+                   if (menu.Items.Count >= 3) // Show, Separator, Exit
+                   {
+                       var showItem = (NativeMenuItem)menu.Items[0];
+                       showItem.Icon = CreateMenuIcon(MaterialIconKind.WindowRestore);
+
+                       var exitItem = (NativeMenuItem)menu.Items[2];
+                       exitItem.Icon = CreateMenuIcon(MaterialIconKind.ExitToApp);
+                   }
+               }
+            };
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    public void ForceShowTrayIcon()
+    {
+        if (_trayIcon == null)
+        {
+            InitializeTrayIcon();
+        }
+    }
+
+    private void UpdateTrayIconState(Models.Configuration.WindowClosingBehavior behavior)
+    {
+        // Only show tray icon if behavior is MinimizeToTray
+        if (behavior == Models.Configuration.WindowClosingBehavior.MinimizeToTray)
+        {
+            if (_trayIcon == null)
+            {
+                InitializeTrayIcon();
+            }
+        }
+        else
+        {
+            RemoveTrayIcon();
+        }
+    }
+
+    private void InitializeTrayIcon()
+    {
+        if (_trayIcon != null) return;
+
+        using var stream = Avalonia.Platform.AssetLoader.Open(new Uri("avares://EasyChat/Assets/easychat-logo.ico"));
+        _trayIcon = new TrayIcon
+        {
+            Icon = new WindowIcon(stream),
+            ToolTipText = Lang.Resources.AppName
+        };
+        _trayIcon.Clicked += TrayIcon_OnClickListener;
+
+        var menu = new NativeMenu();
+        var showItem = new NativeMenuItem(Lang.Resources.TrayShow);
+        showItem.Icon = CreateMenuIcon(MaterialIconKind.WindowRestore);
+        showItem.Click += TrayIcon_OnShow;
+        menu.Items.Add(showItem);
+        
+        menu.Items.Add(new NativeMenuItemSeparator());
+
+        var exitItem = new NativeMenuItem(Lang.Resources.TrayExit);
+        exitItem.Icon = CreateMenuIcon(MaterialIconKind.ExitToApp);
+        exitItem.Click += TrayIcon_OnExit;
+        menu.Items.Add(exitItem);
+
+        _trayIcon.Menu = menu;
+        
+        if (GetValue(TrayIcon.IconsProperty) is TrayIcons icons)
+        {
+            icons.Add(_trayIcon);
+        }
+        else 
+        {
+             var newIcons = new TrayIcons { _trayIcon };
+             SetValue(TrayIcon.IconsProperty, newIcons);
+        }
+    }
+
+    private void RemoveTrayIcon()
+    {
+        if (_trayIcon == null) return;
+        
+        _trayIcon.Clicked -= TrayIcon_OnClickListener;
+        _trayIcon.Dispose();
+        
+        if (GetValue(TrayIcon.IconsProperty) is TrayIcons icons)
+        {
+            icons.Remove(_trayIcon);
+        }
+
+        _trayIcon = null;
+    }
+
+    private void TrayIcon_OnClickListener(object? sender, EventArgs e) => ShowWindow();
+    
+    private void TrayIcon_OnShow(object? sender, EventArgs e) => ShowWindow();
+
+    private void TrayIcon_OnExit(object? sender, EventArgs e)
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            // Signal intent to exit (will be handled in MainWindow_Closing)
+            if (desktop.MainWindow is MainWindow mainWindow)
+            {
+                mainWindow.IsExiting = true;
+            }
+            desktop.Shutdown();
+        }
+    }
+
+    private void ShowWindow()
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            var window = desktop.MainWindow;
+            if (window != null)
+            {
+                window.Show();
+                window.WindowState = WindowState.Normal;
+                window.Activate();
+            }
+        }
+    }
+
+    private Bitmap CreateMenuIcon(MaterialIconKind kind)
+    {
+        IBrush foreground;
+        
+        // Try to get the dynamic theme brush (standard Fluent theme key)
+        if (TryGetResource("SystemControlForegroundBaseHighBrush", ActualThemeVariant, out var res) && res is IBrush brush)
+        {
+            foreground = brush;
+        }
+        else
+        {
+            // Fallback
+            foreground = ActualThemeVariant == Avalonia.Styling.ThemeVariant.Dark ? Brushes.White : Brushes.Black;
+        }
+
+        var data = MaterialIconDataProvider.GetData(kind);
+        var geometry = StreamGeometry.Parse(data);
+
+        var path = new Avalonia.Controls.Shapes.Path
+        {
+            Data = geometry,
+            Fill = foreground,
+            Width = 24,
+            Height = 24,
+            Stretch = Stretch.Uniform
+        };
+        
+        path.Measure(new Size(24, 24));
+        path.Arrange(new Rect(0, 0, 24, 24));
+        
+        var bitmap = new RenderTargetBitmap(new PixelSize(24, 24), new Vector(96, 96));
+        bitmap.Render(path);
+        return bitmap;
     }
 }

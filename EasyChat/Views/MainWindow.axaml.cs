@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Notifications;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using EasyChat.ViewModels;
@@ -7,6 +8,12 @@ using SukiUI.Enums;
 using SukiUI.Models;
 
 // Added for Global
+
+using EasyChat.Common;
+using EasyChat.Services.Abstractions;
+using EasyChat.ViewModels.Dialogs;
+using Microsoft.Extensions.DependencyInjection;
+using SukiUI.Dialogs;
 
 namespace EasyChat.Views;
 
@@ -43,5 +50,45 @@ public partial class MainWindow : SukiWindow
         if (e.Source is not MenuItem mItem) return;
         if (mItem.DataContext is not SukiBackgroundStyle cStyle) return;
         vm.BackgroundStyle = cStyle;
+    }
+
+    public bool IsExiting { get; set; }
+
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        base.OnClosing(e);
+
+        if (IsExiting) return;
+
+        var configService = Global.Services.GetRequiredService<IConfigurationService>();
+        
+        switch (configService.General.ClosingBehavior)
+        {
+            case Models.Configuration.WindowClosingBehavior.ExitApp:
+                // Let it close
+                return;
+            
+            case Models.Configuration.WindowClosingBehavior.MinimizeToTray:
+                e.Cancel = true;
+                Hide();
+                return;
+                
+            case Models.Configuration.WindowClosingBehavior.Ask:
+            default:
+                e.Cancel = true;
+                ShowCloseBehaviorDialog(configService);
+                break;
+        }
+    }
+
+    private void ShowCloseBehaviorDialog(IConfigurationService configService)
+    {
+        var dialogManager = Global.Services?.GetRequiredService<ISukiDialogManager>();
+        
+        dialogManager?.CreateDialog()
+            .WithTitle(Lang.Resources.CloseToTrayPromptTitle)
+            .OfType(NotificationType.Information)
+            .WithViewModel(dialog => new CloseBehaviorDialogViewModel(dialog))
+            .TryShow();
     }
 }

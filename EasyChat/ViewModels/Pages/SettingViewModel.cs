@@ -197,6 +197,21 @@ public class SettingViewModel : Page
         }
     }
 
+    public List<WindowClosingBehavior> ClosingBehaviors { get; } = Enum.GetValues<WindowClosingBehavior>().ToList();
+
+    public WindowClosingBehavior SelectedClosingBehavior
+    {
+        get => GeneralConf.ClosingBehavior;
+        set
+        {
+            if (GeneralConf.ClosingBehavior != value)
+            {
+                GeneralConf.ClosingBehavior = value;
+                this.RaisePropertyChanged();
+            }
+        }
+    }
+
     public List<string> AiProviders
     {
         get => _aiProviders;

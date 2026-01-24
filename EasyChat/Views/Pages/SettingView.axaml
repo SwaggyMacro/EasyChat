@@ -13,6 +13,7 @@
              mc:Ignorable="d">
     <UserControl.Resources>
         <converts:EqualityMultiConverter x:Key="EqualityMultiConverter" />
+        <converts:EnumToDescriptionConverter x:Key="EnumToDescriptionConverter" />
         <converts:ColorToHexConverter x:Key="ColorToHexConverter" />
         <converts:DeliveryModeToBoolConverter x:Key="DeliveryModeToBoolConverter" />
         <converts:DeliveryModeToStringConverter x:Key="DeliveryModeToStringConverter" />
@@ -43,6 +44,18 @@
                                                Text="{x:Static lang:Resources.Language}" />
                                     <ComboBox ItemsSource="{Binding Languages}"
                                               SelectedItem="{Binding SelectedLanguage}" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
+                                    <TextBlock FontWeight="Bold" VerticalAlignment="Center"
+                                               Text="{x:Static lang:Resources.ClosingBehavior}" />
+                                    <ComboBox ItemsSource="{Binding ClosingBehaviors}"
+                                              SelectedItem="{Binding SelectedClosingBehavior}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Converter={StaticResource EnumToDescriptionConverter}}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
                                     <TextBlock FontWeight="Bold" VerticalAlignment="Center"

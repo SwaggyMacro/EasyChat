@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:EasyChat.ViewModels.Dialogs"
+             xmlns:lang="clr-namespace:EasyChat.Lang"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
+             x:Class="EasyChat.Views.Dialogs.CloseBehaviorDialogView"
+             x:DataType="vm:CloseBehaviorDialogViewModel">
+    <StackPanel Spacing="20" Margin="10 40 0 0">
+        <TextBlock Text="{x:Static lang:Resources.CloseToTrayPromptMessage}" TextWrapping="Wrap" />
+        
+        <CheckBox Content="{x:Static lang:Resources.RememberMyChoice}" 
+                  IsChecked="{Binding IsRemember}" />
+        
+        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+            <Button Command="{Binding MinimizeCommand}" 
+                    Content="{x:Static lang:Resources.MinimizeToTray}" 
+                    Classes="Flat"/>
+            <Button Command="{Binding ExitAppCommand}" 
+                    Content="{x:Static lang:Resources.ExitApp}" 
+                    Classes="Default"/>
+        </StackPanel>
+    </StackPanel>
+</UserControl>
