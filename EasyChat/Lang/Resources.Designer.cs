@@ -1532,5 +1532,37 @@ namespace EasyChat.Lang
                 return ResourceManager.GetString("ClosingBehavior", resourceCulture);
             }
         }
+
+        public static string NewVersionAvailable
+        {
+            get
+            {
+                return ResourceManager.GetString("NewVersionAvailable", resourceCulture);
+            }
+        }
+
+        public static string NewVersionContent
+        {
+            get
+            {
+                return ResourceManager.GetString("NewVersionContent", resourceCulture);
+            }
+        }
+
+        public static string ViewRelease
+        {
+            get
+            {
+                return ResourceManager.GetString("ViewRelease", resourceCulture);
+            }
+        }
+
+        public static string Dismiss
+        {
+            get
+            {
+                return ResourceManager.GetString("Dismiss", resourceCulture);
+            }
+        }
     }
 }

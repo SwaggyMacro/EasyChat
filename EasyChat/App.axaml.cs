@@ -29,6 +29,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Material.Icons;
 using SukiUI.Dialogs;
+using SukiUI.Enums;
 using SukiUI.Toasts;
 
 
@@ -143,6 +144,9 @@ public class App : Application
             // Language Services
             services.AddSingleton<LanguageService>();
             
+            // Update Check Service
+            services.AddSingleton<UpdateCheckService>();
+            
             // Language Code Providers
             services.AddSingleton<ILanguageCodeProvider, BaiduLanguageCodeProvider>();
             services.AddSingleton<ILanguageCodeProvider, TencentLanguageCodeProvider>();
@@ -183,6 +187,9 @@ public class App : Application
             // Reactive check
             configService.General.WhenAnyValue(x => x.ClosingBehavior)
                 .Subscribe(UpdateTrayIconState);
+
+            // Check for updates on startup
+            CheckForUpdatesAsync(provider);
 
             // Listen for theme changes to update icons
             this.ActualThemeVariantChanged += (s, e) =>
@@ -347,5 +354,33 @@ public class App : Application
         var bitmap = new RenderTargetBitmap(new PixelSize(24, 24), new Vector(96, 96));
         bitmap.Render(path);
         return bitmap;
+    }
+
+    private async void CheckForUpdatesAsync(IServiceProvider provider)
+    {
+        try
+        {
+            var updateService = provider.GetRequiredService<UpdateCheckService>();
+            var releaseInfo = await updateService.CheckForUpdateAsync();
+
+            if (releaseInfo != null)
+            {
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    Global.ToastManager.CreateToast()
+                        .WithTitle(Lang.Resources.NewVersionAvailable)
+                        .WithContent(string.Format(Lang.Resources.NewVersionContent, releaseInfo.TagName))
+                        .Dismiss().After(TimeSpan.FromSeconds(10))
+                        .WithActionButton(Lang.Resources.ViewRelease, _ => UrlUtilities.OpenUrl(releaseInfo.HtmlUrl), true)
+                        .WithActionButton(Lang.Resources.Dismiss, _ => { }, true, SukiButtonStyles.Standard)
+                        .OnClicked(_ => UrlUtilities.OpenUrl(releaseInfo.HtmlUrl))
+                        .Queue();
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to check for updates");
+        }
     }
 }

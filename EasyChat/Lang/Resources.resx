@@ -476,4 +476,16 @@
     <data name="ClosingBehavior" xml:space="preserve">
         <value>Exit Action</value>
     </data>
+    <data name="NewVersionAvailable" xml:space="preserve">
+        <value>New Version Available</value>
+    </data>
+    <data name="NewVersionContent" xml:space="preserve">
+        <value>A new version {0} is available!</value>
+    </data>
+    <data name="ViewRelease" xml:space="preserve">
+        <value>View Release</value>
+    </data>
+    <data name="Dismiss" xml:space="preserve">
+        <value>Dismiss</value>
+    </data>
 </root>

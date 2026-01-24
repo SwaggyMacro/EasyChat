@@ -462,4 +462,16 @@
     <data name="ClosingBehavior" xml:space="preserve">
         <value>退出方式</value>
     </data>
+    <data name="NewVersionAvailable" xml:space="preserve">
+        <value>发现新版本</value>
+    </data>
+    <data name="NewVersionContent" xml:space="preserve">
+        <value>发现新版本 {0}！</value>
+    </data>
+    <data name="ViewRelease" xml:space="preserve">
+        <value>查看更新</value>
+    </data>
+    <data name="Dismiss" xml:space="preserve">
+        <value>忽略</value>
+    </data>
 </root>

@@ -7,9 +7,12 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <ApplicationIcon>Assets\easychat-logo.ico</ApplicationIcon>
+        
+        <!-- Version for update checking -->
+        <Version>0.0.3</Version>
 
         <!-- NetBeauty Settings -->
-        <DisableBeauty>True</DisableBeauty>
+        <DisableBeauty>False</DisableBeauty>
         <BeautySharedRuntimeMode>False</BeautySharedRuntimeMode>
         <BeautyLibsDir Condition="$(BeautySharedRuntimeMode) == 'True'">../libraries</BeautyLibsDir>
         <BeautyLibsDir Condition="$(BeautySharedRuntimeMode) != 'True'">./libraries</BeautyLibsDir>
@@ -17,6 +20,9 @@
         <!-- Files to hide from end users (e.g., runtime or config files). Only supported on Windows. -->
         <BeautyHiddens>hostfxr;hostpolicy;*.deps.json;*.runtimeconfig*.json</BeautyHiddens>
 
+        <!-- Files to exclude from packing (e.g., resource assemblies). -->
+        <BeautyExcludes>*.resources.dll</BeautyExcludes>
+        
         <!-- Only run NetBeauty on publish (set to True to skip on build). -->
         <BeautyOnPublishOnly>False</BeautyOnPublishOnly>
 
@@ -57,6 +63,7 @@
         <PackageReference Include="Material.Icons.Avalonia" Version="2.1.10" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="nulastudio.NetBeauty" Version="2.1.5" />
         <PackageReference Include="OpenAI" Version="2.1.0" />
         <PackageReference Include="OpenCvSharp4.Extensions" Version="4.10.0.20241108" />
         <PackageReference Include="OpenCvSharp4.Windows" Version="4.10.0.20241108" />
