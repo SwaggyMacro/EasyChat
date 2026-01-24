@@ -1393,5 +1393,40 @@ namespace EasyChat.Lang
                 return ResourceManager.GetString("WindowBackgroundColor", resourceCulture);
             }
         }
+        public static string KeySendDelay
+        {
+            get
+            {
+                return ResourceManager.GetString("KeySendDelay", resourceCulture);
+            }
+        }
+        public static string InputDeliveryMode
+        {
+            get
+            {
+                return ResourceManager.GetString("InputDeliveryMode", resourceCulture);
+            }
+        }
+        public static string DeliveryMode_Type
+        {
+            get
+            {
+                return ResourceManager.GetString("DeliveryMode_Type", resourceCulture);
+            }
+        }
+        public static string DeliveryMode_Paste
+        {
+            get
+            {
+                return ResourceManager.GetString("DeliveryMode_Paste", resourceCulture);
+            }
+        }
+        public static string DeliveryMode_Message
+        {
+            get
+            {
+                return ResourceManager.GetString("DeliveryMode_Message", resourceCulture);
+            }
+        }
     }
 }

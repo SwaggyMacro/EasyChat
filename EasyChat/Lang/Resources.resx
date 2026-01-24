@@ -422,4 +422,19 @@
     <data name="WindowBackgroundColor" xml:space="preserve">
         <value>Window Background</value>
     </data>
+    <data name="KeySendDelay" xml:space="preserve">
+        <value>Key Send Delay</value>
+    </data>
+    <data name="InputDeliveryMode" xml:space="preserve">
+        <value>Text Delivery Mode</value>
+    </data>
+    <data name="DeliveryMode_Type" xml:space="preserve">
+        <value>Typing (Simulate)</value>
+    </data>
+    <data name="DeliveryMode_Paste" xml:space="preserve">
+        <value>Paste (Clipboard)</value>
+    </data>
+    <data name="DeliveryMode_Message" xml:space="preserve">
+        <value>Message (Compatibility)</value>
+    </data>
 </root>

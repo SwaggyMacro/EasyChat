@@ -234,6 +234,8 @@ public class SettingViewModel : Page
     public InputConfig InputConf => _configurationService.Input;
     
     public List<string> TransparencyLevels { get; } = ["AcrylicBlur", "Blur", "Transparent"];
+    
+    public List<InputDeliveryMode> InputDeliveryModes { get; } = Enum.GetValues<InputDeliveryMode>().ToList();
 
     public ReactiveCommand<Unit, Unit> AddModelCommand { get; }
     public ReactiveCommand<CustomAiModel, Unit> EditModelCommand { get; }

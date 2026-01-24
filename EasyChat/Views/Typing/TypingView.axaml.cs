@@ -82,6 +82,18 @@ public partial class TypingView : Window
             }
             catch { /* Ignore invalid color */ }
         }
+
+        // Font Color
+        if (!string.IsNullOrEmpty(config.FontColor))
+        {
+            try
+            {
+                 var brush = Avalonia.Media.Brush.Parse(config.FontColor);
+                 var inputBox = this.FindControl<TextBox>("InputBox");
+                 if (inputBox != null) inputBox.Foreground = brush;
+            }
+            catch { /* Ignore invalid color */ }
+        }
     }
 
     private async void InputBox_OnKeyDown(object? sender, KeyEventArgs e)
@@ -107,18 +119,45 @@ public partial class TypingView : Window
 
                 var translatedText = await TranslateText(text);
 
-                // Done, close and send
+                // Hide first
+                Hide();
+
+                var delay = 10;
+                var mode = Models.Configuration.InputDeliveryMode.Type;
+
+                if (Global.Services?.GetRequiredService<IConfigurationService>()?.Input is { } inputConfig)
+                {
+                    delay = inputConfig.KeySendDelay;
+                    mode = inputConfig.DeliveryMode;
+                }
+
+                // Ensure focus with retry
+                if (await _platformService.EnsureFocused(_targetHwnd))
+                {
+                     // Wait a bit for focus to settle completely
+                     await Task.Delay(100);
+
+                     // Send text
+                     if (mode == Models.Configuration.InputDeliveryMode.Paste)
+                     {
+                         await _platformService.PasteTextAsync(translatedText);
+                     }
+                     else if (mode == Models.Configuration.InputDeliveryMode.Message)
+                     {
+                         await _platformService.SendTextMessageAsync(_targetHwnd, translatedText, delay);
+                     }
+                     else
+                     {
+                         await _platformService.SendTextAsync(translatedText, delay);
+                     }
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to ensure focus on target window, skipping text delivery.");
+                }
+                
+                // Finally close
                 Close();
-
-                // Give focus back to target
-                _platformService.SetForegroundWindow(_targetHwnd);
-                _platformService.SetFocus(_targetHwnd);
-
-                // Wait a bit for focus
-                await Task.Delay(Constant.FocusSwitchDelayMs);
-
-                // Send text
-                await SendTextToWindowAsync(_targetHwnd, translatedText);
             }
             catch (Exception ex)
             {
@@ -162,16 +201,6 @@ public partial class TypingView : Window
         {
             _logger.LogError(ex, "Error during translation");
             return $"[Error] {ex.Message}";
-        }
-    }
-
-    private async Task SendTextToWindowAsync(IntPtr hwnd, string text)
-    {
-        foreach (var c in text)
-        {
-            _platformService.PostMessage(hwnd, Constant.WM_CHAR, c, IntPtr.Zero);
-            // Small delay might be needed for some apps
-            await Task.Delay(Constant.KeySendDelayMs);
         }
     }
 }

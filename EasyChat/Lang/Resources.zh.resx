@@ -408,4 +408,19 @@
     <data name="WindowBackgroundColor" xml:space="preserve">
         <value>窗口背景颜色</value>
     </data>
+    <data name="KeySendDelay" xml:space="preserve">
+        <value>按键发送延迟</value>
+    </data>
+    <data name="InputDeliveryMode" xml:space="preserve">
+        <value>文本投递模式</value>
+    </data>
+    <data name="DeliveryMode_Type" xml:space="preserve">
+        <value>模拟按键 (Type)</value>
+    </data>
+    <data name="DeliveryMode_Paste" xml:space="preserve">
+        <value>剪贴板粘贴 (Paste)</value>
+    </data>
+    <data name="DeliveryMode_Message" xml:space="preserve">
+        <value>消息投递 (Compatibility)</value>
+    </data>
 </root>
