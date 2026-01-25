@@ -1,6 +1,6 @@
 # EasyChat
 
-EasyChat 是一款基于 Avalonia 开发的跨平台即时翻译工具，是继 2018 年高中时期使用易语言开发的“交流神器”（原官网 https://f.julym.com）后的第三次重构版本。
+EasyChat 是一款基于 Avalonia 开发的跨平台即时翻译工具，是继 2018 年高中时期使用易语言开发的“交流神器”（原官网 [https://f.julym.com](https://f.julym.com)）后的第三次重构版本。
 本项目旨在提供更流畅、更现代化的跨语言交流体验。
 
 ## ✨ 核心功能
@@ -80,6 +80,11 @@ https://github.com/user-attachments/assets/6ab9b6a3-446d-403a-b37a-d49b39c0f9d3
 - [ ] **实时语音翻译**: 实时识别语音并翻译。
 - [ ] **固定区域翻译**: 设定特定屏幕区域，快捷键一键翻译（适用于 Galgame 等场景）。
 - [ ] **同色系遮罩**: 截图翻译后，使用背景同色遮罩覆盖原文并显示译文，提供更沉浸的阅读体验。
+
+## 🗪 沟通交流
+<img width="234" height="303" alt="image" src="https://github.com/user-attachments/assets/cb1503b9-96a9-496c-93f3-c30d3df2957f" />
+
+
 
 ## 🤝 参与贡献
 
