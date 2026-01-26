@@ -1,10 +1,24 @@
+using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace EasyChat.Services
 {
     public class AsrNativeInterop
     {
-        private const string DllName = "./Lib/ASRNative"; 
+        private const string DllName = "ASRNative.dll"; 
+
+        static AsrNativeInterop()
+        {
+            string libPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "Lib", "ASRNative.dll"));
+            NativeLibrary.SetDllImportResolver(typeof(AsrNativeInterop).Assembly, (libraryName, _, _) =>
+            {
+                if (!string.Equals(libraryName, DllName, StringComparison.OrdinalIgnoreCase))
+                    return IntPtr.Zero;
+
+                return NativeLibrary.TryLoad(libPath, out var handle) ? handle : IntPtr.Zero;
+            });
+        }
 
         // 0: Final Result, 1: Partial Result, 2: Error, 3: Canceled
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
