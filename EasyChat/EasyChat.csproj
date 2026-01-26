@@ -115,12 +115,9 @@
         </Compile>
     </ItemGroup>
 
-    <Target Name="CopyLibFolderToOutput" AfterTargets="Build">
-        <ItemGroup>
-            <LibFiles Include="$(ProjectDir)Lib\**\*.*" />
-        </ItemGroup>
-        <Copy SourceFiles="@(LibFiles)"
-              DestinationFiles="@(LibFiles->'$(OutputPath)Lib\%(RecursiveDir)%(Filename)%(Extension)')" />
-        
-    </Target>
+    <ItemGroup>
+        <Content Include="Lib\**">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
 </Project>
