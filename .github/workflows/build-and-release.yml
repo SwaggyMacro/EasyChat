@@ -109,12 +109,14 @@ jobs:
           echo "### 📝 Change Log" > release_notes.md
           echo "" >> release_notes.md
           
+          LOG_FORMAT="- [%h](https://github.com/${{ github.repository }}/commit/%H) %s (by @%an)"
+          
           if [ -z "$PREV_TAG" ]; then
             echo "No previous tag found. Listing all commits."
-            git log --pretty=format:"- %s" >> release_notes.md
+            git log --pretty=format:"$LOG_FORMAT" >> release_notes.md
           else
             echo "Listing commits between $PREV_TAG and ${{ github.ref_name }}"
-            git log --pretty=format:"- %s" $PREV_TAG..${{ github.ref_name }} >> release_notes.md
+            git log --pretty=format:"$LOG_FORMAT" "$PREV_TAG..${{ github.ref_name }}" >> release_notes.md
           fi
           
           echo "--- Content of release_notes.md ---"
