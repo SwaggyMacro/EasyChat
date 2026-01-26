@@ -97,7 +97,8 @@ public class OpenAiService : ITranslation
         }
     }
 
-    public async IAsyncEnumerable<string> StreamTranslateAsync(string text, LanguageDefinition source, LanguageDefinition destination)
+    public async IAsyncEnumerable<string> StreamTranslateAsync(string text, LanguageDefinition source, LanguageDefinition destination,
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Stream translation request: {Source} → {Dest}, Length={Length}", source.DisplayName, destination.DisplayName, text.Length);
         
@@ -108,7 +109,7 @@ public class OpenAiService : ITranslation
             new UserChatMessage(text)
         ];
 
-        await foreach (var update in client.CompleteChatStreamingAsync(messages))
+        await foreach (var update in client.CompleteChatStreamingAsync(messages, cancellationToken: cancellationToken))
         {
             if (update.ContentUpdate.Count > 0)
             {

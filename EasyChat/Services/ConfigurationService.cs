@@ -28,6 +28,7 @@ public class ConfigurationService : ReactiveObject, IConfigurationService
         Prompts = ConfigUtil.LoadConfig<Prompts>(Constant.PromptConf);
         Result = ConfigUtil.LoadConfig<ResultConfig>(Constant.ResultConf);
         Input = ConfigUtil.LoadConfig<InputConfig>(Constant.InputConf);
+        SpeechRecognition = ConfigUtil.LoadConfig<SpeechRecognitionConfig>(Constant.SpeechRecognitionConf);
 
         // Set global access for legacy compatibility (if needed)
         Global.Config.GeneralConf = General;
@@ -50,6 +51,7 @@ public class ConfigurationService : ReactiveObject, IConfigurationService
     public Prompts Prompts { get; }
     public ResultConfig Result { get; }
     public InputConfig Input { get; }
+    public SpeechRecognitionConfig SpeechRecognition { get; }
 
     private void SetupAutoSave()
     {
@@ -87,6 +89,15 @@ public class ConfigurationService : ReactiveObject, IConfigurationService
             {
                 _logger.LogDebug("Auto-saving Input configuration");
                 ConfigUtil.SaveConfig(Constant.InputConf, Input);
+            });
+
+        // SpeechRecognition Config - Simple Property Changes
+        SpeechRecognition.Changed
+            .Throttle(TimeSpan.FromMilliseconds(500))
+            .Subscribe(_ =>
+            {
+                _logger.LogDebug("Auto-saving SpeechRecognition configuration");
+                ConfigUtil.SaveConfig(Constant.SpeechRecognitionConf, SpeechRecognition);
             });
 
         // AI Model Config - Deep changes (List modifications + Item changes + Custom Key List changes)

@@ -129,6 +129,7 @@ public class App : Application
             services.AddTransient<Page, ShortcutViewModel>();
             services.AddTransient<Page, AboutViewModel>();
             services.AddTransient<Page, PromptViewModel>();
+            services.AddTransient<Page, SpeechRecognitionViewModel>();
 
             // ViewModels
             services.AddSingleton<MainWindowViewModel>();

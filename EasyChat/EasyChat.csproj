@@ -9,7 +9,7 @@
         <ApplicationIcon>Assets\easychat-logo.ico</ApplicationIcon>
         
         <!-- Version for update checking -->
-        <Version>0.0.3.3</Version>
+        <Version>0.0.4.1</Version>
 
         <!-- NetBeauty Settings -->
         <DisableBeauty>True</DisableBeauty>
@@ -114,4 +114,15 @@
             <DependentUpon>Resources.resx</DependentUpon>
         </Compile>
     </ItemGroup>
+
+    <Target Name="CopyLibFolderToOutput" AfterTargets="Build">
+        <ItemGroup>
+            <LibFiles Include="$(ProjectDir)Lib\**\*.*" />
+        </ItemGroup>
+
+        <Copy
+                SourceFiles="@(LibFiles)"
+                DestinationFiles="@(LibFiles->'$(TargetDir)Lib\%(RecursiveDir)%(Filename)%(Extension)')"
+                SkipUnchangedFiles="true" />
+    </Target>
 </Project>

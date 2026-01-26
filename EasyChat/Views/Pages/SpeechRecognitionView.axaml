@@ -1,0 +1,183 @@
+<UserControl x:Class="EasyChat.Views.Pages.SpeechRecognitionView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:EasyChat.ViewModels.Pages;assembly=EasyChat"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:converts="clr-namespace:EasyChat.Converters;assembly=EasyChat"
+             xmlns:lang="clr-namespace:EasyChat.Lang;assembly=EasyChat"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
+             x:DataType="vm:SpeechRecognitionViewModel">
+
+    <Grid>
+        <Grid RowDefinitions="Auto, *" IsVisible="{Binding IsSupported}">
+        <!-- Configuration Header -->
+        <suki:GlassCard Grid.Row="0" Margin="15">
+            <WrapPanel Orientation="Horizontal" >
+                
+                <!-- Recognition Language -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,20,0" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Static lang:Resources.Language}" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
+                    <ComboBox ItemsSource="{Binding RecognitionLanguages}" SelectedItem="{Binding SelectedRecognitionLanguage}" MinWidth="120"/>
+                </StackPanel>
+
+                <!-- Translation Toggle -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,20,0" VerticalAlignment="Center">
+                    <CheckBox Content="{x:Static lang:Resources.Speech_EnableTranslation}" IsChecked="{Binding IsTranslationEnabled}" Margin="0,0,10,0"/>
+                    <CheckBox Content="{x:Static lang:Resources.Speech_RealTimePreview}" IsChecked="{Binding IsRealTimePreviewEnabled}" IsVisible="{Binding IsTranslationEnabled}" ToolTip.Tip="{x:Static lang:Resources.Speech_RealTimePreviewTip}"/>
+                </StackPanel>
+
+                <!-- Engine Selector -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,20,0" VerticalAlignment="Center" IsVisible="{Binding IsTranslationEnabled}">
+                     <TextBlock Text="{x:Static lang:Resources.TransEngine}" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
+                     <ComboBox ItemsSource="{Binding EngineOptions}" SelectedItem="{Binding SelectedEngineOption}" MinWidth="160">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Panel Width="20" Height="20">
+                                        <Border ClipToBounds="True" CornerRadius="4" IsVisible="{Binding Name, Converter={x:Static converts:EngineConverters.HasIcon}}">
+                                            <Image Source="{Binding Name, Converter={x:Static converts:EngineConverters.ToIcon}}" Stretch="UniformToFill" />
+                                        </Border>
+                                        <avalonia:MaterialIcon Kind="Robot" Width="20" Height="20" Foreground="{DynamicResource SukiText}" IsVisible="{Binding Name, Converter={x:Static converts:EngineConverters.HasNoIcon}}" />
+                                    </Panel>
+                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Foreground="{DynamicResource SukiText}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                     </ComboBox>
+                </StackPanel>
+
+                <!-- Target Language Selector -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,20,0" VerticalAlignment="Center" IsVisible="{Binding IsTranslationEnabled}">
+                     <TextBlock Text="{x:Static lang:Resources.TargetLang}" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
+                     <ComboBox ItemsSource="{Binding TargetLanguages}" SelectedItem="{Binding SelectedTargetLanguage}" MinWidth="160">
+                         <ComboBox.ItemTemplate>
+                             <DataTemplate>
+                                 <StackPanel Orientation="Horizontal" Spacing="8">
+                                     <Border ClipToBounds="True" CornerRadius="2" Width="20" Height="14">
+                                         <Image Source="{Binding Icon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}" Stretch="UniformToFill" />
+                                     </Border>
+                                     <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" Foreground="{DynamicResource SukiText}" />
+                                 </StackPanel>
+                             </DataTemplate>
+                         </ComboBox.ItemTemplate>
+                     </ComboBox>
+                </StackPanel>
+
+                <!-- Audio Source Selector -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,20,0" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Static lang:Resources.Speech_AudioSource}" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
+                    <Button Classes="Outlined" Padding="0" CornerRadius="5" Background="Transparent" MinHeight="32">
+                        <Button.Flyout>
+                            <Flyout Placement="Bottom" ShowMode="Standard">
+                                <Border MinWidth="280" MaxHeight="500" Padding="0" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1" CornerRadius="8">
+                                    <Grid RowDefinitions="Auto, *">
+                                        <!-- Header -->
+                                        <Grid ColumnDefinitions="*, Auto" Margin="12,10" Background="Transparent">
+                                            <TextBlock Text="{x:Static lang:Resources.Speech_SelectSourceTitle}" FontWeight="SemiBold" VerticalAlignment="Center" Opacity="0.8"/>
+                                            <Button Grid.Column="1" Command="{Binding RefreshProcessesCommand}" Classes="Basic" Padding="4" Height="28" Width="28" ToolTip.Tip="{x:Static lang:Resources.Speech_Refresh}">
+                                                <avalonia:MaterialIcon Kind="Refresh" Width="16" Height="16"/>
+                                            </Button>
+                                        </Grid>
+                                        
+                                        <!-- Process List -->
+                                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MaxHeight="400">
+                                            <ItemsControl ItemsSource="{Binding Processes}" Margin="5">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <CheckBox IsChecked="{Binding IsSelected}" HorizontalAlignment="Stretch" Margin="0,2" Padding="8,6" Background="Transparent" CornerRadius="4">
+                                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                                <Image Source="{Binding AppIcon}" Width="20" Height="20" RenderOptions.BitmapInterpolationMode="HighQuality" VerticalAlignment="Center" />
+                                                                <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                                            </StackPanel>
+                                                        </CheckBox>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+                                    </Grid>
+                                </Border>
+                            </Flyout>
+                        </Button.Flyout>
+                        <!-- Button Content mimicking ComboBox -->
+                        <Grid ColumnDefinitions="*, Auto" Width="160" Margin="10,0">
+                            <TextBlock Text="{Binding SelectedProcessesSummary}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" FontSize="13" Foreground="{DynamicResource SukiText}"/>
+                            <avalonia:MaterialIcon Grid.Column="1" Kind="ChevronDown" Width="16" Height="16" Opacity="0.6" Margin="5,0,0,0" Foreground="{DynamicResource SukiText}"/>
+                        </Grid>
+                    </Button>
+                </StackPanel>
+
+                <!-- Recording Button -->
+                <Button Command="{Binding ToggleRecordingCommand}" 
+                        Classes="Flat"
+                        Margin="10,0,0,0"
+                        VerticalAlignment="Center">
+                     <StackPanel Orientation="Horizontal">
+                        <avalonia:MaterialIcon Kind="{Binding RecordingIcon}" Margin="0,0,5,0"/>
+                        <TextBlock Text="{Binding RecordingText}" />
+                     </StackPanel>
+                </Button>
+            </WrapPanel>
+        </suki:GlassCard>
+
+        <!-- Subtitles Display -->
+        <Grid Grid.Row="1" Margin="15,0,15,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="{Binding IsTranslationEnabled, Converter={x:Static converts:BoolToGridLengthConverter.Instance}}" />
+            </Grid.ColumnDefinitions>
+            
+            <!-- Left: Source -->
+            <suki:GlassCard Grid.Column="0" Margin="0,0,5,0">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="{x:Static lang:Resources.Speech_Recognized}" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding SubtitleItems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,0,0,1" Padding="10">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Timestamp, StringFormat=\{0:hh\\:mm\\:ss\}}" FontSize="12" Opacity="0.6"/>
+                                            <TextBlock Text="{Binding OriginalText}" TextWrapping="Wrap" Margin="0,5,0,0" FontSize="14"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </suki:GlassCard>
+
+            <!-- Right: Translation -->
+            <suki:GlassCard Grid.Column="1" Margin="5,0,0,0" IsVisible="{Binding IsTranslationEnabled}">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="{x:Static lang:Resources.Speech_Translated}" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                    <ScrollViewer>
+                         <ItemsControl ItemsSource="{Binding SubtitleItems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,0,0,1" Padding="10">
+                                        <StackPanel>
+                                            <Grid>
+                                                <TextBlock Text="{Binding Timestamp, StringFormat=\{0:hh\\:mm\\:ss\}}" FontSize="12" Opacity="0.6" HorizontalAlignment="Left"/>
+                                                <suki:Loading IsVisible="{Binding IsTranslating}" HorizontalAlignment="Right" Width="16" Height="16"/>
+                                            </Grid>
+                                            <TextBlock Text="{Binding TranslatedText}" TextWrapping="Wrap" Margin="0,5,0,0" FontSize="14" Foreground="{DynamicResource SukiPrimaryColor}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </suki:GlassCard>
+        </Grid>
+    </Grid>
+        <StackPanel IsVisible="{Binding IsNotSupported}" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="20">
+             <avalonia:MaterialIcon Kind="AlertCircleOutline" Width="60" Height="60" Opacity="0.5"/>
+             <TextBlock Text="{x:Static lang:Resources.Speech_NotSupported}" FontSize="18" HorizontalAlignment="Center" Opacity="0.8"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -488,4 +488,46 @@
     <data name="Dismiss" xml:space="preserve">
         <value>Dismiss</value>
     </data>
+    <data name="Speech_EnableTranslation" xml:space="preserve">
+        <value>Enable Translation</value>
+    </data>
+    <data name="Speech_RealTimePreview" xml:space="preserve">
+        <value>Real-time Preview</value>
+    </data>
+    <data name="Speech_RealTimePreviewTip" xml:space="preserve">
+        <value>Enable to translate partial results. Disable to translate only confirmed sentences.</value>
+    </data>
+    <data name="Speech_AudioSource" xml:space="preserve">
+        <value>Audio Source</value>
+    </data>
+    <data name="Speech_SelectSourceTitle" xml:space="preserve">
+        <value>Select Audio Source</value>
+    </data>
+    <data name="Speech_Start" xml:space="preserve">
+        <value>Start Recognition</value>
+    </data>
+    <data name="Speech_Stop" xml:space="preserve">
+        <value>Stop Recognition</value>
+    </data>
+    <data name="Speech_Recognized" xml:space="preserve">
+        <value>Recognized</value>
+    </data>
+    <data name="Speech_Translated" xml:space="preserve">
+        <value>Translated</value>
+    </data>
+    <data name="Speech_Refresh" xml:space="preserve">
+        <value>Refresh</value>
+    </data>
+    <data name="Speech_AllSystemAudio" xml:space="preserve">
+        <value>Global (All System Audio)</value>
+    </data>
+    <data name="Speech_SelectedAppsCount" xml:space="preserve">
+        <value>Selected {0} apps</value>
+    </data>
+    <data name="Speech_NotSupported" xml:space="preserve">
+        <value>This feature is only supported on Windows.</value>
+    </data>
+    <data name="Page_SpeechRecognition" xml:space="preserve">
+        <value>Speech Recognition</value>
+    </data>
 </root>

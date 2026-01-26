@@ -1564,5 +1564,140 @@ namespace EasyChat.Lang
                 return ResourceManager.GetString("Dismiss", resourceCulture);
             }
         }
+        /// <summary>
+        ///   Looks up a localized string similar to Enable Translation.
+        /// </summary>
+        public static string Speech_EnableTranslation
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_EnableTranslation", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Real-time Preview.
+        /// </summary>
+        public static string Speech_RealTimePreview
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_RealTimePreview", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Enable to translate partial results. Disable to translate only confirmed sentences..
+        /// </summary>
+        public static string Speech_RealTimePreviewTip
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_RealTimePreviewTip", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Audio Source.
+        /// </summary>
+        public static string Speech_AudioSource
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_AudioSource", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Select Audio Source.
+        /// </summary>
+        public static string Speech_SelectSourceTitle
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_SelectSourceTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Refresh.
+        /// </summary>
+        public static string Speech_Refresh
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_Refresh", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Start Recognition.
+        /// </summary>
+        public static string Speech_Start
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_Start", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Stop Recognition.
+        /// </summary>
+        public static string Speech_Stop
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_Stop", resourceCulture);
+            }
+        }
+
+        public static string Speech_Recognized
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_Recognized", resourceCulture);
+            }
+        }
+
+        public static string Speech_Translated
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_Translated", resourceCulture);
+            }
+        }
+        public static string Speech_AllSystemAudio
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_AllSystemAudio", resourceCulture);
+            }
+        }
+        public static string Speech_SelectedAppsCount
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_SelectedAppsCount", resourceCulture);
+            }
+        }
+        public static string Speech_NotSupported
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_NotSupported", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Speech Recognition.
+        /// </summary>
+        public static string Page_SpeechRecognition
+        {
+            get
+            {
+                return ResourceManager.GetString("Page_SpeechRecognition", resourceCulture);
+            }
+        }
     }
 }

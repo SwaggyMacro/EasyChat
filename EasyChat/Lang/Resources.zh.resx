@@ -474,4 +474,19 @@
     <data name="Dismiss" xml:space="preserve">
         <value>忽略</value>
     </data>
+    <data name="Speech_Refresh" xml:space="preserve">
+        <value>刷新</value>
+    </data>
+    <data name="Speech_AllSystemAudio" xml:space="preserve">
+        <value>全部 (系统声音)</value>
+    </data>
+    <data name="Speech_SelectedAppsCount" xml:space="preserve">
+        <value>已选择 {0} 个应用</value>
+    </data>
+    <data name="Speech_NotSupported" xml:space="preserve">
+        <value>此功能仅支持 Windows 系统。</value>
+    </data>
+    <data name="Page_SpeechRecognition" xml:space="preserve">
+        <value>语音识别</value>
+    </data>
 </root>

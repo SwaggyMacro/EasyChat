@@ -13,6 +13,7 @@ public static class Constant
     public const string PromptConf = "Prompts";
     public const string ResultConf = "Result";
     public const string InputConf = "Input";
+    public const string SpeechRecognitionConf = "SpeechRecognition";
 
     public const string Prompt =
         "You are a very professional translator. You will translate very idiomatically and perform relevant regional optimizations (idiomatic translation) based on the content to be translated and the corresponding language." +
