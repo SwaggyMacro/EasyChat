@@ -2,6 +2,7 @@ name: Build and Release
 
 on:
   push:
+    branches: [ "master" ]
     tags:
       - 'v*.*.*'
   workflow_dispatch:
@@ -97,16 +98,39 @@ jobs:
           echo "Files prepared for release:"
           ls -la ./release-files/
 
+      - name: Generate Release Notes
+        id: notes
+        run: |
+          COMMIT_INFO=$(git log -1 --format='%h - %s')
+          
+          TAG_MSG=$(git tag -l --format='%(contents)' ${{ github.ref_name }})
+          
+          echo "Preparing notes..."
+          echo "RECENT_COMMIT=$COMMIT_INFO" >> $GITHUB_ENV
+          
+          echo "::group::Debug Info"
+          echo "Commit: $COMMIT_INFO"
+          echo "Tag Msg: $TAG_MSG"
+          echo "::endgroup::"
+    
       - name: Create Release using GitHub CLI
         run: |
-          # Create the release
+          # --generate-notes 
+          # --notes 
+          
+          NOTES_CONTENT="### 🚀 Recent Updates
+          **Latest Commit:** ${{ env.RECENT_COMMIT }}
+          
+          ---
+          "
+          
           gh release create ${{ github.ref_name }} \
             --title "Release ${{ github.ref_name }}" \
-            --notes "Release ${{ github.ref_name }}" \
+            --notes "$NOTES_CONTENT" \
+            --generate-notes \
             --draft=false \
             --prerelease=false
           
-          # Upload each file individually
           for file in ./release-files/*.zip; do
             echo "Uploading $file"
             gh release upload ${{ github.ref_name }} "$file"

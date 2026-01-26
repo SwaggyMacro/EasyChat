@@ -12,7 +12,7 @@
         <Version>0.0.3</Version>
 
         <!-- NetBeauty Settings -->
-        <DisableBeauty>False</DisableBeauty>
+        <DisableBeauty>True</DisableBeauty>
         <BeautySharedRuntimeMode>False</BeautySharedRuntimeMode>
         <BeautyLibsDir Condition="$(BeautySharedRuntimeMode) == 'True'">../libraries</BeautyLibsDir>
         <BeautyLibsDir Condition="$(BeautySharedRuntimeMode) != 'True'">./libraries</BeautyLibsDir>
@@ -63,7 +63,6 @@
         <PackageReference Include="Material.Icons.Avalonia" Version="2.1.10" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="nulastudio.NetBeauty" Version="2.1.5" />
         <PackageReference Include="OpenAI" Version="2.1.0" />
         <PackageReference Include="OpenCvSharp4.Extensions" Version="4.10.0.20241108" />
         <PackageReference Include="OpenCvSharp4.Windows" Version="4.10.0.20241108" />
