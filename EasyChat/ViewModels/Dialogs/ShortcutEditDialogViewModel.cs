@@ -1,5 +1,3 @@
-// Placeholder to ensure I look at the view first
-
 using System;
 using System.Collections.Generic;
 using System.Linq;

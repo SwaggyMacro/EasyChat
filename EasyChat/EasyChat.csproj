@@ -18,7 +18,7 @@
         <BeautyLibsDir Condition="$(BeautySharedRuntimeMode) != 'True'">./libraries</BeautyLibsDir>
 
         <!-- Files to hide from end users (e.g., runtime or config files). Only supported on Windows. -->
-        <BeautyHiddens>hostfxr;hostpolicy;*.deps.json;*.runtimeconfig*.json</BeautyHiddens>
+        <BeautyHiddens>hostfxr;hostpolicy;*.deps.json;*.runtimeconfig*.json;*.pdb;EasyChat.dll</BeautyHiddens>
 
         <!-- Files to exclude from packing (e.g., resource assemblies). -->
         <BeautyExcludes>*.resources.dll</BeautyExcludes>
