@@ -98,41 +98,40 @@ jobs:
           echo "Files prepared for release:"
           ls -la ./release-files/
 
-      - name: Generate Release Notes
-        id: notes
+      - name: Generate Changelog
+        id: changelog
         run: |
-          COMMIT_INFO=$(git log -1 --format='%h - %s')
+          PREV_TAG=$(git describe --tags --abbrev=0 ${{ github.ref_name }}^ 2>/dev/null || echo "")
           
-          TAG_MSG=$(git tag -l --format='%(contents)' ${{ github.ref_name }})
+          echo "Current Tag: ${{ github.ref_name }}"
+          echo "Previous Tag: $PREV_TAG"
           
-          echo "Preparing notes..."
-          echo "RECENT_COMMIT=$COMMIT_INFO" >> $GITHUB_ENV
+          echo "### 📝 Change Log" > release_notes.md
+          echo "" >> release_notes.md
           
-          echo "::group::Debug Info"
-          echo "Commit: $COMMIT_INFO"
-          echo "Tag Msg: $TAG_MSG"
-          echo "::endgroup::"
+          if [ -z "$PREV_TAG" ]; then
+            echo "No previous tag found. Listing all commits."
+            git log --pretty=format:"- %s" >> release_notes.md
+          else
+            echo "Listing commits between $PREV_TAG and ${{ github.ref_name }}"
+            git log --pretty=format:"- %s" $PREV_TAG..${{ github.ref_name }} >> release_notes.md
+          fi
+          
+          echo "--- Content of release_notes.md ---"
+          cat release_notes.md
     
       - name: Create Release using GitHub CLI
         run: |
           # --generate-notes 
           # --notes 
-          
-          NOTES_CONTENT="### 🚀 Recent Updates
-          **Latest Commit:** ${{ env.RECENT_COMMIT }}
-          
-          ---
-          "
-          
           gh release create ${{ github.ref_name }} \
             --title "Release ${{ github.ref_name }}" \
-            --notes "$NOTES_CONTENT" \
+            --notes-file release_notes.md \
             --generate-notes \
             --draft=false \
             --prerelease=false
-          
+
           for file in ./release-files/*.zip; do
-            echo "Uploading $file"
             gh release upload ${{ github.ref_name }} "$file"
           done
         env:
