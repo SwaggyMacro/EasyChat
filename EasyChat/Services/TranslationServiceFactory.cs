@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using EasyChat.Common;
 using EasyChat.Constants;
 using EasyChat.Models;
 using EasyChat.Services.Abstractions;
@@ -40,10 +41,10 @@ public class TranslationServiceFactory : ITranslationServiceFactory
         {
             Constant.TransEngineType.Ai => !string.IsNullOrEmpty(_config.GeneralConf.UsingAiModelId) 
                 ? CreateAiServiceById(_config.GeneralConf.UsingAiModelId)
-                : CreateAiService(_config.GeneralConf.UsingAiModel),
+                : CreateAiService(_config.GeneralConf.UsingAiModel!),
             Constant.TransEngineType.Machine => !string.IsNullOrEmpty(_config.GeneralConf.UsingMachineTransId)
                 ? CreateMachineServiceById(_config.GeneralConf.UsingMachineTransId)
-                : CreateMachineService(_config.GeneralConf.UsingMachineTrans),
+                : CreateMachineService(_config.GeneralConf.UsingMachineTrans!),
             _ => throw new ArgumentException($"Unknown translation engine: {_config.GeneralConf.TransEngine}")
         };
     }
@@ -79,7 +80,7 @@ public class TranslationServiceFactory : ITranslationServiceFactory
         string apiUrl = model.ApiUrl;
         string modelId = model.Model;
 
-        var prompt = _configurationService.Prompts.ActivePromptContent;
+        var prompt = _configurationService.Prompts?.ActivePromptContent ?? Prompts.DefaultPromptContent;
 
         return new OpenAiService(
             apiUrl,

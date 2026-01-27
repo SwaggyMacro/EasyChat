@@ -38,8 +38,8 @@ public class ShortcutViewModel : Page
         // Subscribe to external changes (optional but good for consistency)
         // If entries are added externally or by other means, refresh local view
         Observable.FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
-                h => _configurationService.Shortcut.Entries.CollectionChanged += h,
-                h => _configurationService.Shortcut.Entries.CollectionChanged -= h)
+                h => _configurationService.Shortcut?.Entries.CollectionChanged += h,
+                h => _configurationService.Shortcut?.Entries.CollectionChanged -= h)
             .Subscribe(_ => LoadShortcutsFromService());
 
         AddEntryCommand = ReactiveCommand.Create<string>(AddEntry);
@@ -71,8 +71,9 @@ public class ShortcutViewModel : Page
 
     private void LoadShortcutsFromService()
     {
-        var entries = _configurationService.Shortcut.Entries;
+        var entries = _configurationService.Shortcut?.Entries;
 
+        if (entries == null) return;
         BasicShortcuts = new ObservableCollection<ShortcutEntry>(
             entries.Where(e => _basicTypes.Contains(e.ActionType)));
 
@@ -87,7 +88,7 @@ public class ShortcutViewModel : Page
     private void AddEntry(string category)
     {
         // Check if there are pre-defined actions for this category to select a default
-        ShortcutEntry? template = null;
+        ShortcutEntry? template;
         string[] allowedTypes;
 
         if (category == "Basic")
@@ -127,7 +128,7 @@ public class ShortcutViewModel : Page
             .WithActionButton(Resources.Delete, _ =>
             {
                 // Remove from service collection - this triggers auto-save
-                _configurationService.Shortcut.Entries.Remove(entry);
+                _configurationService.Shortcut?.Entries.Remove(entry);
                 // Local collections will update via LoadShortcutsFromService subscription
             }, true)
             .WithActionButton(Resources.Cancel, _ => { }, true)
@@ -158,8 +159,8 @@ public class ShortcutViewModel : Page
                         }
                         else
                         {
-                            _configurationService.Shortcut.Entries.Remove(entry!);
-                            _configurationService.Shortcut.Entries.Add(result);
+                            _configurationService.Shortcut?.Entries.Remove(entry!);
+                            _configurationService.Shortcut?.Entries.Add(result);
                         }
                     }
                 };
@@ -171,7 +172,7 @@ public class ShortcutViewModel : Page
     private void AddEntryToCollection(ShortcutEntry entry)
     {
         // Add to service
-        _configurationService.Shortcut.Entries.Add(entry);
+        _configurationService.Shortcut?.Entries.Add(entry);
         // Local collections update via subscription
     }
 }

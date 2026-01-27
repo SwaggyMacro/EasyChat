@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
@@ -17,9 +18,11 @@ public partial class OverlayWindow : Window
     private readonly Rectangle _selectionRectangle;
     private Point _startPoint;
 
-    // We pass IScreenCaptureService here, or pre-captured bitmap.
-    // Passing Pre-captured bitmap is faster if we captured it in the session manager.
-    // Let's pass the captured bitmap to avoid double capture or delay in constructor.
+
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    public OverlayWindow () {}
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     public OverlayWindow(Screen screen, Bitmap capturedImage)
     {
         InitializeComponent();

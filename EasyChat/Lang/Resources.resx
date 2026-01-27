@@ -584,4 +584,19 @@
     <data name="FontFamily" xml:space="preserve">
         <value>Font Family</value>
     </data>
+    <data name="Speech_MaxSentencesPerLine" xml:space="preserve">
+        <value>Sentences Per Line</value>
+    </data>
+    <data name="Speech_DisplayMode" xml:space="preserve">
+        <value>Display Mode</value>
+    </data>
+    <data name="Speech_DisplayMode_Segmented" xml:space="preserve">
+        <value>Segmented</value>
+    </data>
+    <data name="Speech_DisplayMode_AutoScroll" xml:space="preserve">
+        <value>Auto Scroll</value>
+    </data>
+    <data name="Speech_MaxHistory" xml:space="preserve">
+        <value>Max Visible Lines</value>
+    </data>
 </root>

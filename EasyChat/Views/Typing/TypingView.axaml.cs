@@ -1,9 +1,10 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
-using EasyChat.Constants;
+using EasyChat.Common;
 using EasyChat.Services.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,10 @@ public partial class TypingView : Window
     private readonly ILogger<TypingView> _logger;
     private readonly IntPtr _targetHwnd;
     
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    public TypingView() {}
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     public TypingView(IntPtr targetHwnd)
     {
         InitializeComponent();
@@ -25,23 +30,20 @@ public partial class TypingView : Window
         
         // Listen for config changes
         var configService = Global.Services?.GetRequiredService<IConfigurationService>();
-        if (configService?.Input != null)
-        {
-            configService.Input.Changed.Subscribe(_ => 
-                Dispatcher.UIThread.Post(ApplyConfiguration));
-        }
-        
+        configService?.Input?.Changed.Subscribe(_ => 
+            Dispatcher.UIThread.Post(ApplyConfiguration));
+
         _targetHwnd = targetHwnd;
         _platformService = Global.Services?.GetRequiredService<IPlatformService>() ??
                            throw new InvalidOperationException("PlatformService not found");
-        _logger = Global.Services?.GetRequiredService<ILogger<TypingView>>() ??
+        _logger = Global.Services.GetRequiredService<ILogger<TypingView>>() ??
                   throw new InvalidOperationException("Logger not found");
 
         var inputBox = this.FindControl<TextBox>("InputBox");
 
-        Opened += (s, e) => { inputBox?.Focus(); };
+        Opened += (_, _) => { inputBox?.Focus(); };
 
-        LostFocus += (s, e) => { Close(); };
+        LostFocus += (_, _) => { Close(); };
     }
 
     private void ApplyConfiguration()
@@ -125,7 +127,7 @@ public partial class TypingView : Window
                 var delay = 10;
                 var mode = Models.Configuration.InputDeliveryMode.Type;
 
-                if (Global.Services?.GetRequiredService<IConfigurationService>()?.Input is { } inputConfig)
+                if (Global.Services?.GetRequiredService<IConfigurationService>().Input is { } inputConfig)
                 {
                     delay = inputConfig.KeySendDelay;
                     mode = inputConfig.DeliveryMode;
@@ -182,8 +184,8 @@ public partial class TypingView : Window
             var configService = services.GetRequiredService<IConfigurationService>();
             
             var translator = factory.CreateCurrentService();
-            var sourceLang = configService.General.SourceLanguage;
-            var targetLang = configService.General.TargetLanguage;
+            var sourceLang = configService.General?.SourceLanguage;
+            var targetLang = configService.General?.TargetLanguage;
 
             if (translator is Services.Translation.Ai.OpenAiService openAi)
             {

@@ -30,7 +30,7 @@
                                 <CheckBox Content="{x:Static lang:Resources.Speech_EnableTranslation}" IsChecked="{Binding IsTranslationEnabled}" Margin="0,0,10,0"/>
                                 <CheckBox Content="{x:Static lang:Resources.Speech_RealTimePreview}" IsChecked="{Binding IsRealTimePreviewEnabled}" IsVisible="{Binding IsTranslationEnabled}" ToolTip.Tip="{x:Static lang:Resources.Speech_RealTimePreviewTip}"/>
                             </StackPanel>
-            
+                            
                             <!-- Engine Selector -->
                             <StackPanel Orientation="Horizontal" Margin="0,0,20,0" VerticalAlignment="Center" IsVisible="{Binding IsTranslationEnabled}">
                                  <TextBlock Text="{x:Static lang:Resources.TransEngine}" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
@@ -215,7 +215,18 @@
                                         <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding MainSourceOptions}" SelectedValue="{Binding MainSubtitleSource}" SelectedValueBinding="{Binding Key}" DisplayMemberBinding="{Binding Value}" HorizontalAlignment="Stretch"/>
 
                                         <TextBlock Grid.Row="1" Grid.Column="0" Text="{x:Static lang:Resources.FontFamily}" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding PrimaryFontFamily}"/>
+                                        <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding AvailableFonts}" SelectedItem="{Binding PrimaryFontFamily}" HorizontalAlignment="Stretch">
+                                            <ComboBox.SelectionBoxItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" VerticalAlignment="Center" />
+                                                </DataTemplate>
+                                            </ComboBox.SelectionBoxItemTemplate>
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding .}" FontFamily="{Binding ., Converter={x:Static converts:StringToFontFamilyConverter.Instance}}" VerticalAlignment="Center" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
                                         
                                         <TextBlock Grid.Row="2" Grid.Column="0" Text="{x:Static lang:Resources.FontSize}" VerticalAlignment="Center"/>
                                         <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding PrimaryFontSize}" Minimum="10" Maximum="100"/>
@@ -248,7 +259,18 @@
                                         <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding SecondarySourceOptions}" SelectedValue="{Binding SecondarySubtitleSource}" SelectedValueBinding="{Binding Key}" DisplayMemberBinding="{Binding Value}" HorizontalAlignment="Stretch"/>
 
                                         <TextBlock Grid.Row="1" Grid.Column="0" Text="{x:Static lang:Resources.FontFamily}" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SecondaryFontFamily}"/>
+                                        <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding AvailableFonts}" SelectedItem="{Binding SecondaryFontFamily}" HorizontalAlignment="Stretch">
+                                            <ComboBox.SelectionBoxItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" VerticalAlignment="Center" />
+                                                </DataTemplate>
+                                            </ComboBox.SelectionBoxItemTemplate>
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding .}" FontFamily="{Binding ., Converter={x:Static converts:StringToFontFamilyConverter.Instance}}" VerticalAlignment="Center" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
                                         
                                         <TextBlock Grid.Row="2" Grid.Column="0" Text="{x:Static lang:Resources.FontSize}" VerticalAlignment="Center"/>
                                         <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding SecondaryFontSize}" Minimum="10" Maximum="100"/>
@@ -274,7 +296,7 @@
 
                             <!-- Window Appearance -->
                             <TextBlock Text="{x:Static lang:Resources.Window_Appearance}" Classes="h4" FontWeight="SemiBold"/>
-                            <Grid ColumnDefinitions="Auto, *, 20, Auto, *" RowDefinitions="Auto, Auto" RowSpacing="15">
+                            <Grid ColumnDefinitions="Auto, *, 20, Auto, *" RowDefinitions="Auto, Auto, Auto, Auto" RowSpacing="15">
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Static lang:Resources.Window_Background}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="10">
                                     <TextBox Text="{Binding BackgroundColor}" Width="100"/>
@@ -305,12 +327,21 @@
 
                                 <TextBlock Grid.Row="1" Grid.Column="0" Text="{x:Static lang:Resources.Window_Opacity}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                 <Grid Grid.Row="1" Grid.Column="1" ColumnDefinitions="*, Auto">
-                                    <Slider Value="{Binding WindowOpacity}" Minimum="0.1" Maximum="1.0" TickFrequency="0.05" IsSnapToTickEnabled="True"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding WindowOpacity, StringFormat='P0'}" Width="40" TextAlignment="Right"/>
+                                    <Slider Value="{Binding WindowOpacity}" Minimum="0.1" Maximum="1.0" TickFrequency="0.05" IsSnapToTickEnabled="True" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding WindowOpacity, StringFormat='P0'}" Width="40" TextAlignment="Right" VerticalAlignment="Center"/>
                                 </Grid>
 
-                                <TextBlock Grid.Row="1" Grid.Column="3" Text="{x:Static lang:Resources.Window_Orientation}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                <ComboBox Grid.Row="1" Grid.Column="4" ItemsSource="{Binding OrientationOptions}" SelectedItem="{Binding FloatingWindowOrientation}" HorizontalAlignment="Stretch"/>
+                                <TextBlock Grid.Row="1" Grid.Column="3" Text="{x:Static lang:Resources.Speech_DisplayMode}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <ComboBox Grid.Row="1" Grid.Column="4" ItemsSource="{Binding DisplayModeOptions}" SelectedValue="{Binding FloatingDisplayMode}" SelectedValueBinding="{Binding Key}" DisplayMemberBinding="{Binding Value}" HorizontalAlignment="Stretch"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{x:Static lang:Resources.Window_Orientation}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding OrientationOptions}" SelectedItem="{Binding FloatingWindowOrientation}" HorizontalAlignment="Stretch"/>
+                                
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static lang:Resources.Speech_MaxSentencesPerLine}" VerticalAlignment="Center" Margin="0,0,10,0" IsVisible="{Binding IsSegmentedMode}"/>
+                                <NumericUpDown Grid.Row="3" Grid.Column="1" Value="{Binding MaxSentencesPerLine}" Minimum="1" Maximum="100" IsVisible="{Binding IsSegmentedMode}"/>
+
+                                <TextBlock Grid.Row="3" Grid.Column="3" Text="{x:Static lang:Resources.Speech_MaxHistory}" VerticalAlignment="Center" Margin="0,0,10,0" IsVisible="{Binding IsSegmentedMode}"/>
+                                <NumericUpDown Grid.Row="3" Grid.Column="4" Value="{Binding MaxFloatingHistory}" Minimum="1" Maximum="20" IsVisible="{Binding IsSegmentedMode}"/>
                             </Grid>
 
                         </StackPanel>

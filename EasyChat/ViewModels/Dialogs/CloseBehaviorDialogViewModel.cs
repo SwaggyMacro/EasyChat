@@ -6,6 +6,7 @@ using ReactiveUI;
 using SukiUI.Dialogs;
 using EasyChat.Views;
 using System.Reactive;
+using EasyChat.Common;
 
 namespace EasyChat.ViewModels.Dialogs;
 
@@ -36,7 +37,7 @@ public class CloseBehaviorDialogViewModel : ViewModelBase
         // Use property to update state
         if (IsRemember)
         {
-            configService?.General.ClosingBehavior = Models.Configuration.WindowClosingBehavior.MinimizeToTray;
+            configService?.General?.ClosingBehavior = Models.Configuration.WindowClosingBehavior.MinimizeToTray;
         }
         else
         {
@@ -63,7 +64,7 @@ public class CloseBehaviorDialogViewModel : ViewModelBase
         var configService = Global.Services?.GetRequiredService<IConfigurationService>();
         if (IsRemember)
         {
-             configService?.General.ClosingBehavior = Models.Configuration.WindowClosingBehavior.ExitApp;
+             configService?.General?.ClosingBehavior = Models.Configuration.WindowClosingBehavior.ExitApp;
         }
 
         if (Global.Services?.GetRequiredService<IApplicationLifetime>() is IClassicDesktopStyleApplicationLifetime

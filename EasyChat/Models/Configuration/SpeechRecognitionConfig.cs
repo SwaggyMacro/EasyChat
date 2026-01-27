@@ -6,204 +6,210 @@ namespace EasyChat.Models.Configuration;
 [JsonObject(MemberSerialization.OptIn)]
 public class SpeechRecognitionConfig : ReactiveObject
 {
-    private string _recognitionLanguage = "";
-
     [JsonProperty]
     public string RecognitionLanguage
     {
-        get => _recognitionLanguage;
-        set => this.RaiseAndSetIfChanged(ref _recognitionLanguage, value);
-    }
-
-    private bool _isTranslationEnabled;
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "";
 
     [JsonProperty]
     public bool IsTranslationEnabled
     {
-        get => _isTranslationEnabled;
-        set => this.RaiseAndSetIfChanged(ref _isTranslationEnabled, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
-
-    private bool _isRealTimePreviewEnabled;
 
     [JsonProperty]
     public bool IsRealTimePreviewEnabled
     {
-        get => _isRealTimePreviewEnabled;
-        set => this.RaiseAndSetIfChanged(ref _isRealTimePreviewEnabled, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
-
-    private string _targetLanguage = "";
 
     [JsonProperty]
     public string TargetLanguage
     {
-        get => _targetLanguage;
-        set => this.RaiseAndSetIfChanged(ref _targetLanguage, value);
-    }
-
-    private string _engineId = "";
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "";
 
     [JsonProperty]
     public string EngineId
     {
-        get => _engineId;
-        set => this.RaiseAndSetIfChanged(ref _engineId, value);
-    }
-    
-    private int _engineType; 
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "";
+
     // 0 = Machine, 1 = AI. 
     // Using int or string enum for serialization safety.
     [JsonProperty]
     public int EngineType
     {
-        get => _engineType;
-        set => this.RaiseAndSetIfChanged(ref _engineType, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
+
+    [JsonProperty]
+    public int MaxSentencesPerLine
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = 1;
+
+    // 0 = Segmented (Default), 1 = Auto Scroll
+    [JsonProperty]
+    public FloatingDisplayMode FloatingDisplayMode
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = FloatingDisplayMode.Segmented;
+
+    [JsonProperty]
+    public int MaxFloatingHistory
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = 2;
 
     // --- Floating Subtitle Configuration ---
 
     // Primary Subtitle (Main)
     
-    private int _mainSubtitleSource = 0; // 0 = Original, 1 = Translated
+    // Default = Original
     [JsonProperty]
-    public int MainSubtitleSource
+    public SubtitleSource MainSubtitleSource
     {
-        get => _mainSubtitleSource;
-        set => this.RaiseAndSetIfChanged(ref _mainSubtitleSource, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = SubtitleSource.Original;
 
-    private double _primaryFontSize = 20.0;
     [JsonProperty("FontSize")] // Backward compatibility
     public double PrimaryFontSize
     {
-        get => _primaryFontSize;
-        set => this.RaiseAndSetIfChanged(ref _primaryFontSize, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = 20.0;
 
-    private string _primaryFontFamily = "Microsoft YaHei UI";
     [JsonProperty("FontFamily")]
     public string PrimaryFontFamily
     {
-        get => _primaryFontFamily;
-        set => this.RaiseAndSetIfChanged(ref _primaryFontFamily, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "Microsoft YaHei UI";
 
-    private string _primaryFontColor = "#FFFFFFFF"; // White
     [JsonProperty("FontColor")]
     public string PrimaryFontColor
     {
-        get => _primaryFontColor;
-        set => this.RaiseAndSetIfChanged(ref _primaryFontColor, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "#FFFFFFFF";
 
     // Secondary Subtitle (Auxiliary)
 
-    private int _secondarySubtitleSource = 2; // 0 = None, 1 = Original, 2 = Translated. (Default Translated)
-    // Actually, simplifying: 0 = None, 1 = Translated, 2 = Original ?? 
-    // ViewModel says: 0=None, 1=Original, 2=Translated.
-    // So 2 is Translated.
+    // Default = Translated
     [JsonProperty]
-    public int SecondarySubtitleSource
+    public SubtitleSource SecondarySubtitleSource
     {
-        get => _secondarySubtitleSource;
-        set => this.RaiseAndSetIfChanged(ref _secondarySubtitleSource, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = SubtitleSource.Translated;
 
-    private double _secondaryFontSize = 16.0;
     [JsonProperty]
     public double SecondaryFontSize
     {
-        get => _secondaryFontSize;
-        set => this.RaiseAndSetIfChanged(ref _secondaryFontSize, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = 16.0;
 
-    private string _secondaryFontFamily = "Microsoft YaHei UI";
     [JsonProperty]
     public string SecondaryFontFamily
     {
-        get => _secondaryFontFamily;
-        set => this.RaiseAndSetIfChanged(ref _secondaryFontFamily, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "Microsoft YaHei UI";
 
-    private string _secondaryFontColor = "#FFCCCCCC"; // Light Gray
     [JsonProperty]
     public string SecondaryFontColor
     {
-        get => _secondaryFontColor;
-        set => this.RaiseAndSetIfChanged(ref _secondaryFontColor, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "#FFCCCCCC";
 
-    private string _backgroundColor = "#99000000"; // Semi-transparent black
     [JsonProperty]
     public string BackgroundColor
     {
-        get => _backgroundColor;
-        set => this.RaiseAndSetIfChanged(ref _backgroundColor, value);
-    }
-    
-    private string _subtitleBackgroundColor = "#00000000"; // Transparent default
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "#99000000";
+
     [JsonProperty]
     public string SubtitleBackgroundColor
     {
-        get => _subtitleBackgroundColor;
-        set => this.RaiseAndSetIfChanged(ref _subtitleBackgroundColor, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "#00000000";
 
-    private double _windowOpacity = 0.8;
     [JsonProperty]
     public double WindowOpacity
     {
-        get => _windowOpacity;
-        set => this.RaiseAndSetIfChanged(ref _windowOpacity, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = 0.8;
 
-    private bool _isFloatingWindowLocked;
     [JsonProperty]
     public bool IsFloatingWindowLocked
     {
-        get => _isFloatingWindowLocked;
-        set => this.RaiseAndSetIfChanged(ref _isFloatingWindowLocked, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    private string _floatingWindowOrientation = "Horizontal";
     [JsonProperty]
     public string FloatingWindowOrientation
     {
-        get => _floatingWindowOrientation;
-        set => this.RaiseAndSetIfChanged(ref _floatingWindowOrientation, value);
-    }
-    
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "Horizontal";
+
     // Window Position and Size
-    private double _windowX = -1;
     [JsonProperty]
     public double WindowX
     {
-        get => _windowX;
-        set => this.RaiseAndSetIfChanged(ref _windowX, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = -1;
 
-    private double _windowY = -1;
     [JsonProperty]
     public double WindowY
     {
-        get => _windowY;
-        set => this.RaiseAndSetIfChanged(ref _windowY, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = -1;
 
-    private double _windowWidth = -1;
     [JsonProperty]
     public double WindowWidth
     {
-        get => _windowWidth;
-        set => this.RaiseAndSetIfChanged(ref _windowWidth, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = -1;
 
-    private double _windowHeight = -1;
     [JsonProperty]
     public double WindowHeight
     {
-        get => _windowHeight;
-        set => this.RaiseAndSetIfChanged(ref _windowHeight, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = -1;
+}
+
+public enum FloatingDisplayMode
+{
+    Segmented = 0,
+    AutoScroll = 1
+}
+
+public enum SubtitleSource
+{
+    None = 0,
+    Original = 1,
+    Translated = 2
 }

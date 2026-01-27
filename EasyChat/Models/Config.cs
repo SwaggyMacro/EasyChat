@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using EasyChat.Models.Configuration;
 
 namespace EasyChat.Models;
 
+[SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
 public class Config
 {
     public General GeneralConf { get; set; } = new();

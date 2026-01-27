@@ -4,9 +4,8 @@ using EasyChat.Models;
 using EasyChat.Services.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using SukiUI.Toasts;
-// Added for Screens
 
-namespace EasyChat;
+namespace EasyChat.Common;
 
 public static class Global
 {

@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Avalonia;
@@ -6,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using EasyChat.Common;
 using EasyChat.Services.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -133,6 +133,7 @@ public partial class ResultView : Window
 
     private Screen? GetScreen()
     {
+        if (Global.Screens == null) return null;
         foreach (var screen in Global.Screens.All)
             if (screen.Bounds.Contains(new PixelPoint(Position.X, Position.Y)))
                 return screen;
@@ -174,7 +175,7 @@ public partial class ResultView : Window
 
     public void CloseAfterDelay(int milliseconds)
     {
-        Dispatcher.UIThread.Post(async () =>
+        Dispatcher.UIThread.Post(async void () =>
         {
             await Task.Delay(milliseconds);
             Close();

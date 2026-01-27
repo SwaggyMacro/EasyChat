@@ -1895,6 +1895,61 @@ namespace EasyChat.Lang
                 return ResourceManager.GetString("FontFamily", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Sentences Per Line.
+        /// </summary>
+        public static string Speech_MaxSentencesPerLine
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_MaxSentencesPerLine", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Display Mode.
+        /// </summary>
+        public static string Speech_DisplayMode
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_DisplayMode", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Segmented.
+        /// </summary>
+        public static string Speech_DisplayMode_Segmented
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_DisplayMode_Segmented", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Auto Scroll.
+        /// </summary>
+        public static string Speech_DisplayMode_AutoScroll
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_DisplayMode_AutoScroll", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Max Visible Lines.
+        /// </summary>
+        public static string Speech_MaxHistory
+        {
+            get
+            {
+                return ResourceManager.GetString("Speech_MaxHistory", resourceCulture);
+            }
+        }
     }
 
 }

@@ -39,9 +39,11 @@ public class GoogleService : ITranslation, IDisposable
         _logger.LogDebug("GoogleService disposed");
     }
 
-    public async Task<string> TranslateAsync(string text, LanguageDefinition source, LanguageDefinition destination, bool showOriginal = false,
+    public async Task<string> TranslateAsync(string text, LanguageDefinition? source, LanguageDefinition? destination, bool showOriginal = false,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(destination);
         _logger.LogDebug("Translation request: {Source} → {Dest}, Length={Length}", source.DisplayName, destination.DisplayName, text.Length);
         
         var src = source.GetCode("Google") ?? source.Id;

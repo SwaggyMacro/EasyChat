@@ -2,14 +2,10 @@ using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using EasyChat.Common;
 using EasyChat.ViewModels;
 using SukiUI.Controls;
-using SukiUI.Enums;
 using SukiUI.Models;
-
-// Added for Global
-
-using EasyChat.Common;
 using EasyChat.Services.Abstractions;
 using EasyChat.ViewModels.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,14 +40,6 @@ public partial class MainWindow : SukiWindow
         IsTitleBarVisible = WindowState != WindowState.FullScreen;
     }
 
-    private void BackgroundMenuItem_OnClick(object? sender, RoutedEventArgs e)
-    {
-        if (DataContext is not MainWindowViewModel vm) return;
-        if (e.Source is not MenuItem mItem) return;
-        if (mItem.DataContext is not SukiBackgroundStyle cStyle) return;
-        vm.BackgroundStyle = cStyle;
-    }
-
     public bool IsExiting { get; set; }
 
     protected override void OnClosing(WindowClosingEventArgs e)
@@ -60,9 +48,9 @@ public partial class MainWindow : SukiWindow
 
         if (IsExiting) return;
 
-        var configService = Global.Services.GetRequiredService<IConfigurationService>();
+        var configService = Global.Services?.GetRequiredService<IConfigurationService>();
         
-        switch (configService.General.ClosingBehavior)
+        switch (configService?.General?.ClosingBehavior)
         {
             case Models.Configuration.WindowClosingBehavior.ExitApp:
                 // Let it close
@@ -72,16 +60,15 @@ public partial class MainWindow : SukiWindow
                 e.Cancel = true;
                 Hide();
                 return;
-                
-            case Models.Configuration.WindowClosingBehavior.Ask:
+
             default:
                 e.Cancel = true;
-                ShowCloseBehaviorDialog(configService);
+                ShowCloseBehaviorDialog();
                 break;
         }
     }
 
-    private void ShowCloseBehaviorDialog(IConfigurationService configService)
+    private void ShowCloseBehaviorDialog()
     {
         var dialogManager = Global.Services?.GetRequiredService<ISukiDialogManager>();
         

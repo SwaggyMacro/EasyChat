@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
 using EasyChat.Lang;
@@ -12,29 +13,20 @@ using SukiUI.Dialogs;
 
 namespace EasyChat.ViewModels.Dialogs;
 
+[SuppressMessage("ReSharper", "PrivateFieldCanBeConvertedToLocalVariable")]
 public class ShortcutEditDialogViewModel : ViewModelBase
 {
     private readonly ISukiDialog _dialog;
     private readonly ShortcutEntry? _existingEntry;
     private readonly IConfigurationService _configurationService;
 
-    private bool _isRecording;
-
-    private string _keyCombination = "";
-
-    private string _parameter = "";
-
-    private IShortcutActionDefinition _selectedAction = ShortcutActionDefinition.AvailableActions.First();
-
-    private IEnumerable<string>? _availableParameterOptions;
-
     public class EngineOption
     {
-        public string Name { get; set; }
-        public string Id { get; set; }
+        public string? Name { get; set; }
+        public string? Id { get; set; }
         public bool IsMachine { get; set; }
 
-        public override string ToString() => Name;
+        public override string? ToString() => Name;
         
         public override bool Equals(object? obj)
         {
@@ -47,26 +39,26 @@ public class ShortcutEditDialogViewModel : ViewModelBase
 
         public override int GetHashCode()
         {
-            return Id.GetHashCode();
+            // ReSharper disable once NonReadonlyMemberInGetHashCode
+            return Id!.GetHashCode();
         }
     }
 
-    public bool IsComplexSwitchAction => SelectedAction?.ActionType == "SwitchEngineSourceTarget";
+    public bool IsComplexSwitchAction => SelectedAction.ActionType == "SwitchEngineSourceTarget";
 
     private EngineOption? _selectedEngineOption;
-    private LanguageDefinition _selectedSourceLang;
-    private LanguageDefinition _selectedTargetLang;
-    private List<LanguageDefinition> _availableLanguages;
+    private LanguageDefinition? _selectedSourceLang;
+    private LanguageDefinition? _selectedTargetLang;
 
     public List<EngineOption> AvailableEngineOptions { get; }
 
-    public List<LanguageDefinition> AvailableLanguages
+    public List<LanguageDefinition>? AvailableLanguages
     {
-        get => _availableLanguages;
-        set => this.RaiseAndSetIfChanged(ref _availableLanguages, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    public EngineOption SelectedEngineOption
+    public EngineOption? SelectedEngineOption
     {
         get => _selectedEngineOption;
         set
@@ -76,22 +68,16 @@ public class ShortcutEditDialogViewModel : ViewModelBase
         }
     }
 
-    public LanguageDefinition SelectedSourceLang
+    public LanguageDefinition? SelectedSourceLang
     {
         get => _selectedSourceLang;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _selectedSourceLang, value);
-        }
+        set => this.RaiseAndSetIfChanged(ref _selectedSourceLang, value);
     }
 
-    public LanguageDefinition SelectedTargetLang
+    public LanguageDefinition? SelectedTargetLang
     {
         get => _selectedTargetLang;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _selectedTargetLang, value);
-        }
+        set => this.RaiseAndSetIfChanged(ref _selectedTargetLang, value);
     }
 
     public ShortcutEditDialogViewModel(ISukiDialog dialog, IConfigurationService configurationService, string[] allowedActionTypes, ShortcutEntry? existingEntry = null)
@@ -104,7 +90,7 @@ public class ShortcutEditDialogViewModel : ViewModelBase
             .Where(a => allowedActionTypes.Contains(a.ActionType))
             .ToArray();
 
-        AvailableEngineOptions = new List<EngineOption>();
+        AvailableEngineOptions = [];
         
         // Add Machine Engines
         foreach (var provider in MachineTrans.SupportedProviders)
@@ -127,8 +113,8 @@ public class ShortcutEditDialogViewModel : ViewModelBase
         // Initialize languages based on default engine
         UpdateAvailableLanguages();
         
-        _selectedSourceLang = AvailableLanguages.FirstOrDefault(l => l.Id == "auto") ?? AvailableLanguages.FirstOrDefault();
-        _selectedTargetLang = AvailableLanguages.FirstOrDefault(l => l.Id == "zh-Hans") ?? AvailableLanguages.FirstOrDefault();
+        _selectedSourceLang = AvailableLanguages?.FirstOrDefault(l => l.Id == "auto") ?? AvailableLanguages?.FirstOrDefault();
+        _selectedTargetLang = AvailableLanguages?.FirstOrDefault(l => l.Id == "zh-Hans") ?? AvailableLanguages?.FirstOrDefault();
 
         // Ensure we have at least one action if possible, or matches existing
         if (existingEntry != null)
@@ -158,13 +144,13 @@ public class ShortcutEditDialogViewModel : ViewModelBase
 
                 if (param.Source != null)
                 {
-                    var src = AvailableLanguages.FirstOrDefault(l => l.Id == param.Source.Id);
+                    var src = AvailableLanguages?.FirstOrDefault(l => l.Id == param.Source.Id);
                     if (src != null) _selectedSourceLang = src;
                 }
 
                 if (param.Target != null)
                 {
-                    var tgt = AvailableLanguages.FirstOrDefault(l => l.Id == param.Target.Id);
+                    var tgt = AvailableLanguages?.FirstOrDefault(l => l.Id == param.Target.Id);
                     if (tgt != null) _selectedTargetLang = tgt;
                 }
             }
@@ -231,42 +217,42 @@ public class ShortcutEditDialogViewModel : ViewModelBase
 
     public IShortcutActionDefinition SelectedAction
     {
-        get => _selectedAction;
+        get;
         set
         {
-            this.RaiseAndSetIfChanged(ref _selectedAction, value);
+            this.RaiseAndSetIfChanged(ref field, value);
             this.RaisePropertyChanged(nameof(IsComplexSwitchAction));
             UpdateAvailableParameterOptions();
-            
+
             if (_existingEntry == null || _existingEntry.ActionType != value.ActionType)
             {
                 Parameter = "";
             }
         }
-    }
+    } = ShortcutActionDefinition.AvailableActions.First();
 
     public string Parameter
     {
-        get => _parameter;
-        set => this.RaiseAndSetIfChanged(ref _parameter, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "";
 
     public IEnumerable<string>? AvailableParameterOptions
     {
-        get => _availableParameterOptions;
-        set => this.RaiseAndSetIfChanged(ref _availableParameterOptions, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public string KeyCombination
     {
-        get => _keyCombination;
-        set => this.RaiseAndSetIfChanged(ref _keyCombination, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "";
 
     public bool IsRecording
     {
-        get => _isRecording;
-        set => this.RaiseAndSetIfChanged(ref _isRecording, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public IShortcutActionDefinition[] AvailableActions { get; }
@@ -316,7 +302,7 @@ public class ShortcutEditDialogViewModel : ViewModelBase
 
     private void UpdateAvailableLanguages()
     {
-        var allLanguages = Services.Languages.LanguageService.GetAllLanguages();
+        var allLanguages = LanguageService.GetAllLanguages();
 
         // Safe check for null
         if (SelectedEngineOption == null)
@@ -328,7 +314,7 @@ public class ShortcutEditDialogViewModel : ViewModelBase
         if (SelectedEngineOption.IsMachine)
         {
             AvailableLanguages = allLanguages
-                .Where(l => l.Id == "auto" || !string.IsNullOrEmpty(l.GetCode(SelectedEngineOption.Id)))
+                .Where(l => SelectedEngineOption.Id != null && (l.Id == "auto" || !string.IsNullOrEmpty(l.GetCode(SelectedEngineOption.Id))))
                 .ToList();
         }
         else

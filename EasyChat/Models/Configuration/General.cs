@@ -8,86 +8,71 @@ namespace EasyChat.Models.Configuration;
 [JsonObject(MemberSerialization.OptIn)]
 public class General : ReactiveObject
 {
-    private string _language = "English";
-    private WindowClosingBehavior _closingBehavior = WindowClosingBehavior.Ask;
-
-    private string _transEngine = Constant.TransEngineType.Ai;
-
-    private string _usingAiModel = "OpenAI";
-    private string? _usingAiModelId;
-
-    private string _usingMachineTrans = "Baidu";
-
-    private LanguageDefinition _sourceLanguage = LanguageService.GetLanguage("auto");
-    private LanguageDefinition _targetLanguage = LanguageService.GetLanguage("zh-Hans");
-
     [JsonProperty]
     public LanguageDefinition SourceLanguage
     {
-        get => _sourceLanguage;
-        set => this.RaiseAndSetIfChanged(ref _sourceLanguage, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = LanguageService.GetLanguage("auto");
 
     [JsonProperty]
     public LanguageDefinition TargetLanguage
     {
-        get => _targetLanguage;
-        set => this.RaiseAndSetIfChanged(ref _targetLanguage, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = LanguageService.GetLanguage("zh-Hans");
 
 
     [JsonProperty]
-    public string Language
+    public string? Language
     {
-        get => _language ?? "English";
-        set => this.RaiseAndSetIfChanged(ref _language, value ?? "English");
-    }
+        get => field ?? "English";
+        set => this.RaiseAndSetIfChanged(ref field, value ?? "English");
+    } = "English";
 
     [JsonProperty]
     public WindowClosingBehavior ClosingBehavior
     {
-        get => _closingBehavior;
-        set => this.RaiseAndSetIfChanged(ref _closingBehavior, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = WindowClosingBehavior.Ask;
 
     [JsonProperty]
-    public string TransEngine
+    public string? TransEngine
     {
-        get => _transEngine ?? "AiModel";
+        get => field ?? "AiModel";
         set
         {
             var newValue = value ?? "AiModel";
-            this.RaiseAndSetIfChanged(ref _transEngine, newValue);
+            this.RaiseAndSetIfChanged(ref field, newValue);
         }
-    }
+    } = Constant.TransEngineType.Ai;
 
     [JsonProperty]
-    public string UsingAiModel
+    public string? UsingAiModel
     {
-        get => _usingAiModel ?? "OpenAI";
-        set => this.RaiseAndSetIfChanged(ref _usingAiModel, value ?? "OpenAI");
-    }
+        get => field ?? "OpenAI";
+        set => this.RaiseAndSetIfChanged(ref field, value ?? "OpenAI");
+    } = "OpenAI";
 
     [JsonProperty]
     public string? UsingAiModelId
     {
-        get => _usingAiModelId;
-        set => this.RaiseAndSetIfChanged(ref _usingAiModelId, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     [JsonProperty]
-    public string UsingMachineTransId
+    public string? UsingMachineTransId
     {
-        get => _usingMachineTransId;
-        set => this.RaiseAndSetIfChanged(ref _usingMachineTransId, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
-
-    private string? _usingMachineTransId;
 
     [JsonProperty]
-    public string UsingMachineTrans
+    public string? UsingMachineTrans
     {
-        get => _usingMachineTrans ?? "Baidu";
-        set => this.RaiseAndSetIfChanged(ref _usingMachineTrans, value ?? "Baidu");
-    }
+        get => field ?? "Baidu";
+        set => this.RaiseAndSetIfChanged(ref field, value ?? "Baidu");
+    } = "Baidu";
 }

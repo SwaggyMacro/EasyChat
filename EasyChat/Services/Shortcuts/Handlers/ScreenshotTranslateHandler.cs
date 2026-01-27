@@ -76,7 +76,7 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
         // Screenshot captured successfully, allow new captures immediately
         _isExecuting = false;
         
-        var sourceLang = _configurationService.General.SourceLanguage;
+        var sourceLang = _configurationService.General?.SourceLanguage;
         var ocrLanguage = _mapper.Map<OcrLanguage?>(sourceLang?.Id ?? LanguageKeys.ChineseSimplifiedId);
         
         // Log OCR start
@@ -87,10 +87,10 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
         {
             try
             {
-                var ocrResult = _ocrService.RecognizeText(bitmap, ocrLanguage) ?? string.Empty;
+                var ocrResult = _ocrService.RecognizeText(bitmap, ocrLanguage);
                 _logger.LogDebug("OCR Result Length: {Length}", ocrResult.Length);
                 
-                Dispatcher.UIThread.Post(() => ProcessOcrResult(ocrResult, bitmap));
+                Dispatcher.UIThread.Post(() => ProcessOcrResult(ocrResult));
             }
             catch (Exception ex)
             {
@@ -100,18 +100,18 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
         });
     }
     
-    private void ProcessOcrResult(string ocrResult, Avalonia.Media.Imaging.Bitmap bitmap)
+    private void ProcessOcrResult(string ocrResult)
     {
         try
         {
             var translator = _translationServiceFactory.CreateCurrentService();
             var resultWindow = new ResultView();
-            var fontSize = _configurationService.Result.FontSize;
-            resultWindow.SetFontSize(fontSize);
+            var fontSize = _configurationService.Result?.FontSize;
+            resultWindow.SetFontSize(fontSize ?? 14);
             var isWindowClosed = false;
             
             resultWindow.ShowLoading(); // Show loading initially
-            resultWindow.Closed += (s, e) => isWindowClosed = true;
+            resultWindow.Closed += (_, _) => isWindowClosed = true;
             resultWindow.Show();
 
             Task.Run(async () => await TranslateAndDisplayAsync(
@@ -132,8 +132,8 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
     {
         try
         {
-            var sourceLang = _configurationService.General.SourceLanguage;
-            var targetLang = _configurationService.General.TargetLanguage;
+            var sourceLang = _configurationService.General?.SourceLanguage;
+            var targetLang = _configurationService.General?.TargetLanguage;
 
             _logger.LogInformation("Starting translation: {Source} -> {Target}", sourceLang?.Id, targetLang?.Id);
 
@@ -149,15 +149,15 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
             // Auto-close after configured delay
             if (!isClosedCheck())
             {
-                var delay = _configurationService.Result.AutoCloseDelay;
-                if (_configurationService.Result.EnableAutoReadDelay)
+                var delay = _configurationService.Result?.AutoCloseDelay;
+                if (_configurationService.Result is { EnableAutoReadDelay: true })
                 {
                     var length = text.Length;
                     var msPerChar = _configurationService.Result.MsPerChar;
                     delay = Math.Max(2000, length * msPerChar); // Minimum 2 seconds
                 }
                 
-                resultWindow.CloseAfterDelay(delay);
+                resultWindow.CloseAfterDelay(delay ?? 5);
             }
         }
         catch (Exception ex)

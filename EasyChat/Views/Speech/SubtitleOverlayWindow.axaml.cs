@@ -1,14 +1,16 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 using EasyChat.ViewModels.Pages;
+using EasyChat.Models.Configuration;
 using ReactiveUI;
 
 namespace EasyChat.Views.Speech;
 
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public partial class SubtitleOverlayWindow : Window
 {
     public SubtitleOverlayWindow()
@@ -35,7 +37,7 @@ public partial class SubtitleOverlayWindow : Window
 
     // Smart Ghost Mode Logic
     private Avalonia.Threading.DispatcherTimer? _hitTestTimer;
-    private bool _isTransparent = false;
+    private bool _isTransparent;
 
     protected override void OnOpened(EventArgs e)
     {
@@ -86,6 +88,35 @@ public partial class SubtitleOverlayWindow : Window
             orientObservable.Subscribe(orientation =>
             {
                 UpdateOrientation(orientation);
+            });
+            
+            // Auto Scroll Logic
+            vm.FloatingSubtitles.CollectionChanged += async (s, args) => 
+            {
+                if (vm.FloatingDisplayMode == FloatingDisplayMode.AutoScroll) // Auto Scroll
+                {
+                    // Delay slightly to ensure ItemControl has materialized the new container and updated layout
+                    await System.Threading.Tasks.Task.Delay(50);
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() => 
+                    {
+                        var scroll = this.FindControl<ScrollViewer>("SubtitlesScrollViewer");
+                        scroll?.ScrollToEnd();
+                    }, Avalonia.Threading.DispatcherPriority.Background);
+                }
+            };
+            
+            // Trigger scroll when switching to AutoScroll
+            vm.WhenAnyValue(x => x.FloatingDisplayMode).Subscribe(async mode => 
+            {
+                if (mode == FloatingDisplayMode.AutoScroll)
+                {
+                    await System.Threading.Tasks.Task.Delay(50);
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() => 
+                    {
+                        var scroll = this.FindControl<ScrollViewer>("SubtitlesScrollViewer");
+                        scroll?.ScrollToEnd();
+                    }, Avalonia.Threading.DispatcherPriority.Background);
+                }
             });
         }
     }

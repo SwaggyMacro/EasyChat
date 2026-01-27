@@ -1,11 +1,9 @@
 using System.Linq;
 using Avalonia.Threading;
-using EasyChat.Common;
 using EasyChat.Constants;
 using EasyChat.Models.Configuration;
 using EasyChat.Services.Abstractions;
 using EasyChat.Services.Languages;
-using EasyChat.Services.Translation.Machine;
 using SukiUI.Toasts;
 
 namespace EasyChat.Services.Shortcuts.Handlers;
@@ -56,7 +54,7 @@ public class SwitchEngineHandler : IShortcutActionHandler
         // 1. Try to find by ID first (if provided)
         if (!string.IsNullOrEmpty(engineId))
         {
-            var aiModelById = _configurationService.AiModel.ConfiguredModels
+            var aiModelById = _configurationService.AiModel?.ConfiguredModels
                 .FirstOrDefault(x => x.Id == engineId);
             if (aiModelById != null)
             {
@@ -79,7 +77,7 @@ public class SwitchEngineHandler : IShortcutActionHandler
             return;
         }
 
-        var aiModelByName = _configurationService.AiModel.ConfiguredModels
+        var aiModelByName = _configurationService.AiModel?.ConfiguredModels
             .FirstOrDefault(x => x.Name == engineName);
         if (aiModelByName != null)
         {
@@ -103,12 +101,15 @@ public class SwitchEngineHandler : IShortcutActionHandler
 
         // Set specific engine FIRST, then engine type.
         // This ensures proper state even if TransEngine value doesn't change (RaiseAndSetIfChanged optimization).
-        // Also clear AI-related settings to avoid state confusion.
-        _configurationService.General.UsingAiModelId = null;
-        _configurationService.General.UsingMachineTrans = providerName;
-        _configurationService.General.SourceLanguage = source;
-        _configurationService.General.TargetLanguage = target;
-        _configurationService.General.TransEngine = Constant.TransEngineType.Machine;
+
+        if (_configurationService.General != null)
+        {
+
+            _configurationService.General.UsingMachineTrans = providerName;
+            _configurationService.General.SourceLanguage = source;
+            _configurationService.General.TargetLanguage = target;
+            _configurationService.General.TransEngine = Constant.TransEngineType.Machine;
+        }
 
         ShowSuccess($"Switched to {providerName} (Machine)\nSource: {source.DisplayName}\nTarget: {target.DisplayName}");
     }
@@ -117,11 +118,14 @@ public class SwitchEngineHandler : IShortcutActionHandler
     {
         // Set specific engine FIRST, then engine type.
         // This ensures proper state even if TransEngine value doesn't change (RaiseAndSetIfChanged optimization).
-        _configurationService.General.UsingAiModel = model.Name;
-        _configurationService.General.UsingAiModelId = model.Id;
-        _configurationService.General.SourceLanguage = source;
-        _configurationService.General.TargetLanguage = target;
-        _configurationService.General.TransEngine = Constant.TransEngineType.Ai;
+        if (_configurationService.General != null)
+        {
+            _configurationService.General.UsingAiModel = model.Name;
+            _configurationService.General.UsingAiModelId = model.Id;
+            _configurationService.General.SourceLanguage = source;
+            _configurationService.General.TargetLanguage = target;
+            _configurationService.General.TransEngine = Constant.TransEngineType.Ai;
+        }
 
         ShowSuccess($"Switched to {model.Name} (AI)\nSource: {source.DisplayName}\nTarget: {target.DisplayName}");
     }

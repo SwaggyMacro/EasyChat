@@ -9,7 +9,8 @@ using EasyChat.Services.Abstractions;
 using EasyChat.Services.Languages;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks; // Added
+using System.Threading.Tasks;
+using EasyChat.Models.Configuration;
 using EasyChat.Services.Translation;
 using EasyChat.Services.Speech;
 using Material.Icons;
@@ -24,28 +25,25 @@ namespace EasyChat.ViewModels.Pages;
 public class SpeechRecognitionViewModel : Page
 {
     private readonly IConfigurationService _configurationService;    // Services
-    private readonly ISpeechRecognitionService _speechRecognitionService; // Renamed
+    private readonly ISpeechRecognitionService _speechRecognitionService; 
     private readonly ITranslationServiceFactory _translationServiceFactory;
     private readonly IProcessService _processService;
     private readonly ILogger<SpeechRecognitionViewModel> _logger;
-    // Removed _snackbar (unused)
 
     // Translation State
-    private readonly object _translationLock = new();
+    private readonly Lock _translationLock = new();
     private readonly Dictionary<SubtitleItem, string> _latestTextForItem = new();
     private readonly Dictionary<SubtitleItem, Task> _activeItemLoops = new();
     private readonly Dictionary<SubtitleItem, CancellationTokenSource> _activeItemCts = new();
     private readonly HashSet<SubtitleItem> _isProcessingStableForItem = new();
     
     // Config
-    private bool _isRecording;
-    private bool _isTranslationEnabled;
-    private bool _isRealTimePreviewEnabled;
     private SubtitleItem? _currentSubtitleItem;
-    private CancellationTokenSource? _recordingCts;
     // Renamed _currentlyProcessingItem to local if needed, but here we just removed it
-    
-    private SubtitleItem? _currentSubtitleItem_DuplicateRemover; // Placeholder to avoid error if I miss one? No.
+
+    // New logic for grouping sentences
+    private int _sentencesInCurrentItem;
+    private StringBuilder _committedTextForCurrentItem = new();
 
 
     // Reuse helper class or define locally if internal
@@ -57,10 +55,13 @@ public class SpeechRecognitionViewModel : Page
         public override string ToString() => Name;
         
         public override bool Equals(object? obj) => obj is EngineOption other && Id == other.Id;
+        // ReSharper disable once NonReadonlyMemberInGetHashCode
         public override int GetHashCode() => Id.GetHashCode();
     }
-
-    // ProcessInfo Removed (using EasyChat.Models.ProcessInfo)
+    
+    private readonly SubtitleProcessor _subtitleProcessor = new();
+    
+    private List<SubtitleItem> _temporarySubtitleItems = new();
 
     public bool IsSupported => OperatingSystem.IsWindows();
     public bool IsNotSupported => !IsSupported;
@@ -78,7 +79,7 @@ public class SpeechRecognitionViewModel : Page
         _speechRecognitionService = speechRecognitionService;
         _processService = processService;
         _logger = logger;
-        
+
         // Initialize defaults
         _selectedEngineOption = null!;
         _selectedTargetLanguage = null!;
@@ -128,99 +129,136 @@ public class SpeechRecognitionViewModel : Page
             // Initialize Models/Engines
             LoadRecognitionModels();
             LoadEngineOptions();
+            LoadAvailableFonts();
             
             // Load Configuration
             var config = _configurationService.SpeechRecognition;
-            IsTranslationEnabled = config.IsTranslationEnabled;
-            IsRealTimePreviewEnabled = config.IsRealTimePreviewEnabled;
-            
-            // Initialize Selection from Config or Defaults
-            if (!string.IsNullOrEmpty(config.RecognitionLanguage) && RecognitionLanguages.Contains(config.RecognitionLanguage))
+            if (config != null)
             {
-                _selectedRecognitionLanguage = config.RecognitionLanguage;
-                this.RaisePropertyChanged(nameof(SelectedRecognitionLanguage));
-            }
-    
-            // Engine
-            if (!string.IsNullOrEmpty(config.EngineId))
-            {
-                var savedEngine = EngineOptions.FirstOrDefault(e => e.Id == config.EngineId && 
-                                                                    ((config.EngineType == 0 && e.IsMachine) || (config.EngineType == 1 && !e.IsMachine)));
-                if (savedEngine != null) _selectedEngineOption = savedEngine;
-                else _selectedEngineOption = EngineOptions.FirstOrDefault(e => e.Id == "Baidu") ?? EngineOptions.FirstOrDefault()!;
-            }
-            else
-            {
-                _selectedEngineOption = EngineOptions.FirstOrDefault(e => e.Id == "Baidu") ?? EngineOptions.FirstOrDefault()!;
-            }
-    
-            // Initialize Target Languages based on Engine
-            UpdateAvailableTargetLanguages();
-    
-            // Target Language
-            if (!string.IsNullOrEmpty(config.TargetLanguage))
-            {
-                var savedTarget = TargetLanguages.FirstOrDefault(l => l.Id == config.TargetLanguage);
-                if (savedTarget != null) _selectedTargetLanguage = savedTarget;
-                else _selectedTargetLanguage = TargetLanguages.FirstOrDefault()!;
-            }
-            else
-            {
-                 _selectedTargetLanguage = TargetLanguages.FirstOrDefault()!;
-            }
-            
-            // Setup Persistence
-            this.WhenAnyValue(x => x.IsTranslationEnabled).Subscribe(v => config.IsTranslationEnabled = v);
-            this.WhenAnyValue(x => x.IsRealTimePreviewEnabled).Subscribe(v => config.IsRealTimePreviewEnabled = v);
-            this.WhenAnyValue(x => x.SelectedRecognitionLanguage).Subscribe(v => config.RecognitionLanguage = v);
-            this.WhenAnyValue(x => x.SelectedEngineOption).Where(x => x != null).Subscribe(v => 
-            {
-                config.EngineId = v!.Id;
-                config.EngineType = v.IsMachine ? 0 : 1;
-            });
-            this.WhenAnyValue(x => x.SelectedTargetLanguage).Where(x => x != null).Subscribe(v => config.TargetLanguage = v!.Id);
-            
-            // Initialize Floating Config
-            // Initialize Floating Config
-            MainSubtitleSource = config.MainSubtitleSource;
-            PrimaryFontSize = config.PrimaryFontSize;
-            PrimaryFontFamily = config.PrimaryFontFamily;
-            PrimaryFontColor = config.PrimaryFontColor;
+                IsTranslationEnabled = config.IsTranslationEnabled;
+                IsRealTimePreviewEnabled = config.IsRealTimePreviewEnabled;
 
-            SecondarySubtitleSource = config.SecondarySubtitleSource;
-            SecondaryFontSize = config.SecondaryFontSize;
-            SecondaryFontFamily = config.SecondaryFontFamily;
-            SecondaryFontColor = config.SecondaryFontColor;
-            
-            BackgroundColor = config.BackgroundColor;
-            SubtitleBackgroundColor = config.SubtitleBackgroundColor;
-            WindowOpacity = config.WindowOpacity;
-            IsFloatingWindowLocked = config.IsFloatingWindowLocked;
-            FloatingWindowOrientation = config.FloatingWindowOrientation;
+                // Initialize Selection from Config or Defaults
+                if (!string.IsNullOrEmpty(config.RecognitionLanguage) &&
+                    RecognitionLanguages.Contains(config.RecognitionLanguage))
+                {
+                    _selectedRecognitionLanguage = config.RecognitionLanguage;
+                    this.RaisePropertyChanged(nameof(SelectedRecognitionLanguage));
+                }
 
-            // Sync Floating Config
-            this.WhenAnyValue(x => x.MainSubtitleSource).Subscribe(v => config.MainSubtitleSource = v);
-            this.WhenAnyValue(x => x.PrimaryFontSize).Subscribe(v => config.PrimaryFontSize = v);
-            this.WhenAnyValue(x => x.PrimaryFontFamily).Subscribe(v => config.PrimaryFontFamily = v);
-            this.WhenAnyValue(x => x.PrimaryFontColor).Subscribe(v => config.PrimaryFontColor = v);
+                // Engine
+                if (!string.IsNullOrEmpty(config.EngineId))
+                {
+                    var savedEngine = EngineOptions.FirstOrDefault(e => e.Id == config.EngineId &&
+                                                                        ((config.EngineType == 0 && e.IsMachine) ||
+                                                                         (config.EngineType == 1 && !e.IsMachine)));
+                    if (savedEngine != null) _selectedEngineOption = savedEngine;
+                    else
+                        _selectedEngineOption = EngineOptions.FirstOrDefault(e => e.Id == "Baidu") ??
+                                                EngineOptions.FirstOrDefault()!;
+                }
+                else
+                {
+                    _selectedEngineOption = EngineOptions.FirstOrDefault(e => e.Id == "Baidu") ??
+                                            EngineOptions.FirstOrDefault()!;
+                }
 
-            this.WhenAnyValue(x => x.SecondarySubtitleSource).Subscribe(v => config.SecondarySubtitleSource = v);
-            this.WhenAnyValue(x => x.SecondaryFontSize).Subscribe(v => config.SecondaryFontSize = v);
-            this.WhenAnyValue(x => x.SecondaryFontFamily).Subscribe(v => config.SecondaryFontFamily = v);
-            this.WhenAnyValue(x => x.SecondaryFontColor).Subscribe(v => config.SecondaryFontColor = v);
+                // Initialize Target Languages based on Engine
+                UpdateAvailableTargetLanguages();
 
-            this.WhenAnyValue(x => x.BackgroundColor).Subscribe(v => config.BackgroundColor = v);
-            this.WhenAnyValue(x => x.SubtitleBackgroundColor).Subscribe(v => config.SubtitleBackgroundColor = v);
-            this.WhenAnyValue(x => x.WindowOpacity).Subscribe(v => config.WindowOpacity = v);
-            this.WhenAnyValue(x => x.IsFloatingWindowLocked).Subscribe(v => config.IsFloatingWindowLocked = v);
-            this.WhenAnyValue(x => x.FloatingWindowOrientation).Subscribe(v => config.FloatingWindowOrientation = v);
-            
+                // Target Language
+                if (!string.IsNullOrEmpty(config.TargetLanguage))
+                {
+                    var savedTarget = TargetLanguages.FirstOrDefault(l => l.Id == config.TargetLanguage);
+                    if (savedTarget != null) _selectedTargetLanguage = savedTarget;
+                    else _selectedTargetLanguage = TargetLanguages.FirstOrDefault()!;
+                }
+                else
+                {
+                    _selectedTargetLanguage = TargetLanguages.FirstOrDefault()!;
+                }
+
+                // Setup Persistence
+                this.WhenAnyValue(x => x.IsTranslationEnabled).Subscribe(v => config.IsTranslationEnabled = v);
+                this.WhenAnyValue(x => x.IsRealTimePreviewEnabled).Subscribe(v => config.IsRealTimePreviewEnabled = v);
+                this.WhenAnyValue(x => x.SelectedRecognitionLanguage).Subscribe(v => config.RecognitionLanguage = v);
+                this.WhenAnyValue(x => x.SelectedEngineOption).Where(x => x != null).Subscribe(v =>
+                {
+                    if (v == null) return;
+                    config.EngineId = v.Id;
+                    config.EngineType = v.IsMachine ? 0 : 1;
+                });
+                this.WhenAnyValue(x => x.SelectedTargetLanguage).Where(x => x != null)
+                    .Subscribe(v => config.TargetLanguage = v!.Id);
+                
+                // Initialize Floating Config
+                MainSubtitleSource = config.MainSubtitleSource;
+                PrimaryFontSize = config.PrimaryFontSize;
+                PrimaryFontFamily = config.PrimaryFontFamily;
+                PrimaryFontColor = config.PrimaryFontColor;
+
+                SecondarySubtitleSource = config.SecondarySubtitleSource;
+                SecondaryFontSize = config.SecondaryFontSize;
+                SecondaryFontFamily = config.SecondaryFontFamily;
+                SecondaryFontColor = config.SecondaryFontColor;
+
+                BackgroundColor = config.BackgroundColor;
+                SubtitleBackgroundColor = config.SubtitleBackgroundColor;
+                WindowOpacity = config.WindowOpacity;
+                IsFloatingWindowLocked = config.IsFloatingWindowLocked;
+                FloatingWindowOrientation = config.FloatingWindowOrientation;
+
+                // Sync Floating Config
+                this.WhenAnyValue(x => x.MainSubtitleSource).Subscribe(v => config.MainSubtitleSource = v);
+                this.WhenAnyValue(x => x.PrimaryFontSize).Subscribe(v => config.PrimaryFontSize = v);
+                this.WhenAnyValue(x => x.PrimaryFontFamily).Subscribe(v => config.PrimaryFontFamily = v);
+                this.WhenAnyValue(x => x.PrimaryFontColor).Subscribe(v => config.PrimaryFontColor = v);
+
+                this.WhenAnyValue(x => x.SecondarySubtitleSource).Subscribe(v => config.SecondarySubtitleSource = v);
+                this.WhenAnyValue(x => x.SecondaryFontSize).Subscribe(v => config.SecondaryFontSize = v);
+                this.WhenAnyValue(x => x.SecondaryFontFamily).Subscribe(v => config.SecondaryFontFamily = v);
+                this.WhenAnyValue(x => x.SecondaryFontColor).Subscribe(v => config.SecondaryFontColor = v);
+
+                this.WhenAnyValue(x => x.BackgroundColor).Subscribe(v => config.BackgroundColor = v);
+                this.WhenAnyValue(x => x.SubtitleBackgroundColor).Subscribe(v => config.SubtitleBackgroundColor = v);
+                this.WhenAnyValue(x => x.WindowOpacity).Subscribe(v => config.WindowOpacity = v);
+                this.WhenAnyValue(x => x.IsFloatingWindowLocked).Subscribe(v => config.IsFloatingWindowLocked = v);
+                this.WhenAnyValue(x => x.FloatingWindowOrientation)
+                    .Subscribe(v => config.FloatingWindowOrientation = v);
+
+                // Sync Sentences Per Line (Renamed from Paragraph)
+                MaxSentencesPerLine = config.MaxSentencesPerLine;
+                this.WhenAnyValue(x => x.MaxSentencesPerLine).Subscribe(v => config.MaxSentencesPerLine = v);
+
+                // Sync Display Mode
+                FloatingDisplayMode = config.FloatingDisplayMode;
+                this.WhenAnyValue(x => x.FloatingDisplayMode).Subscribe(v => config.FloatingDisplayMode = v);
+
+                // Sync Max Floating History
+                MaxFloatingHistory = config.MaxFloatingHistory;
+                this.WhenAnyValue(x => x.MaxFloatingHistory).Subscribe(v => config.MaxFloatingHistory = v);
+            }
+
             // Sync initial processes
             _processService.RefreshProcesses();
             
             // Subscribe to Processes changes for Summary update
             Processes.CollectionChanged += Processes_CollectionChanged;
             foreach(var p in Processes) p.PropertyChanged += Process_PropertyChanged;
+            
+            // Subscribe to AI Model config changes to update EngineOptions dynamically
+            if (_configurationService.AiModel?.ConfiguredModels != null)
+            {
+                _configurationService.AiModel.ConfiguredModels.CollectionChanged += (_, _) => 
+                {
+                    // Dispatch to UI thread to be safe, though LoadEngineOptions mostly operates on local lists, 
+                    // setting EngineOptions property raises notification.
+                    Dispatcher.UIThread.Post(() => LoadEngineOptions());
+                };
+                
+                // Also listen to property changes on the models (e.g. name change)? 
+                // For now, adding/removing is the main concern. 
+            }
         }
     }
 
@@ -331,19 +369,25 @@ public class SpeechRecognitionViewModel : Page
                                  ?? TargetLanguages.FirstOrDefault(l => l.Id == "zh-Hans") 
                                  ?? TargetLanguages.FirstOrDefault()!;
     }
+
+    private void LoadAvailableFonts()
+    {
+        var fonts = Avalonia.Media.FontManager.Current.SystemFonts.OrderBy(x => x.Name).Select(x => x.Name);
+        AvailableFonts = new ObservableCollection<string>(fonts);
+    }
     
     // Properties
-    
+
     public bool IsTranslationEnabled
     {
-         get => _isTranslationEnabled;
-         set => this.RaiseAndSetIfChanged(ref _isTranslationEnabled, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public bool IsRealTimePreviewEnabled
     {
-        get => _isRealTimePreviewEnabled;
-        set => this.RaiseAndSetIfChanged(ref _isRealTimePreviewEnabled, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     private string _selectedProcessesSummary = Lang.Resources.Speech_AllSystemAudio;
@@ -367,15 +411,14 @@ public class SpeechRecognitionViewModel : Page
         set => this.RaiseAndSetIfChanged(ref _recognitionLanguages, value);
     }
 
-    private ObservableCollection<EngineOption> _engineOptions = new();
     public ObservableCollection<EngineOption> EngineOptions
     {
-        get => _engineOptions;
-        set => this.RaiseAndSetIfChanged(ref _engineOptions, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = [];
 
-    private EngineOption _selectedEngineOption;
-    public EngineOption SelectedEngineOption
+    private EngineOption? _selectedEngineOption;
+    public EngineOption? SelectedEngineOption
     {
         get => _selectedEngineOption;
         set
@@ -385,133 +428,163 @@ public class SpeechRecognitionViewModel : Page
         }
     }
 
-    private LanguageDefinition _selectedTargetLanguage;
-    public LanguageDefinition SelectedTargetLanguage
+    private LanguageDefinition? _selectedTargetLanguage;
+    public LanguageDefinition? SelectedTargetLanguage
     {
         get => _selectedTargetLanguage;
         set => this.RaiseAndSetIfChanged(ref _selectedTargetLanguage, value);
     }
 
-    private ObservableCollection<LanguageDefinition> _targetLanguages = new();
     public ObservableCollection<LanguageDefinition> TargetLanguages
     {
-        get => _targetLanguages;
-        set => this.RaiseAndSetIfChanged(ref _targetLanguages, value);
-    }
-    
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = [];
+
+    public ObservableCollection<string> AvailableFonts
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = [];
+
     // --- Floating Window Configuration Properties ---
 
-    // Primary
+    public double PrimaryFontSize
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    [field: AllowNull, MaybeNull]
+    public string PrimaryFontFamily
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    [field: AllowNull, MaybeNull]
+    public string PrimaryFontColor
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public double SecondaryFontSize
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    [field: AllowNull, MaybeNull]
+    public string SecondaryFontFamily
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    [field: AllowNull, MaybeNull]
+    public string SecondaryFontColor
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    [field: AllowNull, MaybeNull]
+    public string BackgroundColor
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    [field: AllowNull, MaybeNull]
+    public string SubtitleBackgroundColor
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public double WindowOpacity
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public bool IsFloatingWindowLocked
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    [field: AllowNull, MaybeNull]
+    public string FloatingWindowOrientation
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public int MaxSentencesPerLine
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = 1;
+
+    // 0=Segmented, 1=AutoScroll
+    public FloatingDisplayMode FloatingDisplayMode
+    {
+        get;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref field, value);
+            this.RaisePropertyChanged(nameof(IsSegmentedMode));
+        }
+    } = FloatingDisplayMode.Segmented;
+
+    public bool IsSegmentedMode => FloatingDisplayMode == FloatingDisplayMode.Segmented;
+
+    public int MaxFloatingHistory
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = 2;
+
+    public ObservableCollection<string> OrientationOptions { get; } = ["Horizontal", "Vertical"];
+    public ObservableCollection<KeyValuePair<FloatingDisplayMode, string>> DisplayModeOptions { get; } =
+    [
+        new(FloatingDisplayMode.Segmented, Lang.Resources.Speech_DisplayMode_Segmented),
+        new(FloatingDisplayMode.AutoScroll, Lang.Resources.Speech_DisplayMode_AutoScroll)
+    ];
     
-    private int _mainSubtitleSource;
-    public int MainSubtitleSource
+    // Subtitle Sources Options
+    // 0=Original, 1=Translated (OLD) -> Now using Enum
+    
+    // Main Source
+    private SubtitleSource _mainSubtitleSource = SubtitleSource.Original;
+    public SubtitleSource MainSubtitleSource
     {
         get => _mainSubtitleSource;
         set => this.RaiseAndSetIfChanged(ref _mainSubtitleSource, value);
     }
+    
+    public ObservableCollection<KeyValuePair<SubtitleSource, string>> MainSourceOptions { get; } = new ObservableCollection<KeyValuePair<SubtitleSource, string>> 
+    { 
+        new(SubtitleSource.Original, Lang.Resources.Subtitle_Source_Original), 
+        new(SubtitleSource.Translated, Lang.Resources.Subtitle_Source_Translated) 
+    };
 
-    private double _primaryFontSize;
-    public double PrimaryFontSize
-    {
-        get => _primaryFontSize;
-        set => this.RaiseAndSetIfChanged(ref _primaryFontSize, value);
-    }
-
-    private string _primaryFontFamily;
-    public string PrimaryFontFamily
-    {
-        get => _primaryFontFamily;
-        set => this.RaiseAndSetIfChanged(ref _primaryFontFamily, value);
-    }
-
-    private string _primaryFontColor;
-    public string PrimaryFontColor
-    {
-        get => _primaryFontColor;
-        set => this.RaiseAndSetIfChanged(ref _primaryFontColor, value);
-    }
-
-    // Secondary
-
-    private int _secondarySubtitleSource;
-    public int SecondarySubtitleSource
+    // Secondary Source
+    private SubtitleSource _secondarySubtitleSource = SubtitleSource.Translated;
+    public SubtitleSource SecondarySubtitleSource
     {
         get => _secondarySubtitleSource;
         set => this.RaiseAndSetIfChanged(ref _secondarySubtitleSource, value);
     }
-
-    private double _secondaryFontSize;
-    public double SecondaryFontSize
-    {
-        get => _secondaryFontSize;
-        set => this.RaiseAndSetIfChanged(ref _secondaryFontSize, value);
-    }
-
-    private string _secondaryFontFamily;
-    public string SecondaryFontFamily
-    {
-        get => _secondaryFontFamily;
-        set => this.RaiseAndSetIfChanged(ref _secondaryFontFamily, value);
-    }
-
-    private string _secondaryFontColor;
-    public string SecondaryFontColor
-    {
-        get => _secondaryFontColor;
-        set => this.RaiseAndSetIfChanged(ref _secondaryFontColor, value);
-    }
-
-    private string _backgroundColor;
-    public string BackgroundColor
-    {
-        get => _backgroundColor;
-        set => this.RaiseAndSetIfChanged(ref _backgroundColor, value);
-    }
-
-    private string _subtitleBackgroundColor;
-    public string SubtitleBackgroundColor
-    {
-        get => _subtitleBackgroundColor;
-        set => this.RaiseAndSetIfChanged(ref _subtitleBackgroundColor, value);
-    }
-
-    private double _windowOpacity;
-    public double WindowOpacity
-    {
-        get => _windowOpacity;
-        set => this.RaiseAndSetIfChanged(ref _windowOpacity, value);
-    }
     
-    private bool _isFloatingWindowLocked;
-    public bool IsFloatingWindowLocked
-    {
-        get => _isFloatingWindowLocked;
-        set => this.RaiseAndSetIfChanged(ref _isFloatingWindowLocked, value);
-    }
-
-    private string _floatingWindowOrientation;
-    public string FloatingWindowOrientation
-    {
-        get => _floatingWindowOrientation;
-        set => this.RaiseAndSetIfChanged(ref _floatingWindowOrientation, value);
-    }
-
-    public ObservableCollection<string> OrientationOptions { get; } = new ObservableCollection<string> { "Horizontal", "Vertical" };
-    
-    // Subtitle Sources Options
-    // 0=Original, 1=Translated
-    public ObservableCollection<KeyValuePair<int, string>> MainSourceOptions { get; } = new ObservableCollection<KeyValuePair<int, string>> 
-    { 
-        new(0, Lang.Resources.Subtitle_Source_Original), 
-        new(1, Lang.Resources.Subtitle_Source_Translated) 
-    };
-
     // 0=None, 1=Original, 2=Translated
-    public ObservableCollection<KeyValuePair<int, string>> SecondarySourceOptions { get; } = new ObservableCollection<KeyValuePair<int, string>> 
+    public ObservableCollection<KeyValuePair<SubtitleSource, string>> SecondarySourceOptions { get; } = new ObservableCollection<KeyValuePair<SubtitleSource, string>> 
     { 
-        new(0, Lang.Resources.Subtitle_Source_None), 
-        new(1, Lang.Resources.Subtitle_Source_Original), 
-        new(2, Lang.Resources.Subtitle_Source_Translated) 
+        new(SubtitleSource.None, Lang.Resources.Subtitle_Source_None), 
+        new(SubtitleSource.Original, Lang.Resources.Subtitle_Source_Original), 
+        new(SubtitleSource.Translated, Lang.Resources.Subtitle_Source_Translated) 
     };
 
     
@@ -525,10 +598,10 @@ public class SpeechRecognitionViewModel : Page
 
     public bool IsRecording
     {
-        get => _isRecording;
+        get;
         set
         {
-            this.RaiseAndSetIfChanged(ref _isRecording, value);
+            this.RaiseAndSetIfChanged(ref field, value);
             this.RaisePropertyChanged(nameof(RecordingText));
             this.RaisePropertyChanged(nameof(RecordingIcon));
         }
@@ -592,31 +665,31 @@ public class SpeechRecognitionViewModel : Page
                     
                     // Restore Size and Position
                     var config = _configurationService.SpeechRecognition;
-                    if (config.WindowWidth > 0 && config.WindowHeight > 0)
+                    if (config is { WindowWidth: > 0, WindowHeight: > 0 })
                     {
                         window.Width = config.WindowWidth;
                         window.Height = config.WindowHeight;
                         window.SizeToContent = Avalonia.Controls.SizeToContent.Manual;
                     }
                     
-                    if (config.WindowX >= 0 && config.WindowY >= 0)
+                    if (config is { WindowX: >= 0, WindowY: >= 0 })
                     {
                         window.Position = new Avalonia.PixelPoint((int)config.WindowX, (int)config.WindowY);
                         window.WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.Manual;
                     }
 
                     // Save on Close
-                    window.Closing += (s, e) => {
-                         if (window.WindowState == Avalonia.Controls.WindowState.Normal)
-                         {
-                             config.WindowX = window.Position.X;
-                             config.WindowY = window.Position.Y;
-                             config.WindowWidth = window.Width;
-                             config.WindowHeight = window.Height;
-                         }
+                    window.Closing += (_, _) =>
+                    {
+                        if (window.WindowState != Avalonia.Controls.WindowState.Normal) return;
+                        if (config == null) return;
+                        config.WindowX = window.Position.X;
+                        config.WindowY = window.Position.Y;
+                        config.WindowWidth = window.Width;
+                        config.WindowHeight = window.Height;
                     };
 
-                    window.Closed += (s, e) => {
+                    window.Closed += (_, _) => {
                          _floatingWindow = null;
                          IsFloatingWindowOpen = false;
                     };
@@ -650,7 +723,7 @@ public class SpeechRecognitionViewModel : Page
     }
 
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-    private async System.Threading.Tasks.Task ToggleRecordingAsync()
+    private async Task ToggleRecordingAsync()
     {
         if (IsBusy) return;
 
@@ -662,7 +735,11 @@ public class SpeechRecognitionViewModel : Page
                 // Cancel all active translations
                 foreach (var cts in _activeItemCts.Values)
                 {
-                    try { cts.Cancel(); cts.Dispose(); } catch {}
+                    try { cts.Cancel(); cts.Dispose(); }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
                 _activeItemCts.Clear();
                 _activeItemLoops.Clear();
@@ -681,7 +758,7 @@ public class SpeechRecognitionViewModel : Page
             var lang = SelectedRecognitionLanguage;
             var selectedProcessIds = Processes.Where(p => p.IsSelected).Select(p => p.Id).ToList();
 
-            var config = new SpeechRecognitionConfig
+            var config = new Services.Speech.SpeechRecognitionConfig
             {
                 ModelPath = lang,
                 ProcessIds = selectedProcessIds
@@ -691,7 +768,7 @@ public class SpeechRecognitionViewModel : Page
         }
     }
 
-    private void OnRecognitionResult(int type, string result)
+    private async void OnRecognitionResult(int type, string result)
     {
          if (!Dispatcher.UIThread.CheckAccess())
          {
@@ -701,32 +778,138 @@ public class SpeechRecognitionViewModel : Page
 
          switch (type)
          {
-             case 0: // Final
-                 if (_currentSubtitleItem == null) CreateNewSubtitleItem();
-                 _currentSubtitleItem!.OriginalText = result;
-                
-                 if (IsTranslationEnabled)
-                 {
-                     EnqueueTranslation(_currentSubtitleItem, result);
-                 }
-                
-                 // Update Floating Subtitles (Move current to history if final)
-                 UpdateFloatingSubtitles(_currentSubtitleItem, true);
+             case 100: // Started
+                 IsRecording = true;
+                 FloatingSubtitles.Clear(); // Clear on start
+                 _sentencesInCurrentItem = 0;
+                 _committedTextForCurrentItem.Clear();
+                 _currentSubtitleItem = null;
+                 break;
 
-                 _currentSubtitleItem = null; 
+             case 0: // Final
+                 var segments = _subtitleProcessor.SplitSentences(result);
+                 var segmentList = segments.ToList();
+                 
+                 for (int i = 0; i < segmentList.Count; i++)
+                 {
+                     var segment = segmentList[i];
+                     if (_currentSubtitleItem == null) CreateNewSubtitleItem();
+
+                     // Count sentences
+                     int count = _subtitleProcessor.CountSentences(segment);
+                     if (count == 0 && !string.IsNullOrWhiteSpace(segment)) count = 1;
+
+                     // Append
+                     string separator = _committedTextForCurrentItem.Length > 0 ? " " : "";
+                     _committedTextForCurrentItem.Append(separator + segment);
+                     
+                     _currentSubtitleItem!.OriginalText = _committedTextForCurrentItem.ToString();
+                     _sentencesInCurrentItem += count;
+
+                     // Trigger Translation
+                     if (IsTranslationEnabled)
+                     {
+                         EnqueueTranslation(_currentSubtitleItem, _currentSubtitleItem.OriginalText);
+                     }
+
+                     // Check Limit
+                     // Check Limit (MaxSentencesPerLine)
+                     if (_sentencesInCurrentItem >= MaxSentencesPerLine)
+                     {
+                         UpdateFloatingSubtitles(_currentSubtitleItem);
+                         
+                         // If we are about to create a NEW item (Queue push), and there are more segments to come,
+                         // we should delay slightly to allow the user to see the current state (scrolling effect).
+                         // Also gives translation a chance to appear for the item being finalized.
+                         if (i < segmentList.Count - 1 || segmentList.Count > 1) 
+                         {
+                             // Dynamic delay based on length? Or fixed. 
+                             // 500ms is good for readability.
+                             await Task.Delay(500);
+                         }
+
+                         _currentSubtitleItem = null;
+                         _sentencesInCurrentItem = 0;
+                         _committedTextForCurrentItem.Clear();
+                     }
+                     else
+                     {
+                         UpdateFloatingSubtitles(_currentSubtitleItem);
+                     }
+                 }
                  break;
 
              case 1: // Partial
                  if (_currentSubtitleItem == null) CreateNewSubtitleItem();
-                 _currentSubtitleItem!.OriginalText = result;
+                 
+                 // Display: Committed + Partial
+                 string connection = _committedTextForCurrentItem.Length > 0 ? " " : "";
+                 string potentialFullText = _committedTextForCurrentItem + connection + result;
+                 
+                 // Split into paragraphs based on MaxSentencesPerLine
+                 // Only impose strict splitting if in Segmented Mode? 
+                 // Or always split for readability?
+                 // User said "Segmented... use what we said... Show sentences per line".
+                 // "Auto scroll... scroll to bottom".
+                 // If AutoScroll, we probably still want to use MaxSentencesPerLine to determine when to break a line?
+                 // Or does AutoScroll just flow?
+                 // Let's assume MaxSentencesPerLine applies to both for text formatting, 
+                 // but AutoScroll keeps history. Or maybe AutoScroll flows naturally.
+                 // However, user associated 'Sentences Per Line' specifically with 'Segmented' logic ("Show ... and Max Visible Lines two configs").
+                 // This implies AutoScroll might NOT use this limit?
+                 // But sticking to one behavior for formatting is safer unless requested.
+                 // I will stick to formatting logic for both, but change History logic.
+                 
+                 var paragraphs = _subtitleProcessor.SplitIntoParagraphs(potentialFullText, MaxSentencesPerLine);
+                 
+                 if (paragraphs.Count > 0)
+                 {
+                     // Update current item with the first paragraph
+                     _currentSubtitleItem!.OriginalText = paragraphs[0];
+                     
+                     // Handle extra paragraphs (if any) as temporary items
+                     // First, remove previous temporary items from FloatingSubtitles
+                     foreach (var temp in _temporarySubtitleItems)
+                     {
+                         FloatingSubtitles.Remove(temp);
+                     }
+                     _temporarySubtitleItems.Clear();
+
+                     // Create new temporary items for subsequent paragraphs
+                     for (int i = 1; i < paragraphs.Count; i++)
+                     {
+                         var tempItem = new SubtitleItem
+                         {
+                             OriginalText = paragraphs[i],
+                             TranslatedText = "", // Trigger translation?
+                             IsTranslating = false
+                         };
+                         
+                         if (IsTranslationEnabled)
+                         {
+                             EnqueueTranslation(tempItem, tempItem.OriginalText);
+                         }
+
+                         _temporarySubtitleItems.Add(tempItem);
+                         FloatingSubtitles.Add(tempItem);
+                     }
+                 }
+                 else
+                 {
+                     _currentSubtitleItem!.OriginalText = potentialFullText; // Fallback
+                 }
 
                  if (IsTranslationEnabled)
                  {
-                     EnqueueTranslation(_currentSubtitleItem, result);
+                     EnqueueTranslation(_currentSubtitleItem, _currentSubtitleItem.OriginalText);
                  }
                  
-                 // Update Floating Subtitles (Update current)
-                 UpdateFloatingSubtitles(_currentSubtitleItem, false);
+                 // Update Floating Subtitles (Ensure current exists)
+                 UpdateFloatingSubtitles(_currentSubtitleItem);
+                 
+                 // Note: UpdateFloatingSubtitles enforces limit. 
+                 // We need to ensure that adding temps didn't push _currentSubtitleItem out unintentionally 
+                 // unless it's strictly FIFO.
                  break;
 
              case 2: // Error
@@ -734,20 +917,23 @@ public class SpeechRecognitionViewModel : Page
                 
              case 3: // Stopped
                  IsRecording = false;
-                 break;
-                
-             case 100: // Started
-                 IsRecording = true;
-                 FloatingSubtitles.Clear(); // Clear on start
+                 // Force finish current item if exists
+                 if (_currentSubtitleItem != null)
+                 {
+                     UpdateFloatingSubtitles(_currentSubtitleItem);
+                     _currentSubtitleItem = null;
+                 }
+                 _sentencesInCurrentItem = 0;
+                 _committedTextForCurrentItem.Clear();
                  break;
          }
     }
 
-    private void UpdateFloatingSubtitles(SubtitleItem item, bool isFinal)
+    private void UpdateFloatingSubtitles(SubtitleItem item)
     {
         if (!Dispatcher.UIThread.CheckAccess())
         {
-            Dispatcher.UIThread.Post(() => UpdateFloatingSubtitles(item, isFinal));
+            Dispatcher.UIThread.Post(() => UpdateFloatingSubtitles(item));
             return;
         }
 
@@ -756,15 +942,24 @@ public class SpeechRecognitionViewModel : Page
             FloatingSubtitles.Add(item);
         }
 
-        // Rolling logic: Keep max 2 items.
-        // If we have more than 2, remove the oldest.
-        // Actually, the user wants: "Previous line" and "Current line".
-        // When 'isFinal' is true, this item becomes "Previous" effectively for the next one.
-        // So we just ensure list size <= 2.
-        
-        while (FloatingSubtitles.Count > 2)
+        // Logic split based on DisplayMode
+        if (FloatingDisplayMode == FloatingDisplayMode.Segmented) // Segmented
         {
-            FloatingSubtitles.RemoveAt(0);
+            // Maintain strict history limit (rolling)
+            while (FloatingSubtitles.Count > MaxFloatingHistory)
+            {
+                FloatingSubtitles.RemoveAt(0);
+            }
+        }
+        else // Auto Scroll
+        {
+            // Don't remove for History Limit (or set very high limit to avoid memory leak)
+            // User wants "Auto scroll to bottom", implying history retention.
+            // Safety limit: 100
+             while (FloatingSubtitles.Count > 100)
+             {
+                 FloatingSubtitles.RemoveAt(0);
+             }
         }
     }
 
@@ -798,8 +993,8 @@ public class SpeechRecognitionViewModel : Page
     {
         while (IsRecording)
         {
-            string text = "";
-            CancellationTokenSource? cts = null;
+            string text;
+            CancellationTokenSource? cts;
 
             lock (_translationLock)
             {
@@ -832,7 +1027,7 @@ public class SpeechRecognitionViewModel : Page
                     _activeItemLoops.Remove(item);
                     _activeItemCts.Remove(item);
                     _latestTextForItem.Remove(item);
-                    cts?.Dispose();
+                    cts.Dispose();
                     return; 
                 }
                 
@@ -848,7 +1043,7 @@ public class SpeechRecognitionViewModel : Page
         }
     }
 
-    private async System.Threading.Tasks.Task TranslateSingleItemAsync(SubtitleItem item, string text, CancellationToken token)
+    private async Task TranslateSingleItemAsync(SubtitleItem item, string text, CancellationToken token)
     {
         if (SelectedEngineOption == null || SelectedTargetLanguage == null || string.IsNullOrWhiteSpace(text)) return;
 
@@ -876,7 +1071,7 @@ public class SpeechRecognitionViewModel : Page
             if (string.IsNullOrEmpty(delta)) return;
 
             // Punctuation logic
-            char[] punctuation = ['.', ',', '?', '!', ';', ':', '。', '，', '？', '！', '；', '：'];
+            char[] punctuation = ['.', ',', '?', '!', ';', '。', '，', '？', '！', '；'];
             int lastPunctIdx = delta.LastIndexOfAny(punctuation);
             
             string stablePart = "";
@@ -1004,6 +1199,8 @@ public class SpeechRecognitionViewModel : Page
         return LanguageService.GetLanguage(LanguageKeys.AutoId); 
     }
 
+
+    
     private void CreateNewSubtitleItem()
     {
         _currentSubtitleItem = new SubtitleItem

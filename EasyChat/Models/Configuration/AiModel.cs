@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using ReactiveUI;
 
@@ -103,7 +104,6 @@ public class CustomAiModel : ReactiveObject
         AiModelType.OpenAi => "avares://EasyChat/Assets/Images/Engine/openai.png",
         AiModelType.Gemini => "avares://EasyChat/Assets/Images/Engine/gemini.png",
         AiModelType.Claude => "avares://EasyChat/Assets/Images/Engine/claude.png",
-        AiModelType.Custom => "avares://EasyChat/Assets/Images/Engine/custom.png",
         _ => "avares://EasyChat/Assets/Images/Engine/custom.png"
     };
 }
@@ -111,6 +111,7 @@ public class CustomAiModel : ReactiveObject
 /// <summary>
 ///     Wrapper for model cards display - includes both actual models and "Add" button placeholder.
 /// </summary>
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
 public class ModelCardItem
 {
     public CustomAiModel? Model { get; set; }
@@ -128,5 +129,5 @@ public class ModelCardItem
 [JsonObject(MemberSerialization.OptIn)]
 public class AiModel
 {
-    [JsonProperty] public ObservableCollection<CustomAiModel> ConfiguredModels { get; set; } = new();
+    [JsonProperty] public ObservableCollection<CustomAiModel> ConfiguredModels { get; set; } = [];
 }

@@ -7,7 +7,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyChat.Constants;
 using Microsoft.Extensions.Logging;
 using OpenAI;
 using OpenAI.Chat;
@@ -68,9 +67,11 @@ public class OpenAiService : ITranslation
         return client.GetChatClient(_model);
     }
 
-    public async Task<string> TranslateAsync(string text, LanguageDefinition source, LanguageDefinition destination, bool showOriginal = false,
+    public async Task<string> TranslateAsync(string text, LanguageDefinition? source, LanguageDefinition? destination, bool showOriginal = false,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(destination);
         _logger.LogDebug("Translation request: {Source} → {Dest}, Length={Length}", source.DisplayName, destination.DisplayName, text.Length);
         
         try
@@ -97,9 +98,11 @@ public class OpenAiService : ITranslation
         }
     }
 
-    public async IAsyncEnumerable<string> StreamTranslateAsync(string text, LanguageDefinition source, LanguageDefinition destination,
+    public async IAsyncEnumerable<string> StreamTranslateAsync(string text, LanguageDefinition? source, LanguageDefinition? destination,
         [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(destination);
         _logger.LogDebug("Stream translation request: {Source} → {Dest}, Length={Length}", source.DisplayName, destination.DisplayName, text.Length);
         
         var client = CreateClient();

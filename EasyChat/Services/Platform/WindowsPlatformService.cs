@@ -231,7 +231,7 @@ public class WindowsPlatformService : IPlatformService
     {
         foreach (var c in text)
         {
-            Win32.PostMessage(hWnd, Constants.Constant.WM_CHAR, c, IntPtr.Zero);
+            Win32.PostMessage(hWnd, Constants.Windows.WM_CHAR, c, IntPtr.Zero);
             await Task.Delay(delayMs);
         }
     }

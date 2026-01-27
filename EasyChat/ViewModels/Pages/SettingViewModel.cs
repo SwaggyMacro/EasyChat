@@ -11,6 +11,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls.Notifications;
+using EasyChat.Common;
 using EasyChat.Constants;
 using EasyChat.Lang;
 using EasyChat.Services.Languages;
@@ -38,32 +39,11 @@ public class SettingViewModel : Page
     private readonly IConfigurationService _configurationService;
     private readonly ISukiDialogManager _dialogManager;
 
-    private List<string> _aiProviders = ["OpenAI", "Gemini", "Claude"];
-
     private List<string> _claudeModels;
-
-    private ObservableCollection<CustomAiModel> _configuredModels = new();
-
-    private List<string> _deepLModelTypes = ["quality_optimized", "prefer_quality_optimized", "latency_optimized"];
 
     private List<string> _geminiModels;
 
-
-
-    private List<string> _machineTransProviders = ["Baidu", "Tencent", "Google", "DeepL"];
-
-    // Combined list with models + Add button placeholder using wrapper
-    private ObservableCollection<ModelCardItem> _modelCardsWithAddButton = new();
-
     private List<string> _openaiModels;
-
-    private List<string> _proxyTypes = ["Socks", "Http"];
-    
-    // Testing state for each service
-    private bool _isTestingBaidu;
-    private bool _isTestingTencent;
-    private bool _isTestingGoogle;
-    private bool _isTestingDeepL;
 
 
     public SettingViewModel(ISukiDialogManager dialogManager, IConfigurationService configurationService) : base(
@@ -79,9 +59,9 @@ public class SettingViewModel : Page
         RefreshConfiguredModels();
 
         // Migrate/Sync ID if missing
-        if (string.IsNullOrEmpty(GeneralConf.UsingAiModelId) && !string.IsNullOrEmpty(GeneralConf.UsingAiModel))
+        if (string.IsNullOrEmpty(GeneralConf?.UsingAiModelId) && !string.IsNullOrEmpty(GeneralConf?.UsingAiModel))
         {
-            var match = AiModelConf.ConfiguredModels.FirstOrDefault(m => m.Name == GeneralConf.UsingAiModel);
+            var match = AiModelConf?.ConfiguredModels.FirstOrDefault(m => m.Name == GeneralConf.UsingAiModel);
             if (match != null)
             {
                 GeneralConf.UsingAiModelId = match.Id;
@@ -89,28 +69,28 @@ public class SettingViewModel : Page
         }
         
         // Ensure name is synced when ID changes (one-way sync for display/legacy)
-        this.WhenAnyValue(x => x.GeneralConf.UsingAiModelId)
+        this.WhenAnyValue(x => x.GeneralConf!.UsingAiModelId)
             .Subscribe(id =>
             {
                 if (!string.IsNullOrEmpty(id))
                 {
-                    var model = AiModelConf.ConfiguredModels.FirstOrDefault(m => m.Id == id);
-                    if (model != null && GeneralConf.UsingAiModel != model.Name)
+                    var model = AiModelConf?.ConfiguredModels.FirstOrDefault(m => m.Id == id);
+                    if (model != null && GeneralConf?.UsingAiModel != model.Name)
                     {
-                        GeneralConf.UsingAiModel = model.Name;
+                        GeneralConf?.UsingAiModel = model.Name;
                     }
                 }
             });
 
         // Migrate/Sync MachineTrans ID if missing
-        if (string.IsNullOrEmpty(GeneralConf.UsingMachineTransId) && !string.IsNullOrEmpty(GeneralConf.UsingMachineTrans))
+        if (string.IsNullOrEmpty(GeneralConf!.UsingMachineTransId) && !string.IsNullOrEmpty(GeneralConf.UsingMachineTrans))
         {
             var id = GeneralConf.UsingMachineTrans switch
             {
-                "Baidu" => MachineTransConf.Baidu.Id,
-                "Tencent" => MachineTransConf.Tencent.Id,
-                "Google" => MachineTransConf.Google.Id,
-                "DeepL" => MachineTransConf.DeepL.Id,
+                Constant.MachineTranslationProviders.Baidu => MachineTransConf?.Baidu.Id,
+                Constant.MachineTranslationProviders.Tencent => MachineTransConf?.Tencent.Id,
+                Constant.MachineTranslationProviders.Google => MachineTransConf?.Google.Id,
+                Constant.MachineTranslationProviders.DeepL => MachineTransConf?.DeepL.Id,
                 _ => null
             };
             
@@ -121,17 +101,17 @@ public class SettingViewModel : Page
         }
 
         // Keep MachineTrans ID in sync when Name changes (User selection from UI)
-        this.WhenAnyValue(x => x.GeneralConf.UsingMachineTrans)
+        this.WhenAnyValue(x => x.GeneralConf!.UsingMachineTrans)
             .Subscribe(name =>
             {
                  if (!string.IsNullOrEmpty(name))
                  {
                      var id = name switch
                      {
-                         "Baidu" => MachineTransConf.Baidu.Id,
-                         "Tencent" => MachineTransConf.Tencent.Id,
-                         "Google" => MachineTransConf.Google.Id,
-                         "DeepL" => MachineTransConf.DeepL.Id,
+                         Constant.MachineTranslationProviders.Baidu => MachineTransConf?.Baidu.Id,
+                         Constant.MachineTranslationProviders.Tencent => MachineTransConf?.Tencent.Id,
+                         Constant.MachineTranslationProviders.Google => MachineTransConf?.Google.Id,
+                         Constant.MachineTranslationProviders.DeepL => MachineTransConf?.DeepL.Id,
                          _ => null
                      };
                      
@@ -144,8 +124,8 @@ public class SettingViewModel : Page
 
         // Watch for collection changes
         Observable.FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
-                h => AiModelConf.ConfiguredModels.CollectionChanged += h,
-                h => AiModelConf.ConfiguredModels.CollectionChanged -= h)
+                h => AiModelConf?.ConfiguredModels.CollectionChanged += h,
+                h => AiModelConf?.ConfiguredModels.CollectionChanged -= h)
             .Subscribe(_ => RefreshConfiguredModels());
 
         AddModelCommand = ReactiveCommand.Create(AddModel);
@@ -158,7 +138,7 @@ public class SettingViewModel : Page
         EditGoogleKeysCommand = ReactiveCommand.Create(EditGoogleKeys);
         EditDeepLKeysCommand = ReactiveCommand.Create(EditDeepLKeys);
         
-        TestAiModelConnectionCommand = ReactiveCommand.Create<CustomAiModel>(async model => await TestAiModelConnection(model));
+        TestAiModelConnectionCommand = ReactiveCommand.Create<CustomAiModel>(async void (model) => await TestAiModelConnection(model));
         TestBaiduConnectionCommand = ReactiveCommand.CreateFromTask(TestBaiduConnection);
         TestTencentConnectionCommand = ReactiveCommand.CreateFromTask(TestTencentConnection);
         TestGoogleConnectionCommand = ReactiveCommand.CreateFromTask(TestGoogleConnection);
@@ -186,15 +166,15 @@ public class SettingViewModel : Page
 
     public List<string> ProxyTypes
     {
-        get => _proxyTypes;
-        set => this.RaiseAndSetIfChanged(ref _proxyTypes, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = ["Socks", "Http"];
 
     public List<string> DeepLModelTypes
     {
-        get => _deepLModelTypes;
-        set => this.RaiseAndSetIfChanged(ref _deepLModelTypes, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = ["quality_optimized", "prefer_quality_optimized", "latency_optimized"];
 
     private List<LanguageDefinition> _languages = [LanguageKeys.English, LanguageKeys.ChineseSimplified];
 
@@ -206,12 +186,12 @@ public class SettingViewModel : Page
 
     public LanguageDefinition? SelectedLanguage
     {
-        get => Languages.FirstOrDefault(l => l.EnglishName == GeneralConf.Language) ?? LanguageKeys.English;
+        get => Languages.FirstOrDefault(l => l.EnglishName == GeneralConf?.Language) ?? LanguageKeys.English;
         set
         {
-            if (value != null && GeneralConf.Language != value.EnglishName)
+            if (value != null && GeneralConf?.Language != value.EnglishName)
             {
-                GeneralConf.Language = value.EnglishName;
+                GeneralConf?.Language = value.EnglishName;
                 this.RaisePropertyChanged();
 
                 // Update Culture
@@ -243,52 +223,50 @@ public class SettingViewModel : Page
 
     public WindowClosingBehavior SelectedClosingBehavior
     {
-        get => GeneralConf.ClosingBehavior;
+        get => GeneralConf!.ClosingBehavior;
         set
         {
-            if (GeneralConf.ClosingBehavior != value)
-            {
-                GeneralConf.ClosingBehavior = value;
-                this.RaisePropertyChanged();
-            }
+            if (GeneralConf!.ClosingBehavior == value) return;
+            GeneralConf.ClosingBehavior = value;
+            this.RaisePropertyChanged();
         }
     }
 
     public List<string> AiProviders
     {
-        get => _aiProviders;
-        set => this.RaiseAndSetIfChanged(ref _aiProviders, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = ["OpenAI", "Gemini", "Claude"];
 
     public List<string> MachineTransProviders
     {
-        get => _machineTransProviders;
-        set => this.RaiseAndSetIfChanged(ref _machineTransProviders, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = [Constant.MachineTranslationProviders.Baidu, Constant.MachineTranslationProviders.Tencent, Constant.MachineTranslationProviders.Google, Constant.MachineTranslationProviders.DeepL];
 
-    public General GeneralConf => _configurationService.General;
+    public General? GeneralConf => _configurationService.General;
 
-    public AiModel AiModelConf => _configurationService.AiModel;
+    public AiModel? AiModelConf => _configurationService.AiModel;
 
     public ObservableCollection<CustomAiModel> ConfiguredModels
     {
-        get => _configuredModels;
-        set => this.RaiseAndSetIfChanged(ref _configuredModels, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = new();
 
     public ObservableCollection<ModelCardItem> ModelCardsWithAddButton
     {
-        get => _modelCardsWithAddButton;
-        set => this.RaiseAndSetIfChanged(ref _modelCardsWithAddButton, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = new();
 
-    public MachineTrans MachineTransConf => _configurationService.MachineTrans;
+    public MachineTrans? MachineTransConf => _configurationService.MachineTrans;
 
-    public Proxy ProxyConf => _configurationService.Proxy;
+    public Proxy? ProxyConf => _configurationService.Proxy;
 
-    public ResultConfig ResultConf => _configurationService.Result;
+    public ResultConfig? ResultConf => _configurationService.Result;
     
-    public InputConfig InputConf => _configurationService.Input;
+    public InputConfig? InputConf => _configurationService.Input;
     
     public List<string> TransparencyLevels { get; } = ["AcrylicBlur", "Blur", "Transparent"];
     
@@ -313,28 +291,27 @@ public class SettingViewModel : Page
     // Testing state properties for loading indicators
     public bool IsTestingBaidu
     {
-        get => _isTestingBaidu;
-        set => this.RaiseAndSetIfChanged(ref _isTestingBaidu, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
-    
+
     public bool IsTestingTencent
     {
-        get => _isTestingTencent;
-        set => this.RaiseAndSetIfChanged(ref _isTestingTencent, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
-    
+
     public bool IsTestingGoogle
     {
-        get => _isTestingGoogle;
-        set => this.RaiseAndSetIfChanged(ref _isTestingGoogle, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
-    
+
     public bool IsTestingDeepL
     {
-        get => _isTestingDeepL;
-        set => this.RaiseAndSetIfChanged(ref _isTestingDeepL, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
-    
 
 
     private void EditModelKeys(CustomAiModel model)
@@ -348,38 +325,42 @@ public class SettingViewModel : Page
 
     private void EditBaiduKeys()
     {
-        ShowKeyEditor(Resources.Baidu, MachineTransConf.Baidu.Items, KeyListType.Baidu, items =>
-        {
-            MachineTransConf.Baidu.Items.Clear();
-            foreach (var item in items.Cast<MachineTrans.BaiduItem>()) MachineTransConf.Baidu.Items.Add(item);
-        });
+        if (MachineTransConf != null)
+            ShowKeyEditor(Resources.Baidu, MachineTransConf.Baidu.Items, KeyListType.Baidu, items =>
+            {
+                MachineTransConf.Baidu.Items.Clear();
+                foreach (var item in items.Cast<MachineTrans.BaiduItem>()) MachineTransConf.Baidu.Items.Add(item);
+            });
     }
 
     private void EditTencentKeys()
     {
-        ShowKeyEditor(Resources.Tencent, MachineTransConf.Tencent.Items, KeyListType.Tencent, items =>
-        {
-            MachineTransConf.Tencent.Items.Clear();
-            foreach (var item in items.Cast<MachineTrans.TencentItem>()) MachineTransConf.Tencent.Items.Add(item);
-        });
+        if (MachineTransConf != null)
+            ShowKeyEditor(Resources.Tencent, MachineTransConf.Tencent.Items, KeyListType.Tencent, items =>
+            {
+                MachineTransConf.Tencent.Items.Clear();
+                foreach (var item in items.Cast<MachineTrans.TencentItem>()) MachineTransConf.Tencent.Items.Add(item);
+            });
     }
 
     private void EditGoogleKeys()
     {
-        ShowKeyEditor(Resources.Google, MachineTransConf.Google.ApiKeys, KeyListType.String, keys =>
-        {
-            MachineTransConf.Google.ApiKeys.Clear();
-            foreach (var key in keys.Cast<string>()) MachineTransConf.Google.ApiKeys.Add(key);
-        });
+        if (MachineTransConf != null)
+            ShowKeyEditor(Resources.Google, MachineTransConf.Google.ApiKeys, KeyListType.String, keys =>
+            {
+                MachineTransConf.Google.ApiKeys.Clear();
+                foreach (var key in keys.Cast<string>()) MachineTransConf.Google.ApiKeys.Add(key);
+            });
     }
 
     private void EditDeepLKeys()
     {
-        ShowKeyEditor(Resources.DeepL, MachineTransConf.DeepL.ApiKeys, KeyListType.String, keys =>
-        {
-            MachineTransConf.DeepL.ApiKeys.Clear();
-            foreach (var key in keys.Cast<string>()) MachineTransConf.DeepL.ApiKeys.Add(key);
-        });
+        if (MachineTransConf != null)
+            ShowKeyEditor(Resources.DeepL, MachineTransConf.DeepL.ApiKeys, KeyListType.String, keys =>
+            {
+                MachineTransConf.DeepL.ApiKeys.Clear();
+                foreach (var key in keys.Cast<string>()) MachineTransConf.DeepL.ApiKeys.Add(key);
+            });
     }
 
     private void ShowKeyEditor(string title, IEnumerable existing, KeyListType type, Action<IEnumerable<object>> onSave)
@@ -388,8 +369,10 @@ public class SettingViewModel : Page
             .WithTitle(title)
             .WithViewModel(dialog =>
             {
-                var vm = new KeyListEditorViewModel(dialog, title, existing.Cast<object>(), type);
-                vm.OnSave = onSave;
+                var vm = new KeyListEditorViewModel(dialog, title, existing.Cast<object>(), type)
+                {
+                    OnSave = onSave
+                };
                 return vm;
             })
             .TryShow();
@@ -397,6 +380,7 @@ public class SettingViewModel : Page
 
     private void RefreshConfiguredModels()
     {
+        if (AiModelConf == null) return;
         ConfiguredModels = new ObservableCollection<CustomAiModel>(AiModelConf.ConfiguredModels);
         // Update AiProviders list based on configured models
         AiProviders = ConfiguredModels.Select(m => m.Name).ToList();
@@ -414,12 +398,14 @@ public class SettingViewModel : Page
             .WithTitle(Resources.AddModel)
             .WithViewModel(dialog =>
             {
-                var vm = new AiModelEditDialogViewModel(dialog);
-                vm.OnClose = result =>
+                var vm = new AiModelEditDialogViewModel(dialog)
                 {
-                    if (result != null) AiModelConf.ConfiguredModels.Add(result);
-                    // Refresh handled by subscription
-                    // Save handled by service
+                    OnClose = result =>
+                    {
+                        if (result != null) AiModelConf?.ConfiguredModels.Add(result);
+                        // Refresh handled by subscription
+                        // Save handled by service
+                    }
                 };
                 return vm;
             })
@@ -432,16 +418,18 @@ public class SettingViewModel : Page
             .WithTitle(Resources.EditModel)
             .WithViewModel(dialog =>
             {
-                var vm = new AiModelEditDialogViewModel(dialog, model);
-                vm.OnClose = result =>
+                var vm = new AiModelEditDialogViewModel(dialog, model)
                 {
-                    if (result != null)
+                    OnClose = result =>
                     {
-                        var existing = AiModelConf.ConfiguredModels.FirstOrDefault(m => m.Id == model.Id);
-                        if (existing != null)
+                        if (result != null)
                         {
+                            var existing = AiModelConf?.ConfiguredModels.FirstOrDefault(m => m.Id == model.Id);
+                            if (existing == null) return;
+                            if (AiModelConf == null) return;
                             var index = AiModelConf.ConfiguredModels.IndexOf(existing);
                             AiModelConf.ConfiguredModels[index] = result;
+
                             // Refresh handled by subscription if collection changes or if we manually trigger 
                             // Since we replace the item, CollectionChanged (Replace) should fire.
                             // Save handled by service
@@ -462,8 +450,8 @@ public class SettingViewModel : Page
             .WithActionButton(Resources.Delete, _ =>
             {
                 // RemoveAll works on List<T>, but ObservableCollection doesn't have it directly.
-                var toRemove = AiModelConf.ConfiguredModels.FirstOrDefault(m => m.Id == model.Id);
-                if (toRemove != null) AiModelConf.ConfiguredModels.Remove(toRemove);
+                var toRemove = AiModelConf?.ConfiguredModels.FirstOrDefault(m => m.Id == model.Id);
+                if (toRemove != null) AiModelConf?.ConfiguredModels.Remove(toRemove);
                 // Refresh handled by subscription
                 // Save handled by service
             }, true, "Flat", "Danger")
@@ -482,11 +470,11 @@ public class SettingViewModel : Page
         model.IsTesting = true;
         try
         {
-            var proxy = model.UseProxy ? ProxyConf.ProxyUrl : null;
+            var proxy = model.UseProxy ? ProxyConf?.ProxyUrl : null;
             var loggerFactory = NullLoggerFactory.Instance;
             var logger = loggerFactory.CreateLogger<OpenAiService>();
-            
-            var prompt = _configurationService.Prompts.ActivePromptContent;
+
+            var prompt = _configurationService.Prompts?.ActivePromptContent ?? Prompts.DefaultPromptContent;
             var service = new OpenAiService(model.ApiUrl, model.ApiKey, model.Model, proxy, prompt, logger);
             var source = LanguageService.GetLanguage("en");
             var target = LanguageService.GetLanguage("zh-Hans");
@@ -505,7 +493,7 @@ public class SettingViewModel : Page
     
     private async Task TestBaiduConnection()
     {
-        if (MachineTransConf.Baidu.Items.Count == 0)
+        if (MachineTransConf is { Baidu.Items.Count: 0 })
         {
             ShowConnectionResult(Resources.Baidu, false, "No API key configured");
             return;
@@ -514,15 +502,19 @@ public class SettingViewModel : Page
         IsTestingBaidu = true;
         try
         {
-            var item = MachineTransConf.Baidu.Items[0];
-            var proxy = MachineTransConf.Baidu.UseProxy ? ProxyConf.ProxyUrl : null;
-            var loggerFactory = NullLoggerFactory.Instance;
-            var logger = loggerFactory.CreateLogger<BaiduService>();
+            if (MachineTransConf != null)
+            {
+                var item = MachineTransConf.Baidu.Items[0];
+                var proxy = MachineTransConf.Baidu.UseProxy ? ProxyConf?.ProxyUrl : null;
+                var loggerFactory = NullLoggerFactory.Instance;
+                var logger = loggerFactory.CreateLogger<BaiduService>();
             
-            using var service = new BaiduService(item.AppId, item.AppKey, proxy, logger);
-            var source = LanguageService.GetLanguage("en");
-            var target = LanguageService.GetLanguage("zh-Hans");
-            await service.TranslateAsync("Hello", source, target);
+                using var service = new BaiduService(item.AppId, item.AppKey, proxy, logger);
+                var source = LanguageService.GetLanguage("en");
+                var target = LanguageService.GetLanguage("zh-Hans");
+                await service.TranslateAsync("Hello", source, target);
+            }
+
             ShowConnectionResult(Resources.Baidu, true);
         }
         catch (Exception ex)
@@ -537,7 +529,7 @@ public class SettingViewModel : Page
     
     private async Task TestTencentConnection()
     {
-        if (MachineTransConf.Tencent.Items.Count == 0)
+        if (MachineTransConf is { Tencent.Items.Count: 0 })
         {
             ShowConnectionResult(Resources.Tencent, false, "No API key configured");
             return;
@@ -546,15 +538,19 @@ public class SettingViewModel : Page
         IsTestingTencent = true;
         try
         {
-            var item = MachineTransConf.Tencent.Items[0];
-            var proxy = MachineTransConf.Tencent.UseProxy ? ProxyConf.ProxyUrl : null;
-            var loggerFactory = NullLoggerFactory.Instance;
-            var logger = loggerFactory.CreateLogger<TencentService>();
+            if (MachineTransConf != null)
+            {
+                var item = MachineTransConf.Tencent.Items[0];
+                var proxy = MachineTransConf.Tencent.UseProxy ? ProxyConf?.ProxyUrl : null;
+                var loggerFactory = NullLoggerFactory.Instance;
+                var logger = loggerFactory.CreateLogger<TencentService>();
             
-            using var service = new TencentService(item.SecretId, item.SecretKey, proxy, logger);
-            var source = LanguageService.GetLanguage("en");
-            var target = LanguageService.GetLanguage("zh-Hans");
-            await service.TranslateAsync("Hello", source, target);
+                using var service = new TencentService(item.SecretId, item.SecretKey, proxy, logger);
+                var source = LanguageService.GetLanguage("en");
+                var target = LanguageService.GetLanguage("zh-Hans");
+                await service.TranslateAsync("Hello", source, target);
+            }
+
             ShowConnectionResult(Resources.Tencent, true);
         }
         catch (Exception ex)
@@ -569,7 +565,7 @@ public class SettingViewModel : Page
     
     private async Task TestGoogleConnection()
     {
-        if (MachineTransConf.Google.ApiKeys.Count == 0)
+        if (MachineTransConf is { Google.ApiKeys.Count: 0 })
         {
             ShowConnectionResult(Resources.Google, false, "No API key configured");
             return;
@@ -578,18 +574,22 @@ public class SettingViewModel : Page
         IsTestingGoogle = true;
         try
         {
-            var proxy = MachineTransConf.Google.UseProxy ? ProxyConf.ProxyUrl : null;
+            var proxy = MachineTransConf is { Google.UseProxy: true } ? ProxyConf?.ProxyUrl : null;
             var loggerFactory = NullLoggerFactory.Instance;
             var logger = loggerFactory.CreateLogger<GoogleService>();
-            
-            using var service = new GoogleService(
-                MachineTransConf.Google.Model,
-                MachineTransConf.Google.ApiKeys[0], 
-                proxy, 
-                logger);
-            var source = LanguageService.GetLanguage("en");
-            var target = LanguageService.GetLanguage("zh-Hans");
-            await service.TranslateAsync("Hello", source, target);
+
+            if (MachineTransConf != null)
+            {
+                using var service = new GoogleService(
+                    MachineTransConf.Google.Model,
+                    MachineTransConf.Google.ApiKeys[0], 
+                    proxy, 
+                    logger);
+                var source = LanguageService.GetLanguage("en");
+                var target = LanguageService.GetLanguage("zh-Hans");
+                await service.TranslateAsync("Hello", source, target);
+            }
+
             ShowConnectionResult(Resources.Google, true);
         }
         catch (Exception ex)
@@ -604,7 +604,7 @@ public class SettingViewModel : Page
     
     private async Task TestDeepLConnection()
     {
-        if (MachineTransConf.DeepL.ApiKeys.Count == 0)
+        if (MachineTransConf is { DeepL.ApiKeys.Count: 0 })
         {
             ShowConnectionResult(Resources.DeepL, false, "No API key configured");
             return;
@@ -613,18 +613,22 @@ public class SettingViewModel : Page
         IsTestingDeepL = true;
         try
         {
-            var proxy = MachineTransConf.DeepL.UseProxy ? ProxyConf.ProxyUrl : null;
+            var proxy = MachineTransConf is { DeepL.UseProxy: true } ? ProxyConf?.ProxyUrl : null;
             var loggerFactory = NullLoggerFactory.Instance;
             var logger = loggerFactory.CreateLogger<DeepLService>();
-            
-            var service = new DeepLService(
-                MachineTransConf.DeepL.ModelType,
-                MachineTransConf.DeepL.ApiKeys[0], 
-                proxy, 
-                logger);
-            var source = LanguageService.GetLanguage("en");
-            var target = LanguageService.GetLanguage("zh-Hans");
-            await service.TranslateAsync("Hello", source, target);
+
+            if (MachineTransConf != null)
+            {
+                var service = new DeepLService(
+                    MachineTransConf.DeepL.ModelType,
+                    MachineTransConf.DeepL.ApiKeys[0], 
+                    proxy, 
+                    logger);
+                var source = LanguageService.GetLanguage("en");
+                var target = LanguageService.GetLanguage("zh-Hans");
+                await service.TranslateAsync("Hello", source, target);
+            }
+
             ShowConnectionResult(Resources.DeepL, true);
         }
         catch (Exception ex)

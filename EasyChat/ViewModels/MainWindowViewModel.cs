@@ -1,16 +1,13 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using Avalonia.Collections;
 using Avalonia.Styling;
-using Avalonia.Threading;
 using EasyChat.Common;
 using EasyChat.Controls.CustomTheme;
 using EasyChat.Lang;
 using EasyChat.Models;
 using EasyChat.Services;
-using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using SukiUI;
 using SukiUI.Dialogs;
@@ -24,19 +21,8 @@ public class MainWindowViewModel : ViewModelBase
 {
     private readonly SukiTheme _theme;
 
-    private Page _activePage;
+    private Page? _activePage;
     private IAvaloniaReadOnlyList<Page> _pages;
-
-    private bool _animationsEnabled;
-
-    private SukiBackgroundStyle _backgroundStyle = SukiBackgroundStyle.Gradient;
-
-    private ThemeVariant _baseTheme;
-    private string? _customShaderFile;
-    private bool _titleBarVisible = true;
-    private bool _transitionsEnabled;
-    private double _transitionTime;
-
 
 
     public MainWindowViewModel(
@@ -72,7 +58,7 @@ public class MainWindowViewModel : ViewModelBase
         pageNavigationService.NavigationRequested += pageType =>
         {
             var page = Pages.FirstOrDefault(x => x.GetType() == pageType);
-            if (page is null || ActivePage.GetType() == pageType) return;
+            if (page is null || ActivePage?.GetType() == pageType) return;
             ActivePage = page;
         };
 
@@ -101,7 +87,6 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _pages, value);
     }
 
-    public IAvaloniaReadOnlyList<SukiBackgroundStyle> BackgroundStyles { get; }
     public IAvaloniaReadOnlyList<SukiColorTheme> Themes { get; }
     public ISukiDialogManager DialogManager { get; }
 
@@ -113,11 +98,11 @@ public class MainWindowViewModel : ViewModelBase
 
     public bool TitleBarVisible
     {
-        get => _titleBarVisible;
-        set => this.RaiseAndSetIfChanged(ref _titleBarVisible, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = true;
 
-    public Page ActivePage
+    public Page? ActivePage
     {
         get => _activePage;
         set => this.RaiseAndSetIfChanged(ref _activePage, value);
@@ -125,38 +110,38 @@ public class MainWindowViewModel : ViewModelBase
 
     public ThemeVariant BaseTheme
     {
-        get => _baseTheme;
-        set => this.RaiseAndSetIfChanged(ref _baseTheme, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public SukiBackgroundStyle BackgroundStyle
     {
-        get => _backgroundStyle;
-        set => this.RaiseAndSetIfChanged(ref _backgroundStyle, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = SukiBackgroundStyle.Gradient;
 
     public bool AnimationsEnabled
     {
-        get => _animationsEnabled;
-        set => this.RaiseAndSetIfChanged(ref _animationsEnabled, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public string? CustomShaderFile
     {
-        get => _customShaderFile;
-        set => this.RaiseAndSetIfChanged(ref _customShaderFile, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public bool TransitionsEnabled
     {
-        get => _transitionsEnabled;
-        set => this.RaiseAndSetIfChanged(ref _transitionsEnabled, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public double TransitionTime
     {
-        get => _transitionTime;
-        set => this.RaiseAndSetIfChanged(ref _transitionTime, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public ReactiveCommand<Unit, Unit> ToggleBaseThemeCommand { get; }

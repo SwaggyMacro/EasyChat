@@ -12,8 +12,7 @@ namespace EasyChat.Models.Configuration;
 [JsonObject(MemberSerialization.OptIn)]
 public class Prompts : ReactiveObject
 {
-    private string _selectedPromptId = string.Empty;
-    private ObservableCollection<PromptEntry> _entries = new();
+    private ObservableCollection<PromptEntry> _entries = [];
 
     /// <summary>
     /// Default translation prompt content.
@@ -56,9 +55,9 @@ public class Prompts : ReactiveObject
     [JsonProperty]
     public string SelectedPromptId
     {
-        get => _selectedPromptId;
-        set => this.RaiseAndSetIfChanged(ref _selectedPromptId, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = string.Empty;
 
     /// <summary>
     /// Collection of all prompt entries.

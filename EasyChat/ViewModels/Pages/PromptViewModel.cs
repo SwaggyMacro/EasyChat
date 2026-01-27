@@ -33,8 +33,8 @@ public class PromptViewModel : Page
 
         // Subscribe to collection changes
         Observable.FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
-                h => _configurationService.Prompts.Entries.CollectionChanged += h,
-                h => _configurationService.Prompts.Entries.CollectionChanged -= h)
+                h => _configurationService.Prompts?.Entries.CollectionChanged += h,
+                h => _configurationService.Prompts?.Entries.CollectionChanged -= h)
             .Subscribe(_ => LoadPromptsFromService());
 
         // Commands
@@ -57,7 +57,8 @@ public class PromptViewModel : Page
 
     private void LoadPromptsFromService()
     {
-        Prompts = new ObservableCollection<PromptEntry>(_configurationService.Prompts.Entries);
+        if (_configurationService.Prompts != null)
+            Prompts = new ObservableCollection<PromptEntry>(_configurationService.Prompts.Entries);
     }
 
     private void AddPrompt()
@@ -73,7 +74,7 @@ public class PromptViewModel : Page
     private void RemovePrompt(PromptEntry entry)
     {
         // Prevent deleting the last prompt or the default prompt
-        if (_configurationService.Prompts.Entries.Count <= 1)
+        if (_configurationService.Prompts?.Entries.Count <= 1)
         {
             _dialogManager.CreateDialog()
                 .OfType(NotificationType.Warning)
@@ -101,7 +102,7 @@ public class PromptViewModel : Page
             .WithContent(Resources.ConfirmDeletePrompt)
             .WithActionButton(Resources.Delete, _ =>
             {
-                _configurationService.Prompts.Entries.Remove(entry);
+                _configurationService.Prompts?.Entries.Remove(entry);
             }, true)
             .WithActionButton(Resources.Cancel, _ => { }, true)
             .TryShow();
@@ -110,13 +111,14 @@ public class PromptViewModel : Page
     private void SetDefault(PromptEntry entry)
     {
         // Clear all other defaults
+        if (_configurationService.Prompts == null) return;
         foreach (var prompt in _configurationService.Prompts.Entries)
         {
             prompt.IsDefault = false;
         }
 
         entry.IsDefault = true;
-        _configurationService.Prompts.SelectedPromptId = entry.Id;
+        _configurationService.Prompts?.SelectedPromptId = entry.Id;
     }
 
     private void ShowEditDialog(PromptEntry? entry, bool isNew)
@@ -124,24 +126,26 @@ public class PromptViewModel : Page
         _dialogManager.CreateDialog()
             .WithViewModel(dialog =>
             {
-                var vm = new PromptEditDialogViewModel(dialog, isNew ? null : entry);
-
-                vm.OnClose = result =>
+                var vm = new PromptEditDialogViewModel(dialog, isNew ? null : entry)
                 {
-                    if (result != null)
+                    OnClose = result =>
                     {
-                        if (isNew)
+                        if (result != null)
                         {
-                            _configurationService.Prompts.Entries.Add(result);
-                        }
-                        else if (entry != null)
-                        {
-                            // Update existing entry
-                            entry.Name = result.Name;
-                            entry.Content = result.Content;
+                            if (isNew)
+                            {
+                                _configurationService.Prompts?.Entries.Add(result);
+                            }
+                            else if (entry != null)
+                            {
+                                // Update existing entry
+                                entry.Name = result.Name;
+                                entry.Content = result.Content;
+                            }
                         }
                     }
                 };
+
                 return vm;
             })
             .TryShow();

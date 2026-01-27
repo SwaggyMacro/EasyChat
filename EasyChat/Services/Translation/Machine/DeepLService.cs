@@ -22,7 +22,6 @@ public class DeepLService : ITranslation
         {
             "quality_optimized" => ModelType.QualityOptimized,
             "prefer_quality_optimized" => ModelType.PreferQualityOptimized,
-            "latency_optimized" => ModelType.LatencyOptimized,
             _ => ModelType.LatencyOptimized
         };
 
@@ -51,9 +50,11 @@ public class DeepLService : ITranslation
         _logger.LogDebug("DeepLService initialized: ModelType={ModelType}", modelType);
     }
 
-    public async Task<string> TranslateAsync(string text, LanguageDefinition source, LanguageDefinition destination, bool showOriginal = true,
+    public async Task<string> TranslateAsync(string text, LanguageDefinition? source, LanguageDefinition? destination, bool showOriginal = true,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(destination);
         _logger.LogDebug("Translation request: {Source} → {Dest}, Length={Length}", source.DisplayName, destination.DisplayName, text.Length);
         
         var src = source.GetCode("DeepL") ?? source.Id;

@@ -4,13 +4,13 @@ namespace EasyChat.Services.Abstractions;
 
 public interface IConfigurationService
 {
-    General General { get; }
-    AiModel AiModel { get; }
-    MachineTrans MachineTrans { get; }
-    Proxy Proxy { get; }
-    Shortcut Shortcut { get; }
-    Prompts Prompts { get; }
-    ResultConfig Result { get; }
-    InputConfig Input { get; }
-    SpeechRecognitionConfig SpeechRecognition { get; }
+    General? General { get; }
+    AiModel? AiModel { get; }
+    MachineTrans? MachineTrans { get; }
+    Proxy? Proxy { get; }
+    Shortcut? Shortcut { get; }
+    Prompts? Prompts { get; }
+    ResultConfig? Result { get; }
+    InputConfig? Input { get; }
+    SpeechRecognitionConfig? SpeechRecognition { get; }
 }

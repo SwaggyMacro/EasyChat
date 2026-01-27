@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -15,6 +16,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EasyChat.Services.Platform;
 
+[SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
 public class WindowsProcessService : IProcessService
 {
     private readonly ILogger<WindowsProcessService> _logger;
@@ -115,7 +117,7 @@ public class WindowsProcessService : IProcessService
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool CloseHandle(IntPtr hObject);
 
-    private const int PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
+    private const int ProcessQueryLimitedInformation = 0x1000;
 
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     private string? GetProcessPath(int processId)
@@ -123,7 +125,7 @@ public class WindowsProcessService : IProcessService
         IntPtr hProcess = IntPtr.Zero;
         try
         {
-            hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, processId);
+            hProcess = OpenProcess(ProcessQueryLimitedInformation, false, processId);
             if (hProcess != IntPtr.Zero)
             {
                 StringBuilder sb = new StringBuilder(1024);

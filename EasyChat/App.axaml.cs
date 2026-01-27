@@ -191,17 +191,20 @@ public class App : Application
             var configService = provider.GetRequiredService<IConfigurationService>();
             
             // Initial check
-            UpdateTrayIconState(configService.General.ClosingBehavior);
+            if (configService.General != null)
+            {
+                UpdateTrayIconState(configService.General.ClosingBehavior);
 
-            // Reactive check
-            configService.General.WhenAnyValue(x => x.ClosingBehavior)
-                .Subscribe(UpdateTrayIconState);
+                // Reactive check
+                configService.General.WhenAnyValue(x => x.ClosingBehavior)
+                    .Subscribe(UpdateTrayIconState);
+            }
 
             // Check for updates on startup
             CheckForUpdatesAsync(provider);
 
             // Listen for theme changes to update icons
-            this.ActualThemeVariantChanged += (s, e) =>
+            ActualThemeVariantChanged += (_, _) =>
             {
                if (_trayIcon?.Menu != null)
                {
@@ -273,7 +276,7 @@ public class App : Application
 
         _trayIcon.Menu = menu;
         
-        if (GetValue(TrayIcon.IconsProperty) is TrayIcons icons)
+        if (GetValue(TrayIcon.IconsProperty) is { } icons)
         {
             icons.Add(_trayIcon);
         }
@@ -291,7 +294,7 @@ public class App : Application
         _trayIcon.Clicked -= TrayIcon_OnClickListener;
         _trayIcon.Dispose();
         
-        if (GetValue(TrayIcon.IconsProperty) is TrayIcons icons)
+        if (GetValue(TrayIcon.IconsProperty) is { } icons)
         {
             icons.Remove(_trayIcon);
         }

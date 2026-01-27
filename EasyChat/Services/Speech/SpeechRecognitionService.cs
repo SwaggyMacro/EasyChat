@@ -18,18 +18,17 @@ public class SpeechRecognitionService : ISpeechRecognitionService, IDisposable
     
     // Dedicated Worker Thread for ASR (STA)
     private readonly BlockingCollection<Action> _workerQueue = new();
-    private readonly Thread _asrWorkerThread;
+    private readonly Thread? _asrWorkerThread;
     private readonly CancellationTokenSource _cts = new();
 
-    private bool _isRecording;
     public bool IsRecording
     {
-        get => _isRecording;
-        private set 
+        get;
+        private set
         {
-            if (_isRecording != value)
+            if (!field.Equals(value))
             {
-                _isRecording = value;
+                field = value;
             }
         }
     }
@@ -213,7 +212,7 @@ public class SpeechRecognitionService : ISpeechRecognitionService, IDisposable
     {
         _cts.Cancel();
         _workerQueue.CompleteAdding();
-        if (_asrWorkerThread.IsAlive)
+        if (_asrWorkerThread is { IsAlive: true })
         {
             // _asrWorkerThread.Join(1000); 
         }

@@ -41,7 +41,7 @@
         <!-- Visible when: Unlocked AND (Hovering OR Dragging) -->
         <!-- Actually, user said: "Mouse move to subtitle area -> show". -->
         <Border x:Name="MainBorder" 
-                Background="{Binding BackgroundColor}"
+                Background="{Binding BackgroundColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}"
                 CornerRadius="8"
                 Padding="10"
                 Opacity="{Binding WindowOpacity}">
@@ -77,7 +77,8 @@
 
         <!-- 2. Subtitles Layer -->
         <!-- Added Top Margin to avoid overlapping the Toolbar area initially -->
-        <ScrollViewer VerticalScrollBarVisibility="Hidden" 
+        <ScrollViewer x:Name="SubtitlesScrollViewer"
+                      VerticalScrollBarVisibility="Hidden" 
                       HorizontalScrollBarVisibility="Disabled" 
                       Margin="10,40,10,10"
                       IsHitTestVisible="{Binding !IsFloatingWindowLocked}">
@@ -86,7 +87,7 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <!-- Subtitle Background Pill -->
-                        <Border Background="{Binding $parent[Window].((vm:SpeechRecognitionViewModel)DataContext).SubtitleBackgroundColor}"
+                        <Border Background="{Binding $parent[Window].((vm:SpeechRecognitionViewModel)DataContext).SubtitleBackgroundColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}"
                                 CornerRadius="4"
                                 Padding="8,4"
                                 Margin="0,2">
@@ -94,9 +95,9 @@
                                 <!-- Primary Subtitle -->
                                 <Grid ColumnDefinitions="*, Auto">
                                     <TextBlock Grid.Column="0" 
-                                               FontFamily="{Binding $parent[Window].((vm:SpeechRecognitionViewModel)DataContext).PrimaryFontFamily}"
+                                               FontFamily="{Binding $parent[Window].((vm:SpeechRecognitionViewModel)DataContext).PrimaryFontFamily, Converter={x:Static converts:StringToFontFamilyConverter.Instance}}"
                                                FontSize="{Binding $parent[Window].((vm:SpeechRecognitionViewModel)DataContext).PrimaryFontSize}"
-                                               Foreground="{Binding $parent[Window].((vm:SpeechRecognitionViewModel)DataContext).PrimaryFontColor}"
+                                               Foreground="{Binding $parent[Window].((vm:SpeechRecognitionViewModel)DataContext).PrimaryFontColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}"
                                                TextWrapping="Wrap"
                                                VerticalAlignment="Center">
                                         <TextBlock.Text>
@@ -128,11 +129,10 @@
                                     </Grid.IsVisible>
                                     
                                     <TextBlock Grid.Column="0"
-                                               FontFamily="{Binding $parent[Window].((vm:SpeechRecognitionViewModel)DataContext).SecondaryFontFamily}"
+                                               FontFamily="{Binding $parent[Window].((vm:SpeechRecognitionViewModel)DataContext).SecondaryFontFamily, Converter={x:Static converts:StringToFontFamilyConverter.Instance}}"
                                                FontSize="{Binding $parent[Window].((vm:SpeechRecognitionViewModel)DataContext).SecondaryFontSize}"
-                                               Foreground="{Binding $parent[Window].((vm:SpeechRecognitionViewModel)DataContext).SecondaryFontColor}"
+                                               Foreground="{Binding $parent[Window].((vm:SpeechRecognitionViewModel)DataContext).SecondaryFontColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}"
                                                TextWrapping="Wrap" 
-                                               Opacity="0.8"
                                                VerticalAlignment="Center">
                                         <TextBlock.Text>
                                             <MultiBinding Converter="{x:Static converts:SubtitleContentConverter.Instance}" ConverterParameter="Secondary">
