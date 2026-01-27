@@ -18,6 +18,7 @@ using EasyChat.Services.Languages;
 using EasyChat.Services.Languages.Providers;
 using EasyChat.Services.Shortcuts;
 using EasyChat.Services.Shortcuts.Handlers;
+using EasyChat.Services.Speech;
 using EasyChat.ViewModels;
 using EasyChat.ViewModels.Pages;
 using EasyChat.Views;
@@ -112,6 +113,10 @@ public class App : Application
             // Other Services
             services.AddSingleton<IOcrService, PaddleOcrService>();
             services.AddSingleton<ITranslationServiceFactory, TranslationServiceFactory>();
+
+            // Speech Recognition
+            services.AddSingleton<ISpeechRecognitionService, SpeechRecognitionService>();
+            services.AddSingleton<IProcessService, WindowsProcessService>();
             services.AddSingleton<PageNavigationService>();
 
             // AutoMapper
@@ -144,6 +149,9 @@ public class App : Application
 
             // Language Services
             services.AddSingleton<LanguageService>();
+            
+            // Speech Recognition Service
+            services.AddSingleton<ISpeechRecognitionService, SpeechRecognitionService>();
             
             // Update Check Service
             services.AddSingleton<UpdateCheckService>();

@@ -4,18 +4,16 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Avalonia.Threading;
-using Avalonia.Media.Imaging; 
 using EasyChat.Models;
 using EasyChat.Services.Abstractions;
 using EasyChat.Services.Languages;
 using System.IO;
 using System.Threading;
-using EasyChat.Services;
 using EasyChat.Services.Translation;
+using EasyChat.Services.Speech;
 using Material.Icons;
 using ReactiveUI;
 using System.Reactive.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Extensions.Logging;
 
@@ -26,13 +24,10 @@ public class SpeechRecognitionViewModel : Page
 {
     private readonly IConfigurationService _configurationService;
     private readonly ITranslationServiceFactory _translationServiceFactory;
+    private readonly ISpeechRecognitionService _speechRecognitionService;
+    private readonly IProcessService _processService;
     private readonly ILogger<SpeechRecognitionViewModel> _logger;
     private SubtitleItem? _currentSubtitleItem;
-    private AsrNativeInterop.RecognitionCallback _callbackDelegate;
-    
-    // Dedicated Worker Thread for ASR (STA)
-    private readonly System.Collections.Concurrent.BlockingCollection<Action> _workerQueue = new();
-    private readonly Thread _asrWorkerThread;
     
     // Translation Queue
     private readonly object _translationLock = new();
@@ -57,26 +52,7 @@ public class SpeechRecognitionViewModel : Page
         public override int GetHashCode() => Id.GetHashCode();
     }
 
-    public class ProcessInfo : ReactiveObject
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = "";
-        public string Title { get; set; } = "";
-        public string DisplayName => Id == 0 ? Lang.Resources.Speech_AllSystemAudio : $"[{Id}] {Name}"; 
-        private Bitmap? _appIcon;
-        public Bitmap? AppIcon
-        {
-            get => _appIcon;
-            set => this.RaiseAndSetIfChanged(ref _appIcon, value);
-        }
-        
-        private bool _isSelected;
-        public bool IsSelected
-        {
-            get => _isSelected;
-            set => this.RaiseAndSetIfChanged(ref _isSelected, value);
-        }
-    }
+    // ProcessInfo Removed (using EasyChat.Models.ProcessInfo)
 
     public bool IsSupported => OperatingSystem.IsWindows();
     public bool IsNotSupported => !IsSupported;
@@ -84,27 +60,27 @@ public class SpeechRecognitionViewModel : Page
     public SpeechRecognitionViewModel(
         IConfigurationService configurationService, 
         ITranslationServiceFactory translationServiceFactory,
+        ISpeechRecognitionService speechRecognitionService,
+        IProcessService processService,
         ILogger<SpeechRecognitionViewModel> logger) 
         : base(Lang.Resources.Page_SpeechRecognition, MaterialIconKind.Microphone, 4)
     {
         _configurationService = configurationService;
         _translationServiceFactory = translationServiceFactory;
+        _speechRecognitionService = speechRecognitionService;
+        _processService = processService;
         _logger = logger;
         
-        // Initialize defaults to satisfy compiler (unused if not supported)
-        _callbackDelegate = null!;
+        // Initialize defaults
         _selectedEngineOption = null!;
         _selectedTargetLanguage = null!;
 
-        if (OperatingSystem.IsWindows())
-        {
-            _callbackDelegate = OnRecognitionResult;
-            
-            // Start Worker Thread
-            _asrWorkerThread = new Thread(WorkerLoop) { IsBackground = true, Name = "ASR Worker" };
-            _asrWorkerThread.SetApartmentState(ApartmentState.STA);
-            _asrWorkerThread.Start();
-        }
+        // Subscribe to Service Events
+        _speechRecognitionService.OnFinalResult += text => OnRecognitionResult(0, text);
+        _speechRecognitionService.OnPartialResult += text => OnRecognitionResult(1, text);
+        _speechRecognitionService.OnError += text => OnRecognitionResult(2, text);
+        _speechRecognitionService.OnStarted += () => OnRecognitionResult(100, ""); // 100 is custom for started
+        _speechRecognitionService.OnStopped += () => OnRecognitionResult(3, "");
 
         // Initialize lists
         _recognitionLanguages = new ObservableCollection<string>();
@@ -112,16 +88,18 @@ public class SpeechRecognitionViewModel : Page
         
         SubtitleItems = new ObservableCollection<SubtitleItem>();
         
+        // Commands
         var canToggle = this.WhenAnyValue(x => x.IsBusy, busy => !busy).ObserveOn(RxApp.MainThreadScheduler);
-        ToggleRecordingCommand = ReactiveCommand.Create(() => { if (OperatingSystem.IsWindows()) ToggleRecording(); }, canToggle);
+        ToggleRecordingCommand = ReactiveCommand.CreateFromTask(async () => { 
+            if (OperatingSystem.IsWindows()) await ToggleRecordingAsync(); 
+        }, canToggle);
         
-        RefreshProcessesCommand = ReactiveCommand.Create(() => { if (OperatingSystem.IsWindows()) RefreshProcesses(); });
+        RefreshProcessesCommand = ReactiveCommand.Create(() => { 
+            if (OperatingSystem.IsWindows()) _processService.RefreshProcesses(); 
+        });
         
         if (OperatingSystem.IsWindows())
         {
-            // Initialize Processes
-            RefreshProcesses();
-    
             // Initialize Models/Engines
             LoadRecognitionModels();
             LoadEngineOptions();
@@ -171,7 +149,38 @@ public class SpeechRecognitionViewModel : Page
             this.WhenAnyValue(x => x.SelectedRecognitionLanguage).Subscribe(v => config.RecognitionLanguage = v);
             this.WhenAnyValue(x => x.SelectedEngineOption).Where(x => x != null).Subscribe(v => config.EngineId = v!.Id);
             this.WhenAnyValue(x => x.SelectedTargetLanguage).Where(x => x != null).Subscribe(v => config.TargetLanguage = v!.Id);
+            
+            // Sync initial processes
+
+            // Sync initial processes
+            _processService.RefreshProcesses();
+            
+            // Subscribe to Processes changes for Summary update
+            Processes.CollectionChanged += Processes_CollectionChanged;
+            foreach(var p in Processes) p.PropertyChanged += Process_PropertyChanged;
         }
+    }
+
+    private void Processes_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        if (e.NewItems != null)
+        {
+            foreach (ProcessInfo item in e.NewItems)
+                item.PropertyChanged += Process_PropertyChanged;
+        }
+
+        if (e.OldItems != null)
+        {
+            foreach (ProcessInfo item in e.OldItems)
+                item.PropertyChanged -= Process_PropertyChanged;
+        }
+        
+        UpdateProcessesSummary();
+    }
+
+    private void Process_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ProcessInfo.IsSelected)) UpdateProcessesSummary();
     }
 
     
@@ -269,14 +278,14 @@ public class SpeechRecognitionViewModel : Page
          set => this.RaiseAndSetIfChanged(ref _isTranslationEnabled, value);
     }
 
-    private bool _isRealTimePreviewEnabled = false;
+    private bool _isRealTimePreviewEnabled;
     public bool IsRealTimePreviewEnabled
     {
         get => _isRealTimePreviewEnabled;
         set => this.RaiseAndSetIfChanged(ref _isRealTimePreviewEnabled, value);
     }
 
-    private string _selectedProcessesSummary = EasyChat.Lang.Resources.Speech_AllSystemAudio;
+    private string _selectedProcessesSummary = Lang.Resources.Speech_AllSystemAudio;
     public string SelectedProcessesSummary
     {
         get => _selectedProcessesSummary;
@@ -354,103 +363,16 @@ public class SpeechRecognitionViewModel : Page
 
     public ObservableCollection<SubtitleItem> SubtitleItems { get; }
 
-    public ObservableCollection<ProcessInfo> Processes { get; } = new();
+    public ObservableCollection<ProcessInfo> Processes => _processService.Processes;
     public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> RefreshProcessesCommand { get; }
-
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-    private void RefreshProcesses()
-    {
-         try
-         {
-             var currentSelectedIds = Processes.Where(p => p.IsSelected).Select(p => p.Id).ToHashSet();
-             Processes.Clear();
-             
-             var global = new ProcessInfo { Id = 0, Name = "Global", Title = "System Audio", IsSelected = currentSelectedIds.Contains(0) || currentSelectedIds.Count == 0 };
-             global.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(ProcessInfo.IsSelected)) UpdateProcessesSummary(); };
-             Processes.Add(global);
-             
-             var procs = System.Diagnostics.Process.GetProcesses();
-             var itemsToLoadIcon = new List<ProcessInfo>();
-
-             foreach(var p in procs)
-             {
-                 if(p.Id == 0) continue;
-                 try 
-                 {
-                     if(!string.IsNullOrEmpty(p.MainWindowTitle))
-                     {
-                         var pi = new ProcessInfo { 
-                            Id = p.Id, 
-                            Name = p.ProcessName, 
-                            Title = p.MainWindowTitle,
-                            IsSelected = currentSelectedIds.Contains(p.Id)
-                         };
-                         
-                         pi.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(ProcessInfo.IsSelected)) UpdateProcessesSummary(); };
-                         Processes.Add(pi);
-                         itemsToLoadIcon.Add(pi);
-                     }
-                 }
-                 catch
-                 {
-                     // ignored
-                 }
-             }
-             
-             UpdateProcessesSummary();
-
-             // Load Icons Async
-             if (OperatingSystem.IsWindows())
-             {
-                 System.Threading.Tasks.Task.Run(() =>
-                 {
-                     foreach (var pi in itemsToLoadIcon)
-                     {
-                         try
-                         {
-                             var path = GetProcessPath(pi.Id);
-
-                             if (!string.IsNullOrEmpty(path) && File.Exists(path))
-                             {
-                                 using (var icon = System.Drawing.Icon.ExtractAssociatedIcon(path))
-                                 {
-                                     if (icon != null)
-                                     {
-                                         using (var sysBitmap = icon.ToBitmap())
-                                         {
-                                             using (var stream = new MemoryStream())
-                                             {
-                                                 sysBitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                                                 stream.Position = 0;
-                                                 var avaloniaBitmap = new Bitmap(stream);
-                                                 
-                                                 Dispatcher.UIThread.Post(() => pi.AppIcon = avaloniaBitmap);
-                                             }
-                                         }
-                                     }
-                                 }
-                             }
-                         }
-                         catch 
-                         {
-                             // Ignore
-                         }
-                     }
-                 });
-             }
-         }
-         catch (Exception ex)
-         {
-              _logger.LogError(ex, "Error refreshing processes");
-         }
-    }
+    public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> ToggleRecordingCommand { get; }
 
     private void UpdateProcessesSummary()
     {
         var selected = Processes.Where(p => p.IsSelected).ToList();
         if (selected.Count == 0 || selected.Any(p => p.Id == 0))
         {
-            SelectedProcessesSummary = EasyChat.Lang.Resources.Speech_AllSystemAudio;
+            SelectedProcessesSummary = Lang.Resources.Speech_AllSystemAudio;
         }
         else if (selected.Count == 1)
         {
@@ -462,34 +384,14 @@ public class SpeechRecognitionViewModel : Page
         }
     }
 
-    public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> ToggleRecordingCommand { get; }
-
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-    private void WorkerLoop()
-    {
-        foreach (var action in _workerQueue.GetConsumingEnumerable())
-        {
-            try
-            {
-                action();
-            }
-            catch (Exception ex)
-            {
-                 _logger.LogError(ex, "ASR Worker Error");
-            }
-        }
-    }
-
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-    private void ToggleRecording()
+    private async System.Threading.Tasks.Task ToggleRecordingAsync()
     {
         if (IsBusy) return;
-        IsBusy = true;
 
         if (IsRecording)
         {
              // Stop
-             // Clear translation queues immediately to stop UI processing
             lock (_translationLock)
             {
                 _itemsToProcess.Clear();
@@ -503,112 +405,69 @@ public class SpeechRecognitionViewModel : Page
                 _currentTranslationCts = null;
             }
 
-            _workerQueue.Add(() =>
-            {
-                try
-                {
-                    AsrNativeInterop.Cleanup();
-                    Dispatcher.UIThread.Post(() => { IsRecording = false; IsBusy = false; });
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error stopping ASR");
-                    Dispatcher.UIThread.Post(() => { IsRecording = false; IsBusy = false; });
-                }
-            });
+            await _speechRecognitionService.StopRecordingAsync();
         }
         else
         {
             // Start
-            if (string.IsNullOrEmpty(SelectedRecognitionLanguage)) 
-            {
-                 IsBusy = false;
-                 return;
-            }
+            if (string.IsNullOrEmpty(SelectedRecognitionLanguage)) return;
             
             var lang = SelectedRecognitionLanguage;
-            // Capture IDs on UI thread to access Processes collection safely
-            var selectedItems = Processes.Where(p => p.IsSelected).Select(p => p.Id).ToList();
+            var selectedProcessIds = Processes.Where(p => p.IsSelected).Select(p => p.Id).ToList();
 
-            _workerQueue.Add(() =>
+            var config = new SpeechRecognitionConfig
             {
-                try
-                {
-                    string libPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Lib");
-                    string modelPath = Path.Combine(libPath, lang);
+                ModelPath = lang,
+                ProcessIds = selectedProcessIds
+            };
 
-                    if (AsrNativeInterop.Initialize(modelPath))
-                    {
-                        AsrNativeInterop.SetCallback(_callbackDelegate);
-                        
-                        int[] pids;
-                        if (selectedItems.Count == 0 || selectedItems.Contains(0))
-                        {
-                            pids = [0];
-                        }
-                        else
-                        {
-                            pids = selectedItems.ToArray();
-                        }
-
-                        AsrNativeInterop.StartLoopbackCapture(pids, pids.Length);
-                        AsrNativeInterop.StartRecognition();
-                        
-                        Dispatcher.UIThread.Post(() => { IsRecording = true; IsBusy = false; });
-                    }
-                    else
-                    {
-                        // Initialization failed
-                         _logger.LogError("ASR Initialization failed.");
-                         Dispatcher.UIThread.Post(() => IsBusy = false);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error starting ASR");
-                    Dispatcher.UIThread.Post(() => IsBusy = false);
-                }
-            });
+            await _speechRecognitionService.StartRecordingAsync(config);
         }
     }
 
     private void OnRecognitionResult(int type, string result)
     {
-        Dispatcher.UIThread.Post(() =>
-        {
-            switch (type)
-            {
-                case 0: // Final
-                    if (_currentSubtitleItem == null) CreateNewSubtitleItem();
-                    _currentSubtitleItem!.OriginalText = result;
-                    
-                    if (IsTranslationEnabled)
-                    {
-                        EnqueueTranslation(_currentSubtitleItem, result);
-                    }
-                    
-                    _currentSubtitleItem = null; // Reset for next sentence
-                    break;
+         if (!Dispatcher.UIThread.CheckAccess())
+         {
+             Dispatcher.UIThread.Post(() => OnRecognitionResult(type, result));
+             return;
+         }
 
-                case 1: // Partial
-                    if (_currentSubtitleItem == null) CreateNewSubtitleItem();
-                    _currentSubtitleItem!.OriginalText = result;
+         switch (type)
+         {
+             case 0: // Final
+                 if (_currentSubtitleItem == null) CreateNewSubtitleItem();
+                 _currentSubtitleItem!.OriginalText = result;
+                
+                 if (IsTranslationEnabled)
+                 {
+                     EnqueueTranslation(_currentSubtitleItem, result);
+                 }
+                
+                 _currentSubtitleItem = null; 
+                 break;
 
-                    if (IsTranslationEnabled)
-                    {
-                        EnqueueTranslation(_currentSubtitleItem, result);
-                    }
-                    break;
+             case 1: // Partial
+                 if (_currentSubtitleItem == null) CreateNewSubtitleItem();
+                 _currentSubtitleItem!.OriginalText = result;
 
-                case 2: // Error
-                    _logger.LogError("ASR Error: {Result}", result);
-                    break;
-                    
-                case 3: // Canceled
-                    IsRecording = false;
-                    break;
-            }
-        });
+                 if (IsTranslationEnabled)
+                 {
+                     EnqueueTranslation(_currentSubtitleItem, result);
+                 }
+                 break;
+
+             case 2: // Error
+                 break;
+                
+             case 3: // Stopped
+                 IsRecording = false;
+                 break;
+                
+             case 100: // Started
+                 IsRecording = true;
+                 break;
+         }
     }
 
     private void EnqueueTranslation(SubtitleItem item, string text)
@@ -739,7 +598,7 @@ public class SpeechRecognitionViewModel : Page
             if (string.IsNullOrEmpty(delta)) return;
 
             // Punctuation logic
-            char[] punctuation = { '.', ',', '?', '!', ';', ':', '。', '，', '？', '！', '；', '：' };
+            char[] punctuation = ['.', ',', '?', '!', ';', ':', '。', '，', '？', '！', '；', '：'];
             int lastPunctIdx = delta.LastIndexOfAny(punctuation);
             
             string stablePart = "";
@@ -771,7 +630,7 @@ public class SpeechRecognitionViewModel : Page
                  lock(_translationLock) _isProcessingStable = true;
                  try
                  {
-                     var sbStable = new System.Text.StringBuilder();
+                     var sbStable = new StringBuilder();
                      var baseText = "";
                      Dispatcher.UIThread.Invoke(() => baseText = item.ConfirmedTranslatedText);
     
@@ -801,7 +660,7 @@ public class SpeechRecognitionViewModel : Page
             // 2. Handle Unstable Part (if any)
             if (IsRealTimePreviewEnabled && !string.IsNullOrEmpty(unstablePart))
             {
-                var sb = new System.Text.StringBuilder();
+                var sb = new StringBuilder();
                 string currentBase = "";
                 Dispatcher.UIThread.Invoke(() => currentBase = item.ConfirmedTranslatedText);
                 
@@ -867,42 +726,4 @@ public class SpeechRecognitionViewModel : Page
     }
 
     // --- P/Invoke Helpers ---
-    [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern bool QueryFullProcessImageName(IntPtr hProcess, int dwFlags, StringBuilder lpExeName, ref int lpdwSize);
-
-    [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
-
-    [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern bool CloseHandle(IntPtr hObject);
-
-    private const int PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
-
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-    private string? GetProcessPath(int processId)
-    {
-        IntPtr hProcess = IntPtr.Zero;
-        try
-        {
-            hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, processId);
-            if (hProcess != IntPtr.Zero)
-            {
-                StringBuilder sb = new StringBuilder(1024);
-                int size = sb.Capacity;
-                if (QueryFullProcessImageName(hProcess, 0, sb, ref size))
-                {
-                    return sb.ToString();
-                }
-            }
-        }
-        catch
-        {
-            // ignored
-        }
-        finally
-        {
-            if (hProcess != IntPtr.Zero) CloseHandle(hProcess);
-        }
-        return null;
-    }
 }

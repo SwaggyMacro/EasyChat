@@ -17,6 +17,7 @@
         <converts:ColorToHexConverter x:Key="ColorToHexConverter" />
         <converts:DeliveryModeToBoolConverter x:Key="DeliveryModeToBoolConverter" />
         <converts:DeliveryModeToStringConverter x:Key="DeliveryModeToStringConverter" />
+        <converts:LanguageNameToIconConverter x:Key="LanguageNameToIconConverter" />
     </UserControl.Resources>
     <UserControl.Styles>
         <Style Selector="suki|GlassCard.ModelCard StackPanel.ActionButtons">
@@ -43,7 +44,22 @@
                                     <TextBlock FontWeight="Bold" VerticalAlignment="Center"
                                                Text="{x:Static lang:Resources.Language}" />
                                     <ComboBox ItemsSource="{Binding Languages}"
-                                              SelectedItem="{Binding SelectedLanguage}" />
+                                              SelectedItem="{Binding SelectedLanguage}"
+                                              MinWidth="150">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <Border ClipToBounds="True" CornerRadius="2" Width="20" Height="14"
+                                                            IsVisible="{Binding Converter={StaticResource LanguageNameToIconConverter}, ConverterParameter=Check}">
+                                                        <Image Source="{Binding Converter={StaticResource LanguageNameToIconConverter}}"
+                                                               Stretch="UniformToFill" />
+                                                    </Border>
+                                                    <TextBlock Text="{Binding}" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource SukiText}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
                                     <TextBlock FontWeight="Bold" VerticalAlignment="Center"
@@ -60,14 +76,22 @@
                                 <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
                                     <TextBlock FontWeight="Bold" VerticalAlignment="Center"
                                                Text="{x:Static lang:Resources.TransEngine}" />
-                                    <RadioButton Content="{x:Static lang:Resources.AIEngine}"
-                                                 GroupName="A"
+                                    <RadioButton GroupName="A"
                                                  IsChecked="{Binding GeneralConf.TransEngine, 
-                                                 Converter={x:Static converts:EngineTypeToBoolConverters.AiModel}}" />
-                                    <RadioButton Content="{x:Static lang:Resources.MachineTranslation}"
-                                                 GroupName="A"
+                                                 Converter={x:Static converts:EngineTypeToBoolConverters.AiModel}}">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <avalonia:MaterialIcon Kind="Robot" Width="16" Height="16" />
+                                            <TextBlock Text="{x:Static lang:Resources.AIEngine}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton GroupName="A"
                                                  IsChecked="{Binding GeneralConf.TransEngine, 
-                                                 Converter={x:Static converts:EngineTypeToBoolConverters.MachineTrans}}" />
+                                                 Converter={x:Static converts:EngineTypeToBoolConverters.MachineTrans}}">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <avalonia:MaterialIcon Kind="Translate" Width="16" Height="16" />
+                                            <TextBlock Text="{x:Static lang:Resources.MachineTranslation}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </RadioButton>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
                                     <TextBlock FontWeight="Bold" VerticalAlignment="Center"
@@ -75,13 +99,50 @@
                                     <ComboBox ItemsSource="{Binding ConfiguredModels}"
                                               SelectedValue="{Binding GeneralConf.UsingAiModelId}"
                                               SelectedValueBinding="{Binding Id}"
-                                              DisplayMemberBinding="{Binding Name}" />
+                                              MinWidth="150">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <Panel Width="20" Height="20">
+                                                        <Border ClipToBounds="True" CornerRadius="4"
+                                                                IsVisible="{Binding ModelType, Converter={x:Static converts:AiModelTypeConverters.IsNotCustom}}">
+                                                            <Image Source="{Binding ModelType, Converter={x:Static converts:AiModelTypeConverters.ToIcon}}"
+                                                                   Stretch="UniformToFill" />
+                                                        </Border>
+                                                        <avalonia:MaterialIcon Kind="Robot" Width="20" Height="20"
+                                                                               IsVisible="{Binding ModelType, Converter={x:Static converts:AiModelTypeConverters.IsCustom}}" />
+                                                    </Panel>
+                                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource SukiText}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
                                     <TextBlock FontWeight="Bold" VerticalAlignment="Center"
                                                Text="{x:Static lang:Resources.UsingMachineTransEngine}" />
                                     <ComboBox ItemsSource="{Binding MachineTransProviders}"
-                                              SelectedItem="{Binding GeneralConf.UsingMachineTrans}" />
+                                              SelectedItem="{Binding GeneralConf.UsingMachineTrans}"
+                                              MinWidth="150">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <Panel Width="20" Height="20">
+                                                        <Border ClipToBounds="True" CornerRadius="4"
+                                                                IsVisible="{Binding Converter={x:Static converts:EngineConverters.HasIcon}}">
+                                                            <Image Source="{Binding Converter={x:Static converts:EngineConverters.ToIcon}}"
+                                                                   Stretch="UniformToFill" />
+                                                        </Border>
+                                                        <avalonia:MaterialIcon Kind="Translate" Width="20" Height="20"
+                                                                               IsVisible="{Binding Converter={x:Static converts:EngineConverters.HasNoIcon}}" />
+                                                    </Panel>
+                                                    <TextBlock Text="{Binding}" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource SukiText}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
                                     <TextBlock FontWeight="Bold" VerticalAlignment="Center"
