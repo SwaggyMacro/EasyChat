@@ -1709,5 +1709,192 @@ namespace EasyChat.Lang
                 return ResourceManager.GetString("Tab_Recognition", resourceCulture);
             }
         }
+        /// <summary>
+        ///   Looks up a localized string similar to Floating Window.
+        /// </summary>
+        public static string FloatingWindow
+        {
+            get
+            {
+                return ResourceManager.GetString("FloatingWindow", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Floating Window Configuration.
+        /// </summary>
+        public static string FloatingWindow_Config
+        {
+            get
+            {
+                return ResourceManager.GetString("FloatingWindow_Config", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Open Window.
+        /// </summary>
+        public static string FloatingWindow_Open
+        {
+            get
+            {
+                return ResourceManager.GetString("FloatingWindow_Open", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Close Window.
+        /// </summary>
+        public static string FloatingWindow_Close
+        {
+            get
+            {
+                return ResourceManager.GetString("FloatingWindow_Close", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Lock Window.
+        /// </summary>
+        public static string FloatingWindow_Lock
+        {
+            get
+            {
+                return ResourceManager.GetString("FloatingWindow_Lock", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Unlock Window (Click-Through).
+        /// </summary>
+        public static string FloatingWindow_Unlock
+        {
+            get
+            {
+                return ResourceManager.GetString("FloatingWindow_Unlock", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Primary Subtitle (Main).
+        /// </summary>
+        public static string Subtitle_Primary
+        {
+            get
+            {
+                return ResourceManager.GetString("Subtitle_Primary", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Secondary Subtitle (Aux).
+        /// </summary>
+        public static string Subtitle_Secondary
+        {
+            get
+            {
+                return ResourceManager.GetString("Subtitle_Secondary", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Original.
+        /// </summary>
+        public static string Subtitle_Source_Original
+        {
+            get
+            {
+                return ResourceManager.GetString("Subtitle_Source_Original", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Translated.
+        /// </summary>
+        public static string Subtitle_Source_Translated
+        {
+            get
+            {
+                return ResourceManager.GetString("Subtitle_Source_Translated", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to None.
+        /// </summary>
+        public static string Subtitle_Source_None
+        {
+            get
+            {
+                return ResourceManager.GetString("Subtitle_Source_None", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Window Appearance.
+        /// </summary>
+        public static string Window_Appearance
+        {
+            get
+            {
+                return ResourceManager.GetString("Window_Appearance", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Window BG.
+        /// </summary>
+        public static string Window_Background
+        {
+            get
+            {
+                return ResourceManager.GetString("Window_Background", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Subtitle BG.
+        /// </summary>
+        public static string Subtitle_Background
+        {
+            get
+            {
+                return ResourceManager.GetString("Subtitle_Background", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Opacity.
+        /// </summary>
+        public static string Window_Opacity
+        {
+            get
+            {
+                return ResourceManager.GetString("Window_Opacity", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Orientation.
+        /// </summary>
+        public static string Window_Orientation
+        {
+            get
+            {
+                return ResourceManager.GetString("Window_Orientation", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Font Family.
+        /// </summary>
+        public static string FontFamily
+        {
+            get
+            {
+                return ResourceManager.GetString("FontFamily", resourceCulture);
+            }
+        }
     }
+
 }

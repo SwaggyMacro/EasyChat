@@ -490,16 +490,16 @@ public class SpeechRecognitionViewModel : Page
     // 0=Original, 1=Translated
     public ObservableCollection<KeyValuePair<int, string>> MainSourceOptions { get; } = new ObservableCollection<KeyValuePair<int, string>> 
     { 
-        new(0, "Original"), 
-        new(1, "Translated") 
+        new(0, Lang.Resources.Subtitle_Source_Original), 
+        new(1, Lang.Resources.Subtitle_Source_Translated) 
     };
 
     // 0=None, 1=Original, 2=Translated
     public ObservableCollection<KeyValuePair<int, string>> SecondarySourceOptions { get; } = new ObservableCollection<KeyValuePair<int, string>> 
     { 
-        new(0, "None"), 
-        new(1, "Original"), 
-        new(2, "Translated") 
+        new(0, Lang.Resources.Subtitle_Source_None), 
+        new(1, Lang.Resources.Subtitle_Source_Original), 
+        new(2, Lang.Resources.Subtitle_Source_Translated) 
     };
 
     

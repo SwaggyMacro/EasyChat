@@ -9,6 +9,7 @@
              xmlns:objectModel="clr-namespace:System.Collections.ObjectModel;assembly=System.ObjectModel"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:converts="clr-namespace:EasyChat.Converters;assembly=EasyChat"
+             xmlns:dataConverters="clr-namespace:Avalonia.Data.Converters;assembly=Avalonia.Base"
              x:DataType="viewModels:SettingViewModel"
              mc:Ignorable="d">
     <UserControl.Resources>
@@ -17,7 +18,7 @@
         <converts:ColorToHexConverter x:Key="ColorToHexConverter" />
         <converts:DeliveryModeToBoolConverter x:Key="DeliveryModeToBoolConverter" />
         <converts:DeliveryModeToStringConverter x:Key="DeliveryModeToStringConverter" />
-        <converts:LanguageNameToIconConverter x:Key="LanguageNameToIconConverter" />
+
     </UserControl.Resources>
     <UserControl.Styles>
         <Style Selector="suki|GlassCard.ModelCard StackPanel.ActionButtons">
@@ -50,11 +51,11 @@
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                                     <Border ClipToBounds="True" CornerRadius="2" Width="20" Height="14"
-                                                            IsVisible="{Binding Converter={StaticResource LanguageNameToIconConverter}, ConverterParameter=Check}">
-                                                        <Image Source="{Binding Converter={StaticResource LanguageNameToIconConverter}}"
+                                                            IsVisible="{Binding Icon, Converter={x:Static dataConverters:StringConverters.IsNotNullOrEmpty}}">
+                                                        <Image Source="{Binding Icon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
                                                                Stretch="UniformToFill" />
                                                     </Border>
-                                                    <TextBlock Text="{Binding}" VerticalAlignment="Center"
+                                                    <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center"
                                                                Foreground="{DynamicResource SukiText}" />
                                                 </StackPanel>
                                             </DataTemplate>

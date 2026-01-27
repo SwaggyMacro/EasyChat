@@ -179,25 +179,25 @@
                 </Grid>
             </TabItem>
             
-            <TabItem Header="Floating Window">
+            <TabItem Header="{x:Static lang:Resources.FloatingWindow}">
                 <suki:GlassCard Margin="15">
                     <ScrollViewer>
                         <StackPanel Spacing="20">
-                            <TextBlock Text="Floating Window Configuration" FontSize="20" FontWeight="Bold"/>
+                            <TextBlock Text="{x:Static lang:Resources.FloatingWindow_Config}" FontSize="20" FontWeight="Bold"/>
 
                             <!-- Control Buttons -->
                             <StackPanel Orientation="Horizontal" Spacing="20">
                                 <Button Command="{Binding ToggleFloatingWindowCommand}" Classes="Flat" Padding="15,10">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <avalonia:MaterialIcon Kind="PictureInPictureBottomRight"/>
-                                        <TextBlock Text="{Binding IsFloatingWindowOpen, Converter={x:Static converts:BoolToTextConverter.Instance}, ConverterParameter='Open Window|Close Window'}"/>
+                                        <TextBlock Text="{Binding IsFloatingWindowOpen, Converter={x:Static converts:BoolToTextConverter.Instance}, ConverterParameter='FloatingWindow_Open|FloatingWindow_Close'}"/>
                                     </StackPanel>
                                 </Button>
                                 
                                 <Button Command="{Binding ToggleLockCommand}" Classes="Outlined" Padding="15,10" IsVisible="{Binding IsFloatingWindowOpen}">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <avalonia:MaterialIcon Kind="{Binding IsFloatingWindowLocked, Converter={x:Static converts:BoolToIconConverter.Instance}, ConverterParameter='Lock;LockOpen'}"/>
-                                        <TextBlock Text="{Binding IsFloatingWindowLocked, Converter={x:Static converts:BoolToTextConverter.Instance}, ConverterParameter='Lock Window|Unlock Window (Click-Through)'}"/>
+                                        <TextBlock Text="{Binding IsFloatingWindowLocked, Converter={x:Static converts:BoolToTextConverter.Instance}, ConverterParameter='FloatingWindow_Lock|FloatingWindow_Unlock'}"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -208,19 +208,19 @@
                             <Grid ColumnDefinitions="*, 20, *" RowDefinitions="Auto, Auto">
                                 <!-- Col 0: Primary -->
                                 <StackPanel Grid.Column="0" Spacing="15">
-                                    <TextBlock Text="Primary Subtitle (Main)" Classes="h4" FontWeight="SemiBold" Foreground="{DynamicResource SukiPrimaryColor}"/>
+                                    <TextBlock Text="{x:Static lang:Resources.Subtitle_Primary}" Classes="h4" FontWeight="SemiBold" Foreground="{DynamicResource SukiPrimaryColor}"/>
                                     
                                     <Grid ColumnDefinitions="100, *" RowDefinitions="Auto, Auto, Auto, Auto" RowSpacing="10">
-                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Content" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Static lang:Resources.PromptContent}" VerticalAlignment="Center"/>
                                         <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding MainSourceOptions}" SelectedValue="{Binding MainSubtitleSource}" SelectedValueBinding="{Binding Key}" DisplayMemberBinding="{Binding Value}" HorizontalAlignment="Stretch"/>
 
-                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Font Family" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{x:Static lang:Resources.FontFamily}" VerticalAlignment="Center"/>
                                         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding PrimaryFontFamily}"/>
                                         
-                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Font Size" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{x:Static lang:Resources.FontSize}" VerticalAlignment="Center"/>
                                         <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding PrimaryFontSize}" Minimum="10" Maximum="100"/>
                                         
-                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Font Color" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static lang:Resources.FontColor}" VerticalAlignment="Center"/>
                                         <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Spacing="10">
                                             <TextBox Text="{Binding PrimaryFontColor}" Width="100"/>
                                             <Button Width="30" Height="30" CornerRadius="15" Background="{Binding PrimaryFontColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
@@ -239,19 +239,19 @@
 
                                 <!-- Col 2: Secondary -->
                                 <StackPanel Grid.Column="2" Spacing="15">
-                                    <TextBlock Text="Secondary Subtitle (Aux)" Classes="h4" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}"/>
+                                    <TextBlock Text="{x:Static lang:Resources.Subtitle_Secondary}" Classes="h4" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}"/>
                                     
                                     <Grid ColumnDefinitions="100, *" RowDefinitions="Auto, Auto, Auto, Auto" RowSpacing="10">
-                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Content" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Static lang:Resources.PromptContent}" VerticalAlignment="Center"/>
                                         <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding SecondarySourceOptions}" SelectedValue="{Binding SecondarySubtitleSource}" SelectedValueBinding="{Binding Key}" DisplayMemberBinding="{Binding Value}" HorizontalAlignment="Stretch"/>
 
-                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Font Family" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{x:Static lang:Resources.FontFamily}" VerticalAlignment="Center"/>
                                         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SecondaryFontFamily}"/>
                                         
-                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Font Size" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{x:Static lang:Resources.FontSize}" VerticalAlignment="Center"/>
                                         <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding SecondaryFontSize}" Minimum="10" Maximum="100"/>
                                         
-                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Font Color" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static lang:Resources.FontColor}" VerticalAlignment="Center"/>
                                         <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Spacing="10">
                                             <TextBox Text="{Binding SecondaryFontColor}" Width="100"/>
                                             <Button Width="30" Height="30" CornerRadius="15" Background="{Binding SecondaryFontColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
@@ -269,9 +269,9 @@
                             <Separator Background="{DynamicResource SukiBorderBrush}" Height="1"/>
 
                             <!-- Window Appearance -->
-                            <TextBlock Text="Window Appearance" Classes="h4" FontWeight="SemiBold"/>
+                            <TextBlock Text="{x:Static lang:Resources.Window_Appearance}" Classes="h4" FontWeight="SemiBold"/>
                             <Grid ColumnDefinitions="Auto, *, 20, Auto, *" RowDefinitions="Auto, Auto" RowSpacing="15">
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Window BG" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Static lang:Resources.Window_Background}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="10">
                                     <TextBox Text="{Binding BackgroundColor}" Width="100"/>
                                     <Button Width="30" Height="30" CornerRadius="15" Background="{Binding BackgroundColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
@@ -283,7 +283,7 @@
                                     </Button>
                                 </StackPanel>
 
-                                <TextBlock Grid.Row="0" Grid.Column="3" Text="Subtitle BG" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <TextBlock Grid.Row="0" Grid.Column="3" Text="{x:Static lang:Resources.Subtitle_Background}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                 <StackPanel Grid.Row="0" Grid.Column="4" Orientation="Horizontal" Spacing="10">
                                     <TextBox Text="{Binding SubtitleBackgroundColor}" Width="100"/>
                                     <Button Width="30" Height="30" CornerRadius="15" Background="{Binding SubtitleBackgroundColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
@@ -295,13 +295,13 @@
                                     </Button>
                                 </StackPanel>
 
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Opacity" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{x:Static lang:Resources.Window_Opacity}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                 <Grid Grid.Row="1" Grid.Column="1" ColumnDefinitions="*, Auto">
                                     <Slider Value="{Binding WindowOpacity}" Minimum="0.1" Maximum="1.0" TickFrequency="0.05" IsSnapToTickEnabled="True"/>
                                     <TextBlock Grid.Column="1" Text="{Binding WindowOpacity, StringFormat='P0'}" Width="40" TextAlignment="Right"/>
                                 </Grid>
 
-                                <TextBlock Grid.Row="1" Grid.Column="3" Text="Orientation" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <TextBlock Grid.Row="1" Grid.Column="3" Text="{x:Static lang:Resources.Window_Orientation}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                 <ComboBox Grid.Row="1" Grid.Column="4" ItemsSource="{Binding OrientationOptions}" SelectedItem="{Binding FloatingWindowOrientation}" HorizontalAlignment="Stretch"/>
                             </Grid>
 

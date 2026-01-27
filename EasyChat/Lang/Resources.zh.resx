@@ -486,7 +486,88 @@
     <data name="Speech_NotSupported" xml:space="preserve">
         <value>此功能仅支持 Windows 系统。</value>
     </data>
+    <data name="Speech_EnableTranslation" xml:space="preserve">
+        <value>启用翻译</value>
+    </data>
+    <data name="Speech_RealTimePreview" xml:space="preserve">
+        <value>实时预览</value>
+    </data>
+    <data name="Speech_RealTimePreviewTip" xml:space="preserve">
+        <value>启用以翻译部分结果。禁用以仅翻译确认的句子。</value>
+    </data>
+    <data name="Speech_AudioSource" xml:space="preserve">
+        <value>音频源</value>
+    </data>
+    <data name="Speech_SelectSourceTitle" xml:space="preserve">
+        <value>选择音频源</value>
+    </data>
+    <data name="Speech_Start" xml:space="preserve">
+        <value>开始识别</value>
+    </data>
+    <data name="Speech_Stop" xml:space="preserve">
+        <value>停止识别</value>
+    </data>
+    <data name="Speech_Recognized" xml:space="preserve">
+        <value>已识别</value>
+    </data>
+    <data name="Speech_Translated" xml:space="preserve">
+        <value>已翻译</value>
+    </data>
     <data name="Page_SpeechRecognition" xml:space="preserve">
         <value>语音识别</value>
+    </data>
+    <data name="Tab_Recognition" xml:space="preserve">
+        <value>识别</value>
+    </data>
+    <data name="FloatingWindow" xml:space="preserve">
+        <value>字幕悬浮窗</value>
+    </data>
+    <data name="FloatingWindow_Config" xml:space="preserve">
+        <value>悬浮窗配置</value>
+    </data>
+    <data name="FloatingWindow_Open" xml:space="preserve">
+        <value>开启悬浮窗</value>
+    </data>
+    <data name="FloatingWindow_Close" xml:space="preserve">
+        <value>关闭悬浮窗</value>
+    </data>
+    <data name="FloatingWindow_Lock" xml:space="preserve">
+        <value>锁定窗口</value>
+    </data>
+    <data name="FloatingWindow_Unlock" xml:space="preserve">
+        <value>解锁窗口 (鼠标穿透)</value>
+    </data>
+    <data name="Subtitle_Primary" xml:space="preserve">
+        <value>主字幕 (主要)</value>
+    </data>
+    <data name="Subtitle_Secondary" xml:space="preserve">
+        <value>副字幕 (辅助)</value>
+    </data>
+    <data name="Subtitle_Source_Original" xml:space="preserve">
+        <value>原文</value>
+    </data>
+    <data name="Subtitle_Source_Translated" xml:space="preserve">
+        <value>译文</value>
+    </data>
+    <data name="Subtitle_Source_None" xml:space="preserve">
+        <value>无</value>
+    </data>
+    <data name="Window_Appearance" xml:space="preserve">
+        <value>窗口外观</value>
+    </data>
+    <data name="Window_Background" xml:space="preserve">
+        <value>窗口背景</value>
+    </data>
+    <data name="Subtitle_Background" xml:space="preserve">
+        <value>字幕背景</value>
+    </data>
+    <data name="Window_Opacity" xml:space="preserve">
+        <value>不透明度</value>
+    </data>
+    <data name="Window_Orientation" xml:space="preserve">
+        <value>方向</value>
+    </data>
+    <data name="FontFamily" xml:space="preserve">
+        <value>字体</value>
     </data>
 </root>

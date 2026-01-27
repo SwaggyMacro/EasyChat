@@ -533,4 +533,55 @@
     <data name="Tab_Recognition" xml:space="preserve">
         <value>Recognition</value>
     </data>
+    <data name="FloatingWindow" xml:space="preserve">
+        <value>Subtitle Window</value>
+    </data>
+    <data name="FloatingWindow_Config" xml:space="preserve">
+        <value>Floating Window Configuration</value>
+    </data>
+    <data name="FloatingWindow_Open" xml:space="preserve">
+        <value>Open Window</value>
+    </data>
+    <data name="FloatingWindow_Close" xml:space="preserve">
+        <value>Close Window</value>
+    </data>
+    <data name="FloatingWindow_Lock" xml:space="preserve">
+        <value>Lock Window</value>
+    </data>
+    <data name="FloatingWindow_Unlock" xml:space="preserve">
+        <value>Unlock Window (Click-Through)</value>
+    </data>
+    <data name="Subtitle_Primary" xml:space="preserve">
+        <value>Primary Subtitle (Main)</value>
+    </data>
+    <data name="Subtitle_Secondary" xml:space="preserve">
+        <value>Secondary Subtitle (Aux)</value>
+    </data>
+    <data name="Subtitle_Source_Original" xml:space="preserve">
+        <value>Original</value>
+    </data>
+    <data name="Subtitle_Source_Translated" xml:space="preserve">
+        <value>Translated</value>
+    </data>
+    <data name="Subtitle_Source_None" xml:space="preserve">
+        <value>None</value>
+    </data>
+    <data name="Window_Appearance" xml:space="preserve">
+        <value>Window Appearance</value>
+    </data>
+    <data name="Window_Background" xml:space="preserve">
+        <value>Window BG</value>
+    </data>
+    <data name="Subtitle_Background" xml:space="preserve">
+        <value>Subtitle BG</value>
+    </data>
+    <data name="Window_Opacity" xml:space="preserve">
+        <value>Opacity</value>
+    </data>
+    <data name="Window_Orientation" xml:space="preserve">
+        <value>Orientation</value>
+    </data>
+    <data name="FontFamily" xml:space="preserve">
+        <value>Font Family</value>
+    </data>
 </root>

@@ -20,8 +20,15 @@ public class BoolToTextConverter : IValueConverter
             var parts = paramStr.Split('|');
             if (parts.Length >= 2)
             {
-                trueText = parts[1];
-                falseText = parts[0];
+                var falseKey = parts[0];
+                var trueKey = parts[1];
+
+                // Try to get from resources, fallback to original string
+                var falseRes = Lang.Resources.ResourceManager.GetString(falseKey, culture) ?? falseKey;
+                var trueRes = Lang.Resources.ResourceManager.GetString(trueKey, culture) ?? trueKey;
+
+                trueText = trueRes;
+                falseText = falseRes;
             }
         }
 

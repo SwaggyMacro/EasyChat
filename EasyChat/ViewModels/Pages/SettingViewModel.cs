@@ -48,7 +48,7 @@ public class SettingViewModel : Page
 
     private List<string> _geminiModels;
 
-    private List<string> _languages = ["English", "Simplified Chinese"];
+
 
     private List<string> _machineTransProviders = ["Baidu", "Tencent", "Google", "DeepL"];
 
@@ -156,24 +156,26 @@ public class SettingViewModel : Page
         set => this.RaiseAndSetIfChanged(ref _deepLModelTypes, value);
     }
 
-    public List<string> Languages
+    private List<LanguageDefinition> _languages = [LanguageKeys.English, LanguageKeys.ChineseSimplified];
+
+    public List<LanguageDefinition> Languages
     {
         get => _languages;
         set => this.RaiseAndSetIfChanged(ref _languages, value);
     }
 
-    public string SelectedLanguage
+    public LanguageDefinition? SelectedLanguage
     {
-        get => GeneralConf.Language;
+        get => Languages.FirstOrDefault(l => l.EnglishName == GeneralConf.Language) ?? LanguageKeys.English;
         set
         {
-            if (GeneralConf.Language != value)
+            if (value != null && GeneralConf.Language != value.EnglishName)
             {
-                GeneralConf.Language = value;
+                GeneralConf.Language = value.EnglishName;
                 this.RaisePropertyChanged();
 
                 // Update Culture
-                var culture = value switch
+                var culture = value.EnglishName switch
                 {
                     "Simplified Chinese" => new CultureInfo("zh-CN"),
                     _ => new CultureInfo("en-US")
