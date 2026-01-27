@@ -181,6 +181,12 @@
                 </StackPanel>
                 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2">
+                    <Button Command="{Binding IncreaseFontSizeCommand}" Classes="ToolbarBtn" ToolTip.Tip="Increase Font Size">
+                        <TextBlock Text="A+" Foreground="White" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
+                    </Button>
+                    <Button Command="{Binding DecreaseFontSizeCommand}" Classes="ToolbarBtn" ToolTip.Tip="Decrease Font Size">
+                        <TextBlock Text="A-" Foreground="White" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
+                    </Button>
                      <Button Command="{Binding ToggleLockCommand}" Classes="ToolbarBtn" ToolTip.Tip="Lock Window">
                         <avalonia:MaterialIcon Kind="LockOpen" Width="16" Height="16" Foreground="White"/>
                     </Button>

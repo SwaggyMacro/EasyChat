@@ -111,6 +111,18 @@ public class SpeechRecognitionViewModel : Page
         ToggleLockCommand = ReactiveCommand.Create(() => IsFloatingWindowLocked = !IsFloatingWindowLocked);
         UnlockFloatingWindowCommand = ReactiveCommand.Create(() => IsFloatingWindowLocked = false);
         
+        IncreaseFontSizeCommand = ReactiveCommand.Create(() => 
+        {
+            if (PrimaryFontSize < 100) PrimaryFontSize = Math.Min(100, PrimaryFontSize + 2);
+            if (SecondaryFontSize < 100) SecondaryFontSize = Math.Min(100, SecondaryFontSize + 2);
+        });
+
+        DecreaseFontSizeCommand = ReactiveCommand.Create(() => 
+        {
+            if (PrimaryFontSize > 10) PrimaryFontSize = Math.Max(10, PrimaryFontSize - 2);
+            if (SecondaryFontSize > 10) SecondaryFontSize = Math.Max(10, SecondaryFontSize - 2);
+        });
+        
         if (OperatingSystem.IsWindows())
         {
             // Initialize Models/Engines
@@ -535,6 +547,8 @@ public class SpeechRecognitionViewModel : Page
     public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> ToggleFloatingWindowCommand { get; }
     public ReactiveCommand<System.Reactive.Unit, bool> ToggleLockCommand { get; }
     public ReactiveCommand<System.Reactive.Unit, bool> UnlockFloatingWindowCommand { get; }
+    public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> IncreaseFontSizeCommand { get; }
+    public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> DecreaseFontSizeCommand { get; }
     
     private Avalonia.Controls.Window? _floatingWindow;
     private bool _isFloatingWindowOpen;
