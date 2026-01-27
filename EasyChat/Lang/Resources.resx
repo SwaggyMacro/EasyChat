@@ -530,4 +530,7 @@
     <data name="Page_SpeechRecognition" xml:space="preserve">
         <value>Speech Recognition</value>
     </data>
+    <data name="Tab_Recognition" xml:space="preserve">
+        <value>Recognition</value>
+    </data>
 </root>

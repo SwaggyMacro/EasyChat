@@ -1699,5 +1699,15 @@ namespace EasyChat.Lang
                 return ResourceManager.GetString("Page_SpeechRecognition", resourceCulture);
             }
         }
+        /// <summary>
+        ///   Looks up a localized string similar to Recognition.
+        /// </summary>
+        public static string Tab_Recognition
+        {
+            get
+            {
+                return ResourceManager.GetString("Tab_Recognition", resourceCulture);
+            }
+        }
     }
 }

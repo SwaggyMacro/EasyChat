@@ -7,6 +7,8 @@ namespace EasyChat.Converters;
 
 public class ColorToHexConverter : IValueConverter
 {
+    public static readonly ColorToHexConverter Instance = new();
+
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is string hex && !string.IsNullOrEmpty(hex)) // String -> Color
