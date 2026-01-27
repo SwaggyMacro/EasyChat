@@ -223,10 +223,12 @@
                                         <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static lang:Resources.FontColor}" VerticalAlignment="Center"/>
                                         <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Spacing="10">
                                             <TextBox Text="{Binding PrimaryFontColor}" Width="100"/>
-                                            <Button Width="30" Height="30" CornerRadius="15" Background="{Binding PrimaryFontColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
+                                            <Button Width="35" Height="35" CornerRadius="20" BorderThickness="1" BorderBrush="#33000000" Background="{Binding PrimaryFontColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
                                                 <Button.Flyout>
                                                     <Flyout Placement="Bottom">
-                                                        <ColorView Color="{Binding PrimaryFontColor, Converter={x:Static converts:ColorToHexConverter.Instance}}" IsAlphaEnabled="True"/>
+                                                        <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
+                                                            <ColorView Color="{Binding PrimaryFontColor, Converter={x:Static converts:ColorToHexConverter.Instance}}" IsAlphaEnabled="True" ColorSpectrumShape="Ring"/>
+                                                        </Border>
                                                     </Flyout>
                                                 </Button.Flyout>
                                             </Button>
@@ -254,10 +256,12 @@
                                         <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static lang:Resources.FontColor}" VerticalAlignment="Center"/>
                                         <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Spacing="10">
                                             <TextBox Text="{Binding SecondaryFontColor}" Width="100"/>
-                                            <Button Width="30" Height="30" CornerRadius="15" Background="{Binding SecondaryFontColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
+                                            <Button Width="35" Height="35" CornerRadius="20" BorderThickness="1" BorderBrush="#33000000" Background="{Binding SecondaryFontColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
                                                 <Button.Flyout>
                                                     <Flyout Placement="Bottom">
-                                                        <ColorView Color="{Binding SecondaryFontColor, Converter={x:Static converts:ColorToHexConverter.Instance}}" IsAlphaEnabled="True"/>
+                                                        <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
+                                                            <ColorView Color="{Binding SecondaryFontColor, Converter={x:Static converts:ColorToHexConverter.Instance}}" IsAlphaEnabled="True" ColorSpectrumShape="Ring"/>
+                                                        </Border>
                                                     </Flyout>
                                                 </Button.Flyout>
                                             </Button>
@@ -274,10 +278,12 @@
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Static lang:Resources.Window_Background}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="10">
                                     <TextBox Text="{Binding BackgroundColor}" Width="100"/>
-                                    <Button Width="30" Height="30" CornerRadius="15" Background="{Binding BackgroundColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
+                                    <Button Width="35" Height="35" CornerRadius="20" BorderThickness="1" BorderBrush="#33000000" Background="{Binding BackgroundColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
                                         <Button.Flyout>
                                             <Flyout Placement="Bottom">
-                                                <ColorView Color="{Binding BackgroundColor, Converter={x:Static converts:ColorToHexConverter.Instance}}" IsAlphaEnabled="True"/>
+                                                <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
+                                                    <ColorView Color="{Binding BackgroundColor, Converter={x:Static converts:ColorToHexConverter.Instance}}" IsAlphaEnabled="True" ColorSpectrumShape="Ring"/>
+                                                </Border>
                                             </Flyout>
                                         </Button.Flyout>
                                     </Button>
@@ -286,10 +292,12 @@
                                 <TextBlock Grid.Row="0" Grid.Column="3" Text="{x:Static lang:Resources.Subtitle_Background}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                 <StackPanel Grid.Row="0" Grid.Column="4" Orientation="Horizontal" Spacing="10">
                                     <TextBox Text="{Binding SubtitleBackgroundColor}" Width="100"/>
-                                    <Button Width="30" Height="30" CornerRadius="15" Background="{Binding SubtitleBackgroundColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
+                                    <Button Width="35" Height="35" CornerRadius="20" BorderThickness="1" BorderBrush="#33000000" Background="{Binding SubtitleBackgroundColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
                                         <Button.Flyout>
                                             <Flyout Placement="Bottom">
-                                                <ColorView Color="{Binding SubtitleBackgroundColor, Converter={x:Static converts:ColorToHexConverter.Instance}}" IsAlphaEnabled="True"/>
+                                                <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
+                                                    <ColorView Color="{Binding SubtitleBackgroundColor, Converter={x:Static converts:ColorToHexConverter.Instance}}" IsAlphaEnabled="True" ColorSpectrumShape="Ring"/>
+                                                </Border>
                                             </Flyout>
                                         </Button.Flyout>
                                     </Button>
