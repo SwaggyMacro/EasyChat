@@ -41,7 +41,9 @@ public class TranslationServiceFactory : ITranslationServiceFactory
             Constant.TransEngineType.Ai => !string.IsNullOrEmpty(_config.GeneralConf.UsingAiModelId) 
                 ? CreateAiServiceById(_config.GeneralConf.UsingAiModelId)
                 : CreateAiService(_config.GeneralConf.UsingAiModel),
-            Constant.TransEngineType.Machine => CreateMachineService(_config.GeneralConf.UsingMachineTrans),
+            Constant.TransEngineType.Machine => !string.IsNullOrEmpty(_config.GeneralConf.UsingMachineTransId)
+                ? CreateMachineServiceById(_config.GeneralConf.UsingMachineTransId)
+                : CreateMachineService(_config.GeneralConf.UsingMachineTrans),
             _ => throw new ArgumentException($"Unknown translation engine: {_config.GeneralConf.TransEngine}")
         };
     }
@@ -50,18 +52,9 @@ public class TranslationServiceFactory : ITranslationServiceFactory
     {
         var model = _config.AiModelConf.ConfiguredModels.FirstOrDefault(m => m.Id == id);
         
-        // Fallback or error if not found by ID. 
-        // Ideally we shouldn't fail hard if possible, but if ID is missing it's a configuration error.
-        // However, we might want to try to recover by name if possible (though dangerous).
-        // Let's stick to explicit failure for ID mismatch to avoid ambiguity, 
-        // OR return null/throw.
-        
         if (model == null)
         {
             _logger.LogWarning("AI model with ID {Id} not found.", id);
-             // Attempt fallback to Name if name happens to match something? No, that defeats the purpose.
-             // But wait, if we are in a transitional state...
-             // Let's just throw for now.
              throw new ArgumentException($"Unknown AI model ID: {id}");
         }
 
@@ -97,45 +90,72 @@ public class TranslationServiceFactory : ITranslationServiceFactory
             _loggerFactory.CreateLogger<OpenAiService>());
     }
 
+    public ITranslation CreateMachineServiceById(string id)
+    {
+        // Check IDs and return the matching service
+        if (_config.MachineTransConf.Baidu.Id == id) return CreateBaiduService();
+        if (_config.MachineTransConf.Tencent.Id == id) return CreateTencentService();
+        if (_config.MachineTransConf.Google.Id == id) return CreateGoogleService();
+        if (_config.MachineTransConf.DeepL.Id == id) return CreateDeepLService();
+        
+        // Fallback: search by ID if it was possibly updated or if we want to be robust?
+        // Actually, the providers are static properties on MachineTransConf. 
+        // So checking them one by one is correct.
+        
+        throw new ArgumentException($"Unknown machine translation provider ID: {id}");
+    }
+
     public ITranslation CreateMachineService(string providerName)
     {
         _logger.LogDebug("Creating machine translation service: Provider={Provider}", providerName);
         
         switch (providerName)
         {
-            case "Baidu":
-                var baiduItem = _config.MachineTransConf.Baidu.GetRandomItem();
-                return new BaiduService(
-                    baiduItem.AppId,
-                    baiduItem.AppKey,
-                    GetProxyUrl(_config.MachineTransConf.Baidu.UseProxy),
-                    _loggerFactory.CreateLogger<BaiduService>());
-
-            case "Tencent":
-                var tencentItem = _config.MachineTransConf.Tencent.GetRandomItem();
-                return new TencentService(
-                    tencentItem.SecretId,
-                    tencentItem.SecretKey,
-                    GetProxyUrl(_config.MachineTransConf.Tencent.UseProxy),
-                    _loggerFactory.CreateLogger<TencentService>());
-
-            case "Google":
-                return new GoogleService(
-                    _config.MachineTransConf.Google.Model,
-                    _config.MachineTransConf.Google.Key,
-                    GetProxyUrl(_config.MachineTransConf.Google.UseProxy),
-                    _loggerFactory.CreateLogger<GoogleService>());
-
-            case "DeepL":
-                return new DeepLService(
-                    _config.MachineTransConf.DeepL.ModelType,
-                    _config.MachineTransConf.DeepL.ApiKey,
-                    GetProxyUrl(_config.MachineTransConf.DeepL.UseProxy),
-                    _loggerFactory.CreateLogger<DeepLService>());
-
+            case "Baidu": return CreateBaiduService();
+            case "Tencent": return CreateTencentService();
+            case "Google": return CreateGoogleService();
+            case "DeepL": return CreateDeepLService();
             default:
                 throw new ArgumentException($"Unknown machine translation provider: {providerName}");
         }
+    }
+
+    private ITranslation CreateBaiduService()
+    {
+         var baiduItem = _config.MachineTransConf.Baidu.GetRandomItem();
+         return new BaiduService(
+             baiduItem.AppId,
+             baiduItem.AppKey,
+             GetProxyUrl(_config.MachineTransConf.Baidu.UseProxy),
+             _loggerFactory.CreateLogger<BaiduService>());
+    }
+
+    private ITranslation CreateTencentService()
+    {
+        var tencentItem = _config.MachineTransConf.Tencent.GetRandomItem();
+        return new TencentService(
+            tencentItem.SecretId,
+            tencentItem.SecretKey,
+            GetProxyUrl(_config.MachineTransConf.Tencent.UseProxy),
+            _loggerFactory.CreateLogger<TencentService>());
+    }
+
+    private ITranslation CreateGoogleService()
+    {
+        return new GoogleService(
+            _config.MachineTransConf.Google.Model,
+            _config.MachineTransConf.Google.Key,
+            GetProxyUrl(_config.MachineTransConf.Google.UseProxy),
+            _loggerFactory.CreateLogger<GoogleService>());
+    }
+
+    private ITranslation CreateDeepLService()
+    {
+        return new DeepLService(
+            _config.MachineTransConf.DeepL.ModelType,
+            _config.MachineTransConf.DeepL.ApiKey,
+            GetProxyUrl(_config.MachineTransConf.DeepL.UseProxy),
+            _loggerFactory.CreateLogger<DeepLService>());
     }
 
     private string? GetProxyUrl(bool useProxy)

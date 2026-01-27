@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Newtonsoft.Json;
@@ -101,6 +101,15 @@ public class MachineTrans : ReactiveObject
             set => this.RaiseAndSetIfChanged(ref _useProxy, value);
         }
 
+        [JsonProperty]
+        public string Id
+        {
+            get => _id;
+            set => this.RaiseAndSetIfChanged(ref _id, value);
+        }
+
+        private string _id = Guid.NewGuid().ToString();
+
         [JsonProperty] public ObservableCollection<BaiduItem> Items { get; set; } = new();
 
         public string AppId
@@ -146,6 +155,15 @@ public class MachineTrans : ReactiveObject
             get => _useProxy;
             set => this.RaiseAndSetIfChanged(ref _useProxy, value);
         }
+
+        [JsonProperty]
+        public string Id
+        {
+            get => _id;
+            set => this.RaiseAndSetIfChanged(ref _id, value);
+        }
+
+        private string _id = Guid.NewGuid().ToString();
 
         [JsonProperty] public ObservableCollection<TencentItem> Items { get; set; } = new();
 
@@ -194,6 +212,15 @@ public class MachineTrans : ReactiveObject
         }
 
         [JsonProperty]
+        public string Id
+        {
+            get => _id;
+            set => this.RaiseAndSetIfChanged(ref _id, value);
+        }
+
+        private string _id = Guid.NewGuid().ToString();
+
+        [JsonProperty]
         public string Model
         {
             get => _model;
@@ -233,6 +260,15 @@ public class MachineTrans : ReactiveObject
             get => _useProxy;
             set => this.RaiseAndSetIfChanged(ref _useProxy, value);
         }
+
+        [JsonProperty]
+        public string Id
+        {
+            get => _id;
+            set => this.RaiseAndSetIfChanged(ref _id, value);
+        }
+
+        private string _id = Guid.NewGuid().ToString();
 
         [JsonProperty]
         public string ModelType

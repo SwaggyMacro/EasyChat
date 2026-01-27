@@ -102,6 +102,46 @@ public class SettingViewModel : Page
                 }
             });
 
+        // Migrate/Sync MachineTrans ID if missing
+        if (string.IsNullOrEmpty(GeneralConf.UsingMachineTransId) && !string.IsNullOrEmpty(GeneralConf.UsingMachineTrans))
+        {
+            var id = GeneralConf.UsingMachineTrans switch
+            {
+                "Baidu" => MachineTransConf.Baidu.Id,
+                "Tencent" => MachineTransConf.Tencent.Id,
+                "Google" => MachineTransConf.Google.Id,
+                "DeepL" => MachineTransConf.DeepL.Id,
+                _ => null
+            };
+            
+            if (id != null)
+            {
+                GeneralConf.UsingMachineTransId = id;
+            }
+        }
+
+        // Keep MachineTrans ID in sync when Name changes (User selection from UI)
+        this.WhenAnyValue(x => x.GeneralConf.UsingMachineTrans)
+            .Subscribe(name =>
+            {
+                 if (!string.IsNullOrEmpty(name))
+                 {
+                     var id = name switch
+                     {
+                         "Baidu" => MachineTransConf.Baidu.Id,
+                         "Tencent" => MachineTransConf.Tencent.Id,
+                         "Google" => MachineTransConf.Google.Id,
+                         "DeepL" => MachineTransConf.DeepL.Id,
+                         _ => null
+                     };
+                     
+                     if (id != null && GeneralConf.UsingMachineTransId != id)
+                     {
+                         GeneralConf.UsingMachineTransId = id;
+                     }
+                 }
+            });
+
         // Watch for collection changes
         Observable.FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
                 h => AiModelConf.ConfiguredModels.CollectionChanged += h,

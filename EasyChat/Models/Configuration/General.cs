@@ -76,6 +76,15 @@ public class General : ReactiveObject
     }
 
     [JsonProperty]
+    public string UsingMachineTransId
+    {
+        get => _usingMachineTransId;
+        set => this.RaiseAndSetIfChanged(ref _usingMachineTransId, value);
+    }
+
+    private string? _usingMachineTransId;
+
+    [JsonProperty]
     public string UsingMachineTrans
     {
         get => _usingMachineTrans ?? "Baidu";

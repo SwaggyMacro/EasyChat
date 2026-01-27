@@ -36,6 +36,9 @@ public class ConfigurationService : ReactiveObject, IConfigurationService
         Global.Config.MachineTransConf = MachineTrans;
         Global.Config.ProxyConf = Proxy;
         Global.Config.ShortcutConf = Shortcut;
+        
+        // Ensure initial IDs are persisted (especially just after migration)
+        ConfigUtil.SaveConfig(Constant.MachineTransConf, MachineTrans);
 
         // Setup Auto-Save Subscriptions
         SetupAutoSave();
