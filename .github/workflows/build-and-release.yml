@@ -51,6 +51,15 @@ jobs:
           fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
+      - name: Download Previous Release Assets
+        continue-on-error: true
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p Releases
+          gh release download -p "RELEASES" -p "*.nupkg" --dir ./Releases || echo "No previous release found, skipping delta generation."
+        
       - name: Pack with Velopack
         run: |
           vpk pack -u EasyChat -v ${{ env.VERSION }} -p ./publish -e EasyChat.exe
