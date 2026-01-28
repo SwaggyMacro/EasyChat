@@ -82,7 +82,7 @@ jobs:
           files: |
             Releases/*Setup.exe
             Releases/*.zip
-            Releases/*.nupkg
+            Releases/*-${{ env.VERSION }}-*.nupkg
             Releases/RELEASES
             Releases/*.json
         env:
@@ -108,6 +108,6 @@ jobs:
         with:
           name: Velopack-Assets
           path: |
-             Releases/*.nupkg
+             Releases/*-${{ env.VERSION }}-*.nupkg
              Releases/RELEASES
              Releases/*.json

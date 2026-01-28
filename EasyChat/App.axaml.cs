@@ -401,10 +401,22 @@ public class App : Application
 
     private async void ShowUpdatingToast(Velopack.UpdateInfo updateInfo, UpdateCheckService updateService)
     {
-        var progress = new ProgressBar { Value = 0 , ShowProgressText = true};
+        var progress = new ProgressBar { Value = 0 };
+        var progressText = new TextBlock 
+        { 
+            Text = "0%", 
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center, 
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            Foreground = Brushes.White // Assuming dark toast background, or use dynamic brush
+        };
+        
+        var content = new Grid();
+        content.Children.Add(progress);
+        content.Children.Add(progressText);
+
         var toast = Global.ToastManager.CreateToast()
             .WithTitle(Lang.Resources.Updating)
-            .WithContent(progress)
+            .WithContent(content)
             .Queue();
 
         try
@@ -414,6 +426,7 @@ public class App : Application
                 Avalonia.Threading.Dispatcher.UIThread.Post(() =>
                 {
                     progress.Value = p;
+                    progressText.Text = $"{p}%";
                 });
             });
             
