@@ -55,11 +55,26 @@ jobs:
         run: |
           vpk pack -u EasyChat -v ${{ env.VERSION }} -p ./publish -e EasyChat.exe
 
-      - name: Upload Release Files
+      - name: Upload Setup
         uses: actions/upload-artifact@v4
         with:
-          name: releases
-          path: Releases/
+          name: EasyChat-Setup
+          path: Releases/*Setup.exe
+
+      - name: Upload Portable
+        uses: actions/upload-artifact@v4
+        with:
+          name: EasyChat-Portable
+          path: Releases/*.zip
+
+      - name: Upload Velopack Assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: Velopack-Assets
+          path: |
+             Releases/*.nupkg
+             Releases/RELEASES
+             Releases/*.json
 
   release:
     needs: build
@@ -71,11 +86,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: releases
           path: ./releases
+          merge-multiple: true
 
       - name: Generate Changelog
         id: changelog
