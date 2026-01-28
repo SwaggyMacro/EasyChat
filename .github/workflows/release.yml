@@ -1,22 +1,18 @@
-name: Build and Release
+name: Release
 
 on:
   push:
-    branches: [ "master" ]
     tags:
       - 'v*.*.*'
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        include:
-          - os: windows-latest
-            runtime: win-x64
-            
-    name: Build on ${{ matrix.os }}
+  release:
+    runs-on: windows-latest
+    name: Create Release
+    permissions:
+      contents: write
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,7 +32,7 @@ jobs:
 
       - name: Publish EasyChat
         run: |
-          dotnet publish ./EasyChat/EasyChat.csproj -c Release -r ${{ matrix.runtime }} --self-contained -o ./publish
+          dotnet publish ./EasyChat/EasyChat.csproj -c Release -r win-x64 --self-contained -o ./publish
 
       - name: Get Version
         id: get_version
@@ -64,45 +60,9 @@ jobs:
         run: |
           vpk pack -u EasyChat -v ${{ env.VERSION }} -p ./publish -e EasyChat.exe
 
-      - name: Upload Setup
-        uses: actions/upload-artifact@v4
-        with:
-          name: EasyChat-Setup
-          path: Releases/*Setup.exe
-
-      - name: Upload Portable
-        uses: actions/upload-artifact@v4
-        with:
-          name: EasyChat-Portable
-          path: Releases/*.zip
-
-      - name: Upload Velopack Assets
-        uses: actions/upload-artifact@v4
-        with:
-          name: Velopack-Assets
-          path: |
-             Releases/*.nupkg
-             Releases/RELEASES
-             Releases/*.json
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ./releases
-          merge-multiple: true
-
       - name: Generate Changelog
         id: changelog
+        shell: bash
         run: |
           PREV_TAG=$(git describe --tags --abbrev=0 ${{ github.ref_name }}^ 2>/dev/null || echo "")
           echo "### 📝 Change Log" > release_notes.md
@@ -115,9 +75,39 @@ jobs:
           fi
 
       - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v1
         with:
           body_path: release_notes.md
-          files: ./releases/*
+          files: |
+            Releases/*Setup.exe
+            Releases/*.zip
+            Releases/*.nupkg
+            Releases/RELEASES
+            Releases/*.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Setup
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: EasyChat-Setup
+          path: Releases/*Setup.exe
+
+      - name: Upload Portable
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: EasyChat-Portable
+          path: Releases/*.zip
+
+      - name: Upload Velopack Assets
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Velopack-Assets
+          path: |
+             Releases/*.nupkg
+             Releases/RELEASES
+             Releases/*.json

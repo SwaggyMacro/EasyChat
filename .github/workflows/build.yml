@@ -1,0 +1,45 @@
+name: Build CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    name: Build and Test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Publish EasyChat
+        run: |
+          dotnet publish ./EasyChat/EasyChat.csproj -c Release -r win-x64 --self-contained -o ./publish
+
+      - name: Get Short SHA
+        id: vars
+        shell: bash
+        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Compress Publish Directory
+        run: Compress-Archive -Path ./publish/* -DestinationPath ./EasyChat-Build-${{ steps.vars.outputs.SHORT_SHA }}.zip
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: EasyChat-Build-${{ steps.vars.outputs.SHORT_SHA }}
+          path: ./EasyChat-Build-${{ steps.vars.outputs.SHORT_SHA }}.zip
