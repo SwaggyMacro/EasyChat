@@ -401,7 +401,7 @@ public class App : Application
 
     private async void ShowUpdatingToast(Velopack.UpdateInfo updateInfo, UpdateCheckService updateService)
     {
-        var progress = new ProgressBar() { Value = 0 };
+        var progress = new ProgressBar { Value = 0 , ShowProgressText = true};
         var toast = Global.ToastManager.CreateToast()
             .WithTitle(Lang.Resources.Updating)
             .WithContent(progress)
