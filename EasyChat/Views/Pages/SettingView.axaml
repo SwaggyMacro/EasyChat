@@ -18,6 +18,8 @@
         <converts:ColorToHexConverter x:Key="ColorToHexConverter" />
         <converts:DeliveryModeToBoolConverter x:Key="DeliveryModeToBoolConverter" />
         <converts:DeliveryModeToStringConverter x:Key="DeliveryModeToStringConverter" />
+        <converts:ScreenshotModeConverter x:Key="ScreenshotModeConverter" />
+
 
     </UserControl.Resources>
     <UserControl.Styles>
@@ -684,6 +686,28 @@
                     </suki:SettingsLayoutItem.Content>
                 </suki:SettingsLayoutItem>
 
+                <suki:SettingsLayoutItem Header="{x:Static lang:Resources.ScreenshotMode}">
+                    <suki:SettingsLayoutItem.Content>
+                        <suki:GlassCard>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
+                                    <TextBlock FontWeight="Bold" VerticalAlignment="Center"
+                                               Text="{x:Static lang:Resources.ScreenshotMode}" />
+                                    <ComboBox ItemsSource="{Binding ScreenshotModes}"
+                                              SelectedItem="{Binding SelectedScreenshotMode}"
+                                              MinWidth="150">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Converter={StaticResource ScreenshotModeConverter}}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+                            </StackPanel>
+                        </suki:GlassCard>
+                    </suki:SettingsLayoutItem.Content>
+                </suki:SettingsLayoutItem>
+                
                 <suki:SettingsLayoutItem Header="{x:Static lang:Resources.ResultSettings}">
                     <suki:SettingsLayoutItem.Content>
                         <suki:GlassCard>

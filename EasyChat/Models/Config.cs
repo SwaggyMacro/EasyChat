@@ -11,4 +11,5 @@ public class Config
     public MachineTrans MachineTransConf { get; set; } = new();
     public Proxy ProxyConf { get; set; } = new();
     public Shortcut ShortcutConf { get; set; } = new();
+    public ScreenshotConfig ScreenshotConf { get; set; } = new();
 }

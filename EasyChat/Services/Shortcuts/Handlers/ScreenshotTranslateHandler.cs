@@ -61,7 +61,8 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
 
     private void StartScreenCapture()
     {
-        var session = new ScreenCapture.ScreenSelectionSession(_screenCaptureService, OnScreenCaptured, OnScreenCaptureCancelled);
+        var mode = _configurationService.Screenshot?.Mode ?? Constants.Constant.ScreenshotMode.Precise;
+        var session = new ScreenCapture.ScreenSelectionSession(_screenCaptureService, OnScreenCaptured, OnScreenCaptureCancelled, mode);
         session.Start();
     }
     

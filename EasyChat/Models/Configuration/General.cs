@@ -72,7 +72,7 @@ public class General : ReactiveObject
     [JsonProperty]
     public string? UsingMachineTrans
     {
-        get => field ?? "Baidu";
-        set => this.RaiseAndSetIfChanged(ref field, value ?? "Baidu");
-    } = "Baidu";
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
 }

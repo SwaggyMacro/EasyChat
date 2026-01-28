@@ -588,4 +588,19 @@
     <data name="Screenshot_Hint" xml:space="preserve">
         <value>请框选需要翻译的区域。右键或ESC取消。</value>
     </data>
+    <data name="Confirm" xml:space="preserve">
+        <value>确认</value>
+    </data>
+    <data name="Reset" xml:space="preserve">
+        <value>重置</value>
+    </data>
+    <data name="ScreenshotMode" xml:space="preserve">
+        <value>截图模式</value>
+    </data>
+    <data name="ScreenshotMode_Quick" xml:space="preserve">
+        <value>快速截图 (无确认)</value>
+    </data>
+    <data name="ScreenshotMode_Precise" xml:space="preserve">
+        <value>精准截图 (工具栏)</value>
+    </data>
 </root>

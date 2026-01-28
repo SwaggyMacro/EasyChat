@@ -770,6 +770,61 @@ namespace EasyChat.Lang
                 return ResourceManager.GetString("Screenshot", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Confirm.
+        /// </summary>
+        public static string Confirm
+        {
+            get
+            {
+                return ResourceManager.GetString("Confirm", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Reset.
+        /// </summary>
+        public static string Reset
+        {
+            get
+            {
+                return ResourceManager.GetString("Reset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Screenshot Mode.
+        /// </summary>
+        public static string ScreenshotMode
+        {
+            get
+            {
+                return ResourceManager.GetString("ScreenshotMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Quick (No Confirm).
+        /// </summary>
+        public static string ScreenshotMode_Quick
+        {
+            get
+            {
+                return ResourceManager.GetString("ScreenshotMode_Quick", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Precise (Toolbar).
+        /// </summary>
+        public static string ScreenshotMode_Precise
+        {
+            get
+            {
+                return ResourceManager.GetString("ScreenshotMode_Precise", resourceCulture);
+            }
+        }
 
         /// <summary>
         ///   Looks up a localized string similar to Select the area to translate. Right-click or ESC to cancel.

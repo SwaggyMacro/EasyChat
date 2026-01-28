@@ -9,6 +9,8 @@ using EasyChat.Services.Abstractions;
 using EasyChat.Views;
 using EasyChat.Views.Overlay;
 
+using EasyChat.Constants;
+
 namespace EasyChat.Services.ScreenCapture;
 
 public class ScreenSelectionSession
@@ -17,12 +19,14 @@ public class ScreenSelectionSession
     private readonly Action? _onCancel;
     private readonly List<OverlayWindow> _overlays = new();
     private readonly IScreenCaptureService _screenCaptureService;
+    private readonly string _mode;
 
-    public ScreenSelectionSession(IScreenCaptureService screenCaptureService, Action<Bitmap> onCapture, Action? onCancel = null)
+    public ScreenSelectionSession(IScreenCaptureService screenCaptureService, Action<Bitmap> onCapture, Action? onCancel = null, string mode = Constant.ScreenshotMode.Precise)
     {
         _screenCaptureService = screenCaptureService;
         _onCapture = onCapture;
         _onCancel = onCancel;
+        _mode = mode;
     }
 
     public void Start()
@@ -47,7 +51,7 @@ public class ScreenSelectionSession
         var bounds = new PixelRect(minX, minY, width, height);
 
         // Create overlay
-        var overlay = new OverlayWindow(bounds, bitmap);
+        var overlay = new OverlayWindow(bounds, bitmap, _mode);
         overlay.SelectionCompleted += OnSelectionCompleted;
         overlay.SelectionCanceled += OnSelectionCanceled;
 

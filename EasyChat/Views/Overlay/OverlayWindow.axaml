@@ -3,25 +3,72 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:lang="clr-namespace:EasyChat.Lang"
+        xmlns:icon="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:suki="https://github.com/kikipoulet/SukiUI"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="EasyChat.Views.Overlay.OverlayWindow"
         Closed="TopLevel_OnClosed" KeyDown="InputElement_OnKeyDown"
         Title="OverlayWindow">
-    <Canvas>
+    <Canvas Name="MainCanvas">
+        <!-- Main Selection Box -->
         <Rectangle x:Name="SelectionRectangle"
-                   Stroke="Red"
+                   Stroke="{DynamicResource SukiPrimaryColor}"
                    StrokeThickness="2"
-                   Fill="#33FF0000"
+                   Fill="#1A2196F3"
                    IsVisible="False" />
         
+        <!-- Resize Handles -->
+        <Border x:Name="HandleTopLeft" Width="14" Height="14" Background="White" BorderBrush="{DynamicResource SukiPrimaryColor}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="TopLeftCorner" />
+        <Border x:Name="HandleTopCenter" Width="14" Height="14" Background="White" BorderBrush="{DynamicResource SukiPrimaryColor}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="SizeNorthSouth" />
+        <Border x:Name="HandleTopRight" Width="14" Height="14" Background="White" BorderBrush="{DynamicResource SukiPrimaryColor}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="TopRightCorner" />
+        <Border x:Name="HandleRightCenter" Width="14" Height="14" Background="White" BorderBrush="{DynamicResource SukiPrimaryColor}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="SizeWestEast" />
+        <Border x:Name="HandleBottomRight" Width="14" Height="14" Background="White" BorderBrush="{DynamicResource SukiPrimaryColor}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="BottomRightCorner" />
+        <Border x:Name="HandleBottomCenter" Width="14" Height="14" Background="White" BorderBrush="{DynamicResource SukiPrimaryColor}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="SizeNorthSouth" />
+        <Border x:Name="HandleBottomLeft" Width="14" Height="14" Background="White" BorderBrush="{DynamicResource SukiPrimaryColor}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="BottomLeftCorner" />
+        <Border x:Name="HandleLeftCenter" Width="14" Height="14" Background="White" BorderBrush="{DynamicResource SukiPrimaryColor}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="SizeWestEast" />
+
         <Border x:Name="HintBorder"
                 Background="#CC000000"
                 Padding="16,12"
-                CornerRadius="8"
-                IsVisible="False">
+                CornerRadius="8">
             <TextBlock Text="{x:Static lang:Resources.Screenshot_Hint}"
                        Foreground="White"
                        FontSize="16" />
+        </Border>
+        
+        <Border x:Name="ToolbarBorder"
+                CornerRadius="15"
+                Padding="0"
+                IsVisible="False"
+                Background="{DynamicResource SukiCardBackground}"
+                BoxShadow="{DynamicResource SukiLowShadow}"
+                BorderThickness="0">
+            <StackPanel Orientation="Horizontal" Spacing="0">
+                <Button x:Name="ConfirmButton" 
+                        Background="Transparent"
+                        Padding="12,8"
+                        CornerRadius="15,0,0,15"
+                        Click="ConfirmButton_OnClick"
+                        ToolTip.Tip="{x:Static lang:Resources.Confirm}">
+                     <icon:MaterialIcon Kind="Check" Width="24" Height="24" Foreground="#4CAF50" />
+                </Button>
+                <Button x:Name="ResetButton" 
+                        Background="Transparent"
+                        Padding="12,8"
+                        CornerRadius="0"
+                        Click="ResetButton_OnClick"
+                        ToolTip.Tip="{x:Static lang:Resources.Reset}">
+                    <icon:MaterialIcon Kind="Refresh" Width="24" Height="24" Foreground="{DynamicResource SukiInfoBrush}" />
+                </Button>
+                <Button x:Name="CancelButton" 
+                        Background="Transparent"
+                        Padding="12,8"
+                        CornerRadius="0,15,15,0"
+                        Click="CancelButton_OnClick"
+                        ToolTip.Tip="{x:Static lang:Resources.Cancel}">
+                    <icon:MaterialIcon Kind="Close" Width="24" Height="24" Foreground="#F44336" />
+                </Button>
+            </StackPanel>
         </Border>
     </Canvas>
 </Window>

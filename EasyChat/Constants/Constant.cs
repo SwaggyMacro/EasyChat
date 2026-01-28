@@ -14,6 +14,7 @@ public static class Constant
     public const string PromptConf = "Prompts";
     public const string ResultConf = "Result";
     public const string InputConf = "Input";
+    public const string ScreenshotConf = "Screenshot";
     public const string SpeechRecognitionConf = "SpeechRecognition";
     
     public static readonly string ConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configuration");
@@ -30,6 +31,12 @@ public static class Constant
         public const string DeepL = "DeepL";
         public const string Baidu = "Baidu";
         public const string Tencent = "Tencent";
+    }
+
+    public static class ScreenshotMode
+    {
+        public const string Precise = "Precise";
+        public const string Quick = "Quick";
     }
 }
 

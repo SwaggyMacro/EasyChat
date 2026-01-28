@@ -617,4 +617,19 @@
     <data name="Screenshot_Hint" xml:space="preserve">
         <value>Select the area to translate. Right-click or ESC to cancel.</value>
     </data>
+    <data name="Confirm" xml:space="preserve">
+        <value>Confirm</value>
+    </data>
+    <data name="Reset" xml:space="preserve">
+        <value>Reset</value>
+    </data>
+    <data name="ScreenshotMode" xml:space="preserve">
+        <value>Screenshot Mode</value>
+    </data>
+    <data name="ScreenshotMode_Quick" xml:space="preserve">
+        <value>Quick (No Confirm)</value>
+    </data>
+    <data name="ScreenshotMode_Precise" xml:space="preserve">
+        <value>Precise (Toolbar)</value>
+    </data>
 </root>

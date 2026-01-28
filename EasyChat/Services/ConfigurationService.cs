@@ -28,6 +28,7 @@ public class ConfigurationService : ReactiveObject, IConfigurationService
         Prompts = ConfigUtil.LoadConfig<Prompts>(Constant.PromptConf);
         Result = ConfigUtil.LoadConfig<ResultConfig>(Constant.ResultConf);
         Input = ConfigUtil.LoadConfig<InputConfig>(Constant.InputConf);
+        Screenshot = ConfigUtil.LoadConfig<ScreenshotConfig>(Constant.ScreenshotConf);
         SpeechRecognition = ConfigUtil.LoadConfig<SpeechRecognitionConfig>(Constant.SpeechRecognitionConf);
 
         // Set global access for legacy compatibility (if needed)
@@ -54,6 +55,7 @@ public class ConfigurationService : ReactiveObject, IConfigurationService
     public Prompts Prompts { get; }
     public ResultConfig Result { get; }
     public InputConfig Input { get; }
+    public ScreenshotConfig Screenshot { get; }
     public SpeechRecognitionConfig SpeechRecognition { get; }
 
     private void SetupAutoSave()
@@ -92,6 +94,15 @@ public class ConfigurationService : ReactiveObject, IConfigurationService
             {
                 _logger.LogDebug("Auto-saving Input configuration");
                 ConfigUtil.SaveConfig(Constant.InputConf, Input);
+            });
+
+        // Screenshot Config - Simple Property Changes
+        Screenshot.Changed
+            .Throttle(TimeSpan.FromMilliseconds(500))
+            .Subscribe(_ =>
+            {
+                _logger.LogDebug("Auto-saving Screenshot configuration");
+                ConfigUtil.SaveConfig(Constant.ScreenshotConf, Screenshot);
             });
 
         // SpeechRecognition Config - Simple Property Changes

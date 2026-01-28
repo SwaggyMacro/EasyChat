@@ -232,6 +232,19 @@ public class SettingViewModel : Page
         }
     }
 
+    public List<string> ScreenshotModes { get; } = [Constant.ScreenshotMode.Precise, Constant.ScreenshotMode.Quick];
+
+    public string SelectedScreenshotMode
+    {
+        get => ScreenshotConf?.Mode ?? Constant.ScreenshotMode.Precise;
+        set
+        {
+            if (ScreenshotConf == null || ScreenshotConf.Mode == value) return;
+            ScreenshotConf.Mode = value;
+            this.RaisePropertyChanged();
+        }
+    }
+
     public List<string> AiProviders
     {
         get;
@@ -267,6 +280,8 @@ public class SettingViewModel : Page
     public ResultConfig? ResultConf => _configurationService.Result;
     
     public InputConfig? InputConf => _configurationService.Input;
+    
+    public ScreenshotConfig? ScreenshotConf => _configurationService.Screenshot;
     
     public List<string> TransparencyLevels { get; } = ["AcrylicBlur", "Blur", "Transparent"];
     

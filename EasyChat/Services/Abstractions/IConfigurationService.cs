@@ -12,5 +12,6 @@ public interface IConfigurationService
     Prompts? Prompts { get; }
     ResultConfig? Result { get; }
     InputConfig? Input { get; }
+    ScreenshotConfig? Screenshot { get; }
     SpeechRecognitionConfig? SpeechRecognition { get; }
 }
