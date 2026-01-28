@@ -100,6 +100,39 @@ public class PaddleOcrService : IOcrService, IDisposable
         return (annotatedBitmap, result.Text);
     }
 
+    public PaddleOcrResult RecognizeTextRaw(Bitmap bitmap, OcrLanguage? language = null, bool enableRotation = false)
+    {
+        var lang = language ?? OcrLanguage.ChineseSimplified;
+        _logger.LogDebug("Starting raw OCR recognition with language: {Language}, Rotation: {Rotation}", lang.DisplayName, enableRotation);
+        
+        var engine = GetOrCreateEngine(lang);
+        
+        // Save previous state
+        var oldRotate = engine.AllowRotateDetection;
+        var old180 = engine.Enable180Classification;
+
+        if (enableRotation)
+        {
+            engine.AllowRotateDetection = true;
+            // engine.Enable180Classification = true; // Causing crash
+        }
+
+        try
+        {
+            using var src = BitmapToMat(bitmap);
+            return engine.Run(src);
+        }
+        finally
+        {
+            // Restore state
+            if (enableRotation)
+            {
+                engine.AllowRotateDetection = oldRotate;
+                // engine.Enable180Classification = old180;
+            }
+        }
+    }
+
     private PaddleOcrAll GetOrCreateEngine(OcrLanguage language)
     {
         return _engines.GetOrAdd(language, lang => new Lazy<PaddleOcrAll>(() =>

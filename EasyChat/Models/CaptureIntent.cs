@@ -5,5 +5,6 @@ public enum CaptureIntent
     Translation, // Default (Confirm button)
     CopyOriginal,
     CopyTranslated,
-    CopyBilingual
+    CopyBilingual,
+    CopyImageTranslated
 }

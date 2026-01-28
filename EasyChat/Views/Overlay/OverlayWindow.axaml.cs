@@ -251,6 +251,7 @@ public partial class OverlayWindow : Window
     public void CopyOriginal_OnClick(object? sender, RoutedEventArgs e) => ProcessSelection(CaptureIntent.CopyOriginal);
     public void CopyTranslated_OnClick(object? sender, RoutedEventArgs e) => ProcessSelection(CaptureIntent.CopyTranslated);
     public void CopyBilingual_OnClick(object? sender, RoutedEventArgs e) => ProcessSelection(CaptureIntent.CopyBilingual);
+    public void CopyImageTranslated_OnClick(object? sender, RoutedEventArgs e) => ProcessSelection(CaptureIntent.CopyImageTranslated);
     
     private void CopyButton_OnPointerEntered(object? sender, PointerEventArgs e)
     {
