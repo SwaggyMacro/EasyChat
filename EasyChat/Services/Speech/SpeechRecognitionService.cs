@@ -163,20 +163,27 @@ public class SpeechRecognitionService : ISpeechRecognitionService, IDisposable
 
     private void WorkerLoop()
     {
-        foreach (var action in _workerQueue.GetConsumingEnumerable(_cts.Token))
+        try
         {
-            try
+            foreach (var action in _workerQueue.GetConsumingEnumerable(_cts.Token))
             {
-                action();
+                try
+                {
+                    action();
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "ASR Worker Error");
+                }
             }
-            catch (OperationCanceledException)
-            {
-                break;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "ASR Worker Error");
-            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Graceful shutdown, avoid exception on exit.
         }
     }
 
