@@ -13,24 +13,10 @@ jobs:
     strategy:
       matrix:
         include:
-          # Windows x64
           - os: windows-latest
             runtime: win-x64
-            archive_name: EasyChat.Win.X64.zip
-          # Uncomment below for other platforms when ready
-          # - os: ubuntu-latest
-          #   runtime: linux-x64
-          #   archive_name: EasyChat.Linux.X64.zip
-          # - os: ubuntu-latest
-          #   runtime: linux-arm64
-          #   archive_name: EasyChat.Linux.Arm64.zip
-          # - os: macos-latest
-          #   runtime: osx-x64
-          #   archive_name: EasyChat.MacOS.X64.zip
-          # - os: macos-latest
-          #   runtime: osx-arm64
-          #   archive_name: EasyChat.MacOS.Arm64.zip
-    name: Build on ${{ matrix.os }} (${{ matrix.runtime }})
+            
+    name: Build on ${{ matrix.os }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -41,40 +27,37 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-          include-prerelease: true
+
+      - name: Install Velopack CLI
+        run: dotnet tool install -g vpk
 
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Publish EasyChat for ${{ matrix.runtime }}
-        shell: bash
+      - name: Publish EasyChat
         run: |
-          dotnet publish ./EasyChat/EasyChat.csproj \
-            -c Release \
-            -f net10.0 \
-            -r ${{ matrix.runtime }} \
-            --self-contained true \
-            -p:UseAppHost=true \
-            -p:PublishReadyToRun=true \
-            -p:PublishTrimmed=false \
-            -p:PublishSingleFile=false \
-            -o ./publish/${{ matrix.runtime }}
+          dotnet publish ./EasyChat/EasyChat.csproj -c Release -r ${{ matrix.runtime }} --self-contained -o ./publish
 
-      - name: Create archive for ${{ matrix.runtime }}
+      - name: Get Version
+        id: get_version
         shell: bash
         run: |
-          cd publish/${{ matrix.runtime }}
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            powershell -Command "Compress-Archive -Path * -DestinationPath ../../${{ matrix.archive_name }}"
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
           else
-            zip -r ../../${{ matrix.archive_name }} *
+            echo "VERSION=0.0.0-dev" >> $GITHUB_ENV
           fi
 
-      - name: Upload build artifact
+      - name: Pack with Velopack
+        run: |
+          vpk pack -u EasyChat -v ${{ env.VERSION }} -p ./publish -e EasyChat.exe
+
+      - name: Upload Release Files
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.archive_name }}
-          path: ${{ matrix.archive_name }}
+          name: releases
+          path: Releases/
 
   release:
     needs: build
@@ -86,55 +69,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download all build artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          path: ./artifacts
-
-      - name: Prepare release files
-        run: |
-          mkdir -p ./release-files
-          find ./artifacts -name "*.zip" -exec cp {} ./release-files/ \;
-          echo "Files prepared for release:"
-          ls -la ./release-files/
+          name: releases
+          path: ./releases
 
       - name: Generate Changelog
         id: changelog
         run: |
           PREV_TAG=$(git describe --tags --abbrev=0 ${{ github.ref_name }}^ 2>/dev/null || echo "")
-          
-          echo "Current Tag: ${{ github.ref_name }}"
-          echo "Previous Tag: $PREV_TAG"
-          
           echo "### 📝 Change Log" > release_notes.md
           echo "" >> release_notes.md
-          
           LOG_FORMAT="- [%h](https://github.com/${{ github.repository }}/commit/%H) %s (by @%an)"
-          
           if [ -z "$PREV_TAG" ]; then
-            echo "No previous tag found. Listing all commits."
             git log --pretty=format:"$LOG_FORMAT" >> release_notes.md
           else
-            echo "Listing commits between $PREV_TAG and ${{ github.ref_name }}"
             git log --pretty=format:"$LOG_FORMAT" "$PREV_TAG..${{ github.ref_name }}" >> release_notes.md
           fi
-          
-          echo "--- Content of release_notes.md ---"
-          cat release_notes.md
-    
-      - name: Create Release using GitHub CLI
-        run: |
-          # --generate-notes 
-          # --notes 
-          gh release create ${{ github.ref_name }} \
-            --title "Release ${{ github.ref_name }}" \
-            --notes-file release_notes.md \
-            --generate-notes \
-            --draft=false \
-            --prerelease=false
 
-          for file in ./release-files/*.zip; do
-            gh release upload ${{ github.ref_name }} "$file"
-          done
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: release_notes.md
+          files: ./releases/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1564,6 +1564,46 @@ namespace EasyChat.Lang
                 return ResourceManager.GetString("Dismiss", resourceCulture);
             }
         }
+
+        public static string Update
+        {
+            get
+            {
+                return ResourceManager.GetString("Update", resourceCulture);
+            }
+        }
+
+        public static string Later
+        {
+            get
+            {
+                return ResourceManager.GetString("Later", resourceCulture);
+            }
+        }
+
+        public static string Updating
+        {
+            get
+            {
+                return ResourceManager.GetString("Updating", resourceCulture);
+            }
+        }
+
+        public static string UpdateFailed
+        {
+            get
+            {
+                return ResourceManager.GetString("UpdateFailed", resourceCulture);
+            }
+        }
+
+        public static string CheckNetwork
+        {
+            get
+            {
+                return ResourceManager.GetString("CheckNetwork", resourceCulture);
+            }
+        }
         /// <summary>
         ///   Looks up a localized string similar to Enable Translation.
         /// </summary>

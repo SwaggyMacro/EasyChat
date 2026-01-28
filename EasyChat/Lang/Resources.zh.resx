@@ -474,6 +474,21 @@
     <data name="Dismiss" xml:space="preserve">
         <value>忽略</value>
     </data>
+    <data name="Update" xml:space="preserve">
+        <value>现在更新</value>
+    </data>
+    <data name="Later" xml:space="preserve">
+        <value>稍后</value>
+    </data>
+    <data name="Updating" xml:space="preserve">
+        <value>更新中...</value>
+    </data>
+    <data name="UpdateFailed" xml:space="preserve">
+        <value>更新失败</value>
+    </data>
+    <data name="CheckNetwork" xml:space="preserve">
+        <value>下载失败，请检查网络设置或代理。</value>
+    </data>
     <data name="Speech_Refresh" xml:space="preserve">
         <value>刷新</value>
     </data>

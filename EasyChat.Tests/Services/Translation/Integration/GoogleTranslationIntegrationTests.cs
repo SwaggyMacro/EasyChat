@@ -70,8 +70,8 @@ public sealed class GoogleTranslationIntegrationTests
         // Assert
         Assert.IsNotNull(result);
         Assert.IsFalse(string.IsNullOrWhiteSpace(result));
-        Assert.IsFalse(result.Contains("error"), $"Translation returned error: {result}");
-        Console.WriteLine($"Translation Result: {textToTranslate} -> {result}");
+        Assert.DoesNotContain("error", result, $"Translation returned error: {result}");
+        Console.WriteLine(@$"Translation Result: {textToTranslate} -> {result}");
     }
 
     [TestMethod]
@@ -97,7 +97,7 @@ public sealed class GoogleTranslationIntegrationTests
         // Assert
         Assert.IsNotNull(result);
         Assert.IsFalse(string.IsNullOrWhiteSpace(result));
-        Assert.IsFalse(result.Contains("error"), $"Translation returned error: {result}");
-        Console.WriteLine($"Translation Result: {textToTranslate} -> {result}");
+        Assert.DoesNotContain("error", result, $"Translation returned error: {result}");
+        Console.WriteLine(@$"Translation Result: {textToTranslate} -> {result}");
     }
 }

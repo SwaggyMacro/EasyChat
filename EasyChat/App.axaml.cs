@@ -373,26 +373,65 @@ public class App : Application
         try
         {
             var updateService = provider.GetRequiredService<UpdateCheckService>();
-            var releaseInfo = await updateService.CheckForUpdateAsync();
+            var updateInfo = await updateService.CheckForUpdateAsync();
 
-            if (releaseInfo != null)
+            if (updateInfo != null)
             {
                 Avalonia.Threading.Dispatcher.UIThread.Post(() =>
                 {
-                    Global.ToastManager.CreateToast()
-                        .WithTitle(Lang.Resources.NewVersionAvailable)
-                        .WithContent(string.Format(Lang.Resources.NewVersionContent, releaseInfo.TagName))
-                        .Dismiss().After(TimeSpan.FromSeconds(10))
-                        .WithActionButton(Lang.Resources.ViewRelease, _ => UrlUtilities.OpenUrl(releaseInfo.HtmlUrl), true)
-                        .WithActionButton(Lang.Resources.Dismiss, _ => { }, true, SukiButtonStyles.Standard)
-                        .OnClicked(_ => UrlUtilities.OpenUrl(releaseInfo.HtmlUrl))
-                        .Queue();
+                    ShowActionToast(updateInfo, updateService);
                 });
             }
         }
         catch (Exception ex)
         {
             Log.Warning(ex, "Failed to check for updates");
+        }
+    }
+
+    private void ShowActionToast(Velopack.UpdateInfo updateInfo, UpdateCheckService updateService)
+    {
+        Global.ToastManager.CreateToast()
+            .WithTitle(Lang.Resources.NewVersionAvailable)
+            .WithContent(string.Format(Lang.Resources.NewVersionContent, updateInfo.TargetFullRelease.Version))
+            .WithActionButton(Lang.Resources.Later, _ => { }, true, SukiButtonStyles.Standard)
+            .WithActionButton(Lang.Resources.Update, _ => ShowUpdatingToast(updateInfo, updateService), true)
+            .Queue();
+    }
+
+    private async void ShowUpdatingToast(Velopack.UpdateInfo updateInfo, UpdateCheckService updateService)
+    {
+        var progress = new ProgressBar() { Value = 0 };
+        var toast = Global.ToastManager.CreateToast()
+            .WithTitle(Lang.Resources.Updating)
+            .WithContent(progress)
+            .Queue();
+
+        try
+        {
+            await updateService.DownloadAndRestartAsync(updateInfo, (p) =>
+            {
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    progress.Value = p;
+                });
+            });
+            
+            Global.ToastManager.Dismiss(toast);
+        }
+        catch (Exception ex)
+        {
+            Global.ToastManager.Dismiss(toast);
+            Log.Error(ex, "Update failed");
+            
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                Global.ToastManager.CreateToast()
+                   .WithTitle(Lang.Resources.UpdateFailed)
+                   .WithContent(Lang.Resources.CheckNetwork)
+                   .Dismiss().After(TimeSpan.FromSeconds(5))
+                   .Queue();
+            });
         }
     }
 }

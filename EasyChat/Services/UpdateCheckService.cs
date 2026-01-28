@@ -4,72 +4,48 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Velopack;
+using Velopack.Sources;
 
 namespace EasyChat.Services;
 
 /// <summary>
-/// Represents information about a GitHub release.
-/// </summary>
-public record ReleaseInfo(string TagName, string HtmlUrl, string Body);
-
-/// <summary>
-/// Service to check for application updates from GitHub releases.
+/// Service to check for application updates using Velopack.
 /// </summary>
 public class UpdateCheckService
 {
-    private const string GitHubApiUrl = "https://api.github.com/repos/SwaggyMacro/EasyChat/releases/latest";
     private readonly ILogger<UpdateCheckService> _logger;
-    private readonly HttpClient _httpClient;
 
     public UpdateCheckService(ILogger<UpdateCheckService> logger)
     {
         _logger = logger;
-        _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.Add("User-Agent", "EasyChat-UpdateChecker");
     }
 
     /// <summary>
     /// Checks for a newer version on GitHub.
     /// </summary>
-    /// <returns>ReleaseInfo if a new version is available, null otherwise.</returns>
-    public async Task<ReleaseInfo?> CheckForUpdateAsync()
+    /// <returns>UpdateInfo if a new version is available, null otherwise.</returns>
+    public async Task<UpdateInfo?> CheckForUpdateAsync()
     {
         try
         {
-            var response = await _httpClient.GetAsync(GitHubApiUrl);
-            if (!response.IsSuccessStatusCode)
+            var updateManager = new UpdateManager(new GithubSource("https://github.com/SwaggyMacro/EasyChat", null, false));
+
+            if (!updateManager.IsInstalled)
             {
-                _logger.LogWarning("Failed to fetch release info. Status: {StatusCode}", response.StatusCode);
+                _logger.LogInformation("Velopack not installed. Skipping update check.");
                 return null;
             }
 
-            var json = await response.Content.ReadAsStringAsync();
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            var tagName = root.GetProperty("tag_name").GetString();
-            var htmlUrl = root.GetProperty("html_url").GetString();
-            var body = root.TryGetProperty("body", out var bodyElement) ? bodyElement.GetString() ?? "" : "";
-
-            if (string.IsNullOrEmpty(tagName) || string.IsNullOrEmpty(htmlUrl))
+            var newVersion = await updateManager.CheckForUpdatesAsync();
+            if (newVersion == null)
             {
-                _logger.LogWarning("Invalid release data received from GitHub.");
-                return null;
+                 _logger.LogInformation("No updates available.");
+                 return null;
             }
 
-            var currentVersion = GetCurrentVersion();
-            var latestVersion = ParseVersion(tagName);
-
-            _logger.LogInformation("Current version: {Current}, Latest version: {Latest}", currentVersion, latestVersion);
-
-            if (latestVersion > currentVersion)
-            {
-                _logger.LogInformation("New version available: {TagName}", tagName);
-                return new ReleaseInfo(tagName, htmlUrl, body);
-            }
-
-            _logger.LogInformation("Application is up to date.");
-            return null;
+             _logger.LogInformation("New version available: {Version}", newVersion.TargetFullRelease.Version);
+             return newVersion;
         }
         catch (Exception ex)
         {
@@ -78,29 +54,10 @@ public class UpdateCheckService
         }
     }
 
-    /// <summary>
-    /// Gets the current application version from the assembly.
-    /// </summary>
-    private static Version GetCurrentVersion()
+    public async Task DownloadAndRestartAsync(UpdateInfo newVersion, Action<int>? progress = null)
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        var version = assembly.GetName().Version;
-        return version ?? new Version(0, 0, 0);
-    }
-
-    /// <summary>
-    /// Parses a version string like "v0.0.2" or "0.0.2" into a Version object.
-    /// </summary>
-    private static Version ParseVersion(string versionString)
-    {
-        // Remove 'v' prefix if present
-        var cleaned = versionString.TrimStart('v', 'V');
-        
-        if (Version.TryParse(cleaned, out var version))
-        {
-            return version;
-        }
-
-        return new Version(0, 0, 0);
+        var updateManager = new UpdateManager(new GithubSource("https://github.com/SwaggyMacro/EasyChat", null, false));
+        await updateManager.DownloadUpdatesAsync(newVersion, progress);
+        updateManager.ApplyUpdatesAndRestart(newVersion);
     }
 }

@@ -488,6 +488,21 @@
     <data name="Dismiss" xml:space="preserve">
         <value>Dismiss</value>
     </data>
+    <data name="Update" xml:space="preserve">
+        <value>Update</value>
+    </data>
+    <data name="Later" xml:space="preserve">
+        <value>Later</value>
+    </data>
+    <data name="Updating" xml:space="preserve">
+        <value>Updating...</value>
+    </data>
+    <data name="UpdateFailed" xml:space="preserve">
+        <value>Update Failed</value>
+    </data>
+    <data name="CheckNetwork" xml:space="preserve">
+        <value>Please check your network connection.</value>
+    </data>
     <data name="Speech_EnableTranslation" xml:space="preserve">
         <value>Enable Translation</value>
     </data>

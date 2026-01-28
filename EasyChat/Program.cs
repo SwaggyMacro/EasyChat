@@ -12,6 +12,9 @@ public static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        Velopack.VelopackApp.Build()
+            .Run();
+
         BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
     }
