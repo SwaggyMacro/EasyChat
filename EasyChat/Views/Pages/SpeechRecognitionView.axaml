@@ -229,7 +229,7 @@
                                         </ComboBox>
                                         
                                         <TextBlock Grid.Row="2" Grid.Column="0" Text="{x:Static lang:Resources.FontSize}" VerticalAlignment="Center"/>
-                                        <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding PrimaryFontSize}" Minimum="10" Maximum="100"/>
+                                        <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding PrimaryFontSize}" FormatString="F0" Minimum="10" Maximum="100"/>
                                         
                                         <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static lang:Resources.FontColor}" VerticalAlignment="Center"/>
                                         <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Spacing="10">
@@ -273,7 +273,7 @@
                                         </ComboBox>
                                         
                                         <TextBlock Grid.Row="2" Grid.Column="0" Text="{x:Static lang:Resources.FontSize}" VerticalAlignment="Center"/>
-                                        <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding SecondaryFontSize}" Minimum="10" Maximum="100"/>
+                                        <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding SecondaryFontSize}" FormatString="F0" Minimum="10" Maximum="100"/>
                                         
                                         <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static lang:Resources.FontColor}" VerticalAlignment="Center"/>
                                         <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Spacing="10">
@@ -338,10 +338,10 @@
                                 <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding OrientationOptions}" SelectedItem="{Binding FloatingWindowOrientation}" HorizontalAlignment="Stretch"/>
                                 
                                 <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static lang:Resources.Speech_MaxSentencesPerLine}" VerticalAlignment="Center" Margin="0,0,10,0" IsVisible="{Binding IsSegmentedMode}"/>
-                                <NumericUpDown Grid.Row="3" Grid.Column="1" Value="{Binding MaxSentencesPerLine}" Minimum="1" Maximum="100" IsVisible="{Binding IsSegmentedMode}"/>
+                                <NumericUpDown Grid.Row="3" Grid.Column="1" Value="{Binding MaxSentencesPerLine}" FormatString="F0" Minimum="1" Maximum="100" IsVisible="{Binding IsSegmentedMode}"/>
 
                                 <TextBlock Grid.Row="3" Grid.Column="3" Text="{x:Static lang:Resources.Speech_MaxHistory}" VerticalAlignment="Center" Margin="0,0,10,0" IsVisible="{Binding IsSegmentedMode}"/>
-                                <NumericUpDown Grid.Row="3" Grid.Column="4" Value="{Binding MaxFloatingHistory}" Minimum="1" Maximum="20" IsVisible="{Binding IsSegmentedMode}"/>
+                                <NumericUpDown Grid.Row="3" Grid.Column="4" Value="{Binding MaxFloatingHistory}" FormatString="F0" Minimum="1" Maximum="20" IsVisible="{Binding IsSegmentedMode}"/>
                             </Grid>
 
                         </StackPanel>
