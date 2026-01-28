@@ -6,22 +6,19 @@ namespace EasyChat.Models.Configuration;
 [JsonObject(MemberSerialization.OptIn)]
 public class ResultConfig : ReactiveObject
 {
-    private int _autoCloseDelay = 5000;
-    private double _fontSize = 18;
-
     [JsonProperty]
     public int AutoCloseDelay
     {
-        get => _autoCloseDelay;
-        set => this.RaiseAndSetIfChanged(ref _autoCloseDelay, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = 5000;
 
     [JsonProperty]
     public double FontSize
     {
-        get => _fontSize;
-        set => this.RaiseAndSetIfChanged(ref _fontSize, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = 18;
 
     private bool _enableAutoReadDelay;
     private int _msPerChar = 50;

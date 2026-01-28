@@ -9,41 +9,33 @@ namespace EasyChat.Models.Configuration;
 [JsonObject(MemberSerialization.OptIn)]
 public class ShortcutEntry : ReactiveObject
 {
-    private string _actionType = "Screenshot";
-
-    private bool _isEnabled = true;
-
-    private string _keyCombination = string.Empty;
-
-    private ShortcutParameter? _parameter;
-
     [JsonProperty]
     public string ActionType
     {
-        get => _actionType;
-        set => this.RaiseAndSetIfChanged(ref _actionType, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "Screenshot";
 
     [JsonProperty]
     public ShortcutParameter? Parameter
     {
-        get => _parameter;
-        set => this.RaiseAndSetIfChanged(ref _parameter, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     [JsonProperty]
     public string KeyCombination
     {
-        get => _keyCombination;
-        set => this.RaiseAndSetIfChanged(ref _keyCombination, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = string.Empty;
 
     [JsonProperty]
     public bool IsEnabled
     {
-        get => _isEnabled;
-        set => this.RaiseAndSetIfChanged(ref _isEnabled, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = true;
 
     /// <summary>
     ///     Gets the display text for this entry.
@@ -88,7 +80,7 @@ public class ShortcutEntry : ReactiveObject
                 return Parameter.Value;
             }
 
-            var paramStr = Parameter.Engine ?? string.Empty;
+            var paramStr = Parameter.Engine;
             if (Parameter.Source != null && Parameter.Target != null)
             {
                 paramStr += $" ({Parameter.Source.DisplayName} -> {Parameter.Target.DisplayName})";

@@ -11,6 +11,10 @@ using EasyChat.Services.Translation.Ai;
 using EasyChat.Views.Result;
 using Microsoft.Extensions.Logging;
 using SukiUI.Toasts;
+using EasyChat.Models;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 
 namespace EasyChat.Services.Shortcuts.Handlers;
 
@@ -72,7 +76,7 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
         _logger.LogInformation("Screenshot capture cancelled.");
     }
 
-    private void OnScreenCaptured(Avalonia.Media.Imaging.Bitmap bitmap)
+    private void OnScreenCaptured(Avalonia.Media.Imaging.Bitmap bitmap, CaptureIntent intent)
     {
         // Screenshot captured successfully, allow new captures immediately
         _isExecuting = false;
@@ -91,7 +95,7 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
                 var ocrResult = _ocrService.RecognizeText(bitmap, ocrLanguage);
                 _logger.LogDebug("OCR Result Length: {Length}", ocrResult.Length);
                 
-                Dispatcher.UIThread.Post(() => ProcessOcrResult(ocrResult));
+                Dispatcher.UIThread.Post(() => ProcessOcrResult(ocrResult, intent));
             }
             catch (Exception ex)
             {
@@ -101,11 +105,25 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
         });
     }
     
-    private void ProcessOcrResult(string ocrResult)
+    private void ProcessOcrResult(string ocrResult, CaptureIntent intent)
     {
+        if (string.IsNullOrWhiteSpace(ocrResult))
+        {
+            ShowError("OCR Warning", "No text detected.");
+            return;
+        }
+
+        if (intent == CaptureIntent.CopyOriginal)
+        {
+            CopyToClipboard(ocrResult);
+            // Continue to show ResultView as requested
+        }
+
         try
         {
             var translator = _translationServiceFactory.CreateCurrentService();
+            
+            // Always show ResultView
             var resultWindow = new ResultView();
             var fontSize = _configurationService.Result?.FontSize;
             resultWindow.SetFontSize(fontSize ?? 14);
@@ -116,7 +134,7 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
             resultWindow.Show();
 
             Task.Run(async () => await TranslateAndDisplayAsync(
-                ocrResult, translator, resultWindow, () => isWindowClosed));
+                ocrResult, translator, resultWindow, () => isWindowClosed, intent));
         }
         catch (Exception ex)
         {
@@ -129,7 +147,8 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
         string text,
         ITranslation translator,
         ResultView resultWindow,
-        Func<bool> isClosedCheck)
+        Func<bool> isClosedCheck,
+        CaptureIntent intent)
     {
         try
         {
@@ -140,11 +159,11 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
 
             if (translator is OpenAiService openAi)
             {
-                await TranslateStreamingAsync(openAi, text, sourceLang, targetLang, resultWindow, isClosedCheck);
+                await TranslateStreamingAsync(openAi, text, sourceLang, targetLang, resultWindow, isClosedCheck, intent);
             }
             else
             {
-                await TranslateNonStreamingAsync(translator, text, sourceLang, targetLang, resultWindow, isClosedCheck);
+                await TranslateNonStreamingAsync(translator, text, sourceLang, targetLang, resultWindow, isClosedCheck, intent);
             }
 
             // Auto-close after configured delay
@@ -190,9 +209,11 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
         LanguageDefinition? sourceLang,
         LanguageDefinition? targetLang,
         ResultView resultWindow,
-        Func<bool> isClosedCheck)
+        Func<bool> isClosedCheck,
+        CaptureIntent intent = CaptureIntent.Translation)
     {
         var isFirstChunk = true;
+        var fullTranslation = new System.Text.StringBuilder();
         
         await foreach (var chunk in openAi.StreamTranslateAsync(text, sourceLang, targetLang))
         {
@@ -220,6 +241,25 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
                     resultWindow.AppendText(chunk);
                 }
             });
+            
+            if (intent != CaptureIntent.Translation)
+            {
+                fullTranslation.Append(chunk);
+            }
+        }
+        
+        if (intent != CaptureIntent.Translation && !isClosedCheck())
+        {
+            var translation = fullTranslation.ToString();
+            var finalText = intent == CaptureIntent.CopyBilingual 
+                 ? $"{text}\n\n{translation}" 
+                 : translation;
+            
+            // Only copy if not CopyOriginal (handled early), or if intent is explicitly CopyTranslated/Bilingual
+            if (intent == CaptureIntent.CopyTranslated || intent == CaptureIntent.CopyBilingual)
+            {
+                 Dispatcher.UIThread.Post(() => CopyToClipboard(finalText));
+            }
         }
     }
 
@@ -229,9 +269,18 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
         LanguageDefinition? sourceLang,
         LanguageDefinition? targetLang,
         ResultView resultWindow,
-        Func<bool> isClosedCheck)
+        Func<bool> isClosedCheck,
+        CaptureIntent intent = CaptureIntent.Translation)
     {
         var translation = await translator.TranslateAsync(text, sourceLang, targetLang);
+        
+        if (!isClosedCheck() && (intent == CaptureIntent.CopyTranslated || intent == CaptureIntent.CopyBilingual))
+        {
+             var finalText = intent == CaptureIntent.CopyBilingual 
+                 ? $"{text}\n\n{translation}" 
+                 : translation;
+             Dispatcher.UIThread.Post(() => CopyToClipboard(finalText));
+        }
         
         Dispatcher.UIThread.Post(() =>
         {
@@ -241,6 +290,24 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
                 resultWindow.IsVisible = true;
             }
         });
+    }
+
+    // TranslateAndCopyAsync removed as we integrated it into main flow
+
+    private void CopyToClipboard(string text)
+    {
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: { } window })
+        {
+            var clipboard = window.Clipboard;
+            if (clipboard != null)
+            {
+                clipboard.SetTextAsync(text);
+                _toastManager.CreateSimpleInfoToast()
+                    .WithTitle("Copied")
+                    .WithContent("Text copied to clipboard.")
+                    .Queue();
+            }
+        }
     }
 
     private void ShowError(string title, string message)

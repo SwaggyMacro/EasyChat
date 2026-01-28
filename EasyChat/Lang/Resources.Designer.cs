@@ -2056,6 +2056,36 @@ namespace EasyChat.Lang
                 return ResourceManager.GetString("Speech_MaxHistory", resourceCulture);
             }
         }
-    }
+        public static string Copy
+        {
+            get
+            {
+                return ResourceManager.GetString("Copy", resourceCulture);
+            }
+        }
 
+        public static string CopyOriginal
+        {
+            get
+            {
+                return ResourceManager.GetString("CopyOriginal", resourceCulture);
+            }
+        }
+
+        public static string CopyTranslated
+        {
+            get
+            {
+                return ResourceManager.GetString("CopyTranslated", resourceCulture);
+            }
+        }
+
+        public static string CopyBilingual
+        {
+            get
+            {
+                return ResourceManager.GetString("CopyBilingual", resourceCulture);
+            }
+        }
+    }
 }

@@ -52,6 +52,15 @@
                         ToolTip.Tip="{x:Static lang:Resources.Confirm}">
                      <icon:MaterialIcon Kind="Check" Width="24" Height="24" Foreground="#4CAF50" />
                 </Button>
+                <Button x:Name="CopyButton" 
+                        Background="Transparent"
+                        Padding="12,8"
+                        CornerRadius="0"
+                        PointerEntered="CopyButton_OnPointerEntered"
+                        PointerExited="CopyButton_OnPointerExited"
+                        ToolTip.Tip="{x:Static lang:Resources.Copy}">
+                    <icon:MaterialIcon Kind="ContentCopy" Width="24" Height="24" Foreground="{DynamicResource SukiPrimaryColor}" />
+                </Button>
                 <Button x:Name="ResetButton" 
                         Background="Transparent"
                         Padding="12,8"
@@ -67,6 +76,55 @@
                         Click="CancelButton_OnClick"
                         ToolTip.Tip="{x:Static lang:Resources.Cancel}">
                     <icon:MaterialIcon Kind="Close" Width="24" Height="24" Foreground="#F44336" />
+                </Button>
+            </StackPanel>
+        </Border>
+        
+        <Border x:Name="CopyMenuBorder"
+                IsVisible="False"
+                Background="{DynamicResource SukiCardBackground}"
+                BoxShadow="{DynamicResource SukiLowShadow}"
+                CornerRadius="8"
+                Padding="5"
+                PointerEntered="CopyMenu_OnPointerEntered"
+                PointerExited="CopyMenu_OnPointerExited">
+            <StackPanel Spacing="2">
+                <StackPanel.Styles>
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="CornerRadius" Value="6" />
+                        <Setter Property="Padding" Value="10,8" />
+                        <Setter Property="HorizontalAlignment" Value="Stretch" />
+                        <Setter Property="HorizontalContentAlignment" Value="Left" />
+                        <Setter Property="Cursor" Value="Hand" />
+                    </Style>
+                    <Style Selector="TextBlock">
+                        <Setter Property="FontSize" Value="13" />
+                         <Setter Property="FontWeight" Value="SemiBold" />
+                    </Style>
+                    <Style Selector="icon|MaterialIcon">
+                        <Setter Property="Width" Value="16" />
+                        <Setter Property="Height" Value="16" />
+                    </Style>
+                </StackPanel.Styles>
+
+                <Button Click="CopyOriginal_OnClick">
+                   <StackPanel Orientation="Horizontal" Spacing="10">
+                       <icon:MaterialIcon Kind="ContentCopy" />
+                       <TextBlock Text="{x:Static lang:Resources.CopyOriginal}" VerticalAlignment="Center" />
+                   </StackPanel>
+                </Button>
+                <Button Click="CopyTranslated_OnClick">
+                   <StackPanel Orientation="Horizontal" Spacing="10">
+                       <icon:MaterialIcon Kind="Translate" />
+                       <TextBlock Text="{x:Static lang:Resources.CopyTranslated}" VerticalAlignment="Center" />
+                   </StackPanel>
+                </Button>
+                <Button Click="CopyBilingual_OnClick">
+                   <StackPanel Orientation="Horizontal" Spacing="10">
+                       <icon:MaterialIcon Kind="ViewAgenda" />
+                       <TextBlock Text="{x:Static lang:Resources.CopyBilingual}" VerticalAlignment="Center" />
+                   </StackPanel>
                 </Button>
             </StackPanel>
         </Border>

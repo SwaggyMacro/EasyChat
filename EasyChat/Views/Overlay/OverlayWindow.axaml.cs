@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using Avalonia;
 using Avalonia.Controls;
@@ -9,6 +9,8 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Key = Avalonia.Input.Key;
+
+using EasyChat.Models;
 
 namespace EasyChat.Views.Overlay;
 
@@ -41,6 +43,9 @@ public partial class OverlayWindow : Window
     private readonly Rectangle _selectionRectangle;
     private readonly Border _hintBorder;
     private readonly Control _toolbarBorder; 
+    private readonly Control _copyMenuBorder;
+    private readonly Control _copyButton;
+    private DispatcherTimer? _menuCloseTimer; 
 
     // Handles
     private readonly Border _handleTopLeft;
@@ -66,7 +71,7 @@ public partial class OverlayWindow : Window
     public OverlayWindow () {}
 #pragma warning restore CS8618 
 
-    public OverlayWindow(PixelRect bounds, Bitmap capturedImage, string mode = "Precise")
+    public OverlayWindow(PixelRect bounds, Bitmap capturedImage, string mode = Constants.Constant.ScreenshotMode.Quick)
     {
         InitializeComponent();
         _capturedImage = capturedImage;
@@ -91,6 +96,8 @@ public partial class OverlayWindow : Window
         _selectionRectangle = this.FindControl<Rectangle>("SelectionRectangle") ?? throw new InvalidOperationException("SelectionRectangle not found");
         _hintBorder = this.FindControl<Border>("HintBorder") ?? throw new InvalidOperationException("HintBorder not found");
         _toolbarBorder = this.FindControl<Control>("ToolbarBorder") ?? throw new InvalidOperationException("ToolbarBorder not found");
+        _copyMenuBorder = this.FindControl<Control>("CopyMenuBorder") ?? throw new InvalidOperationException("CopyMenuBorder not found");
+        _copyButton = this.FindControl<Control>("CopyButton") ?? throw new InvalidOperationException("CopyButton not found");
 
         _handleTopLeft = this.FindControl<Border>("HandleTopLeft")!;
         _handleTopCenter = this.FindControl<Border>("HandleTopCenter")!;
@@ -106,7 +113,7 @@ public partial class OverlayWindow : Window
         PointerReleased += OnPointerReleased;
     }
 
-    public event Action<Bitmap>? SelectionCompleted;
+    public event Action<Bitmap, CaptureIntent>? SelectionCompleted;
     public event Action? SelectionCanceled;
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
@@ -221,16 +228,15 @@ public partial class OverlayWindow : Window
         {
             if (_selectionRectangle.Width > 0 && _selectionRectangle.Height > 0)
             {
-                if (_mode == "Quick")
+                if (_mode == Constants.Constant.ScreenshotMode.Quick)
                 {
-                     ProcessSelection();
+                     ProcessSelection(CaptureIntent.Translation);
                      return;
                 }
 
                 _currentMode = OverlayMode.Done;
                 ShowHandles();
                 UpdateToolbarPosition();
-                _toolbarBorder.IsVisible = true;
                 Cursor = Cursor.Default;
             }
             else
@@ -240,7 +246,86 @@ public partial class OverlayWindow : Window
         }
     }
     
-    public void ConfirmButton_OnClick(object? sender, RoutedEventArgs e) => ProcessSelection();
+    public void ConfirmButton_OnClick(object? sender, RoutedEventArgs e) => ProcessSelection(CaptureIntent.Translation);
+    
+    public void CopyOriginal_OnClick(object? sender, RoutedEventArgs e) => ProcessSelection(CaptureIntent.CopyOriginal);
+    public void CopyTranslated_OnClick(object? sender, RoutedEventArgs e) => ProcessSelection(CaptureIntent.CopyTranslated);
+    public void CopyBilingual_OnClick(object? sender, RoutedEventArgs e) => ProcessSelection(CaptureIntent.CopyBilingual);
+    
+    private void CopyButton_OnPointerEntered(object? sender, PointerEventArgs e)
+    {
+        _menuCloseTimer?.Stop();
+        
+        // Position menu relative to button
+        if (!_toolbarBorder.IsVisible) return;
+        
+        // Ensure layout is up to date
+        var mainCanvas = this.FindControl<Canvas>("MainCanvas");
+        if (mainCanvas == null) return;
+        var buttonPos = _copyButton.TranslatePoint(new Point(0,0), mainCanvas);
+        
+        if (buttonPos.HasValue)
+        {
+             Canvas.SetLeft(_copyMenuBorder, buttonPos.Value.X);
+             // Place below toolbar. Toolbar is at Canvas.GetTop(_toolbarBorder). 
+             // We can just use buttonPos.Y + button Height.
+             // But button height might be implicit.
+             // Toolbar height is better known or relative.
+             
+             // Safer: Get screen coords of button bottom-left?
+             // Since everything is in MainCanvas...
+             
+             Canvas.SetTop(_copyMenuBorder, Canvas.GetTop(_toolbarBorder) + _toolbarBorder.Bounds.Height + 5);
+             
+             // If toolbar is placed ABOVE selection (near top edge of screen), the menu should be BELOW toolbar?
+             // Or if toolbar is inside-bottom?
+             
+             // Dynamic placement:
+             var tbTop = Canvas.GetTop(_toolbarBorder);
+             var tbHeight = _toolbarBorder.Bounds.Height;
+             var menuTop = tbTop + tbHeight + 2;
+             
+             // Check if menu overflows bottom
+             if (menuTop + 150 > this.Height) // approx menu height
+             {
+                 // Place above
+                 menuTop = tbTop - 150 - 2;
+             }
+             
+             Canvas.SetTop(_copyMenuBorder, menuTop);
+             _copyMenuBorder.IsVisible = true;
+        }
+    }
+    
+    private void CopyButton_OnPointerExited(object? sender, PointerEventArgs e)
+    {
+        StartMenuCloseTimer();
+    }
+    
+    private void CopyMenu_OnPointerEntered(object? sender, PointerEventArgs e)
+    {
+        _menuCloseTimer?.Stop();
+    }
+    
+    private void CopyMenu_OnPointerExited(object? sender, PointerEventArgs e)
+    {
+        StartMenuCloseTimer();
+    }
+    
+    private void StartMenuCloseTimer()
+    {
+        _menuCloseTimer?.Stop();
+        _menuCloseTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(200)
+        };
+        _menuCloseTimer.Tick += (_, _) =>
+        {
+            _copyMenuBorder.IsVisible = false;
+            _menuCloseTimer.Stop();
+        };
+        _menuCloseTimer.Start();
+    }
     
     public void ResetButton_OnClick(object? sender, RoutedEventArgs e)
     {
@@ -279,6 +364,7 @@ public partial class OverlayWindow : Window
         _selectionRectangle.IsVisible = false;
         HideHandles();
         _toolbarBorder.IsVisible = false;
+        _copyMenuBorder.IsVisible = false;
         _activeHandle = ResizeHandle.None;
         Cursor = Cursor.Default;
         _hintBorder.IsVisible = true; // Show hint again
@@ -470,27 +556,85 @@ public partial class OverlayWindow : Window
         var width = _selectionRectangle.Width;
         var height = _selectionRectangle.Height;
 
-        Canvas.SetLeft(_toolbarBorder, x + width - 80);
-        Canvas.SetTop(_toolbarBorder, y + height + 10);
+        // Force measure to get accurate size
+        if (_toolbarBorder.Bounds.Width == 0 || _toolbarBorder.Bounds.Height == 0)
+        {
+             _toolbarBorder.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+             _toolbarBorder.Arrange(new Rect(_toolbarBorder.DesiredSize));
+        }
         
-        Dispatcher.UIThread.Post(() => {
-            if (_toolbarBorder.IsVisible)
+        var b = _toolbarBorder.Bounds;
+        var tbHeight = b.Height > 0 ? b.Height : 60; 
+        var tbWidth = b.Width > 0 ? b.Width : 200;
+
+        // Determine limits based on the screen where the selection is
+        double limitLeft = 0;
+        double limitRight = this.Bounds.Width;
+        double limitBottom = this.Bounds.Height;
+        // double limitTop = 0; // Not strictly used for bottom check logic but good to know
+
+        try 
+        {
+            // Use bottom-left of selection to find the screen (or center-bottom)
+            var targetPoint = new Point(x + width / 2, y + height);
+            var screenPoint = this.PointToScreen(targetPoint);
+            var screen = Screens.ScreenFromPoint(screenPoint);
+            
+            if (screen != null)
             {
-                var b = _toolbarBorder.Bounds;
-                if (x + width - 80 + b.Width > this.Width)
-                {
-                    Canvas.SetLeft(_toolbarBorder, this.Width - b.Width - 10);
-                }
-                 if (y + height + 10 + b.Height > this.Height)
-                 {
-                     Canvas.SetTop(_toolbarBorder, y + height - b.Height - 10);
-                 }
+                var workingArea = screen.WorkingArea;
+                var topLeft = this.PointToClient(workingArea.Position); // Screen Pixels -> Client Logical
+                var bottomRight = this.PointToClient(new PixelPoint(workingArea.X + workingArea.Width, workingArea.Y + workingArea.Height));
+                
+                limitLeft = topLeft.X;
+                limitRight = bottomRight.X;
+                limitBottom = bottomRight.Y;
+                // limitTop = topLeft.Y; 
             }
-        });
+        }
+        catch (Exception) { /* Fallback to window bounds */ }
+
+        var finalX = x + width - tbWidth;
+        
+        // Horizontal clamping within screen working area
+        if (finalX + tbWidth > limitRight) finalX = limitRight - tbWidth - 10;
+        if (finalX < limitLeft) finalX = limitLeft + 10;
+
+        // Vertical positioning
+        var finalY = y + height + 10;
+        
+        // Check overflow against working area bottom
+        if (finalY + tbHeight > limitBottom)
+        {
+            // Flip above
+            finalY = y - tbHeight - 10;
+            
+            // If overflowing top of screen (or selection top < toolbar height)
+            // Just checking < 0 or < limitTop might be enough, but let's stick to simple logic first
+            // If flipped position is "too high" relative to selection? 
+            // The user wants it VISIBLE.
+            
+            // If even flipped it's off screen (e.g. huge selection filling height)
+            if (finalY < 0) 
+            {
+                // Place inside-bottom
+                finalY = y + height - tbHeight - 10;
+                
+                // If inside-bottom is ALSO "above" the selection start (super tiny selection?)
+                // Just clamp to stay within selection/screen
+                // Priority: Keep inside selection
+            }
+        }
+         
+         Canvas.SetLeft(_toolbarBorder, finalX);
+         Canvas.SetTop(_toolbarBorder, finalY);
+         _toolbarBorder.IsVisible = true;
     }
 
-    private void ProcessSelection()
+
+    private void ProcessSelection(CaptureIntent intent)
     {
+        _copyMenuBorder.IsVisible = false; // Added this line
         try 
         {
             var xRaw = Canvas.GetLeft(_selectionRectangle);
@@ -516,7 +660,7 @@ public partial class OverlayWindow : Window
 
                 var bitmap = RenderCroppedBitmap(selectedRegion);
 
-                SelectionCompleted?.Invoke(bitmap);
+                SelectionCompleted?.Invoke(bitmap, intent);
             }
             else
             {
@@ -545,7 +689,7 @@ public partial class OverlayWindow : Window
         {
              if (_toolbarBorder.IsVisible)
              {
-                 ProcessSelection();
+                 ProcessSelection(CaptureIntent.Translation);
              }
         }
     }

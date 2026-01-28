@@ -603,4 +603,16 @@
     <data name="ScreenshotMode_Precise" xml:space="preserve">
         <value>精准截图 (工具栏)</value>
     </data>
+    <data name="Copy" xml:space="preserve">
+        <value>复制</value>
+    </data>
+    <data name="CopyOriginal" xml:space="preserve">
+        <value>复制原文</value>
+    </data>
+    <data name="CopyTranslated" xml:space="preserve">
+        <value>复制译文</value>
+    </data>
+    <data name="CopyBilingual" xml:space="preserve">
+        <value>复制双语</value>
+    </data>
 </root>
