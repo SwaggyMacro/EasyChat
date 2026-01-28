@@ -772,6 +772,17 @@ namespace EasyChat.Lang
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Select the area to translate. Right-click or ESC to cancel.
+        /// </summary>
+        public static string Screenshot_Hint
+        {
+            get
+            {
+                return ResourceManager.GetString("Screenshot_Hint", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Record Shortcut.
         /// </summary>
         public static string RecordShortcut

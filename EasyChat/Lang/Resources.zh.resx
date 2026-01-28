@@ -585,4 +585,7 @@
     <data name="FontFamily" xml:space="preserve">
         <value>字体</value>
     </data>
+    <data name="Screenshot_Hint" xml:space="preserve">
+        <value>请框选需要翻译的区域。右键或ESC取消。</value>
+    </data>
 </root>

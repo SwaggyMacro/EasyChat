@@ -614,4 +614,7 @@
     <data name="Speech_MaxHistory" xml:space="preserve">
         <value>Max Visible Lines</value>
     </data>
+    <data name="Screenshot_Hint" xml:space="preserve">
+        <value>Select the area to translate. Right-click or ESC to cancel.</value>
+    </data>
 </root>
