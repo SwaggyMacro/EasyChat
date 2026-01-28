@@ -44,10 +44,12 @@ jobs:
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             VERSION=${GITHUB_REF#refs/tags/v}
-            echo "VERSION=$VERSION" >> $GITHUB_ENV
+            echo "Used Tag Version: $VERSION"
           else
-            echo "VERSION=0.0.0-dev" >> $GITHUB_ENV
+            VERSION=$(dotnet msbuild EasyChat/EasyChat.csproj -getProperty:Version)
+            echo "Used CSPROJ Version: $VERSION"
           fi
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Pack with Velopack
         run: |
