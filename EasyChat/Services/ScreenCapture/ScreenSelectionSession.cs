@@ -31,19 +31,28 @@ public class ScreenSelectionSession
 
         var screens = desktop.Windows.FirstOrDefault(w => w is MainWindow)?.Screens.All ?? Array.Empty<Screen>();
 
-        foreach (var screen in screens)
-        {
-            // Capture full screen content
-            var bitmap = _screenCaptureService.CaptureFullScreen(screen);
+        if (screens.Count == 0) return;
 
-            // Create overlay
-            var overlay = new OverlayWindow(screen, bitmap);
-            overlay.SelectionCompleted += OnSelectionCompleted;
-            overlay.SelectionCanceled += OnSelectionCanceled;
+        var minX = screens.Min(s => s.Bounds.X);
+        var minY = screens.Min(s => s.Bounds.Y);
+        var maxX = screens.Max(s => s.Bounds.X + s.Bounds.Width);
+        var maxY = screens.Max(s => s.Bounds.Y + s.Bounds.Height);
 
-            _overlays.Add(overlay);
-            overlay.Show();
-        }
+        var width = maxX - minX;
+        var height = maxY - minY;
+
+        // Capture full virtual screen content
+        var bitmap = _screenCaptureService.CaptureRegion(minX, minY, width, height);
+
+        var bounds = new PixelRect(minX, minY, width, height);
+
+        // Create overlay
+        var overlay = new OverlayWindow(bounds, bitmap);
+        overlay.SelectionCompleted += OnSelectionCompleted;
+        overlay.SelectionCanceled += OnSelectionCanceled;
+
+        _overlays.Add(overlay);
+        overlay.Show();
     }
 
     private void OnSelectionCompleted(Bitmap bitmap)
