@@ -615,4 +615,7 @@
     <data name="CopyBilingual" xml:space="preserve">
         <value>复制双语</value>
     </data>
+    <data name="ImageTranslate" xml:space="preserve">
+        <value>图片翻译</value>
+    </data>
 </root>

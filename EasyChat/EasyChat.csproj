@@ -9,7 +9,7 @@
         <ApplicationIcon>Assets\easychat-logo.ico</ApplicationIcon>
         
         <!-- Version for update checking -->
-        <Version>0.0.9</Version>
+        <Version>0.0.10</Version>
 
         <!-- NetBeauty Settings -->
         <DisableBeauty>True</DisableBeauty>
@@ -102,9 +102,7 @@
     <ItemGroup>
       <EmbeddedResource Update="Lang\Resources.resx">
         <Generator>PublicResXFileCodeGenerator</Generator>
-      </EmbeddedResource>
-      <EmbeddedResource Update="Lang\Resources.zh.resx">
-        <Generator>PublicResXFileCodeGenerator</Generator>
+          <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       </EmbeddedResource>
     </ItemGroup>
 

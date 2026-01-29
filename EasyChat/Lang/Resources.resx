@@ -644,4 +644,7 @@
     <data name="CopyBilingual" xml:space="preserve">
         <value>Copy Bilingual</value>
     </data>
+    <data name="ImageTranslate" xml:space="preserve">
+        <value>Image Translate</value>
+    </data>
 </root>

@@ -130,7 +130,7 @@
                 <Button Click="CopyImageTranslated_OnClick">
                     <StackPanel Orientation="Horizontal" Spacing="10">
                         <icon:MaterialIcon Kind="ImageEdit" />
-                        <TextBlock Text="Image Translate" VerticalAlignment="Center" />
+                        <TextBlock Text="{x:Static lang:Resources.ImageTranslate}" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
             </StackPanel>
