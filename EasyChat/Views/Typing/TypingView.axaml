@@ -14,6 +14,7 @@
         TransparencyLevelHint="Blur"
         Background="Transparent"
         Topmost="True"
+        ShowInTaskbar="False"
         Title="{x:Static lang:Resources.TranslateToWindow}">
 
     <Panel>

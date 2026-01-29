@@ -618,4 +618,22 @@
     <data name="ImageTranslate" xml:space="preserve">
         <value>图片翻译</value>
     </data>
+    <data name="InputToTranslate" xml:space="preserve">
+        <value>请输入需要翻译的文字</value>
+    </data>
+    <data name="Speech_MaxHistory" xml:space="preserve">
+        <value>最大行数</value>
+    </data>
+    <data name="Speech_MaxSentencesPerLine" xml:space="preserve">
+        <value>每行句数</value>
+    </data>
+    <data name="Speech_DisplayMode_Segmented" xml:space="preserve">
+        <value>分割式</value>
+    </data>
+    <data name="Speech_DisplayMode_AutoScroll" xml:space="preserve">
+        <value>自动滚动</value>
+    </data>
+    <data name="Speech_DisplayMode" xml:space="preserve">
+        <value>显示模式</value>
+    </data>
 </root>
