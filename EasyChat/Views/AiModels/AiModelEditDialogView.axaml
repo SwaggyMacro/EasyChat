@@ -7,6 +7,8 @@
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
              xmlns:lang="clr-namespace:EasyChat.Lang;assembly=EasyChat"
              xmlns:config="clr-namespace:EasyChat.Models.Configuration;assembly=EasyChat"
+             xmlns:converts="clr-namespace:EasyChat.Converters;assembly=EasyChat"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="400"
              x:DataType="viewModels:AiModelEditDialogViewModel"
              Width="400">
@@ -19,7 +21,19 @@
                       HorizontalAlignment="Stretch">
                 <ComboBox.ItemTemplate>
                     <DataTemplate x:DataType="config:AiModelType">
-                        <TextBlock Text="{Binding}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Panel Width="20" Height="20">
+                                <Border ClipToBounds="True" CornerRadius="4"
+                                        IsVisible="{Binding Converter={x:Static converts:AiModelTypeConverters.IsNotCustom}}">
+                                    <Image Source="{Binding Converter={x:Static converts:AiModelTypeConverters.ToIcon}}"
+                                           Stretch="UniformToFill" />
+                                </Border>
+                                <avalonia:MaterialIcon Kind="Robot" Width="20" Height="20"
+                                                       IsVisible="{Binding Converter={x:Static converts:AiModelTypeConverters.IsCustom}}" />
+                            </Panel>
+                            <TextBlock Text="{Binding}" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource SukiText}" />
+                        </StackPanel>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
