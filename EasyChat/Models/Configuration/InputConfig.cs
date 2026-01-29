@@ -6,46 +6,40 @@ namespace EasyChat.Models.Configuration;
 [JsonObject(MemberSerialization.OptIn)]
 public class InputConfig : ReactiveObject
 {
-    private string _transparencyLevel = "Transparent";
-    private string _backgroundColor = "#CC000000";
-
     [JsonProperty]
     public string TransparencyLevel
     {
-        get => _transparencyLevel;
-        set => this.RaiseAndSetIfChanged(ref _transparencyLevel, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "AcrylicBlur";
 
     [JsonProperty]
     public string BackgroundColor
     {
-        get => _backgroundColor;
-        set => this.RaiseAndSetIfChanged(ref _backgroundColor, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "#CC000000";
 
-    private string _fontColor = "#FFFFFFFF"; // Default white
     [JsonProperty]
     public string FontColor
     {
-        get => _fontColor;
-        set => this.RaiseAndSetIfChanged(ref _fontColor, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "#FFFFFFFF";
 
-    private int _keySendDelay = 10;
     [JsonProperty]
     public int KeySendDelay
     {
-        get => _keySendDelay;
-        set => this.RaiseAndSetIfChanged(ref _keySendDelay, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = 10;
 
-    private InputDeliveryMode _deliveryMode = InputDeliveryMode.Type;
     [JsonProperty]
     public InputDeliveryMode DeliveryMode
     {
-        get => _deliveryMode;
-        set => this.RaiseAndSetIfChanged(ref _deliveryMode, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = InputDeliveryMode.Paste;
 }
 
 public enum InputDeliveryMode
@@ -54,3 +48,4 @@ public enum InputDeliveryMode
     Paste,
     Message
 }
+

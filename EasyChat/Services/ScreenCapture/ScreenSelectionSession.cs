@@ -11,6 +11,7 @@ using EasyChat.Views.Overlay;
 
 using EasyChat.Constants;
 using EasyChat.Models;
+using System.Threading.Tasks;
 
 namespace EasyChat.Services.ScreenCapture;
 
@@ -30,7 +31,7 @@ public class ScreenSelectionSession
         _mode = mode;
     }
 
-    public void Start()
+    public async void Start()
     {
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
 
@@ -46,8 +47,8 @@ public class ScreenSelectionSession
         var width = maxX - minX;
         var height = maxY - minY;
 
-        // Capture full virtual screen content
-        var bitmap = _screenCaptureService.CaptureRegion(minX, minY, width, height);
+        // Capture full virtual screen content on background thread
+        var bitmap = await Task.Run(() => _screenCaptureService.CaptureRegion(minX, minY, width, height));
 
         var bounds = new PixelRect(minX, minY, width, height);
 
@@ -58,6 +59,7 @@ public class ScreenSelectionSession
 
         _overlays.Add(overlay);
         overlay.Show();
+        overlay.Activate();
     }
 
     private void OnSelectionCompleted(Bitmap bitmap, CaptureIntent intent)

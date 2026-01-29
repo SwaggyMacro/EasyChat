@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
@@ -111,6 +112,28 @@ public partial class OverlayWindow : Window
         PointerPressed += OnPointerPressed;
         PointerMoved += OnPointerMoved;
         PointerReleased += OnPointerReleased;
+    }
+
+    protected override void OnOpened(EventArgs e)
+    {
+        base.OnOpened(e);
+        if (GetCursorPos(out var lpPoint))
+        {
+            var pixelPoint = new PixelPoint(lpPoint.X, lpPoint.Y);
+            var clientPoint = this.PointToClient(pixelPoint);
+            HandleHint(clientPoint);
+        }
+    }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetCursorPos(out POINT lpPoint);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct POINT
+    {
+        public int X;
+        public int Y;
     }
 
     public event Action<Bitmap, CaptureIntent>? SelectionCompleted;
