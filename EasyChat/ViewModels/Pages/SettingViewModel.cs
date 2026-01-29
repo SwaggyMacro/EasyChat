@@ -144,6 +144,14 @@ public class SettingViewModel : Page
         TestGoogleConnectionCommand = ReactiveCommand.CreateFromTask(TestGoogleConnection);
         TestDeepLConnectionCommand = ReactiveCommand.CreateFromTask(TestDeepLConnection);
 
+        if (OperatingSystem.IsWindows())
+            LoadAvailableFonts();
+    }
+
+    private void LoadAvailableFonts()
+    {
+        var fonts = Avalonia.Media.FontManager.Current.SystemFonts.OrderBy(x => x.Name).Select(x => x.Name);
+        AvailableFonts = new ObservableCollection<string>(fonts);
     }
 
     public List<string> OpenaiModels
@@ -284,6 +292,13 @@ public class SettingViewModel : Page
     public ScreenshotConfig? ScreenshotConf => _configurationService.Screenshot;
     
     public List<string> TransparencyLevels { get; } = ["AcrylicBlur", "Blur", "Transparent"];
+    
+    private ObservableCollection<string> _availableFonts = [];
+    public ObservableCollection<string> AvailableFonts
+    {
+        get => _availableFonts;
+        set => this.RaiseAndSetIfChanged(ref _availableFonts, value);
+    }
     
     public List<InputDeliveryMode> InputDeliveryModes { get; } = Enum.GetValues<InputDeliveryMode>().ToList();
 

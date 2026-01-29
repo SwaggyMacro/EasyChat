@@ -722,9 +722,24 @@
                                                    HorizontalAlignment="Right" Width="150" />
                                 </DockPanel>
 
+                                <!-- Font Family -->
+                                <DockPanel>
+                                    <TextBlock Text="{x:Static lang:Resources.FontFamily}"
+                                               VerticalAlignment="Center" FontWeight="Bold" />
+                                    <ComboBox ItemsSource="{Binding AvailableFonts}"
+                                              SelectedItem="{Binding ResultConf.FontFamily}"
+                                              HorizontalAlignment="Right" Width="150">
+                                              <ComboBox.ItemTemplate>
+                                                  <DataTemplate>
+                                                      <TextBlock Text="{Binding .}" FontFamily="{Binding ., Converter={x:Static converts:StringToFontFamilyConverter.Instance}}" VerticalAlignment="Center" />
+                                                  </DataTemplate>
+                                              </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </DockPanel>
+
                                 <Separator Opacity="0.1" />
                                 
-                                <!-- Font Color -->
+                                <!-- Font Size -->
                                 <DockPanel>
                                     <TextBlock Text="{x:Static lang:Resources.FontColor}"
                                                VerticalAlignment="Center" FontWeight="Bold" />

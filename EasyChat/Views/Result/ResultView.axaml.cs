@@ -104,6 +104,16 @@ public partial class ResultView : Window
         
         // Font Size
         TextBlockResult.FontSize = config.FontSize;
+        
+        // Font Family
+        if (!string.IsNullOrEmpty(config.FontFamily))
+        {
+            try
+            {
+                TextBlockResult.FontFamily = new FontFamily(config.FontFamily);
+            }
+            catch { /* Ignore invalid font */ }
+        }
     }
 
     public ResultView(string result)

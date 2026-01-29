@@ -61,6 +61,15 @@ public class ResultConfig : ReactiveObject
         get => _fontColor;
         set => this.RaiseAndSetIfChanged(ref _fontColor, value);
     }
+    
+    private string _fontFamily = "";
+
+    [JsonProperty]
+    public string FontFamily
+    {
+        get => _fontFamily;
+        set => this.RaiseAndSetIfChanged(ref _fontFamily, value);
+    }
 
     private string _windowBackgroundColor = "#00000000";
 
