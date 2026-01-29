@@ -8,14 +8,14 @@ namespace EasyChat.Models.Configuration;
 [JsonObject(MemberSerialization.OptIn)]
 public class General : ReactiveObject
 {
-    [JsonProperty]
+    [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Replace)]
     public LanguageDefinition SourceLanguage
     {
         get;
         set => this.RaiseAndSetIfChanged(ref field, value);
     } = LanguageService.GetLanguage("auto");
 
-    [JsonProperty]
+    [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Replace)]
     public LanguageDefinition TargetLanguage
     {
         get;
