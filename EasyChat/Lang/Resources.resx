@@ -252,8 +252,8 @@
     <value>Add Language Shortcut</value>
   </data>
     <data name="Edit" xml:space="preserve">
-    <value>Edit</value>
-  </data>
+        <value>Edit</value>
+    </data>
     <data name="Delete" xml:space="preserve">
     <value>Delete</value>
   </data>
@@ -646,5 +646,35 @@
     </data>
     <data name="ImageTranslate" xml:space="preserve">
         <value>Image Translate</value>
+    </data>
+    <data name="FixedAreas" xml:space="preserve">
+        <value>Fixed Areas</value>
+    </data>
+    <data name="FixedArea_Hint" xml:space="preserve">
+        <value>Select a region for the fixed area.</value>
+    </data>
+    <data name="NoFixedAreas" xml:space="preserve">
+        <value>No fixed areas.</value>
+    </data>
+    <data name="AddFixedArea" xml:space="preserve">
+        <value>Add Fixed Area</value>
+    </data>
+    <data name="Close" xml:space="preserve">
+        <value>Close</value>
+    </data>
+    <data name="Name" xml:space="preserve">
+        <value>Name</value>
+    </data>
+    <data name="Area" xml:space="preserve">
+        <value>Area</value>
+    </data>
+    <data name="ReselectArea" xml:space="preserve">
+        <value>Reselect Area</value>
+    </data>
+    <data name="Select" xml:space="preserve">
+        <value>Select</value>
+    </data>
+    <data name="FixedAreaSettings" xml:space="preserve">
+        <value>Fixed Area Settings</value>
     </data>
 </root>

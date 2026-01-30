@@ -13,6 +13,9 @@ public class ScreenshotConfig : ReactiveObject
     public string? Mode
     {
         get => _mode ?? Constant.ScreenshotMode.Precise;
-        set => this.RaiseAndSetIfChanged(ref _mode, value ?? Constant.ScreenshotMode.Precise);
+        set => this.RaiseAndSetIfChanged(ref _mode, value ?? Constant.ScreenshotMode.Quick);
     }
+
+    [JsonProperty]
+    public System.Collections.ObjectModel.ObservableCollection<FixedArea> FixedAreas { get; set; } = new();
 }

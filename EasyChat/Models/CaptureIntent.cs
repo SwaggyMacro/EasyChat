@@ -6,5 +6,6 @@ public enum CaptureIntent
     CopyOriginal,
     CopyTranslated,
     CopyBilingual,
-    CopyImageTranslated
+    CopyImageTranslated,
+    RectSelection
 }

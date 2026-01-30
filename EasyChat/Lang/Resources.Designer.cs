@@ -796,6 +796,53 @@ namespace EasyChat.Lang {
                 return ResourceManager.GetString("Hint_SwitchConfig", resourceCulture);
             }
         }
+
+
+
+        /// <summary>
+        ///   Looks up a localized string similar to Fixed Areas.
+        /// </summary>
+        public static string FixedAreas {
+            get {
+                return ResourceManager.GetString("FixedAreas", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Select a region for the fixed area..
+        /// </summary>
+        public static string FixedArea_Hint {
+            get {
+                return ResourceManager.GetString("FixedArea_Hint", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to No fixed areas.
+        /// </summary>
+        public static string NoFixedAreas {
+            get {
+                return ResourceManager.GetString("NoFixedAreas", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Add Fixed Area.
+        /// </summary>
+        public static string AddFixedArea {
+            get {
+                return ResourceManager.GetString("AddFixedArea", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Close.
+        /// </summary>
+        public static string Close {
+            get {
+                return ResourceManager.GetString("Close", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Home.
@@ -1928,6 +1975,35 @@ namespace EasyChat.Lang {
         public static string WindowBackgroundColor {
             get {
                 return ResourceManager.GetString("WindowBackgroundColor", resourceCulture);
+            }
+        }
+        public static string Name {
+            get {
+                return ResourceManager.GetString("Name", resourceCulture);
+            }
+        }
+
+        public static string Area {
+            get {
+                return ResourceManager.GetString("Area", resourceCulture);
+            }
+        }
+
+        public static string ReselectArea {
+            get {
+                return ResourceManager.GetString("ReselectArea", resourceCulture);
+            }
+        }
+
+        public static string Select {
+            get {
+                return ResourceManager.GetString("Select", resourceCulture);
+            }
+        }
+
+        public static string FixedAreaSettings {
+            get {
+                return ResourceManager.GetString("FixedAreaSettings", resourceCulture);
             }
         }
     }

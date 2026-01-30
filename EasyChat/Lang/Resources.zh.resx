@@ -636,4 +636,34 @@
     <data name="Speech_DisplayMode" xml:space="preserve">
         <value>显示模式</value>
     </data>
+    <data name="FixedAreas" xml:space="preserve">
+        <value>固定区域</value>
+    </data>
+    <data name="FixedArea_Hint" xml:space="preserve">
+        <value>请框选固定区域。</value>
+    </data>
+    <data name="NoFixedAreas" xml:space="preserve">
+        <value>暂无固定区域。</value>
+    </data>
+    <data name="AddFixedArea" xml:space="preserve">
+        <value>添加固定区域</value>
+    </data>
+    <data name="Close" xml:space="preserve">
+        <value>关闭</value>
+    </data>
+    <data name="Name" xml:space="preserve">
+        <value>名称</value>
+    </data>
+    <data name="Area" xml:space="preserve">
+        <value>区域</value>
+    </data>
+    <data name="ReselectArea" xml:space="preserve">
+        <value>重新框选</value>
+    </data>
+    <data name="Select" xml:space="preserve">
+        <value>选取</value>
+    </data>
+    <data name="FixedAreaSettings" xml:space="preserve">
+        <value>固定区域设置</value>
+    </data>
 </root>

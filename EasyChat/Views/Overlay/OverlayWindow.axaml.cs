@@ -43,6 +43,7 @@ public partial class OverlayWindow : Window
     private readonly Bitmap _capturedImage;
     private readonly Rectangle _selectionRectangle;
     private readonly Border _hintBorder;
+    private readonly TextBlock _hintTextBlock;
     private readonly Control _toolbarBorder; 
     private readonly Control _copyMenuBorder;
     private readonly Control _copyButton;
@@ -66,17 +67,19 @@ public partial class OverlayWindow : Window
     private Rect _initialSelection;
 
     private readonly string _mode;
+    private readonly CaptureIntent? _intent;
 
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
 #pragma warning disable CS8618 
     public OverlayWindow () {}
 #pragma warning restore CS8618 
 
-    public OverlayWindow(PixelRect bounds, Bitmap capturedImage, string mode = Constants.Constant.ScreenshotMode.Quick)
+    public OverlayWindow(PixelRect bounds, Bitmap capturedImage, string mode = Constants.Constant.ScreenshotMode.Quick, CaptureIntent? intent = null)
     {
         InitializeComponent();
         _capturedImage = capturedImage;
         _mode = mode;
+        _intent = intent;
 
         // Window setup
         ShowInTaskbar = false;
@@ -96,6 +99,7 @@ public partial class OverlayWindow : Window
 
         _selectionRectangle = this.FindControl<Rectangle>("SelectionRectangle") ?? throw new InvalidOperationException("SelectionRectangle not found");
         _hintBorder = this.FindControl<Border>("HintBorder") ?? throw new InvalidOperationException("HintBorder not found");
+        _hintTextBlock = this.FindControl<TextBlock>("HintTextBlock") ?? throw new InvalidOperationException("HintTextBlock not found");
         _toolbarBorder = this.FindControl<Control>("ToolbarBorder") ?? throw new InvalidOperationException("ToolbarBorder not found");
         _copyMenuBorder = this.FindControl<Control>("CopyMenuBorder") ?? throw new InvalidOperationException("CopyMenuBorder not found");
         _copyButton = this.FindControl<Control>("CopyButton") ?? throw new InvalidOperationException("CopyButton not found");
@@ -112,6 +116,15 @@ public partial class OverlayWindow : Window
         PointerPressed += OnPointerPressed;
         PointerMoved += OnPointerMoved;
         PointerReleased += OnPointerReleased;
+
+        if (_intent == CaptureIntent.RectSelection)
+        {
+             _hintTextBlock.Text = Lang.Resources.FixedArea_Hint;
+        }
+        else
+        {
+             _hintTextBlock.Text = Lang.Resources.Screenshot_Hint;
+        }
     }
 
     protected override void OnOpened(EventArgs e)
@@ -137,7 +150,9 @@ public partial class OverlayWindow : Window
     }
 
     public event Action<Bitmap, CaptureIntent>? SelectionCompleted;
+    public event Action<PixelRect>? RectSelected;
     public event Action? SelectionCanceled;
+
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
@@ -253,7 +268,7 @@ public partial class OverlayWindow : Window
             {
                 if (_mode == Constants.Constant.ScreenshotMode.Quick)
                 {
-                     ProcessSelection(CaptureIntent.Translation);
+                     ProcessSelection(_intent ?? CaptureIntent.Translation);
                      return;
                 }
 
@@ -269,7 +284,7 @@ public partial class OverlayWindow : Window
         }
     }
     
-    public void ConfirmButton_OnClick(object? sender, RoutedEventArgs e) => ProcessSelection(CaptureIntent.Translation);
+    public void ConfirmButton_OnClick(object? sender, RoutedEventArgs e) => ProcessSelection(_intent ?? CaptureIntent.Translation);
     
     public void CopyOriginal_OnClick(object? sender, RoutedEventArgs e) => ProcessSelection(CaptureIntent.CopyOriginal);
     public void CopyTranslated_OnClick(object? sender, RoutedEventArgs e) => ProcessSelection(CaptureIntent.CopyTranslated);
@@ -595,6 +610,16 @@ public partial class OverlayWindow : Window
         double limitLeft = 0;
         double limitRight = this.Bounds.Width;
         double limitBottom = this.Bounds.Height;
+        
+        // Hide Copy Button if doing Rect Selection (only Confirm/Cancel/Reset needed)
+        if (_intent == CaptureIntent.RectSelection)
+        {
+            _copyButton.IsVisible = false;
+        }
+        else
+        {
+            _copyButton.IsVisible = true;
+        }
         // double limitTop = 0; // Not strictly used for bottom check logic but good to know
 
         try 
@@ -679,12 +704,19 @@ public partial class OverlayWindow : Window
 
             if (width > 0 && height > 0)
             {
-                var selectedRegion = new CroppedBitmap(_capturedImage,
-                    new PixelRect((int)x, (int)y, (int)width, (int)height));
+                if (intent == CaptureIntent.RectSelection)
+                {
+                     RectSelected?.Invoke(new PixelRect((int)x, (int)y, (int)width, (int)height));
+                }
+                else
+                {
+                    var selectedRegion = new CroppedBitmap(_capturedImage,
+                        new PixelRect((int)x, (int)y, (int)width, (int)height));
 
-                var bitmap = RenderCroppedBitmap(selectedRegion);
+                    var bitmap = RenderCroppedBitmap(selectedRegion);
 
-                SelectionCompleted?.Invoke(bitmap, intent);
+                    SelectionCompleted?.Invoke(bitmap, intent);
+                }
             }
             else
             {

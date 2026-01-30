@@ -1,0 +1,75 @@
+<UserControl x:Class="EasyChat.Views.Dialogs.FixedAreaEditDialogView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:EasyChat.ViewModels.Dialogs"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:lang="clr-namespace:EasyChat.Lang;assembly=EasyChat"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="500"
+             x:DataType="viewModels:FixedAreaEditDialogViewModel"
+             Width="400" MaxHeight="600"
+             x:Name="Root">
+    <StackPanel Spacing="15">
+        <TextBlock Text="{x:Static lang:Resources.FixedAreas}" FontWeight="SemiBold" FontSize="18" />
+        
+        <ScrollViewer MaxHeight="400" IsVisible="{Binding HasAreas}">
+             <ItemsControl ItemsSource="{Binding FixedAreas}">
+                 <ItemsControl.ItemTemplate>
+                     <DataTemplate x:CompileBindings="False">
+                         <suki:GlassCard Margin="0,0,0,10" Padding="10">
+                             <Grid ColumnDefinitions="*, Auto, Auto">
+                                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="2">
+                                     <TextBlock Text="{Binding Name}" FontWeight="Bold" />
+                                     <TextBlock Text="{Binding DisplayInfo}" 
+                                                FontSize="12" Opacity="0.7" />
+                                 </StackPanel>
+
+                                 <ToggleSwitch Grid.Column="1"
+                                               IsChecked="{Binding IsEnabled}"
+                                               Margin="10,0"
+                                               OnContent="{x:Null}"
+                                               OffContent="{x:Null}" />
+                                 
+                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="0">
+                                     <Button Classes="Flat" 
+                                             CornerRadius="8,0,0,8"
+                                             Click="EditButton_Click"
+                                             DataContext="{Binding}"
+                                             ToolTip.Tip="{x:Static lang:Resources.Edit}">
+                                         <avalonia:MaterialIcon Kind="Pencil" Width="16" Height="16" />
+                                     </Button>
+                                     
+                                     <Button Classes="Flat Danger"
+                                             CornerRadius="0,8,8,0"
+                                             Click="DeleteButton_Click"
+                                             DataContext="{Binding}"
+                                             ToolTip.Tip="{x:Static lang:Resources.Delete}">
+                                         <avalonia:MaterialIcon Kind="TrashCan" Width="16" Height="16" />
+                                     </Button>
+                                 </StackPanel>
+                             </Grid>
+                         </suki:GlassCard>
+                     </DataTemplate>
+                 </ItemsControl.ItemTemplate>
+             </ItemsControl>
+        </ScrollViewer>
+        
+        <TextBlock Text="{x:Static lang:Resources.NoFixedAreas}" 
+                   IsVisible="{Binding !HasAreas}" 
+                   Opacity="0.6" HorizontalAlignment="Center" Margin="0,20" />
+
+        <Button Classes="Flat Primary" HorizontalAlignment="Stretch"
+                Command="{Binding AddAreaCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                <avalonia:MaterialIcon Kind="Plus" />
+                <TextBlock Text="{x:Static lang:Resources.AddFixedArea}" VerticalAlignment="Center" />
+            </StackPanel>
+        </Button>
+        
+        <Button Content="{x:Static lang:Resources.Close}"
+                Command="{Binding CloseCommand}"
+                HorizontalAlignment="Right" Margin="0,10,0,0"/>
+    </StackPanel>
+</UserControl>

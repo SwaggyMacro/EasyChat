@@ -105,6 +105,36 @@ public class ConfigurationService : ReactiveObject, IConfigurationService
                 ConfigUtil.SaveConfig(Constant.ScreenshotConf, Screenshot);
             });
 
+        // Screenshot FixedAreas
+        Observable.FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
+                h => Screenshot.FixedAreas.CollectionChanged += h,
+                h => Screenshot.FixedAreas.CollectionChanged -= h)
+            .Throttle(TimeSpan.FromMilliseconds(500))
+            .Subscribe(e =>
+            {
+                 _logger.LogDebug("Auto-saving Screenshot configuration (FixedAreas changed)");
+                 ConfigUtil.SaveConfig(Constant.ScreenshotConf, Screenshot);
+                 
+                 // Attach listeners to new items if needed (for property changes inside items)
+                 if (e.EventArgs.NewItems != null)
+                 {
+                     foreach (FixedArea item in e.EventArgs.NewItems)
+                     {
+                         item.Changed
+                             .Throttle(TimeSpan.FromMilliseconds(500))
+                             .Subscribe(_ => ConfigUtil.SaveConfig(Constant.ScreenshotConf, Screenshot));
+                     }
+                 }
+            });
+            
+        // Attach to existing FixedAreas
+        foreach (var item in Screenshot.FixedAreas)
+        {
+            item.Changed
+                .Throttle(TimeSpan.FromMilliseconds(500))
+                .Subscribe(_ => ConfigUtil.SaveConfig(Constant.ScreenshotConf, Screenshot));
+        }
+
         // SpeechRecognition Config - Simple Property Changes
         SpeechRecognition.Changed
             .Throttle(TimeSpan.FromMilliseconds(500))

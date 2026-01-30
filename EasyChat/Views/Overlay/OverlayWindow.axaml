@@ -32,7 +32,7 @@
                 Padding="16,12"
                 CornerRadius="8"
                 IsVisible="False">
-            <TextBlock Text="{x:Static lang:Resources.Screenshot_Hint}"
+            <TextBlock x:Name="HintTextBlock"
                        Foreground="White"
                        FontSize="16" />
         </Border>

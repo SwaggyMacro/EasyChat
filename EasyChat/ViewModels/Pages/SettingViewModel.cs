@@ -23,6 +23,7 @@ using EasyChat.Services.Translation.Machine;
 using EasyChat.ViewModels.AiModels;
 using EasyChat.ViewModels.Dialogs;
 using Material.Icons;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using ReactiveUI;
@@ -143,6 +144,8 @@ public class SettingViewModel : Page
         TestTencentConnectionCommand = ReactiveCommand.CreateFromTask(TestTencentConnection);
         TestGoogleConnectionCommand = ReactiveCommand.CreateFromTask(TestGoogleConnection);
         TestDeepLConnectionCommand = ReactiveCommand.CreateFromTask(TestDeepLConnection);
+        
+        ManageFixedAreasCommand = ReactiveCommand.Create(ManageFixedAreas);
 
         if (OperatingSystem.IsWindows())
             LoadAvailableFonts();
@@ -301,6 +304,22 @@ public class SettingViewModel : Page
     }
     
     public List<InputDeliveryMode> InputDeliveryModes { get; } = Enum.GetValues<InputDeliveryMode>().ToList();
+
+    public ReactiveCommand<Unit, Unit> ManageFixedAreasCommand { get; }
+
+    private void ManageFixedAreas()
+    {
+        if (Global.Services == null) return;
+        
+        _dialogManager.CreateDialog()
+            .WithTitle(Resources.FixedAreas)
+            .WithViewModel(dialog => new FixedAreaEditDialogViewModel(
+                _dialogManager, 
+                dialog, 
+                _configurationService, 
+                Global.Services.GetRequiredService<IScreenCaptureService>()))
+            .TryShow();
+    }
 
     public ReactiveCommand<Unit, Unit> AddModelCommand { get; }
     public ReactiveCommand<CustomAiModel, Unit> EditModelCommand { get; }

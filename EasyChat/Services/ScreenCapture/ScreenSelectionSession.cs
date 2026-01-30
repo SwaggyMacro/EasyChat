@@ -22,13 +22,23 @@ public class ScreenSelectionSession
     private readonly List<OverlayWindow> _overlays = new();
     private readonly IScreenCaptureService _screenCaptureService;
     private readonly string _mode;
+    private readonly Action<PixelRect>? _onRectSelected;
+    private readonly CaptureIntent? _intent;
 
-    public ScreenSelectionSession(IScreenCaptureService screenCaptureService, Action<Bitmap, CaptureIntent> onCapture, Action? onCancel = null, string mode = Constant.ScreenshotMode.Precise)
+    public ScreenSelectionSession(
+        IScreenCaptureService screenCaptureService, 
+        Action<Bitmap, CaptureIntent> onCapture, 
+        Action? onCancel = null, 
+        string mode = Constant.ScreenshotMode.Precise,
+        Action<PixelRect>? onRectSelected = null,
+        CaptureIntent? intent = null)
     {
         _screenCaptureService = screenCaptureService;
         _onCapture = onCapture;
         _onCancel = onCancel;
         _mode = mode;
+        _onRectSelected = onRectSelected;
+        _intent = intent;
     }
 
     public async void Start()
@@ -53,8 +63,9 @@ public class ScreenSelectionSession
         var bounds = new PixelRect(minX, minY, width, height);
 
         // Create overlay
-        var overlay = new OverlayWindow(bounds, bitmap, _mode);
+        var overlay = new OverlayWindow(bounds, bitmap, _mode, _intent);
         overlay.SelectionCompleted += OnSelectionCompleted;
+        overlay.RectSelected += OnRectSelected;
         overlay.SelectionCanceled += OnSelectionCanceled;
 
         _overlays.Add(overlay);
@@ -68,6 +79,12 @@ public class ScreenSelectionSession
         _onCapture(bitmap, intent);
     }
 
+    private void OnRectSelected(PixelRect rect)
+    {
+        CloseAll();
+        _onRectSelected?.Invoke(rect);
+    }
+
     private void OnSelectionCanceled()
     {
         CloseAll();
@@ -79,6 +96,7 @@ public class ScreenSelectionSession
         foreach (var overlay in _overlays)
         {
             overlay.SelectionCompleted -= OnSelectionCompleted;
+            overlay.RectSelected -= OnRectSelected;
             overlay.SelectionCanceled -= OnSelectionCanceled;
             overlay.Close();
         }
