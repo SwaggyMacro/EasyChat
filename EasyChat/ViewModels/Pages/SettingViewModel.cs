@@ -148,13 +148,21 @@ public class SettingViewModel : Page
         ManageFixedAreasCommand = ReactiveCommand.Create(ManageFixedAreas);
 
         if (OperatingSystem.IsWindows())
-            LoadAvailableFonts();
+            Task.Run(LoadAvailableFonts);
     }
 
-    private void LoadAvailableFonts()
+    private async Task LoadAvailableFonts()
     {
-        var fonts = Avalonia.Media.FontManager.Current.SystemFonts.OrderBy(x => x.Name).Select(x => x.Name);
-        AvailableFonts = new ObservableCollection<string>(fonts);
+        var fonts = await Task.Run(() => 
+            Avalonia.Media.FontManager.Current.SystemFonts
+                .OrderBy(x => x.Name)
+                .Select(x => x.Name)
+                .ToList());
+        
+        await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() => 
+        {
+            AvailableFonts = new ObservableCollection<string>(fonts);
+        });
     }
 
     public List<string> OpenaiModels

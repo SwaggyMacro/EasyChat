@@ -176,8 +176,28 @@ public class WindowsPlatformService : IPlatformService
             try
             {
                 // 1. Clear Clipboard (to detect new copy)
-                // Note: OleSetClipboard(null) clears it.
-                Win32.OleSetClipboard(null);
+                // Use OpenClipboard/EmptyClipboard for reliability
+                int retryCount = 0;
+                bool cleared = false;
+                while (retryCount < 5 && !cleared)
+                {
+                    if (Win32.OpenClipboard(IntPtr.Zero))
+                    {
+                        Win32.EmptyClipboard();
+                        Win32.CloseClipboard();
+                        cleared = true;
+                    }
+                    else
+                    {
+                        retryCount++;
+                        await Task.Delay(10);
+                    }
+                }
+                
+                if (!cleared)
+                {
+                    _logger.LogWarning("Failed to clear clipboard, text extraction might be inaccurate");
+                }
                 
                 // 2. Send Ctrl+C
                 // Wait a tiny bit for the clear to settle
@@ -384,6 +404,9 @@ public class WindowsPlatformService : IPlatformService
         [DllImport("user32.dll")]
         public static extern bool OpenClipboard(IntPtr hWndNewOwner);
         
+        [DllImport("user32.dll")]
+        public static extern bool EmptyClipboard();
+
         [DllImport("user32.dll")]
         public static extern bool CloseClipboard();
         
