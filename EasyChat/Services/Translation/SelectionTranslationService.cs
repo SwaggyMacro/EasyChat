@@ -6,6 +6,7 @@ using EasyChat.Services.Abstractions;
 using EasyChat.Views.Windows;
 using Microsoft.Extensions.Logging;
 using EasyChat.Common;
+using ReactiveUI;
 
 namespace EasyChat.Services.Translation;
 
@@ -40,10 +41,64 @@ public class SelectionTranslationService : IDisposable
         _mouseHookService.MouseDown += OnMouseDown;
         _mouseHookService.MouseUp += OnMouseUp;
         
-        // Ensure hook is started
-        _mouseHookService.Start();
+        // Reactive config monitoring
+        if (_configurationService.SelectionTranslation != null)
+        {
+            // Flag to track if this is the initial subscription callback (app startup)
+            bool isStartup = true;
+
+            _configurationService.SelectionTranslation.WhenAnyValue(x => x.Enabled)
+                .Subscribe(enabled =>
+                {
+                    if (enabled)
+                    {
+                        if (isStartup)
+                        {
+                            // Delay start strictly for startup to prevent lag
+                            Task.Delay(3000).ContinueWith(_ =>
+                            {
+                                Dispatcher.UIThread.InvokeAsync(() =>
+                                {
+                                    // Re-check enabled state after delay in case it changed
+                                    if (_configurationService.SelectionTranslation.Enabled)
+                                    {
+                                        StartHook();
+                                    }
+                                });
+                            });
+                        }
+                        else
+                        {
+                            // Immediate start for runtime toggle
+                            Dispatcher.UIThread.InvokeAsync(StartHook);
+                        }
+                    }
+                    else
+                    {
+                        Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                             _mouseHookService.Stop();
+                        });
+                    }
+                    
+                    // After the first callback (immediate initial value), subsequent ones are runtime changes
+                    isStartup = false;
+                });
+        }
         
         _logger.LogInformation("SelectionTranslationService initialized");
+    }
+
+    private void StartHook()
+    {
+        try
+        {
+            _mouseHookService.Start();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to start mouse hook service");
+        }
     }
 
     private void OnMouseDown(object? sender, SimpleMouseEventArgs e)
@@ -115,14 +170,13 @@ public class SelectionTranslationService : IDisposable
                     if (!string.IsNullOrWhiteSpace(text))
                     {
                         _logger.LogInformation("Got selected text: {Length} chars", text.Length);
+                        // Show icon only if text is found
+                        await Dispatcher.UIThread.InvokeAsync(() => ShowIcon(x2, y2));
                     }
                     else
                     {
                          _logger.LogDebug("No text selected (or extraction failed)");
                     }
-                    
-                    // Show icon regardless (user can still paste text manually)
-                    await Dispatcher.UIThread.InvokeAsync(() => ShowIcon(x2, y2));
                 }
                 catch (Exception ex)
                 {

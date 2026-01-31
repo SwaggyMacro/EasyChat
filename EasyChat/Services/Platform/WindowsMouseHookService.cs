@@ -55,7 +55,10 @@ public class WindowsMouseHookService : IMouseHookService, IDisposable
 
     private IntPtr SetHook(LowLevelMouseProc proc)
     {
-        return SetWindowsHookEx(WH_MOUSE_LL, proc, IntPtr.Zero, 0);
+        using var curProcess = System.Diagnostics.Process.GetCurrentProcess();
+        using var curModule = curProcess.MainModule;
+        
+        return SetWindowsHookEx(WH_MOUSE_LL, proc, GetModuleHandle(curModule?.ModuleName), 0);
     }
 
     private delegate IntPtr LowLevelMouseProc(int nCode, IntPtr wParam, IntPtr lParam);
@@ -116,6 +119,9 @@ public class WindowsMouseHookService : IMouseHookService, IDisposable
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    private static extern IntPtr GetModuleHandle(string? lpModuleName);
 
     public void Dispose()
     {
