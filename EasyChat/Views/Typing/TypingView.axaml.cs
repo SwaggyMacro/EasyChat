@@ -142,7 +142,16 @@ public partial class TypingView : Window
                      // Send text
                      if (mode == Models.Configuration.InputDeliveryMode.Paste)
                      {
+                         // Backup clipboard logic using helper
+                         var backup = await ClipboardHelper.BackupClipboardAsync(_logger);
+
                          await _platformService.PasteTextAsync(translatedText);
+                         
+                         // Wait for paste to complete before restoring
+                         await Task.Delay(200);
+                         
+                         // Restore clipboard
+                         await ClipboardHelper.RestoreClipboardAsync(backup, _logger);
                      }
                      else if (mode == Models.Configuration.InputDeliveryMode.Message)
                      {

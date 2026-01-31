@@ -11,6 +11,7 @@ using EasyChat.Models;
 using EasyChat.Models.Configuration;
 using EasyChat.Services;
 using EasyChat.Services.Abstractions;
+using EasyChat.Services.Translation;
 using EasyChat.Services.HotKey;
 using EasyChat.Services.Ocr;
 using EasyChat.Services.Platform;
@@ -103,6 +104,7 @@ public class App : Application
                 services.AddSingleton<IPlatformService, WindowsPlatformService>();
                 services.AddSingleton<IHotKeyManager, WindowsHotKeyManager>();
                 services.AddSingleton<IScreenCaptureService, WindowsScreenCaptureService>();
+                services.AddSingleton<IMouseHookService, WindowsMouseHookService>();
             }
             else
             {
@@ -113,6 +115,7 @@ public class App : Application
             // Other Services
             services.AddSingleton<IOcrService, PaddleOcrService>();
             services.AddSingleton<ITranslationServiceFactory, TranslationServiceFactory>();
+            services.AddSingleton<SelectionTranslationService>();
 
             // Speech Recognition
             services.AddSingleton<ISpeechRecognitionService, SpeechRecognitionService>();
@@ -170,6 +173,11 @@ public class App : Application
             // Ensure ConfigurationService and GlobalShortcutService are initialized
             provider.GetRequiredService<IConfigurationService>();
             provider.GetRequiredService<GlobalShortcutService>();
+            
+            if (OperatingSystem.IsWindows())
+            {
+                provider.GetRequiredService<SelectionTranslationService>();
+            }
 
             // Startup Main Window
             var mainViewModel = provider.GetRequiredService<MainWindowViewModel>();

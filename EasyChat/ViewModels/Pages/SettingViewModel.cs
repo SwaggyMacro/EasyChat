@@ -294,6 +294,8 @@ public class SettingViewModel : Page
     
     public ScreenshotConfig? ScreenshotConf => _configurationService.Screenshot;
     
+    public SelectionTranslationConfig? SelectionTranslationConf => _configurationService.SelectionTranslation;
+    
     public List<string> TransparencyLevels { get; } = ["AcrylicBlur", "Blur", "Transparent"];
     
     private ObservableCollection<string> _availableFonts = [];

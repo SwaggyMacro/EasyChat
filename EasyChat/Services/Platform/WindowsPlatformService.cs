@@ -4,14 +4,12 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using EasyChat.Services.Abstractions;
 using Microsoft.Extensions.Logging;
-// ReSharper disable InconsistentNaming
 
 namespace EasyChat.Services.Platform;
 
 public class WindowsPlatformService : IPlatformService
 {
     private readonly ILogger<WindowsPlatformService> _logger;
-
     public WindowsPlatformService(ILogger<WindowsPlatformService> logger)
     {
         _logger = logger;
@@ -24,10 +22,6 @@ public class WindowsPlatformService : IPlatformService
 
     public void SetForegroundWindow(IntPtr hWnd)
     {
-        // Robustly set foreground window using AttachThreadInput hack
-        // This is necessary because Windows restricts processes from stealing focus
-        // unless they are complying with specific rules.
-        
         var targetThreadId = Win32.GetWindowThreadProcessId(hWnd, out _);
         var currentThreadId = Win32.GetCurrentThreadId();
         var attached = false;
@@ -43,14 +37,12 @@ public class WindowsPlatformService : IPlatformService
                 }
             }
 
-            // Retry a few times if needed, or just call it.
             var result = Win32.SetForegroundWindow(hWnd);
             if (!result)
             {
                 _logger.LogWarning($"SetForegroundWindow failed for hWnd: {hWnd}");
             }
             
-            // Try SetFocus as well, now that we are attached or if we own it
             Win32.SetFocus(hWnd);
         }
         catch (Exception ex)
@@ -93,8 +85,7 @@ public class WindowsPlatformService : IPlatformService
 
             if (c == '\n')
             {
-                // Send VK_RETURN for newline
-                 var down = new Win32.INPUT { type = Win32.INPUT_KEYBOARD, u = new Win32.InputUnion { ki = new Win32.KEYBDINPUT { wVk = 0x0D, dwFlags = 0 } } }; // VK_RETURN
+                 var down = new Win32.INPUT { type = Win32.INPUT_KEYBOARD, u = new Win32.InputUnion { ki = new Win32.KEYBDINPUT { wVk = 0x0D, dwFlags = 0 } } };
                  var up = new Win32.INPUT { type = Win32.INPUT_KEYBOARD, u = new Win32.InputUnion { ki = new Win32.KEYBDINPUT { wVk = 0x0D, dwFlags = Win32.KEYEVENTF_KEYUP } } };
                  inputs.Add(down);
                  inputs.Add(up);
@@ -144,43 +135,16 @@ public class WindowsPlatformService : IPlatformService
     {
         try
         {
-            var clipboard = (Avalonia.Application.Current?.ApplicationLifetime as Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime)?.MainWindow?.Clipboard;
-            if (clipboard == null) return;
-
-            // 1. Backup all clipboard data
-            var backedUpData = new Dictionary<string, object>();
-            try
+            await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                var formats = await clipboard.GetFormatsAsync();
-                foreach (var format in formats)
-                {
-                    try 
-                    {
-                        var data = await clipboard.GetDataAsync(format);
-                        if (data != null)
-                        {
-                            backedUpData[format] = data;
-                        }
-                    }
-                    catch 
-                    {
-                        // Can fail for specific formats or locked clipboard
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to inspect clipboard formats for backup");
-            }
+                var clipboard = (Avalonia.Application.Current?.ApplicationLifetime as Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime)?.MainWindow?.Clipboard;
+                if (clipboard == null) return;
 
-            // 2. Set new text check
-            await clipboard.SetTextAsync(text);
+                await clipboard.SetTextAsync(text);
+            });
             
-            // Wait slightly for clipboard
             await Task.Delay(50);
 
-            // 3. Send Ctrl+V
-            // VK_CONTROL = 0x11, V = 0x56
             var inputs = new List<Win32.INPUT>();
             
             var ctrlDown = new Win32.INPUT { type = Win32.INPUT_KEYBOARD, u = new Win32.InputUnion { ki = new Win32.KEYBDINPUT { wVk = 0x11, dwFlags = 0 } } };
@@ -194,37 +158,115 @@ public class WindowsPlatformService : IPlatformService
             inputs.Add(ctrlUp);
 
             Win32.SendInput((uint)inputs.Count, inputs.ToArray(), Marshal.SizeOf(typeof(Win32.INPUT)));
-            
-            // Wait for app to process paste command before restoring
-            await Task.Delay(200);
-
-            // 4. Restore old data
-            if (backedUpData.Count > 0)
-            {
-                try 
-                {
-                    var dataObject = new Avalonia.Input.DataObject();
-                    foreach (var kvp in backedUpData)
-                    {
-                        dataObject.Set(kvp.Key, kvp.Value);
-                    }
-                    await clipboard.SetDataObjectAsync(dataObject);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to restore clipboard data");
-                }
-            }
-            else
-            {
-                // Nothing to restore, just clear our temp text to be safe/clean
-                await clipboard.ClearAsync();
-            }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to paste text");
         }
+    }
+    
+    public async Task<string?> GetSelectedTextAsync(int? x = null, int? y = null)
+    {
+        // User requested Clipboard approach ensuring original content is restored.
+        // Backup/Restore is handled by the caller (SelectionTranslationService) using ClipboardHelper.
+        // This method strictly performs: Clear -> Copy (Ctrl+C) -> Read.
+        
+        return await Task.Run(async () =>
+        {
+            try
+            {
+                // 1. Clear Clipboard (to detect new copy)
+                // Note: OleSetClipboard(null) clears it.
+                Win32.OleSetClipboard(null);
+                
+                // 2. Send Ctrl+C
+                // Wait a tiny bit for the clear to settle
+                await Task.Delay(10);
+                
+                var inputs = new Win32.INPUT[4];
+                
+                // Ctrl Down
+                inputs[0].type = Win32.INPUT_KEYBOARD;
+                inputs[0].u.ki.wVk = 0x11; // VK_CONTROL
+                
+                // C Down
+                inputs[1].type = Win32.INPUT_KEYBOARD;
+                inputs[1].u.ki.wVk = 0x43; // C
+                
+                // C Up
+                inputs[2].type = Win32.INPUT_KEYBOARD;
+                inputs[2].u.ki.wVk = 0x43;
+                inputs[2].u.ki.dwFlags = Win32.KEYEVENTF_KEYUP;
+                
+                // Ctrl Up
+                inputs[3].type = Win32.INPUT_KEYBOARD;
+                inputs[3].u.ki.wVk = 0x11;
+                inputs[3].u.ki.dwFlags = Win32.KEYEVENTF_KEYUP;
+                
+                Win32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(Win32.INPUT)));
+                
+                // 3. Poll for text
+                string? result = null;
+                // Poll more frequently for faster response
+                for (int i = 0; i < 20; i++) 
+                {
+                    await Task.Delay(10); // 10ms * 20 = 200ms max
+                    if (IsClipboardTextAvailable())
+                    {
+                        result = GetClipboardTextWin32();
+                        if (!string.IsNullOrEmpty(result)) break;
+                    }
+                }
+                
+                if (!string.IsNullOrEmpty(result))
+                {
+                    _logger.LogDebug("Got text via Clipboard: {Length} chars", result.Length);
+                    return result;
+                }
+                
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get text via Clipboard");
+                return null;
+            }
+        });
+    }
+
+    private bool IsClipboardTextAvailable()
+    {
+        // CF_UNICODETEXT = 13
+        return Win32.IsClipboardFormatAvailable(13);
+    }
+    
+    private string? GetClipboardTextWin32()
+    {
+        if (!Win32.OpenClipboard(IntPtr.Zero)) return null;
+        try
+        {
+            IntPtr hData = Win32.GetClipboardData(13); // CF_UNICODETEXT
+            if (hData != IntPtr.Zero)
+            {
+                IntPtr pData = Win32.GlobalLock(hData);
+                if (pData != IntPtr.Zero)
+                {
+                    try
+                    {
+                        return Marshal.PtrToStringUni(pData);
+                    }
+                    finally
+                    {
+                        Win32.GlobalUnlock(hData);
+                    }
+                }
+            }
+        }
+        finally
+        {
+            Win32.CloseClipboard();
+        }
+        return null;
     }
 
     public async Task SendTextMessageAsync(IntPtr hWnd, string text, int delayMs = 10)
@@ -243,10 +285,8 @@ public class WindowsPlatformService : IPlatformService
             var foreground = Win32.GetForegroundWindow();
             if (foreground == hWnd) return true;
 
-            // Try to set it
             SetForegroundWindow(hWnd);
 
-            // Small wait
             await Task.Delay(50);
         }
 
@@ -263,12 +303,18 @@ public class WindowsPlatformService : IPlatformService
 
         [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr SetFocus(IntPtr hWnd);
+        
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetFocus();
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern IntPtr PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+        
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, out int wParam, out int lParam);
 
         [DllImport("user32.dll")]
         public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
@@ -334,5 +380,71 @@ public class WindowsPlatformService : IPlatformService
         public const uint KEYEVENTF_KEYUP = 0x0002;
         public const uint KEYEVENTF_UNICODE = 0x0004;
         public const uint KEYEVENTF_SCANCODE = 0x0008;
+
+        [DllImport("user32.dll")]
+        public static extern bool OpenClipboard(IntPtr hWndNewOwner);
+        
+        [DllImport("user32.dll")]
+        public static extern bool CloseClipboard();
+        
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetClipboardData(uint uFormat);
+        
+        [DllImport("user32.dll")]
+        public static extern bool IsClipboardFormatAvailable(uint format);
+
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GlobalLock(IntPtr hMem);
+        
+        [DllImport("kernel32.dll")]
+        public static extern bool GlobalUnlock(IntPtr hMem);
+
+        [DllImport("ole32.dll")]
+        public static extern int OleGetClipboard(out IDataObject ppDataObj);
+        
+        [DllImport("ole32.dll")]
+        public static extern int OleSetClipboard(IDataObject? pDataObj);
+        
+        [DllImport("ole32.dll")]
+        public static extern int OleFlushClipboard();
+
+        [ComImport]
+        [Guid("0000010e-0000-0000-C000-000000000046")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        public interface IDataObject
+        {
+            void GetData(ref FORMATETC format, out STGMEDIUM medium);
+            void GetDataHere(ref FORMATETC format, ref STGMEDIUM medium);
+            int QueryGetData(ref FORMATETC format);
+            int GetCanonicalFormatEtc(ref FORMATETC formatIn, out FORMATETC formatOut);
+            void SetData(ref FORMATETC formatIn, ref STGMEDIUM medium, bool release);
+            void EnumFormatEtc(int direction, out IEnumFORMATETC enumFormat); // Simplified
+            int DAdvise(ref FORMATETC pFormatetc, int advf, object pAdvSink, out int pdwConnection);
+            void DUnadvise(int dwConnection);
+            int EnumDAdvise(out object enumAdvise);
+        }
+        
+        [StructLayout(LayoutKind.Sequential)]
+        public struct FORMATETC
+        {
+            public short cfFormat;
+            public IntPtr ptd;
+            public int dwAspect;
+            public int lindex;
+            public int tymed;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct STGMEDIUM
+        {
+            public int tymed;
+            public IntPtr unionmember;
+            public IntPtr pUnkForRelease;
+        }
+        
+        [ComImport]
+        [Guid("00000103-0000-0000-C000-000000000046")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        public interface IEnumFORMATETC { } // Placeholder
     }
 }

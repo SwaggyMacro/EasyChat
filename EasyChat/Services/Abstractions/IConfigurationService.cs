@@ -13,5 +13,6 @@ public interface IConfigurationService
     ResultConfig? Result { get; }
     InputConfig? Input { get; }
     ScreenshotConfig? Screenshot { get; }
+    SelectionTranslationConfig? SelectionTranslation { get; }
     SpeechRecognitionConfig? SpeechRecognition { get; }
 }

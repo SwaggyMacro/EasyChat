@@ -2006,5 +2006,81 @@ namespace EasyChat.Lang {
                 return ResourceManager.GetString("FixedAreaSettings", resourceCulture);
             }
         }
+        /// <summary>
+        ///   Looks up a localized string similar to Selection Translation.
+        /// </summary>
+        public static string SelectionTranslation {
+            get {
+                return ResourceManager.GetString("SelectionTranslation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable Selection Translation.
+        /// </summary>
+        public static string EnableSelectionTranslation {
+            get {
+                return ResourceManager.GetString("EnableSelectionTranslation", resourceCulture);
+            }
+        }
+        public static string SelectionTranslate_Title {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_Title", resourceCulture);
+            }
+        }
+
+        public static string SelectionTranslate_SourceLabel {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_SourceLabel", resourceCulture);
+            }
+        }
+
+        public static string SelectionTranslate_SourceWatermark {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_SourceWatermark", resourceCulture);
+            }
+        }
+
+        public static string SelectionTranslate_ResultLabel {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_ResultLabel", resourceCulture);
+            }
+        }
+
+        public static string SelectionTranslate_AutoDetect {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_AutoDetect", resourceCulture);
+            }
+        }
+
+        public static string SelectionTranslate_Language_Chinese {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_Language_Chinese", resourceCulture);
+            }
+        }
+        
+        public static string SelectionTranslate_CopyTooltip {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_CopyTooltip", resourceCulture);
+            }
+        }
+        
+        public static string SelectionTranslate_TranslateButton {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_TranslateButton", resourceCulture);
+            }
+        }
+        
+        public static string SelectionTranslate_ImplementationPending {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_ImplementationPending", resourceCulture);
+            }
+        }
+        
+        public static string SelectionTranslate_Failed {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_Failed", resourceCulture);
+            }
+        }
     }
 }

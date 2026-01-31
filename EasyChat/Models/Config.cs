@@ -12,4 +12,5 @@ public class Config
     public Proxy ProxyConf { get; set; } = new();
     public Shortcut ShortcutConf { get; set; } = new();
     public ScreenshotConfig ScreenshotConf { get; set; } = new();
+    public SelectionTranslationConfig SelectionTranslationConf { get; set; } = new();
 }

@@ -968,6 +968,21 @@
                         </suki:GlassCard>
                     </suki:SettingsLayoutItem.Content>
                 </suki:SettingsLayoutItem>
+                <suki:SettingsLayoutItem Header="{x:Static lang:Resources.SelectionTranslation}">
+                    <suki:SettingsLayoutItem.Content>
+                        <suki:GlassCard>
+                            <StackPanel>
+                                <DockPanel>
+                                    <TextBlock Text="{x:Static lang:Resources.EnableSelectionTranslation}"
+                                               VerticalAlignment="Center" FontWeight="Bold" />
+                                    <ToggleSwitch IsChecked="{Binding SelectionTranslationConf.Enabled}"
+                                                  HorizontalAlignment="Right"
+                                                  OnContent="" OffContent="" />
+                                </DockPanel>
+                            </StackPanel>
+                        </suki:GlassCard>
+                    </suki:SettingsLayoutItem.Content>
+                </suki:SettingsLayoutItem>
             </objectModel:ObservableCollection>
         </suki:SettingsLayout.Items>
     </suki:SettingsLayout>

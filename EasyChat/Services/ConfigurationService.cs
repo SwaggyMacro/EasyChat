@@ -30,6 +30,7 @@ public class ConfigurationService : ReactiveObject, IConfigurationService
         Input = ConfigUtil.LoadConfig<InputConfig>(Constant.InputConf);
         Screenshot = ConfigUtil.LoadConfig<ScreenshotConfig>(Constant.ScreenshotConf);
         SpeechRecognition = ConfigUtil.LoadConfig<SpeechRecognitionConfig>(Constant.SpeechRecognitionConf);
+        SelectionTranslation = ConfigUtil.LoadConfig<SelectionTranslationConfig>(Constant.SelectionTranslationConf);
 
         // Set global access for legacy compatibility (if needed)
         Global.Config.GeneralConf = General;
@@ -37,6 +38,7 @@ public class ConfigurationService : ReactiveObject, IConfigurationService
         Global.Config.MachineTransConf = MachineTrans;
         Global.Config.ProxyConf = Proxy;
         Global.Config.ShortcutConf = Shortcut;
+        Global.Config.SelectionTranslationConf = SelectionTranslation;
         
         // Ensure initial IDs are persisted (especially just after migration)
         ConfigUtil.SaveConfig(Constant.MachineTransConf, MachineTrans);
@@ -56,6 +58,7 @@ public class ConfigurationService : ReactiveObject, IConfigurationService
     public ResultConfig Result { get; }
     public InputConfig Input { get; }
     public ScreenshotConfig Screenshot { get; }
+    public SelectionTranslationConfig SelectionTranslation { get; }
     public SpeechRecognitionConfig SpeechRecognition { get; }
 
     private void SetupAutoSave()
@@ -103,6 +106,15 @@ public class ConfigurationService : ReactiveObject, IConfigurationService
             {
                 _logger.LogDebug("Auto-saving Screenshot configuration");
                 ConfigUtil.SaveConfig(Constant.ScreenshotConf, Screenshot);
+            });
+
+        // SelectionTranslation Config
+        SelectionTranslation.Changed
+            .Throttle(TimeSpan.FromMilliseconds(500))
+            .Subscribe(_ =>
+            {
+                _logger.LogDebug("Auto-saving SelectionTranslation configuration");
+                ConfigUtil.SaveConfig(Constant.SelectionTranslationConf, SelectionTranslation);
             });
 
         // Screenshot FixedAreas

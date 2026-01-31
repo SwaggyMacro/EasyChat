@@ -677,4 +677,40 @@
     <data name="FixedAreaSettings" xml:space="preserve">
         <value>Fixed Area Settings</value>
     </data>
+    <data name="SelectionTranslation" xml:space="preserve">
+        <value>Selection Translation</value>
+    </data>
+    <data name="EnableSelectionTranslation" xml:space="preserve">
+        <value>Enable Selection Translation</value>
+    </data>
+    <data name="SelectionTranslate_Title" xml:space="preserve">
+        <value>Selection Translation</value>
+    </data>
+    <data name="SelectionTranslate_SourceLabel" xml:space="preserve">
+        <value>Source</value>
+    </data>
+    <data name="SelectionTranslate_SourceWatermark" xml:space="preserve">
+        <value>Selected text will appear here...</value>
+    </data>
+    <data name="SelectionTranslate_ResultLabel" xml:space="preserve">
+        <value>Translation</value>
+    </data>
+    <data name="SelectionTranslate_AutoDetect" xml:space="preserve">
+        <value>Auto Detect</value>
+    </data>
+    <data name="SelectionTranslate_Language_Chinese" xml:space="preserve">
+        <value>Chinese</value>
+    </data>
+    <data name="SelectionTranslate_CopyTooltip" xml:space="preserve">
+        <value>Copy Translation</value>
+    </data>
+    <data name="SelectionTranslate_TranslateButton" xml:space="preserve">
+        <value>Translate</value>
+    </data>
+    <data name="SelectionTranslate_ImplementationPending" xml:space="preserve">
+        <value>[Translation Pending] Source: </value>
+    </data>
+    <data name="SelectionTranslate_Failed" xml:space="preserve">
+        <value>Translation Failed: </value>
+    </data>
 </root>
