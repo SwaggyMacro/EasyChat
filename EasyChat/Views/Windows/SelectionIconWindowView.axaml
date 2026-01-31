@@ -3,8 +3,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:suki="https://github.com/kikipoulet/SukiUI"
         mc:Ignorable="d" d:DesignWidth="40" d:DesignHeight="40"
-        x:Class="EasyChat.Views.Windows.SelectionIconWindow"
+        x:Class="EasyChat.Views.Windows.SelectionIconWindowView"
         Width="40" Height="40"
         SystemDecorations="None"
         TransparencyLevelHint="Transparent"
@@ -23,9 +24,19 @@
             VerticalAlignment="Center"
             Cursor="Hand"
             PointerPressed="OnIconPointerPressed">
-        <icons:MaterialIcon Kind="Translate" Width="20" Height="20" 
-                            Foreground="White"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
+        <Panel>
+            <!-- Normal translate icon -->
+            <icons:MaterialIcon x:Name="TranslateIcon" Kind="Translate" Width="20" Height="20" 
+                                Foreground="White"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"/>
+            <!-- Loading spinner (initially hidden) -->
+            <suki:Loading x:Name="LoadingSpinner" 
+                          Width="18" Height="18"
+                          Foreground="White"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          IsVisible="False"/>
+        </Panel>
     </Border>
 </Window>

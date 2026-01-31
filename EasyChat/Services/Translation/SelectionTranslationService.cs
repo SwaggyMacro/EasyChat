@@ -22,7 +22,8 @@ public class SelectionTranslationService : IDisposable
     // Thresholds
     private const int DragThreshold = 5; // pixels
     
-    private SelectionIconWindow? _iconWindow;
+    private SelectionIconWindowView? _iconWindow;
+    private SelectionTranslateWindowView? _currentTranslateWindow;
     private int _lastIconX;
     private int _lastIconY;
     private string? _lastSelectedText;
@@ -40,6 +41,7 @@ public class SelectionTranslationService : IDisposable
 
         _mouseHookService.MouseDown += OnMouseDown;
         _mouseHookService.MouseUp += OnMouseUp;
+        _mouseHookService.MouseDoubleClick += OnMouseDoubleClick;
         
         // Reactive config monitoring
         if (_configurationService.SelectionTranslation != null)
@@ -117,12 +119,36 @@ public class SelectionTranslationService : IDisposable
         if (_iconWindow != null && _iconWindow.IsVisible)
         {
             var iconPos = _iconWindow.Position;
-            var iconBounds = new Avalonia.Rect(iconPos.X, iconPos.Y, 40, 40);
-            if (iconBounds.Contains(new Avalonia.Point(e.X, e.Y)))
+            var iconBounds = new Rect(iconPos.X, iconPos.Y, 40, 40);
+            if (iconBounds.Contains(new Point(e.X, e.Y)))
             {
                 _logger.LogDebug("Click is on icon window, not hiding");
                 return; // Don't hide - let the icon handle the click
             }
+        }
+        
+        // Check if click is inside the Translation Window (if open)
+        if (_currentTranslateWindow != null && _currentTranslateWindow.IsVisible)
+        {
+            var screenPoint = new PixelPoint(e.X, e.Y);
+            var clientPoint = _currentTranslateWindow.PointToClient(screenPoint);
+            var bounds = new Rect(0, 0, _currentTranslateWindow.Bounds.Width, _currentTranslateWindow.Bounds.Height);
+            
+            if (bounds.Contains(clientPoint))
+            {
+                 _logger.LogDebug("Click is inside Translation Window, ignoring.");
+                 return;
+            }
+            
+            // Click is outside -> Close Window
+            Dispatcher.UIThread.Post(() => 
+            {
+                try { _currentTranslateWindow?.Close(); }
+                catch
+                {
+                    // ignored
+                }
+            });
         }
         
         // Hide icon on any click elsewhere (start of new interaction)
@@ -186,13 +212,57 @@ public class SelectionTranslationService : IDisposable
         }
     }
 
+    private void OnMouseDoubleClick(object? sender, SimpleMouseEventArgs e)
+    {
+        if (_configurationService.SelectionTranslation?.Enabled != true) return;
+        
+        _logger.LogInformation("Double Click detected at {X}, {Y}", e.X, e.Y);
+        
+        _lastIconX = e.X;
+        _lastIconY = e.Y;
+            
+        // Get selected text using UI Automation
+        Task.Run(async () =>
+        {
+            try
+            {
+                // Wait for potential selection finalization (double click selects word)
+                await Task.Delay(50);
+                    
+                // Backup clipboard (Must be on UI Thread)
+                var backup = await Dispatcher.UIThread.InvokeAsync(() => ClipboardHelper.BackupClipboardAsync(_logger));
+                    
+                var text = await _platformService.GetSelectedTextAsync(e.X, e.Y);
+                _lastSelectedText = text;
+                    
+                // Restore clipboard (Must be on UI Thread)
+                await Dispatcher.UIThread.InvokeAsync(() => ClipboardHelper.RestoreClipboardAsync(backup, _logger));
+                    
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    _logger.LogInformation("Got selected text (Double Click): {Length} chars", text.Length);
+                    // Show icon only if text is found
+                    await Dispatcher.UIThread.InvokeAsync(() => ShowIcon(e.X, e.Y));
+                }
+                else
+                {
+                         _logger.LogDebug("No text selected (Double Click)");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting selected text (Double Click)");
+            }
+        });
+    }
+
     private void ShowIcon(int x, int y)
     {
         _logger.LogDebug("Showing icon at {X}, {Y}", x, y);
         
         if (_iconWindow == null)
         {
-            _iconWindow = new SelectionIconWindow();
+            _iconWindow = new SelectionIconWindowView();
             _iconWindow.TranslateClicked += OnTranslateClicked;
         }
         
@@ -210,7 +280,7 @@ public class SelectionTranslationService : IDisposable
         catch
         {
             // Recreate if failed (e.g. invalid handle)
-            _iconWindow = new SelectionIconWindow();
+            _iconWindow = new SelectionIconWindowView();
             _iconWindow.TranslateClicked += OnTranslateClicked;
             _iconWindow.Position = new PixelPoint(x + 10, y + 10);
             _iconWindow.Show();
@@ -233,22 +303,100 @@ public class SelectionTranslationService : IDisposable
     {
         _logger.LogInformation("Translate icon clicked! Opening dialog...");
         
-        // Get position and text before hiding
+        // Get position and text before any async operation
         var x = _lastIconX;
         var y = _lastIconY;
         var text = _lastSelectedText;
         
-        // Open dialog first to maintain app focus/activation from the UI thread
-        Dispatcher.UIThread.Post(async () => 
+        // Immediately show loading spinner on UI thread
+        Dispatcher.UIThread.Post(() => _iconWindow?.ShowLoading());
+        
+        // Run the preparation asynchronously to avoid blocking
+        Task.Run(async () =>
         {
-            OpenTranslateDialog(x, y, text);
-            
-            // Short delay to ensure the new window is registered as the active window
-            await Task.Delay(100);
-            
-            // Then close the icon
-            HideIcon();
+            try
+            {
+                // Create and prepare the dialog on the UI thread
+                SelectionTranslateWindowView? dialog = null;
+                
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    _logger.LogInformation("Attempting to open translate dialog at {X}, {Y}", x, y);
+                    
+                    // Close existing window if any (Singleton behavior)
+                    try { _currentTranslateWindow?.Close(); } catch { /* Ignore if already closing */ }
+
+                    dialog = new SelectionTranslateWindowView();
+                    _currentTranslateWindow = dialog;
+                    
+                    // Handle cleanup when closed manually
+                    dialog.Closed += (_, _) => 
+                    {
+                        if (_currentTranslateWindow == dialog)
+                        {
+                            _currentTranslateWindow = null;
+                        }
+                    };
+                });
+                
+                if (dialog == null || string.IsNullOrEmpty(text))
+                {
+                    // Fallback: show dialog without async init
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        if (dialog != null && !string.IsNullOrEmpty(text))
+                        {
+                            dialog.SetSourceText(text);
+                        }
+                        ShowDialogAtPosition(dialog, x, y);
+                        HideIconAndLoading();
+                    });
+                    return;
+                }
+                
+                // Initialize asynchronously - this does the heavy lifting
+                await dialog.InitializeAsync(text);
+                
+                // Now show the prepared dialog on UI thread
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    ShowDialogAtPosition(dialog, x, y);
+                    HideIconAndLoading();
+                    _logger.LogInformation("SelectionTranslateDialog opened successfully");
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to open translate dialog. StackTrace: {StackTrace}", ex.StackTrace);
+                await Dispatcher.UIThread.InvokeAsync(HideIconAndLoading);
+            }
         });
+    }
+    
+    private void ShowDialogAtPosition(SelectionTranslateWindowView? dialog, int x, int y)
+    {
+        if (dialog == null) return;
+        
+        // Position near where the icon was
+        // Ensure we don't go off-screen (basic check)
+        var screen = dialog.Screens.ScreenFromPoint(new PixelPoint(x, y)) ?? dialog.Screens.Primary;
+        if (screen != null)
+        {
+            var screenRect = screen.WorkingArea;
+            if (x + 450 > screenRect.Right) x = screenRect.Right - 470;
+            if (y + 350 > screenRect.Bottom) y = screenRect.Bottom - 370;
+        }
+
+        dialog.Position = new PixelPoint(x + 20, y + 20);
+        dialog.Show();
+        // Don't activate to prevent focus theft
+        // dialog.Activate();
+    }
+    
+    private void HideIconAndLoading()
+    {
+        _iconWindow?.HideLoading();
+        HideIcon();
     }
     
     private void OpenTranslateDialog(int x, int y, string? prefilledText)
@@ -257,7 +405,20 @@ public class SelectionTranslationService : IDisposable
         
         try
         {
-            var dialog = new SelectionTranslateWindow();
+            // Close existing window if any (Singleton behavior)
+            try { _currentTranslateWindow?.Close(); } catch { /* Ignore if already closing */ }
+
+            var dialog = new SelectionTranslateWindowView();
+            _currentTranslateWindow = dialog;
+            
+            // Handle cleanup when closed manually
+            dialog.Closed += (_, _) => 
+            {
+                if (_currentTranslateWindow == dialog)
+                {
+                    _currentTranslateWindow = null;
+                }
+            };
             
             // Pre-fill text if we got it from UI Automation
             if (!string.IsNullOrEmpty(prefilledText))
@@ -265,20 +426,7 @@ public class SelectionTranslationService : IDisposable
                 dialog.SetSourceText(prefilledText);
             }
             
-            // Position near where the icon was
-            // Ensure we don't go off-screen (basic check)
-            var screen = dialog.Screens.ScreenFromPoint(new PixelPoint(x, y)) ?? dialog.Screens.Primary;
-            if (screen != null)
-            {
-                var screenRect = screen.WorkingArea;
-                if (x + 450 > screenRect.Right) x = screenRect.Right - 470;
-                if (y + 350 > screenRect.Bottom) y = screenRect.Bottom - 370;
-            }
-
-            dialog.Position = new PixelPoint(x + 20, y + 20);
-            dialog.Show();
-            // Don't activate to prevent focus theft
-            // dialog.Activate();
+            ShowDialogAtPosition(dialog, x, y);
             
             _logger.LogInformation("SelectionTranslateDialog opened successfully");
         }
@@ -292,6 +440,7 @@ public class SelectionTranslationService : IDisposable
     {
         _mouseHookService.MouseDown -= OnMouseDown;
         _mouseHookService.MouseUp -= OnMouseUp;
+        _mouseHookService.MouseDoubleClick -= OnMouseDoubleClick;
         _mouseHookService.Stop();
         if (_iconWindow != null)
         {

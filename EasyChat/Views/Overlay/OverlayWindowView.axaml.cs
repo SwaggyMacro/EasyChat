@@ -38,7 +38,7 @@ public enum ResizeHandle
     LeftCenter
 }
 
-public partial class OverlayWindow : Window
+public partial class OverlayWindowView : Window
 {
     private readonly Bitmap _capturedImage;
     private readonly Rectangle _selectionRectangle;
@@ -71,10 +71,10 @@ public partial class OverlayWindow : Window
 
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
 #pragma warning disable CS8618 
-    public OverlayWindow () {}
+    public OverlayWindowView () {}
 #pragma warning restore CS8618 
 
-    public OverlayWindow(PixelRect bounds, Bitmap capturedImage, string mode = Constants.Constant.ScreenshotMode.Quick, CaptureIntent? intent = null)
+    public OverlayWindowView(PixelRect bounds, Bitmap capturedImage, string mode = Constants.Constant.ScreenshotMode.Quick, CaptureIntent? intent = null)
     {
         InitializeComponent();
         _capturedImage = capturedImage;

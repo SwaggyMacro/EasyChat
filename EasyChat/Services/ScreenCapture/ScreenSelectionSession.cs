@@ -19,7 +19,7 @@ public class ScreenSelectionSession
 {
     private readonly Action<Bitmap, CaptureIntent> _onCapture;
     private readonly Action? _onCancel;
-    private readonly List<OverlayWindow> _overlays = new();
+    private readonly List<OverlayWindowView> _overlays = new();
     private readonly IScreenCaptureService _screenCaptureService;
     private readonly string _mode;
     private readonly Action<PixelRect>? _onRectSelected;
@@ -63,7 +63,7 @@ public class ScreenSelectionSession
         var bounds = new PixelRect(minX, minY, width, height);
 
         // Create overlay
-        var overlay = new OverlayWindow(bounds, bitmap, _mode, _intent);
+        var overlay = new OverlayWindowView(bounds, bitmap, _mode, _intent);
         overlay.SelectionCompleted += OnSelectionCompleted;
         overlay.RectSelected += OnRectSelected;
         overlay.SelectionCanceled += OnSelectionCanceled;

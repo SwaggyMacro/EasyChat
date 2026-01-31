@@ -165,43 +165,17 @@ public class SettingViewModel : Page
         });
     }
 
-    public List<string> OpenaiModels
-    {
-        get => _openaiModels;
-        set => this.RaiseAndSetIfChanged(ref _openaiModels, value);
-    }
-
-    public List<string> GeminiModels
-    {
-        get => _geminiModels;
-        set => this.RaiseAndSetIfChanged(ref _geminiModels, value);
-    }
-
-    public List<string> ClaudeModels
-    {
-        get => _claudeModels;
-        set => this.RaiseAndSetIfChanged(ref _claudeModels, value);
-    }
-
-    public List<string> ProxyTypes
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = ["Socks", "Http"];
-
     public List<string> DeepLModelTypes
     {
         get;
         set => this.RaiseAndSetIfChanged(ref field, value);
     } = ["quality_optimized", "prefer_quality_optimized", "latency_optimized"];
 
-    private List<LanguageDefinition> _languages = [LanguageKeys.English, LanguageKeys.ChineseSimplified];
-
     public List<LanguageDefinition> Languages
     {
-        get => _languages;
-        set => this.RaiseAndSetIfChanged(ref _languages, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = [LanguageKeys.English, LanguageKeys.ChineseSimplified];
 
     public LanguageDefinition? SelectedLanguage
     {
@@ -305,14 +279,13 @@ public class SettingViewModel : Page
     public SelectionTranslationConfig? SelectionTranslationConf => _configurationService.SelectionTranslation;
     
     public List<string> TransparencyLevels { get; } = ["AcrylicBlur", "Blur", "Transparent"];
-    
-    private ObservableCollection<string> _availableFonts = [];
+
     public ObservableCollection<string> AvailableFonts
     {
-        get => _availableFonts;
-        set => this.RaiseAndSetIfChanged(ref _availableFonts, value);
-    }
-    
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = [];
+
     public List<InputDeliveryMode> InputDeliveryModes { get; } = Enum.GetValues<InputDeliveryMode>().ToList();
 
     public ReactiveCommand<Unit, Unit> ManageFixedAreasCommand { get; }

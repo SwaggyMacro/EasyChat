@@ -11,9 +11,9 @@ using ReactiveUI;
 namespace EasyChat.Views.Speech;
 
 [SuppressMessage("ReSharper", "InconsistentNaming")]
-public partial class SubtitleOverlayWindow : Window
+public partial class SubtitleOverlayWindowView : Window
 {
-    public SubtitleOverlayWindow()
+    public SubtitleOverlayWindowView()
     {
         InitializeComponent();
         PointerPressed += OnPointerPressed;

@@ -657,7 +657,7 @@ public class SpeechRecognitionViewModel : Page
                 // but here we can just use the type if known.
                 // Assuming EasyChat.Views.Speech.SubtitleOverlayWindow exists.
                 // Use Assembly.GetType to find it within the same assembly.
-                var windowType = typeof(SpeechRecognitionViewModel).Assembly.GetType("EasyChat.Views.Speech.SubtitleOverlayWindow");
+                var windowType = typeof(SpeechRecognitionViewModel).Assembly.GetType("EasyChat.Views.Speech.SubtitleOverlayWindowView");
                 if (windowType != null)
                 {
                     var window = (Avalonia.Controls.Window)Activator.CreateInstance(windowType)!;

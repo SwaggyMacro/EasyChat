@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using EasyChat.Services.Abstractions;
@@ -313,6 +314,7 @@ public class WindowsPlatformService : IPlatformService
         return Win32.GetForegroundWindow() == hWnd;
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal static class Win32
     {
         [DllImport("user32.dll")]
@@ -421,31 +423,6 @@ public class WindowsPlatformService : IPlatformService
         
         [DllImport("kernel32.dll")]
         public static extern bool GlobalUnlock(IntPtr hMem);
-
-        [DllImport("ole32.dll")]
-        public static extern int OleGetClipboard(out IDataObject ppDataObj);
-        
-        [DllImport("ole32.dll")]
-        public static extern int OleSetClipboard(IDataObject? pDataObj);
-        
-        [DllImport("ole32.dll")]
-        public static extern int OleFlushClipboard();
-
-        [ComImport]
-        [Guid("0000010e-0000-0000-C000-000000000046")]
-        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        public interface IDataObject
-        {
-            void GetData(ref FORMATETC format, out STGMEDIUM medium);
-            void GetDataHere(ref FORMATETC format, ref STGMEDIUM medium);
-            int QueryGetData(ref FORMATETC format);
-            int GetCanonicalFormatEtc(ref FORMATETC formatIn, out FORMATETC formatOut);
-            void SetData(ref FORMATETC formatIn, ref STGMEDIUM medium, bool release);
-            void EnumFormatEtc(int direction, out IEnumFORMATETC enumFormat); // Simplified
-            int DAdvise(ref FORMATETC pFormatetc, int advf, object pAdvSink, out int pdwConnection);
-            void DUnadvise(int dwConnection);
-            int EnumDAdvise(out object enumAdvise);
-        }
         
         [StructLayout(LayoutKind.Sequential)]
         public struct FORMATETC
@@ -464,10 +441,5 @@ public class WindowsPlatformService : IPlatformService
             public IntPtr unionmember;
             public IntPtr pUnkForRelease;
         }
-        
-        [ComImport]
-        [Guid("00000103-0000-0000-C000-000000000046")]
-        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        public interface IEnumFORMATETC { } // Placeholder
     }
 }

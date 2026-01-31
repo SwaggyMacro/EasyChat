@@ -6,7 +6,7 @@
         xmlns:icon="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:suki="https://github.com/kikipoulet/SukiUI"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="EasyChat.Views.Overlay.OverlayWindow"
+        x:Class="EasyChat.Views.Overlay.OverlayWindowView"
         Closed="TopLevel_OnClosed" KeyDown="InputElement_OnKeyDown"
         Title="OverlayWindow">
     <Canvas Name="MainCanvas">

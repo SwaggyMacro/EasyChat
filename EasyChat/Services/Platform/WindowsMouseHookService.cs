@@ -19,6 +19,13 @@ public class WindowsMouseHookService : IMouseHookService, IDisposable
 
     public event EventHandler<SimpleMouseEventArgs>? MouseUp;
     public event EventHandler<SimpleMouseEventArgs>? MouseDown;
+    public event EventHandler<SimpleMouseEventArgs>? MouseDoubleClick;
+
+    private int _lastClickTime;
+    private POINT _lastClickPosition;
+    
+    [DllImport("user32.dll")]
+    private static extern int GetDoubleClickTime();
 
     public WindowsMouseHookService(ILogger<WindowsMouseHookService> logger)
     {
@@ -75,6 +82,27 @@ public class WindowsMouseHookService : IMouseHookService, IDisposable
             else if (wParam == WM_LBUTTONDOWN)
             {
                 MSLLHOOKSTRUCT hookStruct = Marshal.PtrToStructure<MSLLHOOKSTRUCT>(lParam);
+                
+                // Double Click Detection
+                int clickTime = Environment.TickCount;
+                int doubleClickTime = GetDoubleClickTime();
+                
+                if (clickTime - _lastClickTime <= doubleClickTime)
+                {
+                    // Check distance
+                    int dx = hookStruct.pt.x - _lastClickPosition.x;
+                    int dy = hookStruct.pt.y - _lastClickPosition.y;
+                    
+                    // Standard double click distance is usually sm_cxdoubleclk/cy... but hardcoding small px is easier/safer for hooks
+                    if (Math.Abs(dx) < 5 && Math.Abs(dy) < 5)
+                    {
+                        SafeInvoke(MouseDoubleClick, hookStruct.pt.x, hookStruct.pt.y);
+                    }
+                }
+                
+                _lastClickTime = clickTime;
+                _lastClickPosition = hookStruct.pt;
+                
                 SafeInvoke(MouseDown, hookStruct.pt.x, hookStruct.pt.y);
             }
         }

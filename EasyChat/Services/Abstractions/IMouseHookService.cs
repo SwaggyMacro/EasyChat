@@ -6,6 +6,7 @@ public interface IMouseHookService
 {
     event EventHandler<SimpleMouseEventArgs> MouseUp;
     event EventHandler<SimpleMouseEventArgs> MouseDown;
+    event EventHandler<SimpleMouseEventArgs> MouseDoubleClick;
     void Start();
     void Stop();
 }
