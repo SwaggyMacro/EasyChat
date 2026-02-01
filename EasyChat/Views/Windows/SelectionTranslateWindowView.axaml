@@ -8,6 +8,7 @@
         xmlns:vm="using:EasyChat.ViewModels.Windows"
         xmlns:models="using:EasyChat.Models"
         xmlns:selection="clr-namespace:EasyChat.Models.Translation.Selection"
+        xmlns:controls="clr-namespace:EasyChat.Controls"
         mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="400"
         x:Class="EasyChat.Views.Windows.SelectionTranslateWindowView"
         x:DataType="vm:SelectionTranslateWindowViewModel"
@@ -143,31 +144,16 @@
                         <Border IsVisible="{Binding !IsWordMode}" Padding="16, 0, 12,12">
                             <StackPanel Spacing="16">
                                 <!-- Interactive Source Text -->
-                                <Border CornerRadius="8" Background="{DynamicResource SukiBackground}" Padding="12, 0, 12, 12">
-                                    <ItemsControl ItemsSource="{Binding SourceTokens}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel Orientation="Horizontal" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate DataType="selection:TextToken">
-                                                <!-- Use a Button for interactivity, style it effectively as text -->
-                                                <Button Command="{Binding #SelectionWindow.((vm:SelectionTranslateWindowViewModel)DataContext).LookupWordCommand}" 
-                                                        CommandParameter="{Binding Text}"
-                                                        Classes="WordToken"
-                                                        Classes.NonWord="{Binding !IsWord}">
-                                                    <Grid>
-                                                        <TextBlock Text="{Binding Text}" 
-                                                                   FontSize="15" 
-                                                                   Margin="0,0,0,3"
-                                                                   Foreground="{DynamicResource SukiText}"/>
-                                                        <Border Classes="AnimatedUnderline"/>
-                                                    </Grid>
-                                                </Button>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
+                                <Border CornerRadius="8" Background="{DynamicResource SukiBackground}" Padding="12, 8, 12, 12">
+                                    <controls:VirtualizedTokenDisplay 
+                                        Tokens="{Binding SourceTokens}"
+                                        WordClickedCommand="{Binding LookupWordCommand}"
+                                        FontSize="15"
+                                        LineHeight="24"
+                                        Foreground="{DynamicResource SukiText}"
+                                        NonWordForeground="Gray"
+                                        FontWeight="Bold"
+                                        UnderlineColor="{DynamicResource SukiPrimaryColor}"/>
                                 </Border>
 
                                 <Separator Background="{DynamicResource SukiControlBorderBrush}" Height="1"/>
