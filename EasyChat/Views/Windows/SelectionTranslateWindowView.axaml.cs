@@ -5,6 +5,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using EasyChat.Common;
+using EasyChat.Services.Abstractions;
 using EasyChat.ViewModels.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -20,23 +21,37 @@ public partial class SelectionTranslateWindowView : Window
     {
         InitializeComponent();
         
-        _viewModel = new SelectionTranslateWindowViewModel();
+        _viewModel = Global.Services?.GetService<SelectionTranslateWindowViewModel>() 
+                     ?? throw new InvalidOperationException("Failed to resolve ViewModel");
         DataContext = _viewModel;
         
         try
         {
-            _logger = Global.Services?.GetService<ILogger<SelectionTranslateWindowView>>();
+            _logger = Global.Services.GetService<ILogger<SelectionTranslateWindowView>>();
         }
         catch { /* Ignore if services not available */ }
+        
+        // Apply no-activate style when window is opened (prevents focus stealing)
+        Opened += (_, _) => ApplyNoActivateStyle();
         
         // Close on Escape key
         KeyDown += (_, e) =>
         {
-            if (e.Key == Key.Escape)
+            if (e.Key == Avalonia.Input.Key.Escape)
             {
                 Close();
             }
         };
+    }
+
+    private void ApplyNoActivateStyle()
+    {
+        var handle = TryGetPlatformHandle()?.Handle;
+        if (handle != null && handle != IntPtr.Zero)
+        {
+            var focusService = Global.Services?.GetService<IFocusService>();
+            focusService?.SetWindowNoActivate(handle.Value);
+        }
     }
 
     private void InitializeComponent()
@@ -75,17 +90,54 @@ public partial class SelectionTranslateWindowView : Window
             BeginMoveDrag(e);
         }
     }
-    
-    private void OnCloseClick(object? sender, RoutedEventArgs e)
-    {
-        Close();
-    }
-    
+
     private async void OnCopyClick(object? sender, RoutedEventArgs e)
     {
-        var textToCopy = _viewModel.IsWordMode 
-            ? _viewModel.DictionaryResult?.Word 
-            : _viewModel.TranslationResult;
+        string textToCopy;
+
+        if (_viewModel.IsWordMode && _viewModel.DictionaryResult != null)
+        {
+            // Format:
+            // Word [Phonetic]
+            // Part: Def1; Def2...
+            //
+            // Examples:
+            // Origin -> Translation
+            
+            var sb = new System.Text.StringBuilder();
+            var dr = _viewModel.DictionaryResult;
+            
+            sb.Append(dr.Word);
+            if (!string.IsNullOrWhiteSpace(dr.Phonetic))
+            {
+                sb.Append($" {dr.Phonetic}");
+            }
+            sb.AppendLine();
+            
+            if (dr.Parts != null)
+            {
+                foreach (var part in dr.Parts)
+                {
+                    sb.AppendLine($"{part.PartOfSpeech} {string.Join("; ", part.Definitions)}");
+                }
+            }
+
+            if (dr.Examples != null && dr.Examples.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("Examples:");
+                foreach (var ex in dr.Examples)
+                {
+                    sb.AppendLine($"{ex.Origin} -> {ex.Translation}");
+                }
+            }
+            
+            textToCopy = sb.ToString().Trim();
+        }
+        else
+        {
+            textToCopy = _viewModel.TranslationResult;
+        }
             
         if (string.IsNullOrWhiteSpace(textToCopy))
         {
@@ -94,7 +146,7 @@ public partial class SelectionTranslateWindowView : Window
         
         try
         {
-            var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+            var clipboard = GetTopLevel(this)?.Clipboard;
             if (clipboard != null)
             {
                 await clipboard.SetTextAsync(textToCopy);

@@ -702,4 +702,10 @@
     <data name="SelectionTranslate_Failed" xml:space="preserve">
         <value>翻译失败: </value>
     </data>
+  <data name="Tips" xml:space="preserve">
+    <value>提示</value>
+  </data>
+  <data name="Examples" xml:space="preserve">
+    <value>例句</value>
+  </data>
 </root>

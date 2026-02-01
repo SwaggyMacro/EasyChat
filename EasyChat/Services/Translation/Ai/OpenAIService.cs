@@ -21,8 +21,9 @@ public class OpenAiService : ITranslation
     private readonly string _model;
     private readonly string? _proxy;
     private readonly string _promptTemplate;
+    private readonly bool _enableThinking;
 
-    public OpenAiService(string apiUrl, string apiKey, string model, string? proxy, string promptTemplate, ILogger<OpenAiService> logger)
+    public OpenAiService(string apiUrl, string apiKey, string model, string? proxy, string promptTemplate, ILogger<OpenAiService> logger, bool enableThinking = false)
     {
         _apiUrl = apiUrl;
         _apiKey = apiKey;
@@ -30,8 +31,9 @@ public class OpenAiService : ITranslation
         _proxy = proxy;
         _promptTemplate = promptTemplate;
         _logger = logger;
+        _enableThinking = enableThinking;
         
-        _logger.LogDebug("OpenAiService initialized: Model={Model}", model);
+        _logger.LogDebug("OpenAiService initialized: Model={Model}, Thinking={Thinking}", model, enableThinking);
     }
 
     private string GetPrompt(LanguageDefinition source, LanguageDefinition destination)
@@ -83,7 +85,23 @@ public class OpenAiService : ITranslation
                 new UserChatMessage(text)
             ];
 
-            ChatCompletion completion = await client.CompleteChatAsync(messages, cancellationToken: cancellationToken);
+            var chatOptions = new ChatCompletionOptions();
+            
+            // Set reasoning effort based on configuration
+            // Low = Disable/Minimize thinking (as close as possible via API)
+            // High = Enable full thinking (as per user snippet)
+#pragma warning disable OPENAI001 // Experimental API
+            if (!_enableThinking)
+            {
+                 chatOptions.ReasoningEffortLevel = ChatReasoningEffortLevel.Low;
+            }
+            else
+            {
+                 chatOptions.ReasoningEffortLevel = ChatReasoningEffortLevel.High;
+            }
+#pragma warning restore OPENAI001
+
+            ChatCompletion completion = await client.CompleteChatAsync(messages, chatOptions, cancellationToken);
             
             // Combine all content parts if multiple
             string result = completion.Content.Count > 0 ? completion.Content[0].Text : string.Empty;
@@ -112,7 +130,19 @@ public class OpenAiService : ITranslation
             new UserChatMessage(text)
         ];
 
-        await foreach (var update in client.CompleteChatStreamingAsync(messages, cancellationToken: cancellationToken))
+        var chatOptions = new ChatCompletionOptions();
+#pragma warning disable OPENAI001 // Experimental API
+        if (!_enableThinking)
+        {
+            chatOptions.ReasoningEffortLevel = ChatReasoningEffortLevel.Low;
+        }
+        else
+        {
+            chatOptions.ReasoningEffortLevel = ChatReasoningEffortLevel.High;
+        }
+#pragma warning restore OPENAI001
+
+        await foreach (var update in client.CompleteChatStreamingAsync(messages, chatOptions, cancellationToken))
         {
             if (update.ContentUpdate.Count > 0)
             {

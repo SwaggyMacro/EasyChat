@@ -244,6 +244,27 @@ public class VirtualizedTokenDisplay : Control
 
         foreach (var token in tokens)
         {
+            // Explicitly handle newlines
+            if (token.Text.Contains("\n") || token.Text.Contains("\r"))
+            {
+                x = 0;
+                y += lineHeight;
+                
+                // If it's purely whitespace containing newline, skip measuring width (it's invisible anyway)
+                // But if it has content (weird tokenization), we might want to render?
+                // EnglishTokenizer returns whitespace including newlines as one token.
+                // We should probably just continue unless we want to render the non-newline part?
+                // For simplicity, if it's whitespace with newline, we just break.
+                // If it's mixed content (unlikely with our regex), we treat it as break + render.
+                
+                if (string.IsNullOrWhiteSpace(token.Text))
+                {
+                     // Use the token to advance index but don't render anything or take space
+                     index++;
+                     continue; 
+                }
+            }
+        
             // Use gray color for non-word tokens (punctuation, spaces)
             var tokenBrush = token.IsWord ? foreground : nonWordForeground;
             
@@ -294,13 +315,16 @@ public class VirtualizedTokenDisplay : Control
         var underlineBrush = UnderlineColor ?? Brushes.Blue;
         var underlineHeight = UnderlineHeight;
 
-        foreach (var layoutInfo in _layoutCache)
+        for (int i = 0; i < _layoutCache.Count; i++)
         {
+            var layoutInfo = _layoutCache[i];
+            
             // Draw token text
             context.DrawText(layoutInfo.FormattedText, layoutInfo.Bounds.TopLeft);
 
             // Draw underline for hovered word token
-            if (layoutInfo.Index == _hoveredTokenIndex && 
+            // Use 'i' (visual index) to match _hoveredTokenIndex (visual index from HitTest)
+            if (i == _hoveredTokenIndex && 
                 layoutInfo.Token.IsWord && 
                 _underlineScale > 0)
             {

@@ -88,7 +88,8 @@ public class TranslationServiceFactory : ITranslationServiceFactory
             modelId,
             GetProxyUrl(model.UseProxy),
             prompt,
-            _loggerFactory.CreateLogger<OpenAiService>());
+            _loggerFactory.CreateLogger<OpenAiService>(),
+            model.EnableThinking);
     }
 
     public ITranslation CreateMachineServiceById(string id)

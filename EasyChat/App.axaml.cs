@@ -33,6 +33,8 @@ using Material.Icons;
 using SukiUI.Dialogs;
 using SukiUI.Enums;
 using SukiUI.Toasts;
+using EasyChat.Services.Translation.Ai;
+using EasyChat.ViewModels.Windows;
 
 
 namespace EasyChat;
@@ -105,6 +107,7 @@ public class App : Application
                 services.AddSingleton<IHotKeyManager, WindowsHotKeyManager>();
                 services.AddSingleton<IScreenCaptureService, WindowsScreenCaptureService>();
                 services.AddSingleton<IMouseHookService, WindowsMouseHookService>();
+                services.AddSingleton<IFocusService, WindowsFocusService>();
             }
             else
             {
@@ -165,6 +168,10 @@ public class App : Application
             services.AddSingleton<ILanguageCodeProvider, GoogleLanguageCodeProvider>();
             services.AddSingleton<ILanguageCodeProvider, DeepLLanguageCodeProvider>();
             services.AddSingleton<ILanguageCodeProvider, AiLanguageCodeProvider>();
+            
+            // Selection Translation
+            services.AddSingleton<ISelectionTranslationProvider, AiSelectionTranslationProvider>();
+            services.AddTransient<SelectionTranslateWindowViewModel>();
 
             // Build Provider
             var provider = services.BuildServiceProvider();

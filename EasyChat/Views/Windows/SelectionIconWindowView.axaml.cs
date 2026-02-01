@@ -2,7 +2,10 @@ using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
+using EasyChat.Common;
+using EasyChat.Services.Abstractions;
 using Material.Icons.Avalonia;
+using Microsoft.Extensions.DependencyInjection;
 using SukiUI.Controls;
 
 namespace EasyChat.Views.Windows;
@@ -18,6 +21,19 @@ public partial class SelectionIconWindowView : Window
     public SelectionIconWindowView()
     {
         InitializeComponent();
+        
+        // Apply no-activate style when window is opened (prevents focus stealing)
+        Opened += (_, _) => ApplyNoActivateStyle();
+    }
+
+    private void ApplyNoActivateStyle()
+    {
+        var handle = TryGetPlatformHandle()?.Handle;
+        if (handle != null && handle != IntPtr.Zero)
+        {
+            var focusService = Global.Services?.GetService<IFocusService>();
+            focusService?.SetWindowNoActivate(handle.Value);
+        }
     }
 
     private void InitializeComponent()

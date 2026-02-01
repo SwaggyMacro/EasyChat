@@ -20,6 +20,7 @@
         ShowInTaskbar="False"
         CornerRadius="12"
         CanResize="True"
+        Focusable="False"
         ShowActivated="False"
         WindowStartupLocation="Manual"
         SizeToContent="Height">
@@ -87,7 +88,7 @@
                             <Button IsVisible="{Binding ShowBackButton}" 
                                     Command="{Binding SwitchToSentenceModeCommand}"
                                     Classes="Flat" Padding="4" Width="28" Height="28">
-                                <icons:MaterialIcon Kind="ArrowLeft" Width="18" Height="18" Foreground="{DynamicResource SukiText}"/>
+                                <icons:MaterialIcon Kind="ArrowLeft" Width="18" Height="18" Foreground="White"/>
                             </Button>
 
                             <StackPanel Orientation="Vertical" VerticalAlignment="Center">
@@ -95,13 +96,10 @@
                                            IsVisible="{Binding IsWordMode}"
                                            FontWeight="Bold" FontSize="18" Foreground="{DynamicResource SukiText}"/>
                                 <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsWordMode}">
-                                    <Border Background="{DynamicResource SukiControlBorderBrush}" CornerRadius="4" Padding="4,0" IsVisible="{Binding DictionaryResult.Phonetic, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                                        <TextBlock Text="US" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource SukiLowText}"/>
-                                    </Border>
                                     <TextBlock Text="{Binding DictionaryResult.Phonetic}" 
                                                FontSize="13" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center"/>
                                     <Button Classes="Flat" Padding="2" Width="20" Height="20" IsVisible="{Binding DictionaryResult.Phonetic, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                                         <icons:MaterialIcon Kind="VolumeHigh" Width="14" Height="14" Foreground="{DynamicResource SukiText}"/>
+                                         <icons:MaterialIcon Kind="VolumeHigh" Width="14" Height="14" Foreground="White"/>
                                     </Button>
                                 </StackPanel>
                                 
@@ -112,49 +110,87 @@
                 </Border>
                 
                 <!-- Main Content -->
-                <ScrollViewer Grid.Row="1" MaxHeight="400" Background="{DynamicResource SukiCardBackground}">
+                <Panel Grid.Row="1">
+                    <Border Background="{DynamicResource SukiCardBackground}">
+                        <ScrollViewer MaxHeight="400">
                     <Panel>
-                        <!-- Loading State -->
-                        <StackPanel IsVisible="{Binding IsLoading}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20">
-                            <suki:Loading Width="30" Height="30"/>
-                        </StackPanel>
+                        <!-- Loading State Removed from inside Panel -->
 
                         <!-- Dictionary View (Word Mode) -->
-                        <ItemsControl ItemsSource="{Binding DictionaryResult.Parts}" Margin="16,8" IsVisible="{Binding IsWordMode}">
-                             <ItemsControl.ItemTemplate>
-                                 <DataTemplate DataType="selection:DictionaryPart">
-                                     <Grid RowDefinitions="Auto,*" ColumnDefinitions="40,*" Margin="0,8">
-                                         <TextBlock Grid.Column="0" Text="{Binding PartOfSpeech}" 
-                                                    FontWeight="Bold" Foreground="{DynamicResource SukiPrimaryColor}"
-                                                    VerticalAlignment="Top" Margin="0,2,0,0"/>
-                                         <ItemsControl Grid.Column="1" ItemsSource="{Binding Definitions}">
-                                             <ItemsControl.ItemTemplate>
-                                                 <DataTemplate>
-                                                     <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,0,0,4"
-                                                                FontSize="14" Foreground="{DynamicResource SukiText}"/>
-                                                 </DataTemplate>
-                                             </ItemsControl.ItemTemplate>
-                                         </ItemsControl>
-                                     </Grid>
-                                 </DataTemplate>
-                             </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <StackPanel Margin="16,8" IsVisible="{Binding IsWordMode}" Spacing="16">
+                             
+                             <!-- Tips -->
+                             <Border Background="#1AFFFF00" CornerRadius="8" Padding="12" 
+                                     IsVisible="{Binding DictionaryResult.Tips, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                 <StackPanel Spacing="4">
+                                     <StackPanel Orientation="Horizontal" Spacing="6">
+                                         <icons:MaterialIcon Kind="LightbulbOutline" Width="16" Height="16" Foreground="#E6E600"/>
+                                         <TextBlock Text="{x:Static lang:Resources.Tips}" FontWeight="Bold" FontSize="12" Foreground="#E6E600"/>
+                                     </StackPanel>
+                                     <TextBlock Text="{Binding DictionaryResult.Tips}" TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource SukiText}"/>
+                                 </StackPanel>
+                             </Border>
+
+                             <ItemsControl ItemsSource="{Binding DictionaryResult.Parts}">
+                                 <ItemsControl.ItemTemplate>
+                                     <DataTemplate DataType="selection:DictionaryPart">
+                                         <StackPanel Margin="0,0,0,12">
+                                             <TextBlock Text="{Binding PartOfSpeech}" 
+                                                        FontWeight="Bold" FontStyle="Italic" Foreground="{DynamicResource SukiPrimaryColor}"
+                                                        Margin="0,0,0,4"/>
+                                             <ItemsControl ItemsSource="{Binding Definitions}">
+                                                 <ItemsControl.ItemTemplate>
+                                                     <DataTemplate>
+                                                         <Grid ColumnDefinitions="Auto, *" Margin="4,2,0,4">
+                                                             <Border Width="4" Height="4" Background="{DynamicResource SukiText}" CornerRadius="2" Margin="0,8,8,0" VerticalAlignment="Top" Opacity="0.6"/>
+                                                             <TextBlock Grid.Column="1" Text="{Binding}" TextWrapping="Wrap"
+                                                                    FontSize="14" Foreground="{DynamicResource SukiText}"/>
+                                                         </Grid>
+                                                     </DataTemplate>
+                                                 </ItemsControl.ItemTemplate>
+                                             </ItemsControl>
+                                         </StackPanel>
+                                     </DataTemplate>
+                                 </ItemsControl.ItemTemplate>
+                             </ItemsControl>
+
+                             <!-- Examples -->
+                             <StackPanel IsVisible="{Binding DictionaryResult.Examples.Count}">
+                                 <Border Background="{DynamicResource SukiControlBorderBrush}" Height="1" Margin="0,0,0,12"/>
+                                 <TextBlock Text="{x:Static lang:Resources.Examples}" FontWeight="Bold" Margin="0,0,0,8" Foreground="{DynamicResource SukiText}"/>
+                                 <ItemsControl ItemsSource="{Binding DictionaryResult.Examples}">
+                                     <ItemsControl.ItemTemplate>
+                                         <DataTemplate DataType="selection:DictionaryExample">
+                                             <StackPanel Margin="0,0,0,12">
+                                                 <TextBlock Text="{Binding Origin}" TextWrapping="Wrap" FontSize="14" Foreground="{DynamicResource SukiText}"/>
+                                                 <TextBlock Text="{Binding Translation}" TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource SukiLowText}" Margin="0,2,0,0"/>
+                                             </StackPanel>
+                                         </DataTemplate>
+                                     </ItemsControl.ItemTemplate>
+                                 </ItemsControl>
+                             </StackPanel>
+                        </StackPanel>
 
                         <!-- Sentence View (Transition Mode) -->
                         <Border IsVisible="{Binding !IsWordMode}" Padding="16, 0, 12,12">
                             <StackPanel Spacing="16">
                                 <!-- Interactive Source Text -->
-                                <Border CornerRadius="8" Background="{DynamicResource SukiBackground}" Padding="12, 8, 12, 12">
-                                    <controls:VirtualizedTokenDisplay 
-                                        Tokens="{Binding SourceTokens}"
-                                        WordClickedCommand="{Binding LookupWordCommand}"
-                                        FontSize="15"
-                                        LineHeight="24"
-                                        Foreground="{DynamicResource SukiText}"
-                                        NonWordForeground="Gray"
-                                        FontWeight="Bold"
-                                        UnderlineColor="{DynamicResource SukiPrimaryColor}"/>
-                                </Border>
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,0,8">
+                                            <icons:MaterialIcon Kind="TextShort" Width="16" Height="16" Foreground="{DynamicResource SukiPrimaryColor}"/>
+                                            <TextBlock Text="{x:Static lang:Resources.SelectionTranslate_SourceLabel}" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource SukiText}"/>
+                                        </StackPanel>
+                                    
+                                        <controls:VirtualizedTokenDisplay 
+                                            Tokens="{Binding SourceTokens}"
+                                            WordClickedCommand="{Binding LookupWordCommand}"
+                                            FontSize="15"
+                                            LineHeight="24"
+                                            Foreground="{DynamicResource SukiText}"
+                                            NonWordForeground="Gray"
+                                            FontWeight="Bold"
+                                            UnderlineColor="{DynamicResource SukiPrimaryColor}"/>
+                                    </StackPanel>
 
                                 <Separator Background="{DynamicResource SukiControlBorderBrush}" Height="1"/>
 
@@ -172,7 +208,14 @@
                             </StackPanel>
                         </Border>
                     </Panel>
-                </ScrollViewer>
+                    </ScrollViewer>
+                    </Border>
+                    
+                    <!-- Loading Overlay -->
+                    <Border IsVisible="{Binding IsLoading}" Background="#80000000" IsHitTestVisible="True">
+                        <suki:Loading Width="45" Height="45" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </Panel>
 
                 <!-- Footer Actions -->
                 <Border Grid.Row="2" Background="{DynamicResource SukiCardBackground}" 
@@ -192,7 +235,7 @@
                         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
                             <Button Click="OnCopyClick" ToolTip.Tip="{x:Static lang:Resources.SelectionTranslate_CopyTooltip}" 
                                     Classes="Flat" Padding="6" Width="32" Height="32">
-                                <icons:MaterialIcon Kind="ContentCopy" Width="18" Height="18" Foreground="{DynamicResource SukiText}"/>
+                                <icons:MaterialIcon Kind="ContentCopy" Width="18" Height="18" Foreground="White"/>
                             </Button>
                         </StackPanel>
                     </Grid>

@@ -7,7 +7,15 @@ public class DictionaryResult
     public string Word { get; set; } = string.Empty;
     public string Phonetic { get; set; } = string.Empty;
     public string? PronunciationUrl { get; set; }
+    public string? Tips { get; set; }
+    public List<DictionaryExample> Examples { get; set; } = new();
     public List<DictionaryPart> Parts { get; set; } = new();
+}
+
+public class DictionaryExample
+{
+    public string Origin { get; set; } = string.Empty;
+    public string Translation { get; set; } = string.Empty;
 }
 
 public class DictionaryPart

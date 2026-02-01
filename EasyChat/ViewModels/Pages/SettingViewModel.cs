@@ -145,6 +145,14 @@ public class SettingViewModel : Page
         TestGoogleConnectionCommand = ReactiveCommand.CreateFromTask(TestGoogleConnection);
         TestDeepLConnectionCommand = ReactiveCommand.CreateFromTask(TestDeepLConnection);
         
+        // Keep SelectionTranslation ID in sync if we need to track name changes (though we use ID directly now)
+        // Ensure SelectionTranslationConf.AiModelId is valid or default
+        if (string.IsNullOrEmpty(SelectionTranslationConf?.AiModelId) && AiModelConf?.ConfiguredModels.Count > 0)
+        {
+             // Default to using the same as General or first available
+             SelectionTranslationConf.AiModelId = GeneralConf?.UsingAiModelId ?? AiModelConf.ConfiguredModels.First().Id;
+        }
+
         ManageFixedAreasCommand = ReactiveCommand.Create(ManageFixedAreas);
 
         if (OperatingSystem.IsWindows())

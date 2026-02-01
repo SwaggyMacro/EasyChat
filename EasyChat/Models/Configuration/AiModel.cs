@@ -98,6 +98,14 @@ public class CustomAiModel : ReactiveObject
         get => _useProxy;
         set => this.RaiseAndSetIfChanged(ref _useProxy, value);
     }
+    
+    private bool _enableThinking;
+    [JsonProperty]
+    public bool EnableThinking
+    {
+        get => _enableThinking;
+        set => this.RaiseAndSetIfChanged(ref _enableThinking, value);
+    }
 
     public string IconPath => ModelType switch
     {

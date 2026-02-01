@@ -1,19 +1,21 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using EasyChat.Models.Translation.Selection;
 using EasyChat.Services.Abstractions;
 using EasyChat.Services.Text;
+using EasyChat.Services.Translation;
 using ReactiveUI;
 
 namespace EasyChat.ViewModels.Windows;
 
 public class SelectionTranslateWindowViewModel : ViewModelBase
 {
-    private readonly ITextTokenizer _tokenizer;
+    private readonly ISelectionTranslationProvider _translationProvider;
+    private readonly IConfigurationService _configurationService;
     private TaskCompletionSource<bool>? _initializationTcs;
 
     public string SourceText
@@ -59,10 +61,15 @@ public class SelectionTranslateWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _showBackButton, value);
     }
 
-    public SelectionTranslateWindowViewModel()
+    public SelectionTranslateWindowViewModel(
+        ISelectionTranslationProvider translationProvider,
+        IConfigurationService configurationService)
     {
+        _translationProvider = translationProvider;
+        _configurationService = configurationService;
+
         // Default tokenizer for now. In a real app, inject this.
-        _tokenizer = new EnglishTokenizer();
+        ITextTokenizer tokenizer = new EnglishTokenizer();
 
         LookupWordCommand = ReactiveCommand.CreateFromTask<string>(LookupWordAsync);
         SwitchToSentenceModeCommand = ReactiveCommand.Create(SwitchToSentenceMode);
@@ -78,13 +85,11 @@ public class SelectionTranslateWindowViewModel : ViewModelBase
                 }
                 
                 // Tokenize for Sentence Mode
-                var tokens = _tokenizer.Tokenize(text);
+                var tokens = tokenizer.Tokenize(text);
                 
-                // Auto-detect mode
-                // Simple heuristic: if it's a single word (no spaces, short length), try Dictionary Mode
-                var isSingleWord = !text.Trim().Contains(' ') && text.Length < 30;
-
-                return new { Text = text, Tokens = tokens, IsSingleWord = isSingleWord };
+                // Auto-detect mode assumption (initial heuristic before AI result)
+                // We rely on AI to tell us the truth, but we prepare tokens for sentence view anyway.
+                return new { Text = text, Tokens = tokens };
             })
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(result =>
@@ -94,7 +99,6 @@ public class SelectionTranslateWindowViewModel : ViewModelBase
                 if (result == null)
                 {
                     IsWordMode = false;
-                    // Signal initialization complete if waiting
                     _initializationTcs?.TrySetResult(true);
                     return;
                 }
@@ -104,25 +108,9 @@ public class SelectionTranslateWindowViewModel : ViewModelBase
                     SourceTokens.Add(token);
                 }
                 
-                if (result.IsSingleWord)
-                {
-                    _canNavigateBack = false;
-                    LookupWordCommand.Execute(result.Text.Trim()).Subscribe(_ =>
-                    {
-                        // Signal initialization complete after word lookup finishes
-                        _initializationTcs?.TrySetResult(true);
-                    });
-                }
-                else
-                {
-                    _canNavigateBack = true;
-                    IsWordMode = false;
-                    // TODO: Trigger sentence translation here
-                    TranslationResult = "Translation logic pending..."; 
-                    // Signal initialization complete
-                    _initializationTcs?.TrySetResult(true);
-                }
-                UpdateShowBackButton();
+                // We don't trigger AI here automatically because InitializeAsync does it.
+                // But if SourceText changes due to binding (not InitializeAsync), we might want to trigger?
+                // Usually SourceText is set via InitializeAsync in this specific window flow.
             });
             
         // Update ShowBackButton when mode changes
@@ -138,17 +126,65 @@ public class SelectionTranslateWindowViewModel : ViewModelBase
     {
         _initializationTcs = new TaskCompletionSource<bool>();
         
-        // Set source text which triggers the reactive pipeline
         SourceText = text;
         
-        // Wait for processing to complete (with timeout)
-        var timeoutTask = Task.Delay(5000);
-        var completedTask = await Task.WhenAny(_initializationTcs.Task, timeoutTask);
-        
-        // If timeout, just continue anyway
-        if (completedTask == timeoutTask)
+        IsLoading = true;
+
+        try 
         {
+            await PerformTranslationAsync(text);
+        }
+        catch (Exception ex)
+        {
+            // Error handling (maybe show error state)
+            TranslationResult = $"Translation Engine Error: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
             _initializationTcs.TrySetResult(true);
+        }
+    }
+
+    private async Task PerformTranslationAsync(string text)
+    {
+        var sourceLang = _configurationService.General?.SourceLanguage.EnglishName ?? "Auto";
+        var targetLang = _configurationService.General?.TargetLanguage.EnglishName ?? "Chinese";
+
+        var result = await _translationProvider.TranslateAsync(text, sourceLang, targetLang);
+
+        if (result is WordTranslationResult wordResult)
+        {
+            IsWordMode = true;
+            _canNavigateBack = false; // Initial load is word -> no back
+            
+            // Map to DictionaryResult
+            DictionaryResult = new DictionaryResult
+            {
+                Word = wordResult.Word,
+                Phonetic = wordResult.Phonetic,
+                Parts = wordResult.Definitions
+                    .GroupBy(d => d.Pos)
+                    .Select(g => new DictionaryPart
+                    {
+                        PartOfSpeech = g.Key,
+                        Definitions = g.Select(d => d.Meaning).ToList()
+                    }).ToList(),
+                Tips = wordResult.Tips,
+                Examples = wordResult.Examples.Select(e => new DictionaryExample
+                {
+                    Origin = e.Origin,
+                    Translation = e.Translation
+                }).ToList()
+            };
+        }
+        else if (result is SentenceTranslationResult sentenceResult)
+        {
+             IsWordMode = false;
+             _canNavigateBack = true; // Can go back if we dive into words later (logic pending)
+             
+             TranslationResult = sentenceResult.Translation;
+             // We could also process Keywords here if we had a UI for it.
         }
     }
 
@@ -162,15 +198,56 @@ public class SelectionTranslateWindowViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(word)) return;
 
         IsLoading = true;
-        IsWordMode = true;
-
+        // Don't switch mode immediately, wait for result? 
+        // Or switch to show loading in word mode?
+        // Current UI has shared loading.
+        
         try
         {
-            // Simulate network delay
-            await Task.Delay(300);
-
-            // Mock Data Logic
-            DictionaryResult = GenerateMockResult(word);
+            var sourceLang = "Auto"; // Looking up a word from sentence is usually Auto
+            var targetLang = _configurationService.General?.TargetLanguage.EnglishName ?? "Chinese";
+            
+            // Force "Word Mode" expectation? The provider detects.
+            // If I click a single word, AI should detect Word Mode.
+            
+            var result = await _translationProvider.TranslateAsync(word, sourceLang, targetLang);
+            
+            if (result is WordTranslationResult wordResult)
+            {
+                IsWordMode = true;
+                _canNavigateBack = true; // Came from sentence view
+                
+                 DictionaryResult = new DictionaryResult
+                {
+                    Word = wordResult.Word,
+                    Phonetic = wordResult.Phonetic,
+                    Parts = wordResult.Definitions
+                        .GroupBy(d => d.Pos)
+                        .Select(g => new DictionaryPart
+                        {
+                            PartOfSpeech = g.Key,
+                            Definitions = g.Select(d => d.Meaning).ToList()
+                        }).ToList(),
+                    Tips = wordResult.Tips,
+                    Examples = wordResult.Examples.Select(e => new DictionaryExample
+                    {
+                         Origin = e.Origin,
+                         Translation = e.Translation
+                    }).ToList()
+                };
+            }
+            else
+            {
+                // Fallback if AI thinks it's a sentence?
+                // Treat as simple translation?
+                 IsWordMode = false; 
+                 TranslationResult = (result as SentenceTranslationResult)?.Translation ?? "";
+            }
+        }
+        catch (Exception)
+        {
+             // Fallback for lookup failure
+             // Could show a snackbar or message, for now just log/ignore or reset loading
         }
         finally
         {
@@ -181,56 +258,5 @@ public class SelectionTranslateWindowViewModel : ViewModelBase
     private void SwitchToSentenceMode()
     {
         IsWordMode = false;
-    }
-
-    private DictionaryResult GenerateMockResult(string word)
-    {
-        // specific mock for "Download" as per screenshot
-        if (string.Equals(word, "Download", StringComparison.OrdinalIgnoreCase))
-        {
-            return new DictionaryResult
-            {
-                Word = "Download",
-                Phonetic = "/ˌdaʊnˈləʊd/",
-                Parts = new List<DictionaryPart>
-                {
-                    new DictionaryPart
-                    {
-                        PartOfSpeech = "n.",
-                        Definitions = new List<string> { "【计】 下载; 【计】 下载的文件" }
-                    },
-                    new DictionaryPart
-                    {
-                        PartOfSpeech = "v.",
-                        Definitions = new List<string> { "【计】 下载" }
-                    },
-                    new DictionaryPart
-                    {
-                        PartOfSpeech = "web.",
-                        Definitions = new List<string> { "下载中心; 资料下载; 文档下载" }
-                    }
-                }
-            };
-        }
-
-        // Generic mock for other words
-        return new DictionaryResult
-        {
-            Word = word,
-            Phonetic = $"/test-{word.ToLower()}/",
-            Parts = new List<DictionaryPart>
-            {
-                new DictionaryPart
-                {
-                    PartOfSpeech = "n.",
-                    Definitions = new List<string> { $"The noun definition of {word}" }
-                },
-                new DictionaryPart
-                {
-                    PartOfSpeech = "v.",
-                    Definitions = new List<string> { $"The verb definition of {word}" }
-                }
-            }
-        };
     }
 }
