@@ -711,4 +711,13 @@
   <data name="Examples" xml:space="preserve">
     <value>例句</value>
   </data>
+  <data name="Manifest" xml:space="preserve">
+    <value>应用清单</value>
+  </data>
+    <data name="LatestVersion" xml:space="preserve">
+        <value>最新版本</value>
+    </data>
+    <data name="CurrentVersion" xml:space="preserve">
+        <value>当前版本</value>
+    </data>
 </root>

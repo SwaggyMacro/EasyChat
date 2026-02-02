@@ -722,4 +722,13 @@
   <data name="Examples" xml:space="preserve">
     <value>Examples</value>
   </data>
+  <data name="Manifest" xml:space="preserve">
+    <value>Manifest</value>
+  </data>
+    <data name="LatestVersion" xml:space="preserve">
+        <value>Latest Version</value>
+    </data>
+    <data name="CurrentVersion" xml:space="preserve">
+        <value>Current Version</value>
+    </data>
 </root>
