@@ -149,6 +149,7 @@ public class App : Application
             services.AddSingleton<IShortcutActionHandler, ScreenshotTranslateHandler>();
             services.AddSingleton<IShortcutActionHandler, InputTranslateHandler>();
             services.AddSingleton<IShortcutActionHandler, SwitchEngineHandler>();
+            services.AddSingleton<IShortcutActionHandler, SelectionTranslateHandler>();
 
             // Global Shortcuts Service
             services.AddSingleton<GlobalShortcutService>();

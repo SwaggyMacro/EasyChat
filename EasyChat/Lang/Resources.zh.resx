@@ -252,6 +252,9 @@
     <data name="Action_InputTranslate" xml:space="preserve">
     <value>输入翻译</value>
   </data>
+    <data name="Action_SelectionTranslate" xml:space="preserve">
+    <value>划词翻译</value>
+  </data>
     <data name="Action_SwitchSourceLang" xml:space="preserve">
     <value>切换源语言</value>
   </data>

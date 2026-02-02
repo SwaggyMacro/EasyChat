@@ -48,7 +48,12 @@ public class SelectionTranslateWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    public ObservableCollection<TextToken> SourceTokens { get; } = new();
+    private ObservableCollection<TextToken> _sourceTokens = new();
+    public ObservableCollection<TextToken> SourceTokens
+    {
+        get => _sourceTokens;
+        set => this.RaiseAndSetIfChanged(ref _sourceTokens, value);
+    }
 
     public ReactiveCommand<string, Unit> LookupWordCommand { get; }
     public ReactiveCommand<Unit, Unit> SwitchToSentenceModeCommand { get; }
@@ -94,19 +99,15 @@ public class SelectionTranslateWindowViewModel : ViewModelBase
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(result =>
             {
-                SourceTokens.Clear();
-
                 if (result == null)
                 {
+                    SourceTokens = new ObservableCollection<TextToken>();
                     IsWordMode = false;
                     _initializationTcs?.TrySetResult(true);
                     return;
                 }
 
-                foreach (var token in result.Tokens)
-                {
-                    SourceTokens.Add(token);
-                }
+                SourceTokens = new ObservableCollection<TextToken>(result.Tokens);
                 
                 // We don't trigger AI here automatically because InitializeAsync does it.
                 // But if SourceText changes due to binding (not InitializeAsync), we might want to trigger?

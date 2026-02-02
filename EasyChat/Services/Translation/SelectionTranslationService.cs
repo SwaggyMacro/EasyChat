@@ -521,6 +521,45 @@ public class SelectionTranslationService : IDisposable
         HideIcon();
     }
 
+    public async Task TranslateCurrentSelectionAsync()
+    {
+        var (x, y) = _platformService.GetCursorPosition();
+        _logger.LogInformation("Shortcut Translate at {X}, {Y}", x, y);
+
+        // Backup clipboard (Must be on UI Thread)
+        var backup = await Dispatcher.UIThread.InvokeAsync(() => ClipboardHelper.BackupClipboardAsync(_logger));
+
+        // Get text
+        var text = await _platformService.GetSelectedTextAsync(x, y);
+
+        // Restore clipboard (Must be on UI Thread)
+        await Dispatcher.UIThread.InvokeAsync(() => ClipboardHelper.RestoreClipboardAsync(backup, _logger));
+
+        if (string.IsNullOrWhiteSpace(text)) return;
+
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+             // Close existing (Singleton)
+            try { _currentTranslateWindow?.Close(); } catch { /* Ignore */ }
+
+            var dialog = new SelectionTranslateWindowView();
+            _currentTranslateWindow = dialog;
+            
+            dialog.Closed += (_, _) => 
+            {
+                if (_currentTranslateWindow == dialog) _currentTranslateWindow = null;
+            };
+
+            // Start initialization (loading state)
+            // We just fire off the task, the VM handles the async translation and updates UI
+            _ = dialog.InitializeAsync(text);
+            
+            ShowDialogAtPosition(dialog, x, y);
+            
+            _logger.LogInformation("Opened translation window via shortcut");
+        });
+    }
+
     public void Dispose()
     {
         _mouseHookService.MouseDown -= OnMouseDown;

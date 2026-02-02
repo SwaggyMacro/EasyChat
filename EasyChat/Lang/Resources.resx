@@ -266,6 +266,9 @@
     <data name="Action_InputTranslate" xml:space="preserve">
     <value>Typing Translate</value>
   </data>
+    <data name="Action_SelectionTranslate" xml:space="preserve">
+    <value>Selection Translation</value>
+  </data>
     <data name="Action_SwitchSourceLang" xml:space="preserve">
     <value>Switch Source Language</value>
   </data>
