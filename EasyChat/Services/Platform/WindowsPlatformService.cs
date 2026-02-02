@@ -170,10 +170,13 @@ public class WindowsPlatformService : IPlatformService
     {
         // User requested Clipboard approach ensuring original content is restored.
         // Backup/Restore is handled by the caller (SelectionTranslationService) using ClipboardHelper.
-        // This method strictly performs: Clear -> Copy (Ctrl+C) -> Read.
+        // This method strictly performs: Clear -> Save modifier state -> Release modifiers -> Copy (Ctrl+C) -> Restore modifiers -> Read.
         
         return await Task.Run(async () =>
         {
+            // Track which modifier keys the user is currently pressing
+            var pressedModifiers = new List<ushort>();
+            
             try
             {
                 // 1. Clear Clipboard (to detect new copy)
@@ -200,10 +203,33 @@ public class WindowsPlatformService : IPlatformService
                     _logger.LogWarning("Failed to clear clipboard, text extraction might be inaccurate");
                 }
                 
-                // 2. Send Ctrl+C
-                // Wait a tiny bit for the clear to settle
+                // 2. Detect and temporarily release user's modifier keys
                 await Task.Delay(10);
                 
+                // Check which modifier keys are currently pressed by user
+                if ((Win32.GetAsyncKeyState(0x11) & 0x8000) != 0) pressedModifiers.Add(0x11); // VK_CONTROL
+                if ((Win32.GetAsyncKeyState(0x10) & 0x8000) != 0) pressedModifiers.Add(0x10); // VK_SHIFT  
+                if ((Win32.GetAsyncKeyState(0x12) & 0x8000) != 0) pressedModifiers.Add(0x12); // VK_MENU (Alt)
+                
+                if (pressedModifiers.Count > 0)
+                {
+                    _logger.LogDebug("User has {Count} modifier keys pressed, temporarily releasing them", pressedModifiers.Count);
+                    
+                    // Release all pressed modifier keys
+                    var releaseInputs = new Win32.INPUT[pressedModifiers.Count];
+                    for (int i = 0; i < pressedModifiers.Count; i++)
+                    {
+                        releaseInputs[i].type = Win32.INPUT_KEYBOARD;
+                        releaseInputs[i].u.ki.wVk = pressedModifiers[i];
+                        releaseInputs[i].u.ki.dwFlags = Win32.KEYEVENTF_KEYUP;
+                    }
+                    Win32.SendInput((uint)releaseInputs.Length, releaseInputs, Marshal.SizeOf(typeof(Win32.INPUT)));
+                    
+                    // Small delay to let the release take effect
+                    await Task.Delay(5);
+                }
+                
+                // 3. Send Ctrl+C
                 var inputs = new Win32.INPUT[4];
                 
                 // Ctrl Down
@@ -226,7 +252,7 @@ public class WindowsPlatformService : IPlatformService
                 
                 Win32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(Win32.INPUT)));
                 
-                // 3. Poll for text
+                // 4. Poll for text
                 string? result = null;
                 // Poll more frequently for faster response
                 for (int i = 0; i < 20; i++) 
@@ -242,15 +268,32 @@ public class WindowsPlatformService : IPlatformService
                 if (!string.IsNullOrEmpty(result))
                 {
                     _logger.LogDebug("Got text via Clipboard: {Length} chars", result.Length);
-                    return result;
                 }
                 
-                return null;
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to get text via Clipboard");
                 return null;
+            }
+            finally
+            {
+                // 5. Restore user's modifier key states (always, even on exception)
+                if (pressedModifiers.Count > 0)
+                {
+                    _logger.LogDebug("Restoring {Count} modifier keys for user", pressedModifiers.Count);
+                    
+                    // Re-press the modifier keys that were held by user
+                    var restoreInputs = new Win32.INPUT[pressedModifiers.Count];
+                    for (int i = 0; i < pressedModifiers.Count; i++)
+                    {
+                        restoreInputs[i].type = Win32.INPUT_KEYBOARD;
+                        restoreInputs[i].u.ki.wVk = pressedModifiers[i];
+                        restoreInputs[i].u.ki.dwFlags = 0; // Key down
+                    }
+                    Win32.SendInput((uint)restoreInputs.Length, restoreInputs, Marshal.SizeOf(typeof(Win32.INPUT)));
+                }
             }
         });
     }
@@ -289,7 +332,7 @@ public class WindowsPlatformService : IPlatformService
         }
         return null;
     }
-
+    
     public async Task SendTextMessageAsync(IntPtr hWnd, string text, int delayMs = 10)
     {
         foreach (var c in text)
@@ -423,6 +466,9 @@ public class WindowsPlatformService : IPlatformService
         
         [DllImport("kernel32.dll")]
         public static extern bool GlobalUnlock(IntPtr hMem);
+        
+        [DllImport("user32.dll")]
+        public static extern short GetAsyncKeyState(int vKey);
         
         [StructLayout(LayoutKind.Sequential)]
         public struct FORMATETC

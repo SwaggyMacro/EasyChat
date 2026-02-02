@@ -9,7 +9,7 @@
         <ApplicationIcon>Assets\easychat-logo.ico</ApplicationIcon>
         
         <!-- Version for update checking -->
-        <Version>0.0.12</Version>
+        <Version>0.0.13</Version>
 
         <!-- NetBeauty Settings -->
         <DisableBeauty>True</DisableBeauty>
