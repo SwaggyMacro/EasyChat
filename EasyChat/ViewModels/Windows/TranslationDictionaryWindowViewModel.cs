@@ -12,7 +12,7 @@ using ReactiveUI;
 
 namespace EasyChat.ViewModels.Windows;
 
-public class SelectionTranslateWindowViewModel : ViewModelBase
+public class TranslationDictionaryWindowViewModel : ViewModelBase
 {
     private readonly ISelectionTranslationProvider _translationProvider;
     private readonly IConfigurationService _configurationService;
@@ -66,7 +66,7 @@ public class SelectionTranslateWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _showBackButton, value);
     }
 
-    public SelectionTranslateWindowViewModel(
+    public TranslationDictionaryWindowViewModel(
         ISelectionTranslationProvider translationProvider,
         IConfigurationService configurationService)
     {

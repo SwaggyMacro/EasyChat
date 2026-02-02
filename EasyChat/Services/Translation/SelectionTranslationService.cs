@@ -23,7 +23,7 @@ public class SelectionTranslationService : IDisposable
     private const int DragThreshold = 5; // pixels
     
     private SelectionIconWindowView? _iconWindow;
-    private SelectionTranslateWindowView? _currentTranslateWindow;
+    private TranslationDictionaryWindowView? _currentTranslateWindow;
     private int _lastIconX;
     private int _lastIconY;
     private string? _lastSelectedText;
@@ -378,7 +378,7 @@ public class SelectionTranslationService : IDisposable
                 if (gen != System.Threading.Interlocked.Read(ref _interactionGeneration)) return;
 
                 // Create and prepare the dialog on the UI thread
-                SelectionTranslateWindowView? dialog = null;
+                TranslationDictionaryWindowView? dialog = null;
                 
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
@@ -389,7 +389,7 @@ public class SelectionTranslationService : IDisposable
                     // Close existing window if any (Singleton behavior)
                     try { _currentTranslateWindow?.Close(); } catch { /* Ignore if already closing */ }
 
-                    dialog = new SelectionTranslateWindowView();
+                    dialog = new TranslationDictionaryWindowView();
                     _currentTranslateWindow = dialog;
                     
                     // Handle cleanup when closed manually
@@ -444,7 +444,7 @@ public class SelectionTranslationService : IDisposable
         });
     }
     
-    private void ShowDialogAtPosition(SelectionTranslateWindowView? dialog, int x, int y)
+    private void ShowDialogAtPosition(TranslationDictionaryWindowView? dialog, int x, int y)
     {
         if (dialog == null) return;
         
@@ -542,7 +542,7 @@ public class SelectionTranslationService : IDisposable
              // Close existing (Singleton)
             try { _currentTranslateWindow?.Close(); } catch { /* Ignore */ }
 
-            var dialog = new SelectionTranslateWindowView();
+            var dialog = new TranslationDictionaryWindowView();
             _currentTranslateWindow = dialog;
             
             dialog.Closed += (_, _) => 

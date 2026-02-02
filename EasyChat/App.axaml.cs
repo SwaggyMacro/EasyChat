@@ -172,7 +172,7 @@ public class App : Application
             
             // Selection Translation
             services.AddSingleton<ISelectionTranslationProvider, AiSelectionTranslationProvider>();
-            services.AddTransient<SelectionTranslateWindowViewModel>();
+            services.AddTransient<TranslationDictionaryWindowViewModel>();
 
             // Build Provider
             var provider = services.BuildServiceProvider();
