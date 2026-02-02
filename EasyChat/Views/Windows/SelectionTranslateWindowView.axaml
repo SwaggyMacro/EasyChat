@@ -223,11 +223,11 @@
                     <Grid ColumnDefinitions="Auto,*,Auto">
                          <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
                              <Border Background="{DynamicResource SukiControlBorderBrush}" CornerRadius="4" Padding="6,2">
-                                 <TextBlock Text="Auto Detect" FontSize="11" Foreground="{DynamicResource SukiText}"/>
+                                 <TextBlock Text="{Binding SourceLanguageDisplay}" FontSize="11" Foreground="{DynamicResource SukiText}"/>
                              </Border>
                              <icons:MaterialIcon Kind="ArrowRight" Width="14" Height="14" Foreground="{DynamicResource SukiText}"/>
                              <Border Background="{DynamicResource SukiControlBorderBrush}" CornerRadius="4" Padding="6,2">
-                                 <TextBlock Text="{x:Static lang:Resources.SelectionTranslate_Language_Chinese}" FontSize="11" Foreground="{DynamicResource SukiText}"/>
+                                 <TextBlock Text="{Binding TargetLanguageDisplay}" FontSize="11" Foreground="{DynamicResource SukiText}"/>
                              </Border>
                          </StackPanel>
 

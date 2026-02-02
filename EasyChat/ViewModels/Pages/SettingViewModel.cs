@@ -150,7 +150,7 @@ public class SettingViewModel : Page
         if (string.IsNullOrEmpty(SelectionTranslationConf?.AiModelId) && AiModelConf?.ConfiguredModels.Count > 0)
         {
              // Default to using the same as General or first available
-             SelectionTranslationConf.AiModelId = GeneralConf?.UsingAiModelId ?? AiModelConf.ConfiguredModels.First().Id;
+             SelectionTranslationConf?.AiModelId = GeneralConf?.UsingAiModelId ?? AiModelConf.ConfiguredModels.First().Id;
         }
 
         ManageFixedAreasCommand = ReactiveCommand.Create(ManageFixedAreas);

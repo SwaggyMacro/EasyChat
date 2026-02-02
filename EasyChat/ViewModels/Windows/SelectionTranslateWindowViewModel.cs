@@ -61,6 +61,9 @@ public class SelectionTranslateWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _showBackButton, value);
     }
 
+    public string SourceLanguageDisplay => _configurationService.General?.SourceLanguage.DisplayName ?? "Auto";
+    public string TargetLanguageDisplay => _configurationService.General?.TargetLanguage.DisplayName ?? "Chinese";
+
     public SelectionTranslateWindowViewModel(
         ISelectionTranslationProvider translationProvider,
         IConfigurationService configurationService)
