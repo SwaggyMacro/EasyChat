@@ -1,0 +1,37 @@
+<UserControl x:Class="EasyChat.Views.Dialogs.TtsPreviewInputDialogView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:EasyChat.ViewModels.Dialogs"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:lang="clr-namespace:EasyChat.Lang;assembly=EasyChat"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
+             x:DataType="viewModels:TtsPreviewInputDialogViewModel"
+             Width="400">
+    <suki:GlassCard>
+        <StackPanel Spacing="15">
+            <TextBlock Text="{x:Static lang:Resources.Tts_PreviewVoice}" FontWeight="SemiBold" FontSize="18"/>
+            
+            <TextBlock Text="{x:Static lang:Resources.Tts_PreviewInputPrompt}" Opacity="0.8"/>
+            
+            <TextBox Text="{Binding InputText}" 
+                     AcceptsReturn="True" 
+                     Height="100" 
+                     VerticalContentAlignment="Top"
+                     TextWrapping="Wrap"/>
+                     
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                <Button Classes="Success" Command="{Binding PlayCommand}" IsEnabled="{Binding !IsPlaying}">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <avalonia:MaterialIcon Kind="Play" IsVisible="{Binding !IsPlaying}"/>
+                        <suki:Loading IsVisible="{Binding IsPlaying}" Width="16" Height="16"/>
+                        <TextBlock Text="{x:Static lang:Resources.Tts_Play}"/>
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding CloseCommand}" Content="{x:Static lang:Resources.Close}"/>
+                </StackPanel>
+        </StackPanel>
+    </suki:GlassCard>
+</UserControl>

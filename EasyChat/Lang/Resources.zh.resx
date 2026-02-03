@@ -720,4 +720,40 @@
     <data name="CurrentVersion" xml:space="preserve">
         <value>当前版本</value>
     </data>
+    <data name="Tts_Configuration" xml:space="preserve">
+        <value>TTS 语音配置</value>
+    </data>
+    <data name="Tts_Provider" xml:space="preserve">
+        <value>提供商:</value>
+    </data>
+    <data name="Tts_NoVoicesConfigured" xml:space="preserve">
+        <value>未配置语音。点击“添加”为语言配置语音。</value>
+    </data>
+    <data name="Tts_AddVoiceMapping" xml:space="preserve">
+        <value>添加语音映射</value>
+    </data>
+    <data name="Tts_PreviewVoice" xml:space="preserve">
+        <value>试听语音</value>
+    </data>
+    <data name="Tts_PreviewInputPrompt" xml:space="preserve">
+        <value>输入试听文本:</value>
+    </data>
+    <data name="Tts_PreviewDefaultText" xml:space="preserve">
+        <value>Hello, this is a distinct voice preview.</value>
+    </data>
+    <data name="Tts_Play" xml:space="preserve">
+        <value>播放</value>
+    </data>
+    <data name="Tts_EditVoiceMapping" xml:space="preserve">
+        <value>编辑语音映射</value>
+    </data>
+    <data name="Tts_ErrorOpeningDialog" xml:space="preserve">
+        <value>打开对话框错误</value>
+    </data>
+    <data name="Tts_Voice" xml:space="preserve">
+        <value>语音</value>
+    </data>
+    <data name="Tts_SearchVoices" xml:space="preserve">
+        <value>搜索语音...</value>
+    </data>
 </root>

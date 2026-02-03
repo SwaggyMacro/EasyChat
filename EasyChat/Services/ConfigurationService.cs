@@ -31,6 +31,7 @@ public class ConfigurationService : ReactiveObject, IConfigurationService
         Screenshot = ConfigUtil.LoadConfig<ScreenshotConfig>(Constant.ScreenshotConf);
         SpeechRecognition = ConfigUtil.LoadConfig<SpeechRecognitionConfig>(Constant.SpeechRecognitionConf);
         SelectionTranslation = ConfigUtil.LoadConfig<SelectionTranslationConfig>(Constant.SelectionTranslationConf);
+        Tts = ConfigUtil.LoadConfig<TtsConfig>(Constant.TtsConf);
 
         // Set global access for legacy compatibility (if needed)
         Global.Config.GeneralConf = General;
@@ -39,6 +40,7 @@ public class ConfigurationService : ReactiveObject, IConfigurationService
         Global.Config.ProxyConf = Proxy;
         Global.Config.ShortcutConf = Shortcut;
         Global.Config.SelectionTranslationConf = SelectionTranslation;
+        Global.Config.TtsConf = Tts;
         
         // Ensure initial IDs are persisted (especially just after migration)
         ConfigUtil.SaveConfig(Constant.MachineTransConf, MachineTrans);
@@ -60,6 +62,7 @@ public class ConfigurationService : ReactiveObject, IConfigurationService
     public ScreenshotConfig Screenshot { get; }
     public SelectionTranslationConfig SelectionTranslation { get; }
     public SpeechRecognitionConfig SpeechRecognition { get; }
+    public TtsConfig Tts { get; }
 
     private void SetupAutoSave()
     {
@@ -314,6 +317,16 @@ public class ConfigurationService : ReactiveObject, IConfigurationService
             {
                 _logger.LogDebug("Auto-saving MachineTrans configuration (Tencent items changed)");
                 ConfigUtil.SaveConfig(Constant.MachineTransConf, MachineTrans);
+            });
+
+
+        // Tts Config
+        Tts.Changed
+            .Throttle(TimeSpan.FromMilliseconds(500))
+            .Subscribe(_ =>
+            {
+                _logger.LogDebug("Auto-saving Tts configuration");
+                ConfigUtil.SaveConfig(Constant.TtsConf, Tts);
             });
     }
 }

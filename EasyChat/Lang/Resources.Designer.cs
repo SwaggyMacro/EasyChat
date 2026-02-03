@@ -2182,5 +2182,114 @@ namespace EasyChat.Lang {
                 return ResourceManager.GetString("WindowBackgroundColor", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add Voice Mapping.
+        /// </summary>
+        public static string Tts_AddVoiceMapping {
+            get {
+                return ResourceManager.GetString("Tts_AddVoiceMapping", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TTS Voice Configuration.
+        /// </summary>
+        public static string Tts_Configuration {
+            get {
+                return ResourceManager.GetString("Tts_Configuration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit Voice Mapping.
+        /// </summary>
+        public static string Tts_EditVoiceMapping {
+            get {
+                return ResourceManager.GetString("Tts_EditVoiceMapping", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error Opening Dialog.
+        /// </summary>
+        public static string Tts_ErrorOpeningDialog {
+            get {
+                return ResourceManager.GetString("Tts_ErrorOpeningDialog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No voices configured. Click 'Add' to configure a voice for a language..
+        /// </summary>
+        public static string Tts_NoVoicesConfigured {
+            get {
+                return ResourceManager.GetString("Tts_NoVoicesConfigured", resourceCulture);
+            }
+        }
+        
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Play.
+        /// </summary>
+        public static string Tts_Play {
+            get {
+                return ResourceManager.GetString("Tts_Play", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, this is a distinct voice preview..
+        /// </summary>
+        public static string Tts_PreviewDefaultText {
+            get {
+                return ResourceManager.GetString("Tts_PreviewDefaultText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter text to preview:.
+        /// </summary>
+        public static string Tts_PreviewInputPrompt {
+            get {
+                return ResourceManager.GetString("Tts_PreviewInputPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Preview Voice.
+        /// </summary>
+        public static string Tts_PreviewVoice {
+            get {
+                return ResourceManager.GetString("Tts_PreviewVoice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provider:.
+        /// </summary>
+        public static string Tts_Provider {
+            get {
+                return ResourceManager.GetString("Tts_Provider", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search voices....
+        /// </summary>
+        public static string Tts_SearchVoices {
+            get {
+                return ResourceManager.GetString("Tts_SearchVoices", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Voice.
+        /// </summary>
+        public static string Tts_Voice {
+            get {
+                return ResourceManager.GetString("Tts_Voice", resourceCulture);
+            }
+        }
     }
 }

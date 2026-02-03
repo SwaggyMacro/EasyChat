@@ -18,6 +18,7 @@ using EasyChat.Services.Languages;
 using EasyChat.Models;
 using EasyChat.Models.Configuration;
 using EasyChat.Services.Abstractions;
+using EasyChat.Services.Speech.Tts;
 using EasyChat.Services.Translation.Ai;
 using EasyChat.Services.Translation.Machine;
 using EasyChat.ViewModels.AiModels;
@@ -39,6 +40,8 @@ public class SettingViewModel : Page
 {
     private readonly IConfigurationService _configurationService;
     private readonly ISukiDialogManager _dialogManager;
+    private readonly ISukiToastManager _toastManager;
+    private readonly ITtsService _ttsService;
 
     private List<string> _claudeModels;
 
@@ -47,11 +50,13 @@ public class SettingViewModel : Page
     private List<string> _openaiModels;
 
 
-    public SettingViewModel(ISukiDialogManager dialogManager, IConfigurationService configurationService) : base(
+    public SettingViewModel(ISukiDialogManager dialogManager, ISukiToastManager toastManager, IConfigurationService configurationService, ITtsService ttsService) : base(
         Resources.Settings, MaterialIconKind.Settings, 1)
     {
         _dialogManager = dialogManager;
+        _toastManager = toastManager;
         _configurationService = configurationService;
+        _ttsService = ttsService;
         _openaiModels = ModelList.OpenAiModels;
         _geminiModels = ModelList.GeminiModels;
         _claudeModels = ModelList.ClaudeModels;
@@ -150,10 +155,20 @@ public class SettingViewModel : Page
         if (string.IsNullOrEmpty(SelectionTranslationConf?.AiModelId) && AiModelConf?.ConfiguredModels.Count > 0)
         {
              // Default to using the same as General or first available
-             SelectionTranslationConf?.AiModelId = GeneralConf?.UsingAiModelId ?? AiModelConf.ConfiguredModels.First().Id;
+             if (SelectionTranslationConf != null)
+             {
+                 SelectionTranslationConf.AiModelId = GeneralConf?.UsingAiModelId ?? AiModelConf.ConfiguredModels.First().Id;
+             }
         }
 
         ManageFixedAreasCommand = ReactiveCommand.Create(ManageFixedAreas);
+        ConfigureTtsCommand = ReactiveCommand.Create(ConfigureTts);
+        
+        // Initialize TTS Provider list
+        if (_ttsService is TtsManager manager)
+        {
+            TtsProviders = manager.GetAvailableProviders();
+        }
 
         if (OperatingSystem.IsWindows())
             Task.Run(LoadAvailableFonts);
@@ -173,17 +188,19 @@ public class SettingViewModel : Page
         });
     }
 
+    private List<string> _deepLModelTypes = ["quality_optimized", "prefer_quality_optimized", "latency_optimized"];
     public List<string> DeepLModelTypes
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = ["quality_optimized", "prefer_quality_optimized", "latency_optimized"];
+        get => _deepLModelTypes;
+        set => this.RaiseAndSetIfChanged(ref _deepLModelTypes, value);
+    }
 
+    private List<LanguageDefinition> _languages = [LanguageKeys.English, LanguageKeys.ChineseSimplified];
     public List<LanguageDefinition> Languages
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = [LanguageKeys.English, LanguageKeys.ChineseSimplified];
+        get => _languages;
+        set => this.RaiseAndSetIfChanged(ref _languages, value);
+    }
 
     public LanguageDefinition? SelectedLanguage
     {
@@ -246,33 +263,62 @@ public class SettingViewModel : Page
         }
     }
 
+    private List<string> _aiProviders = ["OpenAI", "Gemini", "Claude"];
     public List<string> AiProviders
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = ["OpenAI", "Gemini", "Claude"];
+        get => _aiProviders;
+        set => this.RaiseAndSetIfChanged(ref _aiProviders, value);
+    }
 
+    private List<string> _machineTransProviders = [Constant.MachineTranslationProviders.Baidu, Constant.MachineTranslationProviders.Tencent, Constant.MachineTranslationProviders.Google, Constant.MachineTranslationProviders.DeepL];
     public List<string> MachineTransProviders
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = [Constant.MachineTranslationProviders.Baidu, Constant.MachineTranslationProviders.Tencent, Constant.MachineTranslationProviders.Google, Constant.MachineTranslationProviders.DeepL];
+        get => _machineTransProviders;
+        set => this.RaiseAndSetIfChanged(ref _machineTransProviders, value);
+    } 
+
+    private List<string> _ttsProviders = new();
+    public List<string> TtsProviders
+    {
+        get => _ttsProviders;
+        set => this.RaiseAndSetIfChanged(ref _ttsProviders, value);
+    }
+
+    public string SelectedTtsProvider
+    {
+        get => TtsConf?.Provider ?? EasyChat.Services.Speech.Tts.TtsProviders.EdgeTTS;
+        set
+        {
+            if (TtsConf != null && TtsConf.Provider != value)
+            {
+                TtsConf.Provider = value;
+                this.RaisePropertyChanged();
+                
+                if (_ttsService is TtsManager manager)
+                {
+                    manager.SwitchProvider(value);
+                }
+            }
+        }
+    }
 
     public General? GeneralConf => _configurationService.General;
 
     public AiModel? AiModelConf => _configurationService.AiModel;
 
+    private ObservableCollection<CustomAiModel> _configuredModels = new();
     public ObservableCollection<CustomAiModel> ConfiguredModels
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = new();
+        get => _configuredModels;
+        set => this.RaiseAndSetIfChanged(ref _configuredModels, value);
+    }
 
+    private ObservableCollection<ModelCardItem> _modelCardsWithAddButton = new();
     public ObservableCollection<ModelCardItem> ModelCardsWithAddButton
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = new();
+        get => _modelCardsWithAddButton;
+        set => this.RaiseAndSetIfChanged(ref _modelCardsWithAddButton, value);
+    }
 
     public MachineTrans? MachineTransConf => _configurationService.MachineTrans;
 
@@ -286,17 +332,36 @@ public class SettingViewModel : Page
     
     public SelectionTranslationConfig? SelectionTranslationConf => _configurationService.SelectionTranslation;
     
+    public TtsConfig? TtsConf => _configurationService.Tts;
+    
     public List<string> TransparencyLevels { get; } = ["AcrylicBlur", "Blur", "Transparent"];
 
+    private ObservableCollection<string> _availableFonts = [];
     public ObservableCollection<string> AvailableFonts
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = [];
+        get => _availableFonts;
+        set => this.RaiseAndSetIfChanged(ref _availableFonts, value);
+    }
 
     public List<InputDeliveryMode> InputDeliveryModes { get; } = Enum.GetValues<InputDeliveryMode>().ToList();
 
     public ReactiveCommand<Unit, Unit> ManageFixedAreasCommand { get; }
+    public ReactiveCommand<Unit, Unit> ConfigureTtsCommand { get; }
+
+    private void ConfigureTts()
+    {
+        if (TtsConf == null) return;
+        
+        _dialogManager.CreateDialog()
+            .WithTitle("TTS Configuration")
+            .WithViewModel(dialog => new TtsVoiceSettingsDialogViewModel(
+                _dialogManager, 
+                _toastManager,
+                dialog,
+                _ttsService, 
+                TtsConf))
+            .TryShow();
+    }
 
     private void ManageFixedAreas()
     {
@@ -329,28 +394,32 @@ public class SettingViewModel : Page
     public ReactiveCommand<Unit, Unit> TestDeepLConnectionCommand { get; }
     
     // Testing state properties for loading indicators
+    private bool _isTestingBaidu;
     public bool IsTestingBaidu
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        get => _isTestingBaidu;
+        set => this.RaiseAndSetIfChanged(ref _isTestingBaidu, value);
     }
 
+    private bool _isTestingTencent;
     public bool IsTestingTencent
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        get => _isTestingTencent;
+        set => this.RaiseAndSetIfChanged(ref _isTestingTencent, value);
     }
 
+    private bool _isTestingGoogle;
     public bool IsTestingGoogle
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        get => _isTestingGoogle;
+        set => this.RaiseAndSetIfChanged(ref _isTestingGoogle, value);
     }
 
+    private bool _isTestingDeepL;
     public bool IsTestingDeepL
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        get => _isTestingDeepL;
+        set => this.RaiseAndSetIfChanged(ref _isTestingDeepL, value);
     }
 
 

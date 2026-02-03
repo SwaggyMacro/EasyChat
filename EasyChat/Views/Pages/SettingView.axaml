@@ -213,6 +213,29 @@
                     </suki:SettingsLayoutItem.Content>
                 </suki:SettingsLayoutItem>
 
+                <suki:SettingsLayoutItem Header="TTS">
+                    <suki:SettingsLayoutItem.Content>
+                        <suki:GlassCard>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
+                                    <TextBlock FontWeight="Bold" VerticalAlignment="Center"
+                                               Text="{x:Static lang:Resources.TransEngine}" />
+                                    <!-- Using TransEngine label for Provider/Engine -->
+                                    <ComboBox ItemsSource="{Binding TtsProviders}"
+                                              SelectedItem="{Binding SelectedTtsProvider}"
+                                              MinWidth="150" />
+                                </StackPanel>
+                                
+                                <Button Content="Configure Voices" 
+                                        Command="{Binding ConfigureTtsCommand}" 
+                                        HorizontalAlignment="Left"
+                                        Classes="Flat"
+                                        Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </suki:GlassCard>
+                    </suki:SettingsLayoutItem.Content>
+                </suki:SettingsLayoutItem>
+
                 <suki:SettingsLayoutItem Header="{x:Static lang:Resources.Translation}">
                     <suki:SettingsLayoutItem.Content>
                         <suki:GlassCard>

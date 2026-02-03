@@ -1,0 +1,94 @@
+<UserControl x:Class="EasyChat.Views.Dialogs.TtsVoiceSettingsDialogView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:EasyChat.ViewModels.Dialogs"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:lang="clr-namespace:EasyChat.Lang;assembly=EasyChat"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="500"
+             x:DataType="viewModels:TtsVoiceSettingsDialogViewModel"
+             Width="700" Height="500">
+    <suki:GlassCard>
+        <Grid RowDefinitions="Auto, *, Auto">
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,15" Orientation="Horizontal" Spacing="20">
+                <TextBlock Text="{x:Static lang:Resources.Tts_Configuration}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center"/>
+                
+                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Static lang:Resources.Tts_Provider}" VerticalAlignment="Center" Opacity="0.7"/>
+                    <ComboBox ItemsSource="{Binding AvailableProviders}" 
+                              SelectedItem="{Binding SelectedProvider}"
+                              MinWidth="120"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Content -->
+            <suki:GlassCard Grid.Row="1" Margin="0,0,0,15" Padding="0">
+                <Grid>
+                    <TextBlock Text="{x:Static lang:Resources.Tts_NoVoicesConfigured}"
+                               IsVisible="{Binding !ConfiguredVoices.Count}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Opacity="0.5"/>
+                    
+                    <ListBox ItemsSource="{Binding ConfiguredVoices}" 
+                             SelectedItem="{Binding SelectedConfiguredVoice}"
+                             Background="Transparent">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="*, 2*, *">
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Grid.Column="0">
+                                        <TextBlock Text="{Binding Language.EnglishName}" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding Language.ChineseName}" Opacity="0.6" FontSize="12" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Grid.Column="1">
+                                        <avalonia:MaterialIcon Kind="AccountVoice" Width="16" Height="16" Opacity="0.7"/>
+                                        <TextBlock Text="{Binding VoiceName}"/>
+                                    </StackPanel>
+
+                                    <TextBlock Text="{Binding VoiceLocale}" Grid.Column="2" 
+                                               HorizontalAlignment="Right" Opacity="0.5" FontSize="12"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </suki:GlassCard>
+
+            <!-- Footer -->
+            <Grid Grid.Row="2">
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Left">
+                    <Button Classes="Flat" Command="{Binding AddCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <avalonia:MaterialIcon Kind="Plus"/>
+                            <TextBlock Text="{x:Static lang:Resources.Add}"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="Flat Accent" Command="{Binding EditCommand}" 
+                            CommandParameter="{Binding SelectedConfiguredVoice}"
+                            IsEnabled="{Binding SelectedConfiguredVoice, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <avalonia:MaterialIcon Kind="Pencil"/>
+                            <TextBlock Text="{x:Static lang:Resources.Edit}"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="Flat Danger" Command="{Binding DeleteCommand}"
+                            CommandParameter="{Binding SelectedConfiguredVoice}"
+                            IsEnabled="{Binding SelectedConfiguredVoice, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <avalonia:MaterialIcon Kind="Delete"/>
+                            <TextBlock Text="{x:Static lang:Resources.Delete}"/>
+                        </StackPanel>
+                    </Button>
+
+                </StackPanel>
+                
+                <Button Content="{x:Static lang:Resources.Close}" 
+                        Command="{Binding CloseCommand}" 
+                        HorizontalAlignment="Right" />
+            </Grid>
+        </Grid>
+    </suki:GlassCard>
+</UserControl>

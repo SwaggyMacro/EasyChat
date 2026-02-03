@@ -13,4 +13,5 @@ public class Config
     public Shortcut ShortcutConf { get; set; } = new();
     public ScreenshotConfig ScreenshotConf { get; set; } = new();
     public SelectionTranslationConfig SelectionTranslationConf { get; set; } = new();
+    public TtsConfig TtsConf { get; set; } = new();
 }

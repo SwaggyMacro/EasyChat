@@ -731,4 +731,40 @@
     <data name="CurrentVersion" xml:space="preserve">
         <value>Current Version</value>
     </data>
+    <data name="Tts_Configuration" xml:space="preserve">
+        <value>TTS Voice Configuration</value>
+    </data>
+    <data name="Tts_Provider" xml:space="preserve">
+        <value>Provider:</value>
+    </data>
+    <data name="Tts_NoVoicesConfigured" xml:space="preserve">
+        <value>No voices configured. Click 'Add' to configure a voice for a language.</value>
+    </data>
+    <data name="Tts_AddVoiceMapping" xml:space="preserve">
+        <value>Add Voice Mapping</value>
+    </data>
+    <data name="Tts_PreviewVoice" xml:space="preserve">
+        <value>Preview Voice</value>
+    </data>
+    <data name="Tts_PreviewInputPrompt" xml:space="preserve">
+        <value>Enter text to preview:</value>
+    </data>
+     <data name="Tts_PreviewDefaultText" xml:space="preserve">
+        <value>Hello, this is a distinct voice preview.</value>
+    </data>
+    <data name="Tts_Play" xml:space="preserve">
+        <value>Play</value>
+    </data>
+    <data name="Tts_EditVoiceMapping" xml:space="preserve">
+        <value>Edit Voice Mapping</value>
+    </data>
+    <data name="Tts_ErrorOpeningDialog" xml:space="preserve">
+        <value>Error Opening Dialog</value>
+    </data>
+    <data name="Tts_Voice" xml:space="preserve">
+        <value>Voice</value>
+    </data>
+    <data name="Tts_SearchVoices" xml:space="preserve">
+        <value>Search voices...</value>
+    </data>
 </root>

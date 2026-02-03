@@ -15,4 +15,5 @@ public interface IConfigurationService
     ScreenshotConfig? Screenshot { get; }
     SelectionTranslationConfig? SelectionTranslation { get; }
     SpeechRecognitionConfig? SpeechRecognition { get; }
+    TtsConfig? Tts { get; }
 }

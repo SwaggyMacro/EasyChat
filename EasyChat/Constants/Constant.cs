@@ -17,6 +17,7 @@ public static class Constant
     public const string ScreenshotConf = "Screenshot";
     public const string SpeechRecognitionConf = "SpeechRecognition";
     public const string SelectionTranslationConf = "SelectionTranslation";
+    public const string TtsConf = "Tts";
     
     public static readonly string ConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configuration");
 
