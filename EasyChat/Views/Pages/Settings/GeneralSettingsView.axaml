@@ -1,0 +1,129 @@
+<UserControl x:Class="EasyChat.Views.Pages.Settings.GeneralSettingsView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:viewModels="clr-namespace:EasyChat.ViewModels.Pages"
+             xmlns:lang="clr-namespace:EasyChat.Lang;assembly=EasyChat"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:converts="clr-namespace:EasyChat.Converters;assembly=EasyChat"
+             xmlns:dataConverters="clr-namespace:Avalonia.Data.Converters;assembly=Avalonia.Base"
+             x:DataType="viewModels:SettingViewModel"
+             mc:Ignorable="d">
+    <suki:GlassCard>
+        <StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
+                <TextBlock FontWeight="Bold" VerticalAlignment="Center"
+                           Text="{x:Static lang:Resources.Language}" />
+                <ComboBox ItemsSource="{Binding Languages}"
+                          SelectedItem="{Binding SelectedLanguage}"
+                          MinWidth="150">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Border ClipToBounds="True" CornerRadius="2" Width="20" Height="14"
+                                        IsVisible="{Binding Icon, Converter={x:Static dataConverters:StringConverters.IsNotNullOrEmpty}}">
+                                    <Image Source="{Binding Icon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
+                                           Stretch="UniformToFill" />
+                                </Border>
+                                <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource SukiText}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
+                <TextBlock FontWeight="Bold" VerticalAlignment="Center"
+                           Text="{x:Static lang:Resources.ClosingBehavior}" />
+                <ComboBox ItemsSource="{Binding ClosingBehaviors}"
+                          SelectedItem="{Binding SelectedClosingBehavior}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={x:Static converts:EnumToDescriptionConverter.Instance}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
+                <TextBlock FontWeight="Bold" VerticalAlignment="Center"
+                           Text="{x:Static lang:Resources.TransEngine}" />
+                <RadioButton GroupName="A"
+                             IsChecked="{Binding GeneralConf.TransEngine, 
+                             Converter={x:Static converts:EngineTypeToBoolConverters.AiModel}}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <avalonia:MaterialIcon Kind="Robot" Width="16" Height="16" />
+                        <TextBlock Text="{x:Static lang:Resources.AIEngine}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </RadioButton>
+                <RadioButton GroupName="A"
+                             IsChecked="{Binding GeneralConf.TransEngine, 
+                             Converter={x:Static converts:EngineTypeToBoolConverters.MachineTrans}}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <avalonia:MaterialIcon Kind="Translate" Width="16" Height="16" />
+                        <TextBlock Text="{x:Static lang:Resources.MachineTranslation}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </RadioButton>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
+                <TextBlock FontWeight="Bold" VerticalAlignment="Center"
+                           Text="{x:Static lang:Resources.UsingAiModel}" />
+                <ComboBox ItemsSource="{Binding ConfiguredModels}"
+                          SelectedValue="{Binding GeneralConf.UsingAiModelId}"
+                          SelectedValueBinding="{Binding Id}"
+                          MinWidth="150">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Panel Width="20" Height="20">
+                                    <Border ClipToBounds="True" CornerRadius="4"
+                                            IsVisible="{Binding ModelType, Converter={x:Static converts:AiModelTypeConverters.IsNotCustom}}">
+                                        <Image Source="{Binding ModelType, Converter={x:Static converts:AiModelTypeConverters.ToIcon}}"
+                                               Stretch="UniformToFill" />
+                                    </Border>
+                                    <avalonia:MaterialIcon Kind="Robot" Width="20" Height="20"
+                                                           IsVisible="{Binding ModelType, Converter={x:Static converts:AiModelTypeConverters.IsCustom}}" />
+                                </Panel>
+                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource SukiText}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
+                <TextBlock FontWeight="Bold" VerticalAlignment="Center"
+                           Text="{x:Static lang:Resources.UsingMachineTransEngine}" />
+                <ComboBox ItemsSource="{Binding MachineTransProviders}"
+                          SelectedItem="{Binding GeneralConf.UsingMachineTrans}"
+                          MinWidth="150">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Panel Width="20" Height="20">
+                                    <Border ClipToBounds="True" CornerRadius="4"
+                                            IsVisible="{Binding Converter={x:Static converts:EngineConverters.HasIcon}}">
+                                        <Image Source="{Binding Converter={x:Static converts:EngineConverters.ToIcon}}"
+                                               Stretch="UniformToFill" />
+                                    </Border>
+                                    <avalonia:MaterialIcon Kind="Translate" Width="20" Height="20"
+                                                           IsVisible="{Binding Converter={x:Static converts:EngineConverters.HasNoIcon}}" />
+                                </Panel>
+                                <TextBlock Text="{Binding}" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource SukiText}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
+                <TextBlock FontWeight="Bold" VerticalAlignment="Center"
+                           Text="{x:Static lang:Resources.ProxyUrl}" />
+                <TextBox MinWidth="300"
+                         Text="{Binding ProxyConf.ProxyUrl}"
+                         Watermark="{x:Static lang:Resources.ProxyAddrQuestion}" />
+            </StackPanel>
+        </StackPanel>
+    </suki:GlassCard>
+</UserControl>
