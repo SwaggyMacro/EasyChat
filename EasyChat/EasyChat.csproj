@@ -60,7 +60,9 @@
         <PackageReference Include="HotAvalonia" Version="3.0.2" />
         <PackageReference Include="Material.Icons" Version="2.1.10" />
         <PackageReference Include="Material.Icons.Avalonia" Version="2.1.10" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.2" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="OpenAI" Version="2.8.0" />
         <PackageReference Include="OpenCvSharp4.Extensions" Version="4.10.0.20241108" />

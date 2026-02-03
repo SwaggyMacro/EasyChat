@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using EasyChat.Services.Abstractions;
-using Serilog;
+using Microsoft.Extensions.Logging;
 using SoundFlow.Abstracts;
 using SoundFlow.Abstracts.Devices;
 using SoundFlow.Backends.MiniAudio;
@@ -17,6 +17,7 @@ namespace EasyChat.Services.Speech.Tts;
 
 public class AudioPlayer : IAudioPlayer, IDisposable
 {
+    private readonly ILogger<AudioPlayer> _logger;
     private readonly ConcurrentQueue<Func<Task>> _playbackQueue = new();
     private readonly object _lockObj = new();
     private volatile bool _isPlaying;
@@ -26,8 +27,9 @@ public class AudioPlayer : IAudioPlayer, IDisposable
     private AudioEngine? _engine;
     private AudioPlaybackDevice? _playbackDevice;
 
-    public AudioPlayer()
+    public AudioPlayer(ILogger<AudioPlayer> logger)
     {
+        _logger = logger;
         InitializeSoundFlow();
     }
 
@@ -49,11 +51,11 @@ public class AudioPlayer : IAudioPlayer, IDisposable
             // 6. Start the device (Important from example)
             _playbackDevice.Start();
             
-            Log.Information("SoundFlow AudioPlayer initialized.");
+            _logger.LogInformation("SoundFlow AudioPlayer initialized.");
         }
         catch (Exception ex)
         {
-             Log.Error(ex, "Exception during SoundFlow initialization");
+             _logger.LogError(ex, "Exception during SoundFlow initialization");
         }
     }
 
@@ -75,7 +77,7 @@ public class AudioPlayer : IAudioPlayer, IDisposable
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed to read audio stream for queue");
+            _logger.LogError(ex, "Failed to read audio stream for queue");
             return;
         }
 
@@ -108,7 +110,7 @@ public class AudioPlayer : IAudioPlayer, IDisposable
              }
              catch (Exception ex)
              {
-                 Log.Error(ex, "Error playing audio item");
+                 _logger.LogError(ex, "Error playing audio item");
              }
              finally
              {
@@ -165,7 +167,7 @@ public class AudioPlayer : IAudioPlayer, IDisposable
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error playing from memory");
+            _logger.LogError(ex, "Error playing from memory");
         }
         finally
         {
@@ -221,7 +223,7 @@ public class AudioPlayer : IAudioPlayer, IDisposable
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error playing from file: {FilePath}", filePath);
+            _logger.LogError(ex, "Error playing from file: {FilePath}", filePath);
         }
         finally
         {

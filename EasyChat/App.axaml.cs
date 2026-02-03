@@ -93,7 +93,12 @@ public class App : Application
             services.AddSingleton<IApplicationLifetime>(desktop);
 
             // Logging
-            services.AddLogging(builder => builder.AddSerilog(dispose: true));
+            services.AddLogging(builder =>
+            {
+                builder.AddSerilog(dispose: true);
+                builder.AddConsole();
+                builder.AddDebug();
+            });
 
             // SukiUI Managers
             services.AddSingleton<ISukiToastManager, SukiToastManager>();
