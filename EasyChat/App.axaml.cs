@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -20,6 +21,7 @@ using EasyChat.Services.Languages.Providers;
 using EasyChat.Services.Shortcuts;
 using EasyChat.Services.Shortcuts.Handlers;
 using EasyChat.Services.Speech;
+using EasyChat.Services.Speech.EdgeTts;
 using EasyChat.ViewModels;
 using EasyChat.ViewModels.Pages;
 using EasyChat.Views;
@@ -159,6 +161,10 @@ public class App : Application
             // Speech Recognition Service
             services.AddSingleton<ISpeechRecognitionService, SpeechRecognitionService>();
             
+            // Edge TTS Service
+            services.AddSingleton<IEdgeTtsService, EdgeTtsService>();
+            services.AddSingleton<IEdgeTtsVoiceProvider, EdgeTtsVoiceProvider>(); // Register Voice Provider
+            
             // Update Check Service
             services.AddSingleton<UpdateCheckService>();
             
@@ -180,6 +186,10 @@ public class App : Application
             // Ensure ConfigurationService and GlobalShortcutService are initialized
             provider.GetRequiredService<IConfigurationService>();
             provider.GetRequiredService<GlobalShortcutService>();
+            
+            // Initialize Voice Provider
+            var voiceProvider = provider.GetRequiredService<IEdgeTtsVoiceProvider>();
+            Task.Run(async () => await voiceProvider.InitializeAsync());
             
             if (OperatingSystem.IsWindows())
             {
