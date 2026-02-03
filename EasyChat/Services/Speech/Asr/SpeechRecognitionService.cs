@@ -9,7 +9,7 @@ using Avalonia.Threading;
 using EasyChat.Services.Abstractions;
 using Microsoft.Extensions.Logging;
 
-namespace EasyChat.Services.Speech;
+namespace EasyChat.Services.Speech.Asr;
 
 public class SpeechRecognitionService : ISpeechRecognitionService, IDisposable
 {

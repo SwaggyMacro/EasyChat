@@ -2,46 +2,66 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyChat.Services.Abstractions;
 
-namespace EasyChat.Services.Speech.EdgeTts;
+namespace EasyChat.Services.Speech.Tts.EdgeTts;
 
-public class EdgeTtsService : IEdgeTtsService
+public class EdgeTtsService : ITtsService
 {
-    public async Task SynthesizeAsync(string text, string voice, string outputFile, string rate = "+0%", string volume = "+0%", string pitch = "+0Hz")
+    public string ProviderId => TtsProviders.EdgeTTS;
+    private readonly EdgeTtsVoiceProvider _voiceProvider;
+
+    public EdgeTtsService(EdgeTtsVoiceProvider voiceProvider)
     {
-        using var audioStream = await StreamAsync(text, voice, rate, volume, pitch);
+        _voiceProvider = voiceProvider;
+    }
+
+    public List<TtsVoiceDefinition> GetVoices()
+    {
+        return _voiceProvider.GetGenericVoices();
+    }
+
+    public List<TtsLanguageDefinition> GetSupportedLanguages()
+    {
+        var voiceLangIds = _voiceProvider.GetGenericVoices()
+            .Select(v => v.LanguageId)
+            .ToHashSet();
+            
+        return TtsLanguageService.Languages
+            .Where(l => voiceLangIds.Contains(l.Locale))
+            .ToList();
+    }
+
+    public async Task SynthesizeAsync(string text, string voiceId, string outputFile, string? rate = null, string? volume = null, string? pitch = null)
+    {
+        using var audioStream = await StreamAsync(text, voiceId, rate, volume, pitch);
         using var fileStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
         await audioStream.CopyToAsync(fileStream);
     }
 
-    public async Task<Stream> StreamAsync(string text, string voice, string rate = "+0%", string volume = "+0%", string pitch = "+0Hz")
+    public async Task<Stream> StreamAsync(string text, string voiceId, string? rate = null, string? volume = null, string? pitch = null)
     {
         var memoryStream = new MemoryStream();
         
         using var client = new ClientWebSocket();
         
-        // Add headers
-        // WebSocket headers are added during ConnectAsync usually via options, but ClientWebSocket support for custom headers is via Options.SetRequestHeader
         foreach (var header in EdgeTtsConstants.WssHeaders)
         {
             if (header.Key == "Sec-WebSocket-Version") continue;
             client.Options.SetRequestHeader(header.Key, header.Value);
         }
         
-        // Add Cookie with MUID
         var muid = EdgeTtsTokenGenerator.GenerateMuid();
         client.Options.SetRequestHeader("Cookie", $"muid={muid};");
 
         var connectId = Guid.NewGuid().ToString("N");
         var secMsGec = EdgeTtsTokenGenerator.GenerateSecMsGec();
 
-        // We need to append query parameters manually or securely
-        // The WssUrl in constants already has TrustedClientToken, we need to append others.
-        // WssUrl: wss://.../edge/v1?TrustedClientToken=...
         var uri = new Uri($"{EdgeTtsConstants.WssUrl}&ConnectionId={connectId}&Sec-MS-GEC={secMsGec}&Sec-MS-GEC-Version={EdgeTtsConstants.SecMsGecVersion}");
 
         await client.ConnectAsync(uri, CancellationToken.None);
@@ -51,7 +71,13 @@ public class EdgeTtsService : IEdgeTtsService
 
         // 2. Send SSML Request
         var requestId = Guid.NewGuid().ToString("N");
-        var ssml = MakeSsml(text, voice, rate, volume, pitch);
+        
+        // Defaults if null
+        var safeRate = rate ?? "+0%";
+        var safeVolume = volume ?? "+0%";
+        var safePitch = pitch ?? "+0Hz";
+
+        var ssml = MakeSsml(text, voiceId, safeRate, safeVolume, safePitch);
         await SendSsmlRequestAsync(client, requestId, ssml);
 
         // 3. Receive Loop
@@ -78,9 +104,9 @@ public class EdgeTtsService : IEdgeTtsService
             if (result.MessageType == WebSocketMessageType.Text)
             {
                 var textMsg = Encoding.UTF8.GetString(messageBuffer.ToArray());
+                // Simple parsing for end of turn
                 if (textMsg.Contains("Path:turn.end"))
                 {
-                    // End of turn, successful completion
                     break;
                 }
             }
@@ -94,11 +120,8 @@ public class EdgeTtsService : IEdgeTtsService
 
                 var headersText = Encoding.UTF8.GetString(data, 2, headerLength);
                 
-                // Check if it's audio
                 if (headersText.Contains("Path:audio"))
                 {
-                    // The rest is audio data
-                    // There might be some logic needed to verify Content-Type, typically audio/mpeg
                     var audioData = new ReadOnlyMemory<byte>(data, headerLength + 2, data.Length - (headerLength + 2));
                     await memoryStream.WriteAsync(audioData);
                 }
@@ -140,7 +163,6 @@ public class EdgeTtsService : IEdgeTtsService
 
     private string MakeSsml(string text, string voice, string rate, string volume, string pitch)
     {
-        // Simple XML escaping
         var escapedText = System.Security.SecurityElement.Escape(text);
         
         return $"<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'>" +
@@ -154,7 +176,6 @@ public class EdgeTtsService : IEdgeTtsService
 
     private string GetJsDateString()
     {
-        // Format: Fri Aug 06 2021 15:00:00 GMT+0000 (Coordinated Universal Time)
         return DateTime.UtcNow.ToString("ddd MMM dd yyyy HH:mm:ss 'GMT+0000 (Coordinated Universal Time)'", CultureInfo.InvariantCulture);
     }
 }

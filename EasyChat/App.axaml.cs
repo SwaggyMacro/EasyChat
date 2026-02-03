@@ -18,10 +18,7 @@ using EasyChat.Services.Ocr;
 using EasyChat.Services.Platform;
 using EasyChat.Services.Languages;
 using EasyChat.Services.Languages.Providers;
-using EasyChat.Services.Shortcuts;
 using EasyChat.Services.Shortcuts.Handlers;
-using EasyChat.Services.Speech;
-using EasyChat.Services.Speech.EdgeTts;
 using EasyChat.ViewModels;
 using EasyChat.ViewModels.Pages;
 using EasyChat.Views;
@@ -31,6 +28,9 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using EasyChat.Services.Speech.Asr;
+using EasyChat.Services.Speech.Tts;
+using EasyChat.Services.Speech.Tts.EdgeTts;
 using Material.Icons;
 using SukiUI.Dialogs;
 using SukiUI.Enums;
@@ -162,9 +162,17 @@ public class App : Application
             // Speech Recognition Service
             services.AddSingleton<ISpeechRecognitionService, SpeechRecognitionService>();
             
-            // Edge TTS Service
-            services.AddSingleton<IEdgeTtsService, EdgeTtsService>();
-            services.AddSingleton<IEdgeTtsVoiceProvider, EdgeTtsVoiceProvider>(); // Register Voice Provider
+            // Edge TTS Service (Concrete implementation)
+            services.AddSingleton<EdgeTtsService>();
+            services.AddSingleton<EdgeTtsVoiceProvider>(); // Register Voice Provider (Concrete)
+
+            // TTS Manager (Proxy)
+            services.AddSingleton<ITtsService>(sp =>
+            {
+                var edgeService = sp.GetRequiredService<EdgeTtsService>();
+                // Add other providers here in the future
+                return new TtsManager([edgeService]);
+            });
             
             // Update Check Service
             services.AddSingleton<UpdateCheckService>();
@@ -189,7 +197,7 @@ public class App : Application
             provider.GetRequiredService<GlobalShortcutService>();
             
             // Initialize Voice Provider
-            var voiceProvider = provider.GetRequiredService<IEdgeTtsVoiceProvider>();
+            var voiceProvider = provider.GetRequiredService<EdgeTtsVoiceProvider>();
             Task.Run(async () => await voiceProvider.InitializeAsync());
             
             if (OperatingSystem.IsWindows())

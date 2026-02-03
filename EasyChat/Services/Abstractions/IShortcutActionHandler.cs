@@ -1,6 +1,6 @@
 using EasyChat.Models.Configuration;
 
-namespace EasyChat.Services.Shortcuts;
+namespace EasyChat.Services.Abstractions;
 
 /// <summary>
 /// Interface for handling shortcut key actions.

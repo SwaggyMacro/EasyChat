@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using EasyChat.Services.Speech.Asr;
 
 namespace EasyChat.Services.Abstractions;
 
@@ -16,7 +17,7 @@ public interface ISpeechRecognitionService
     /// Starts recording with the specified configuration.
     /// </summary>
     /// <param name="config">The configuration object containing parameters like model path or capture targets.</param>
-    Task StartRecordingAsync(Speech.SpeechRecognitionConfig config);
+    Task StartRecordingAsync(SpeechRecognitionConfig config);
     
     Task StopRecordingAsync();
     

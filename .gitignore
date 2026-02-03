@@ -480,3 +480,14 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+EasyChat/Lib/da-DK/
+EasyChat/Lib/de-DE/
+EasyChat/Lib/en-US/
+EasyChat/Lib/es-ES/
+EasyChat/Lib/fr-FR/
+EasyChat/Lib/it-IT/
+EasyChat/Lib/ja-JP/
+EasyChat/Lib/ko-KR/
+EasyChat/Lib/pt-BR/
+EasyChat/Lib/zh-CN/

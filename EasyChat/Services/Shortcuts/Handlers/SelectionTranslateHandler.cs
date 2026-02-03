@@ -1,4 +1,5 @@
 using EasyChat.Models.Configuration;
+using EasyChat.Services.Abstractions;
 using EasyChat.Services.Translation;
 
 namespace EasyChat.Services.Shortcuts.Handlers;

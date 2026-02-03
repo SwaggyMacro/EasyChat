@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace EasyChat.Services.Speech;
+namespace EasyChat.Services.Speech.Asr;
 
 public class SubtitleProcessor
 {

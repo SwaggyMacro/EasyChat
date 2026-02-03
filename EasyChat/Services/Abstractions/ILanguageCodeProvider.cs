@@ -1,6 +1,7 @@
-namespace EasyChat.Services.Languages;
-
 using System.Collections.Generic;
+using EasyChat.Services.Languages;
+
+namespace EasyChat.Services.Abstractions;
 
 /// <summary>
 /// Interface for a service that provides language codes for a specific translation API.

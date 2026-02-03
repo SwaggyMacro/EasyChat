@@ -2,7 +2,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace EasyChat.Services.Speech.EdgeTts;
+namespace EasyChat.Services.Speech.Tts.EdgeTts;
 
 public static class EdgeTtsTokenGenerator
 {

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace EasyChat.Services.Speech.EdgeTts;
+namespace EasyChat.Services.Speech.Tts.EdgeTts;
 
 public static class EdgeTtsConstants
 {

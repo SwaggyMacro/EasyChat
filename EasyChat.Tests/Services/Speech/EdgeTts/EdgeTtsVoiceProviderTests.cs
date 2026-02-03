@@ -1,4 +1,6 @@
-using EasyChat.Services.Speech.EdgeTts;
+using EasyChat.Services.Abstractions;
+using EasyChat.Services.Speech;
+using EasyChat.Services.Speech.Tts.EdgeTts;
 
 namespace EasyChat.Tests.Services.Speech.EdgeTts;
 
@@ -9,7 +11,7 @@ public class EdgeTtsVoiceProviderTests
     public async Task TestInitializeAsync_LoadsVoicesFromJson()
     {
         // Arrange
-        IEdgeTtsVoiceProvider provider = new EdgeTtsVoiceProvider();
+        EdgeTtsVoiceProvider provider = new EdgeTtsVoiceProvider();
 
         // Act
         await provider.InitializeAsync();
@@ -40,8 +42,8 @@ public class EdgeTtsVoiceProviderTests
     public async Task TestSynthesizeWithProviderVoice()
     {
         // Arrange
-        IEdgeTtsVoiceProvider provider = new EdgeTtsVoiceProvider();
-        IEdgeTtsService client = new EdgeTtsService();
+        EdgeTtsVoiceProvider provider = new EdgeTtsVoiceProvider();
+        ITtsService client = new EdgeTtsService(provider);
         await provider.InitializeAsync();
 
         var voiceDef = provider.Voices.Find(v => v.Name == "zu-ZA-ThembaNeural");

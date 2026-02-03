@@ -17,7 +17,9 @@ using Material.Icons;
 using ReactiveUI;
 using System.Reactive.Linq;
 using System.Text;
+using EasyChat.Services.Speech.Asr;
 using Microsoft.Extensions.Logging;
+using SpeechRecognitionConfig = EasyChat.Services.Speech.Asr.SpeechRecognitionConfig;
 
 namespace EasyChat.ViewModels.Pages;
 
@@ -758,7 +760,7 @@ public class SpeechRecognitionViewModel : Page
             var lang = SelectedRecognitionLanguage;
             var selectedProcessIds = Processes.Where(p => p.IsSelected).Select(p => p.Id).ToList();
 
-            var config = new Services.Speech.SpeechRecognitionConfig
+            var config = new SpeechRecognitionConfig
             {
                 ModelPath = lang,
                 ProcessIds = selectedProcessIds

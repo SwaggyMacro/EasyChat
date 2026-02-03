@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace EasyChat.Services.Speech;
+namespace EasyChat.Services.Speech.Asr;
 
 public class SpeechRecognitionConfig
 {
