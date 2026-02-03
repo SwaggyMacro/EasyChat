@@ -165,6 +165,7 @@ public class App : Application
             // Edge TTS Service (Concrete implementation)
             services.AddSingleton<EdgeTtsService>();
             services.AddSingleton<EdgeTtsVoiceProvider>(); // Register Voice Provider (Concrete)
+            services.AddSingleton<IAudioPlayer, AudioPlayer>();
 
             // TTS Manager (Proxy)
             services.AddSingleton<ITtsService>(sp =>

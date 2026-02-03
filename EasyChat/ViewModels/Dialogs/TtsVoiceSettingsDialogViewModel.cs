@@ -30,6 +30,7 @@ public class TtsVoiceSettingsDialogViewModel : ViewModelBase
     private readonly ITtsService _ttsService;
     private readonly TtsConfig _ttsConfig;
     private readonly TtsManager? _ttsManager;
+    private readonly IAudioPlayer _audioPlayer;
     
     private List<TtsVoiceDefinition> _allVoices = new();
 
@@ -68,13 +69,14 @@ public class TtsVoiceSettingsDialogViewModel : ViewModelBase
     public ReactiveCommand<ConfiguredVoiceItem, Unit> DeleteCommand { get; }
     public ReactiveCommand<Unit, Unit> CloseCommand { get; }
 
-    public TtsVoiceSettingsDialogViewModel(ISukiDialogManager dialogManager, ISukiToastManager toastManager, ISukiDialog dialog, ITtsService ttsService, TtsConfig ttsConfig) 
+    public TtsVoiceSettingsDialogViewModel(ISukiDialogManager dialogManager, ISukiToastManager toastManager, ISukiDialog dialog, ITtsService ttsService, TtsConfig ttsConfig, IAudioPlayer audioPlayer) 
     {
         _dialogManager = dialogManager;
         _toastManager = toastManager;
         _dialog = dialog;
         _ttsService = ttsService;
         _ttsConfig = ttsConfig;
+        _audioPlayer = audioPlayer;
 
         if (_ttsService is TtsManager manager)
         {
@@ -144,6 +146,7 @@ public class TtsVoiceSettingsDialogViewModel : ViewModelBase
                     _dialogManager, 
                     _ttsService, 
                     _toastManager, 
+                    _audioPlayer,
                     _allVoices)
                 {
                     OnSave = (lang, voice) =>
@@ -178,6 +181,7 @@ public class TtsVoiceSettingsDialogViewModel : ViewModelBase
                 _dialogManager, 
                 _ttsService, 
                 _toastManager, 
+                _audioPlayer,
                 _allVoices, 
                 item.Language, 
                 item.VoiceId)
@@ -207,7 +211,8 @@ public class TtsVoiceSettingsDialogViewModel : ViewModelBase
                 _toastManager,
                 dialog,
                 _ttsService, 
-                _ttsConfig))
+                _ttsConfig,
+                _audioPlayer))
             .TryShow();
         });
     }

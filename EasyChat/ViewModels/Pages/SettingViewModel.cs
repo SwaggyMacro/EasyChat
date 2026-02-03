@@ -42,6 +42,7 @@ public class SettingViewModel : Page
     private readonly ISukiDialogManager _dialogManager;
     private readonly ISukiToastManager _toastManager;
     private readonly ITtsService _ttsService;
+    private readonly IAudioPlayer _audioPlayer;
 
     private List<string> _claudeModels;
 
@@ -50,13 +51,14 @@ public class SettingViewModel : Page
     private List<string> _openaiModels;
 
 
-    public SettingViewModel(ISukiDialogManager dialogManager, ISukiToastManager toastManager, IConfigurationService configurationService, ITtsService ttsService) : base(
+    public SettingViewModel(ISukiDialogManager dialogManager, ISukiToastManager toastManager, IConfigurationService configurationService, ITtsService ttsService, IAudioPlayer audioPlayer) : base(
         Resources.Settings, MaterialIconKind.Settings, 1)
     {
         _dialogManager = dialogManager;
         _toastManager = toastManager;
         _configurationService = configurationService;
         _ttsService = ttsService;
+        _audioPlayer = audioPlayer;
         _openaiModels = ModelList.OpenAiModels;
         _geminiModels = ModelList.GeminiModels;
         _claudeModels = ModelList.ClaudeModels;
@@ -359,7 +361,8 @@ public class SettingViewModel : Page
                 _toastManager,
                 dialog,
                 _ttsService, 
-                TtsConf))
+                TtsConf,
+                _audioPlayer))
             .TryShow();
     }
 

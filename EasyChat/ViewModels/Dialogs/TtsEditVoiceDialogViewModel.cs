@@ -19,6 +19,7 @@ public class TtsEditVoiceDialogViewModel : ViewModelBase
     private readonly ISukiDialogManager _dialogManager;
     private readonly ITtsService _ttsService;
     private readonly ISukiToastManager _toastManager;
+    private readonly IAudioPlayer _audioPlayer;
     
     public List<LanguageDefinition> AvailableLanguages { get; }
 
@@ -72,6 +73,7 @@ public class TtsEditVoiceDialogViewModel : ViewModelBase
         ISukiDialogManager dialogManager,
         ITtsService ttsService,
         ISukiToastManager toastManager,
+        IAudioPlayer audioPlayer,
         List<TtsVoiceDefinition> allVoices, 
         LanguageDefinition? initialLang = null, 
         string? initialVoiceId = null)
@@ -80,6 +82,7 @@ public class TtsEditVoiceDialogViewModel : ViewModelBase
         _dialogManager = dialogManager;
         _ttsService = ttsService;
         _toastManager = toastManager;
+        _audioPlayer = audioPlayer;
         _allVoices = allVoices;
         AvailableLanguages = LanguageService.GetAllLanguages().OrderBy(x => x.EnglishName).ToList();
         
@@ -105,7 +108,7 @@ public class TtsEditVoiceDialogViewModel : ViewModelBase
         _dialog.Dismiss();
         
         _dialogManager.CreateDialog()
-            .WithViewModel(d => new TtsPreviewInputDialogViewModel(d, _ttsService, SelectedVoice.Id)
+            .WithViewModel(d => new TtsPreviewInputDialogViewModel(d, _ttsService, _audioPlayer, SelectedVoice.Id)
             {
                 OnDismiss = ReopenSelf
             })
@@ -122,6 +125,7 @@ public class TtsEditVoiceDialogViewModel : ViewModelBase
                     _dialogManager, 
                     _ttsService, 
                     _toastManager, 
+                    _audioPlayer,
                     _allVoices, 
                     SelectedLanguage, 
                     SelectedVoice?.Id)

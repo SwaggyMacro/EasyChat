@@ -13,6 +13,7 @@ public class TtsPreviewInputDialogViewModel : ViewModelBase
 {
     private readonly ISukiDialog _dialog;
     private readonly ITtsService _ttsService;
+    private readonly IAudioPlayer _audioPlayer;
     private readonly string _voiceId;
 
     private string _inputText;
@@ -34,10 +35,11 @@ public class TtsPreviewInputDialogViewModel : ViewModelBase
     
     public Action? OnDismiss { get; set; }
 
-    public TtsPreviewInputDialogViewModel(ISukiDialog dialog, ITtsService ttsService, string voiceId)
+    public TtsPreviewInputDialogViewModel(ISukiDialog dialog, ITtsService ttsService, IAudioPlayer audioPlayer, string voiceId)
     {
         _dialog = dialog;
         _ttsService = ttsService;
+        _audioPlayer = audioPlayer;
         _voiceId = voiceId;
         
         _inputText = Lang.Resources.Tts_PreviewDefaultText;
@@ -53,25 +55,14 @@ public class TtsPreviewInputDialogViewModel : ViewModelBase
         try 
         {
             IsPlaying = true;
-            // Create temp file
-            var tempPath = Path.Combine(Path.GetTempPath(), $"easychat_preview_{Guid.NewGuid()}.mp3");
+            // Get audio stream
+            var stream = await _ttsService.StreamAsync(InputText, _voiceId);
             
-            await _ttsService.SynthesizeAsync(InputText, _voiceId, tempPath);
-            
-            if (File.Exists(tempPath))
-            {
-                using var process = new Process();
-                process.StartInfo = new ProcessStartInfo(tempPath)
-                {
-                    UseShellExecute = true
-                };
-                process.Start();
-            }
+            // Enqueue to player
+            _audioPlayer.Enqueue(stream);
         }
         catch (Exception ex)
         {
-            // Should probably log or show toast, but for simple preview silent fail or debug log is okay for now
-            // Or maybe inject ToastManager if we want robustness
             Debug.WriteLine($"Error playing preview: {ex.Message}");
         }
         finally
@@ -82,6 +73,7 @@ public class TtsPreviewInputDialogViewModel : ViewModelBase
 
     private void Close()
     {
+        _audioPlayer.Stop();
         OnDismiss?.Invoke();
         _dialog.Dismiss();
     }
