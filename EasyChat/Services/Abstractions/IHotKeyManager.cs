@@ -6,7 +6,7 @@ public interface IHotKeyManager : IDisposable
 {
     // Register a hotkey. Action callback is invoked when hotkey is pressed.
     // Returns an IDisposable that unregisters the hotkey when disposed.
-    IDisposable Register(KeyModifiers modifiers, Key key, Action callback);
+    IDisposable? Register(KeyModifiers modifiers, Key key, Action callback);
 
     /// <summary>
     ///     Try to register a hotkey to test if it's available.
@@ -31,7 +31,7 @@ public enum Key
 {
     // Define only keys we might need, or map generic ones. 
     // For now, mapping a few standard ones.
-    Key_Z, // Renaming or keeping Z for compatibility? The user used "Z". The file has A..Z without prefix.
+    KeyZ, // Renaming or keeping Z for compatibility? The user used "Z". The file has A..Z without prefix.
     // Actually I should just append.
     A = 65,
     B,

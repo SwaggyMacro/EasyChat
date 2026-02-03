@@ -12,24 +12,11 @@ namespace EasyChat.ViewModels.AiModels;
 
 public class AiModelEditDialogViewModel : ViewModelBase
 {
-    private readonly ISukiDialog _dialog;
     private readonly CustomAiModel? _existingModel;
-
-    private string _apiKey = string.Empty;
-
-    private string _apiUrl = string.Empty;
-
-    private string _model = string.Empty;
-
-    private string _name = string.Empty;
-
-    private AiModelType _selectedModelType = AiModelType.OpenAi;
-    
-    private bool _useProxy;
 
     public AiModelEditDialogViewModel(ISukiDialog dialog, CustomAiModel? existingModel = null)
     {
-        _dialog = dialog;
+        var dialog1 = dialog;
         _existingModel = existingModel;
 
         if (existingModel != null)
@@ -62,13 +49,13 @@ public class AiModelEditDialogViewModel : ViewModelBase
         SaveCommand = ReactiveCommand.Create(() =>
         {
             OnClose?.Invoke(GetResult());
-            _dialog.Dismiss();
+            dialog1.Dismiss();
         }, canSave);
 
         CancelCommand = ReactiveCommand.Create(() =>
         {
             OnClose?.Invoke(null);
-            _dialog.Dismiss();
+            dialog1.Dismiss();
         });
     }
 
@@ -80,16 +67,16 @@ public class AiModelEditDialogViewModel : ViewModelBase
 
     public AiModelType SelectedModelType
     {
-        get => _selectedModelType;
+        get;
         set
         {
-            this.RaiseAndSetIfChanged(ref _selectedModelType, value);
+            this.RaiseAndSetIfChanged(ref field, value);
             UpdateDefaultsForModelType(value);
             this.RaisePropertyChanged(nameof(AvailableModels));
             this.RaisePropertyChanged(nameof(IsCustomModel));
             this.RaisePropertyChanged(nameof(DisplayName));
         }
-    }
+    } = AiModelType.OpenAi;
 
     public bool IsCustomModel => SelectedModelType == AiModelType.Custom;
 
@@ -104,32 +91,32 @@ public class AiModelEditDialogViewModel : ViewModelBase
 
     public string Name
     {
-        get => _name;
-        set => this.RaiseAndSetIfChanged(ref _name, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = string.Empty;
 
     public string ApiUrl
     {
-        get => _apiUrl;
-        set => this.RaiseAndSetIfChanged(ref _apiUrl, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = string.Empty;
 
     public string ApiKey
     {
-        get => _apiKey;
-        set => this.RaiseAndSetIfChanged(ref _apiKey, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = string.Empty;
 
     public string Model
     {
-        get => _model;
-        set => this.RaiseAndSetIfChanged(ref _model, value);
-    }
-    
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = string.Empty;
+
     public bool UseProxy
     {
-        get => _useProxy;
-        set => this.RaiseAndSetIfChanged(ref _useProxy, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public List<string> AvailableModels => SelectedModelType switch

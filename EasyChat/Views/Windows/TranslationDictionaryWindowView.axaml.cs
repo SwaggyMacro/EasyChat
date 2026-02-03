@@ -12,22 +12,22 @@ using Microsoft.Extensions.Logging;
 
 namespace EasyChat.Views.Windows;
 
-public partial class SelectionTranslateWindowView : Window
+public partial class TranslationDictionaryWindowView : Window
 {
-    private readonly SelectionTranslateWindowViewModel _viewModel;
-    private readonly ILogger<SelectionTranslateWindowView>? _logger;
+    private readonly TranslationDictionaryWindowViewModel _viewModel;
+    private readonly ILogger<TranslationDictionaryWindowView>? _logger;
     
-    public SelectionTranslateWindowView()
+    public TranslationDictionaryWindowView()
     {
         InitializeComponent();
         
-        _viewModel = Global.Services?.GetService<SelectionTranslateWindowViewModel>() 
+        _viewModel = Global.Services?.GetService<TranslationDictionaryWindowViewModel>() 
                      ?? throw new InvalidOperationException("Failed to resolve ViewModel");
         DataContext = _viewModel;
         
         try
         {
-            _logger = Global.Services.GetService<ILogger<SelectionTranslateWindowView>>();
+            _logger = Global.Services.GetService<ILogger<TranslationDictionaryWindowView>>();
         }
         catch { /* Ignore if services not available */ }
         

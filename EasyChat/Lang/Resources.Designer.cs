@@ -123,6 +123,15 @@ namespace EasyChat.Lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Selection Translation.
+        /// </summary>
+        public static string Action_SelectionTranslate {
+            get {
+                return ResourceManager.GetString("Action_SelectionTranslate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Switch Engine, Source &amp; Target.
         /// </summary>
         public static string Action_SwitchEngineSourceTarget {
@@ -173,6 +182,15 @@ namespace EasyChat.Lang {
         public static string AddBasicShortcut {
             get {
                 return ResourceManager.GetString("AddBasicShortcut", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add Fixed Area.
+        /// </summary>
+        public static string AddFixedArea {
+            get {
+                return ResourceManager.GetString("AddFixedArea", resourceCulture);
             }
         }
         
@@ -236,6 +254,15 @@ namespace EasyChat.Lang {
         public static string AppName {
             get {
                 return ResourceManager.GetString("AppName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Area.
+        /// </summary>
+        public static string Area {
+            get {
+                return ResourceManager.GetString("Area", resourceCulture);
             }
         }
         
@@ -326,6 +353,15 @@ namespace EasyChat.Lang {
         public static string ClickToRecord {
             get {
                 return ResourceManager.GetString("ClickToRecord", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Close.
+        /// </summary>
+        public static string Close {
+            get {
+                return ResourceManager.GetString("Close", resourceCulture);
             }
         }
         
@@ -501,6 +537,15 @@ namespace EasyChat.Lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Current Version.
+        /// </summary>
+        public static string CurrentVersion {
+            get {
+                return ResourceManager.GetString("CurrentVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Custom Model.
         /// </summary>
         public static string CustomModel {
@@ -645,6 +690,15 @@ namespace EasyChat.Lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enable Selection Translation.
+        /// </summary>
+        public static string EnableSelectionTranslation {
+            get {
+                return ResourceManager.GetString("EnableSelectionTranslation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enable System Tray.
         /// </summary>
         public static string EnableTray {
@@ -654,11 +708,47 @@ namespace EasyChat.Lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Examples.
+        /// </summary>
+        public static string Examples {
+            get {
+                return ResourceManager.GetString("Examples", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Exit Application.
         /// </summary>
         public static string ExitApp {
             get {
                 return ResourceManager.GetString("ExitApp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select a region for the fixed area..
+        /// </summary>
+        public static string FixedArea_Hint {
+            get {
+                return ResourceManager.GetString("FixedArea_Hint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fixed Areas.
+        /// </summary>
+        public static string FixedAreas {
+            get {
+                return ResourceManager.GetString("FixedAreas", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fixed Area Settings.
+        /// </summary>
+        public static string FixedAreaSettings {
+            get {
+                return ResourceManager.GetString("FixedAreaSettings", resourceCulture);
             }
         }
         
@@ -796,53 +886,6 @@ namespace EasyChat.Lang {
                 return ResourceManager.GetString("Hint_SwitchConfig", resourceCulture);
             }
         }
-
-
-
-        /// <summary>
-        ///   Looks up a localized string similar to Fixed Areas.
-        /// </summary>
-        public static string FixedAreas {
-            get {
-                return ResourceManager.GetString("FixedAreas", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Select a region for the fixed area..
-        /// </summary>
-        public static string FixedArea_Hint {
-            get {
-                return ResourceManager.GetString("FixedArea_Hint", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to No fixed areas.
-        /// </summary>
-        public static string NoFixedAreas {
-            get {
-                return ResourceManager.GetString("NoFixedAreas", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Add Fixed Area.
-        /// </summary>
-        public static string AddFixedArea {
-            get {
-                return ResourceManager.GetString("AddFixedArea", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Close.
-        /// </summary>
-        public static string Close {
-            get {
-                return ResourceManager.GetString("Close", resourceCulture);
-            }
-        }
         
         /// <summary>
         ///   Looks up a localized string similar to Home.
@@ -953,6 +996,15 @@ namespace EasyChat.Lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Latest Version.
+        /// </summary>
+        public static string LatestVersion {
+            get {
+                return ResourceManager.GetString("LatestVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Light.
         /// </summary>
         public static string LightMode {
@@ -967,6 +1019,15 @@ namespace EasyChat.Lang {
         public static string MachineTranslation {
             get {
                 return ResourceManager.GetString("MachineTranslation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Manifest.
+        /// </summary>
+        public static string Manifest {
+            get {
+                return ResourceManager.GetString("Manifest", resourceCulture);
             }
         }
         
@@ -1016,6 +1077,15 @@ namespace EasyChat.Lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        public static string Name {
+            get {
+                return ResourceManager.GetString("Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New Version Available.
         /// </summary>
         public static string NewVersionAvailable {
@@ -1030,6 +1100,15 @@ namespace EasyChat.Lang {
         public static string NewVersionContent {
             get {
                 return ResourceManager.GetString("NewVersionContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No fixed areas..
+        /// </summary>
+        public static string NoFixedAreas {
+            get {
+                return ResourceManager.GetString("NoFixedAreas", resourceCulture);
             }
         }
         
@@ -1268,6 +1347,15 @@ namespace EasyChat.Lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Reselect Area.
+        /// </summary>
+        public static string ReselectArea {
+            get {
+                return ResourceManager.GetString("ReselectArea", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Reset.
         /// </summary>
         public static string Reset {
@@ -1381,6 +1469,114 @@ namespace EasyChat.Lang {
         public static string ScreenshotMode_Quick {
             get {
                 return ResourceManager.GetString("ScreenshotMode_Quick", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select.
+        /// </summary>
+        public static string Select {
+            get {
+                return ResourceManager.GetString("Select", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Auto Detect.
+        /// </summary>
+        public static string SelectionTranslate_AutoDetect {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_AutoDetect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy Translation.
+        /// </summary>
+        public static string SelectionTranslate_CopyTooltip {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_CopyTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Translation Failed: .
+        /// </summary>
+        public static string SelectionTranslate_Failed {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [Translation Pending] Source: .
+        /// </summary>
+        public static string SelectionTranslate_ImplementationPending {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_ImplementationPending", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Chinese.
+        /// </summary>
+        public static string SelectionTranslate_Language_Chinese {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_Language_Chinese", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Translation.
+        /// </summary>
+        public static string SelectionTranslate_ResultLabel {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_ResultLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Source.
+        /// </summary>
+        public static string SelectionTranslate_SourceLabel {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_SourceLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Selected text will appear here....
+        /// </summary>
+        public static string SelectionTranslate_SourceWatermark {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_SourceWatermark", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Selection Translation.
+        /// </summary>
+        public static string SelectionTranslate_Title {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Translate.
+        /// </summary>
+        public static string SelectionTranslate_TranslateButton {
+            get {
+                return ResourceManager.GetString("SelectionTranslate_TranslateButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Selection Translation.
+        /// </summary>
+        public static string SelectionTranslation {
+            get {
+                return ResourceManager.GetString("SelectionTranslation", resourceCulture);
             }
         }
         
@@ -1736,6 +1932,15 @@ namespace EasyChat.Lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Tips.
+        /// </summary>
+        public static string Tips {
+            get {
+                return ResourceManager.GetString("Tips", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Title Bar.
         /// </summary>
         public static string TitleBar {
@@ -1975,129 +2180,6 @@ namespace EasyChat.Lang {
         public static string WindowBackgroundColor {
             get {
                 return ResourceManager.GetString("WindowBackgroundColor", resourceCulture);
-            }
-        }
-        public static string Name {
-            get {
-                return ResourceManager.GetString("Name", resourceCulture);
-            }
-        }
-
-        public static string Area {
-            get {
-                return ResourceManager.GetString("Area", resourceCulture);
-            }
-        }
-
-        public static string ReselectArea {
-            get {
-                return ResourceManager.GetString("ReselectArea", resourceCulture);
-            }
-        }
-
-        public static string Select {
-            get {
-                return ResourceManager.GetString("Select", resourceCulture);
-            }
-        }
-
-        public static string FixedAreaSettings {
-            get {
-                return ResourceManager.GetString("FixedAreaSettings", resourceCulture);
-            }
-        }
-        /// <summary>
-        ///   Looks up a localized string similar to Selection Translation.
-        /// </summary>
-        public static string SelectionTranslation {
-            get {
-                return ResourceManager.GetString("SelectionTranslation", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enable Selection Translation.
-        /// </summary>
-        public static string EnableSelectionTranslation {
-            get {
-                return ResourceManager.GetString("EnableSelectionTranslation", resourceCulture);
-            }
-        }
-        public static string SelectionTranslate_Title {
-            get {
-                return ResourceManager.GetString("SelectionTranslate_Title", resourceCulture);
-            }
-        }
-
-        public static string SelectionTranslate_SourceLabel {
-            get {
-                return ResourceManager.GetString("SelectionTranslate_SourceLabel", resourceCulture);
-            }
-        }
-
-        public static string SelectionTranslate_SourceWatermark {
-            get {
-                return ResourceManager.GetString("SelectionTranslate_SourceWatermark", resourceCulture);
-            }
-        }
-
-        public static string SelectionTranslate_ResultLabel {
-            get {
-                return ResourceManager.GetString("SelectionTranslate_ResultLabel", resourceCulture);
-            }
-        }
-
-        public static string SelectionTranslate_AutoDetect {
-            get {
-                return ResourceManager.GetString("SelectionTranslate_AutoDetect", resourceCulture);
-            }
-        }
-
-        public static string SelectionTranslate_Language_Chinese {
-            get {
-                return ResourceManager.GetString("SelectionTranslate_Language_Chinese", resourceCulture);
-            }
-        }
-        
-        public static string SelectionTranslate_CopyTooltip {
-            get {
-                return ResourceManager.GetString("SelectionTranslate_CopyTooltip", resourceCulture);
-            }
-        }
-        
-        public static string SelectionTranslate_TranslateButton {
-            get {
-                return ResourceManager.GetString("SelectionTranslate_TranslateButton", resourceCulture);
-            }
-        }
-        
-        public static string SelectionTranslate_ImplementationPending {
-            get {
-                return ResourceManager.GetString("SelectionTranslate_ImplementationPending", resourceCulture);
-            }
-        }
-        
-        public static string SelectionTranslate_Failed {
-            get {
-                return ResourceManager.GetString("SelectionTranslate_Failed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Tips.
-        /// </summary>
-        public static string Tips {
-            get {
-                return ResourceManager.GetString("Tips", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Examples.
-        /// </summary>
-        public static string Examples {
-            get {
-                return ResourceManager.GetString("Examples", resourceCulture);
             }
         }
     }

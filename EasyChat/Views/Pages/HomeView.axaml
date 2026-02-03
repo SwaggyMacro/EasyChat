@@ -94,6 +94,44 @@
                     </StackPanel>
                 </suki:GroupBox>
             </suki:GlassCard>
+
+            <!-- About Card -->
+            <suki:GlassCard>
+                <suki:GroupBox>
+                    <suki:GroupBox.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <avalonia:MaterialIcon Kind="InformationOutline" Width="20" Height="20" />
+                            <TextBlock Text="{x:Static lang:Resources.Manifest}" 
+                                       FontWeight="Bold" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </suki:GroupBox.Header>
+                    <StackPanel Spacing="15">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" MinWidth="180">
+                                <avalonia:MaterialIcon Kind="Tag" Width="18" Height="18" 
+                                                       VerticalAlignment="Center" Opacity="0.7" />
+                                <TextBlock Text="{x:Static lang:Resources.CurrentVersion}" 
+                                           VerticalAlignment="Center" FontWeight="SemiBold" />
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" 
+                                       Text="{Binding CurrentVersion}" 
+                                       VerticalAlignment="Center" Opacity="0.8" />
+                        </Grid>
+
+                        <Grid ColumnDefinitions="Auto,*">
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" MinWidth="180">
+                                <avalonia:MaterialIcon Kind="Update" Width="18" Height="18" 
+                                                       VerticalAlignment="Center" Opacity="0.7" />
+                                <TextBlock Text="{x:Static lang:Resources.LatestVersion}" 
+                                           VerticalAlignment="Center" FontWeight="SemiBold" />
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" 
+                                       Text="{Binding LatestVersion}" 
+                                       VerticalAlignment="Center" Opacity="0.8" />
+                        </Grid>
+                    </StackPanel>
+                </suki:GroupBox>
+            </suki:GlassCard>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

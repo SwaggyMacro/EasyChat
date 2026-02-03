@@ -49,6 +49,11 @@ public abstract class ShortcutActionDefinition : IShortcutActionDefinition
             ActionType = "InputTranslate",
             ResourceKey = "Action_InputTranslate"
         },
+        new SimpleActionDefinition
+        {
+            ActionType = "SelectionTranslate",
+            ResourceKey = "Action_SelectionTranslate"
+        },
         new StaticOptionsActionDefinition
         {
             ActionType = "SwitchSourceLang",
@@ -89,7 +94,7 @@ public class StaticOptionsActionDefinition : ShortcutActionDefinition
 {
     public required string[] Options { get; init; }
 
-    public override IEnumerable<string>? GetParameterOptions(IConfigurationService config) => Options;
+    public override IEnumerable<string> GetParameterOptions(IConfigurationService config) => Options;
 }
 
 public class SwitchEngineSourceTargetActionDefinition : ShortcutActionDefinition

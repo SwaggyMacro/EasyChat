@@ -66,7 +66,7 @@ public class ShortcutViewModel : Page
     public ReactiveCommand<ShortcutEntry, Unit> EditEntryCommand { get; }
     public ReactiveCommand<ShortcutEntry, Unit> RemoveEntryCommand { get; }
 
-    private readonly string[] _basicTypes = { "Screenshot", "InputTranslate" };
+    private readonly string[] _basicTypes = { "Screenshot", "InputTranslate", "SelectionTranslate" };
     private readonly string[] _languageTypes = { "SwitchEngineSourceTarget" };
 
     private void LoadShortcutsFromService()

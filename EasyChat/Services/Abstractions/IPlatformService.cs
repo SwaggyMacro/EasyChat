@@ -15,4 +15,5 @@ public interface IPlatformService
     Task SendTextMessageAsync(IntPtr hWnd, string text, int delayMs = 10);
     Task<bool> EnsureFocused(IntPtr hWnd);
     Task<string?> GetSelectedTextAsync(int? x = null, int? y = null);
+    (int X, int Y) GetCursorPosition();
 }

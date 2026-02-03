@@ -357,9 +357,28 @@ public class WindowsPlatformService : IPlatformService
         return Win32.GetForegroundWindow() == hWnd;
     }
 
+    public (int X, int Y) GetCursorPosition()
+    {
+        if (Win32.GetCursorPos(out var point))
+        {
+            return (point.X, point.Y);
+        }
+        return (0, 0);
+    }
+
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal static class Win32
     {
+        [DllImport("user32.dll")]
+        public static extern bool GetCursorPos(out POINT lpPoint);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT
+        {
+            public int X;
+            public int Y;
+        }
+
         [DllImport("user32.dll")]
         public static extern IntPtr GetForegroundWindow();
 
