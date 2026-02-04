@@ -252,7 +252,7 @@ public class VirtualizedTokenDisplay : Control
                 
                 // If it's purely whitespace containing newline, skip measuring width (it's invisible anyway)
                 // But if it has content (weird tokenization), we might want to render?
-                // EnglishTokenizer returns whitespace including newlines as one token.
+                // Tokenizers return whitespace including newlines as one token.
                 // We should probably just continue unless we want to render the non-newline part?
                 // For simplicity, if it's whitespace with newline, we just break.
                 // If it's mixed content (unlikely with our regex), we treat it as break + render.

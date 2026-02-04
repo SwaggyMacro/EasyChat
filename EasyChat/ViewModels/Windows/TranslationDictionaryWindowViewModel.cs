@@ -20,6 +20,7 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
     private readonly IConfigurationService _configurationService;
     private readonly ITtsService _ttsService;
     private readonly IAudioPlayer _audioPlayer;
+    private readonly ITokenizerFactory _tokenizerFactory;
     private TaskCompletionSource<bool>? _initializationTcs;
 
     public string SourceText
@@ -52,33 +53,29 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    private ObservableCollection<TextToken> _sourceTokens = new();
     public ObservableCollection<TextToken> SourceTokens
     {
-        get => _sourceTokens;
-        set => this.RaiseAndSetIfChanged(ref _sourceTokens, value);
-    }
-    
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = [];
+
     // Independent Loading States for Main UI Elements
-    private bool _isWordTtsLoading;
     public bool IsWordTtsLoading
     {
-        get => _isWordTtsLoading;
-        set => this.RaiseAndSetIfChanged(ref _isWordTtsLoading, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    private bool _isSourceTtsLoading;
     public bool IsSourceTtsLoading
     {
-        get => _isSourceTtsLoading;
-        set => this.RaiseAndSetIfChanged(ref _isSourceTtsLoading, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    private bool _isResultTtsLoading;
     public bool IsResultTtsLoading
     {
-        get => _isResultTtsLoading;
-        set => this.RaiseAndSetIfChanged(ref _isResultTtsLoading, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public ReactiveCommand<string, Unit> LookupWordCommand { get; }
@@ -88,26 +85,31 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
     public ReactiveCommand<object?, Unit> PlayTargetAudioCommand { get; }
 
     private bool _canNavigateBack;
-    private bool _showBackButton;
+
     public bool ShowBackButton
     {
-        get => _showBackButton;
-        set => this.RaiseAndSetIfChanged(ref _showBackButton, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public bool ShowCloseButton
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public TranslationDictionaryWindowViewModel(
         ISelectionTranslationProvider translationProvider,
         IConfigurationService configurationService,
         ITtsService ttsService,
-        IAudioPlayer audioPlayer)
+        IAudioPlayer audioPlayer,
+        ITokenizerFactory tokenizerFactory)
     {
         _translationProvider = translationProvider;
         _configurationService = configurationService;
         _ttsService = ttsService;
         _audioPlayer = audioPlayer;
-
-        // Default tokenizer for now. In a real app, inject this.
-        ITextTokenizer tokenizer = new EnglishTokenizer();
+        _tokenizerFactory = tokenizerFactory;
 
         LookupWordCommand = ReactiveCommand.CreateFromTask<string>(LookupWordAsync);
         SwitchToSentenceModeCommand = ReactiveCommand.Create(SwitchToSentenceMode);
@@ -125,11 +127,10 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
                     return null;
                 }
                 
-                // Tokenize for Sentence Mode
+                // Use factory to get appropriate tokenizer
+                var tokenizer = _tokenizerFactory.GetTokenizer(_currentSourceLang);
                 var tokens = tokenizer.Tokenize(text);
                 
-                // Auto-detect mode assumption (initial heuristic before AI result)
-                // We rely on AI to tell us the truth, but we prepare tokens for sentence view anyway.
                 return new { Text = text, Tokens = tokens };
             })
             .ObserveOn(RxApp.MainThreadScheduler)
@@ -144,10 +145,6 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
                 }
 
                 SourceTokens = new ObservableCollection<TextToken>(result.Tokens);
-                
-                // We don't trigger AI here automatically because InitializeAsync does it.
-                // But if SourceText changes due to binding (not InitializeAsync), we might want to trigger?
-                // Usually SourceText is set via InitializeAsync in this specific window flow.
             });
             
         // Update ShowBackButton when mode changes
@@ -189,10 +186,10 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
     private async Task PerformTranslationAsync(string text)
     {
         var sourceLang = _configurationService.General?.SourceLanguage.EnglishName ?? LanguageKeys.Auto.EnglishName;
-        var targetLang = _configurationService.General?.TargetLanguage.EnglishName ?? "Chinese";
+        var targetLang = _configurationService.General?.TargetLanguage.EnglishName ?? throw new InvalidOperationException("Target language is not configured.");
 
-        _currentSourceLang = _configurationService.General?.SourceLanguage.Id ?? "en";
-        _currentTargetLang = _configurationService.General?.TargetLanguage.Id ?? "zh-CN";
+        _currentSourceLang = _configurationService.General?.SourceLanguage.Id ?? LanguageKeys.AutoId;
+        _currentTargetLang = _configurationService.General?.TargetLanguage.Id ?? throw new InvalidOperationException("Target language is not configured.");
 
         if (sourceLang == LanguageKeys.Auto.EnglishName) _currentSourceLang = "en"; // Default fallback for TTS if auto?
 
@@ -201,7 +198,17 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
         // Update source language if auto-detected
         if (result.DetectedSourceLanguage is { } detected && !string.IsNullOrWhiteSpace(detected))
         {
-            _currentSourceLang = detected;
+            if (_currentSourceLang != detected)
+            {
+                _currentSourceLang = detected;
+                // Trigger re-tokenization with new language
+                // Since this is reactive, setting SourceText again might trigger the pipeline, 
+                // but SourceText hasn't changed, so WhenAnyValue might not fire.
+                // We force update tokens here.
+                var tokenizer = _tokenizerFactory.GetTokenizer(_currentSourceLang);
+                var tokens = tokenizer.Tokenize(SourceText);
+                SourceTokens = new ObservableCollection<TextToken>(tokens);
+            }
         }
 
         if (result is WordTranslationResult wordResult)
@@ -257,15 +264,22 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
         
         try
         {
-            var sourceLang = "Auto"; 
-            var targetLang = _configurationService.General?.TargetLanguage.EnglishName ?? "Chinese";
+            var sourceLang = _configurationService.General?.SourceLanguage.EnglishName ?? LanguageKeys.Auto.EnglishName;
+            var targetLang = _configurationService.General?.TargetLanguage.EnglishName ?? throw new InvalidOperationException("Target language is not configured.");
             
             var result = await _translationProvider.TranslateAsync(word, sourceLang, targetLang);
 
             // Update source language if auto-detected
             if (result.DetectedSourceLanguage is { } detected && !string.IsNullOrWhiteSpace(detected))
             {
-                _currentSourceLang = detected;
+                if (_currentSourceLang != detected)
+                {
+                    _currentSourceLang = detected;
+                    // Trigger re-tokenization with new language
+                    var tokenizer = _tokenizerFactory.GetTokenizer(_currentSourceLang);
+                    var tokens = tokenizer.Tokenize(SourceText);
+                    SourceTokens = new ObservableCollection<TextToken>(tokens);
+                }
             }
             
             if (result is WordTranslationResult wordResult)
@@ -320,8 +334,8 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
 
     private async Task PlayTtsAsync(object? parameter)
     {
-        string? textToSpeak = null;
-        string langId = _currentSourceLang;
+        string? textToSpeak;
+        string langId;
         Action<bool>? setLoading = null;
 
         if (parameter is string text)

@@ -12,7 +12,6 @@ using EasyChat.Models;
 using EasyChat.Models.Configuration;
 using EasyChat.Services;
 using EasyChat.Services.Abstractions;
-using EasyChat.Services.Translation;
 using EasyChat.Services.HotKey;
 using EasyChat.Services.Ocr;
 using EasyChat.Services.Platform;
@@ -35,9 +34,9 @@ using Material.Icons;
 using SukiUI.Dialogs;
 using SukiUI.Enums;
 using SukiUI.Toasts;
-using EasyChat.Services.Translation.Ai;
 using EasyChat.Services.Translation.Selection;
 using EasyChat.ViewModels.Windows;
+using EasyChat.Services.Text;
 
 
 namespace EasyChat;
@@ -195,6 +194,7 @@ public class App : Application
             services.AddSingleton<AiSelectionTranslationProvider>();
             services.AddSingleton<MachineSelectionTranslationProvider>();
             services.AddSingleton<ISelectionTranslationProvider, SelectionTranslationProviderManager>();
+            services.AddSingleton<ITokenizerFactory, TokenizerFactory>();
             services.AddTransient<TranslationDictionaryWindowViewModel>();
 
             // Build Provider

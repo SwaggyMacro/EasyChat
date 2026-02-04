@@ -7,6 +7,7 @@ using EasyChat.Services.Abstractions;
 using EasyChat.Views.Windows;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
+using EasyChat.ViewModels.Windows;
 
 namespace EasyChat.Services.Translation.Selection;
 
@@ -543,6 +544,11 @@ public class SelectionTranslationService : IDisposable
             try { _currentTranslateWindow?.Close(); } catch { /* Ignore */ }
 
             var dialog = new TranslationDictionaryWindowView();
+            // Enable close button for shortcut-triggered window
+            if (dialog.DataContext is TranslationDictionaryWindowViewModel vm)
+            {
+                vm.ShowCloseButton = true;
+            }
             _currentTranslateWindow = dialog;
             
             dialog.Closed += (_, _) => 

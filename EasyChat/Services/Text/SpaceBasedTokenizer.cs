@@ -1,13 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using EasyChat.Models;
 using EasyChat.Models.Translation.Selection;
 using EasyChat.Services.Abstractions;
 
 namespace EasyChat.Services.Text;
 
-public class EnglishTokenizer : ITextTokenizer
+public class SpaceBasedTokenizer : ITextTokenizer
 {
     // Regex to split by words, keeping punctuation as separate tokens
     // \w+ matches word characters

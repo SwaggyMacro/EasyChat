@@ -158,4 +158,16 @@ public partial class TranslationDictionaryWindowView : Window
             _logger?.LogError(ex, "Failed to copy to clipboard");
         }
     }
+    private void OnCloseClick(object? sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
+    private void OnResizePointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            BeginResizeDrag(WindowEdge.SouthEast, e);
+        }
+    }
 }

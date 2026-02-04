@@ -6,7 +6,6 @@
         xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:lang="using:EasyChat.Lang"
         xmlns:vm="using:EasyChat.ViewModels.Windows"
-        xmlns:models="using:EasyChat.Models"
         xmlns:selection="clr-namespace:EasyChat.Models.Translation.Selection"
         xmlns:controls="clr-namespace:EasyChat.Controls"
         mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="400"
@@ -329,15 +328,34 @@
                              </Border>
                          </StackPanel>
 
-                        <!-- Removed History and Like buttons as requested -->
                         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
                             <Button Click="OnCopyClick" ToolTip.Tip="{x:Static lang:Resources.SelectionTranslate_CopyTooltip}" 
                                     Classes="Flat" Padding="6" Width="32" Height="32">
-                                <icons:MaterialIcon Kind="ContentCopy" Width="18" Height="18" Foreground="White"/>
+                                <icons:MaterialIcon Kind="ContentCopy" Width="18" Height="18" Foreground="{DynamicResource SukiText}"/>
+                            </Button>
+                            
+                            <!-- Close Button -->
+                            <Button Click="OnCloseClick"
+                                    IsVisible="{Binding ShowCloseButton}"
+                                    ToolTip.Tip="{x:Static lang:Resources.Close}" 
+                                    Classes="Danger" Padding="6" Width="32" Height="32">
+                                <icons:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="{DynamicResource SukiText}"/>
                             </Button>
                         </StackPanel>
                     </Grid>
                 </Border>
+                
+                <!-- Resize Grip -->
+                <icons:MaterialIcon Kind="ResizeBottomRight" 
+                                   Grid.Row="2"
+                                   Width="20" Height="20" 
+                                   Foreground="{DynamicResource SukiText}"
+                                   Opacity="0.5"
+                                   VerticalAlignment="Bottom"
+                                   HorizontalAlignment="Right"
+                                   Cursor="BottomRightCorner"
+                                   PointerPressed="OnResizePointerPressed"
+                                   Margin="0,0,2,2"/>
             </Grid>
         </suki:GlassCard>
     </Panel>
