@@ -41,10 +41,11 @@ public class EdgeTtsService : ITtsService
     {
         using var audioStream = await StreamAsync(text, voiceId, rate, volume, pitch);
         using var fileStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
+        if (audioStream is null) throw new InvalidOperationException("Failed to get audio stream from Edge TTS.");
         await audioStream.CopyToAsync(fileStream);
     }
 
-    public async Task<Stream> StreamAsync(string text, string voiceId, string? rate = null, string? volume = null, string? pitch = null)
+    public async Task<Stream?> StreamAsync(string text, string voiceId, string? rate = null, string? volume = null, string? pitch = null)
     {
         var memoryStream = new MemoryStream();
         

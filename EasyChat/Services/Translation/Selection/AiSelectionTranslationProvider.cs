@@ -34,20 +34,35 @@ If Source Language is "Auto" or "Auto Detect", automatically detect it based on 
 
 1. Analyze the user's input to determine if it is **"Word/Dictionary Mode"** or **"Sentence/Translation Mode"**.
 2. Return the result in the specified JSON format.
-3. **CRITICAL**: All translations, definitions, and meanings MUST be in **[TargetLang]**. Do NOT use Chinese unless [TargetLang] is Chinese.
+3. **CRITICAL**: All translations, definitions, meanings, AND grammatical labels MUST be in **[TargetLang]**. Do NOT use Chinese unless [TargetLang] is Chinese.
 
-# Judgment Logic
+# Judgment Logic (STRICT HARD RULES)
 
-1. **Case 1 (Word Mode)**:
-   - Input is a single word (e.g., "Run", "测试").
-   - Input is a standard idiom or set phrase, typically **2-3 words** max (e.g., "Give up", "Piece of cake").
-   - **Constraint**: If the input is a sentence, clause, or long phrase (> 4 words), do NOT use Word Mode.
-   - **Goal**: Provide definitions, morphological forms, and usage examples.
+**Step 1: Input Cleaning**
+- Remove leading/trailing whitespace.
+- Remove ALL trailing punctuation marks (e.g., "Schema." -> "Schema", "你好！" -> "你好").
 
-2. **Case 2 (Sentence Mode)**:
-   - Input is a complete sentence (regardless of length).
-   - Input is a fragment, title, or phrase longer than 3-4 words.
-   - **Goal**: Provide a fluent translation of the **ENTIRE** text and context-specific keyword analysis.
+**Step 2: Detect Language Type & Apply Rule**
+
+**RULE A: For Space-Based Languages (English, French, Spanish, etc.)**
+- **Logic**: Count the spaces inside the cleaned string.
+- **IF Spaces == 0**: 
+  - **RESULT**: **Word Mode** (ABSOLUTE).
+  - (Examples: "Schema", "Translation", "Unbelievable" -> Word Mode).
+- **IF Spaces > 0**:
+  - **RESULT**: **Sentence Mode**.
+  - (Examples: "Look up", "Human rights", "I go home" -> Sentence Mode).
+
+**RULE B: For No-Space Languages (Chinese, Japanese, etc.)**
+- **Logic**: Count the character length.
+- **IF Length <= 4 characters**:
+  - **RESULT**: **Word Mode**.
+  - (Examples: "你", "测试", "四字成语" -> Word Mode).
+- **IF Length > 4 characters**:
+  - **RESULT**: **Sentence Mode**.
+  - (Examples: "我今天去超市", "这个东西很好吃" -> Sentence Mode).
+
+**Override**: Do NOT attempt to analyze grammar/meaning to switch modes. Stick strictly to the Space/Length count.
 
 # Output Schemas
 
@@ -55,8 +70,15 @@ If Source Language is "Auto" or "Auto Detect", automatically detect it based on 
 
 {
   "type": "word",
-  "word": "The original word",
+  "detected_source_language": "The detected source language code (e.g. en, zh-CN, ja)",
+  "word": "The original word (lemma form if needed)",
   "phonetic": "Phonetic symbol (IPA for English, Pinyin for Chinese, etc.)",
+  "forms": [ // Comprehensive list of ALL morphological forms
+    {
+       "label": "Tense/Form Name translated into [TargetLang] (e.g., '过去式', '复数', 'Comparatif')",
+       "word": "The word form"
+    }
+  ],
   "definitions": [ 
     {
       "pos": "Part of speech (e.g., n., v., adj.)",
@@ -84,6 +106,7 @@ If Source Language is "Auto" or "Auto Detect", automatically detect it based on 
 
 {
   "type": "sentence",
+  "detected_source_language": "The detected source language code (e.g. en, zh-CN, ja)",
   "origin": "Original text",
   "translation": "Fluent translation of the ENTIRE text in [TargetLang]",
   "key_words": [ // Extract 1-3 key terms
@@ -96,20 +119,25 @@ If Source Language is "Auto" or "Auto Detect", automatically detect it based on 
 
 # Critical Constraints
 
-1. **Strict JSON Schema**: You must adhere **EXACTLY** to the JSON structures defined above.
-   - **DO NOT** add new keys.
-   - **DO NOT** rename keys.
-2. **Raw JSON Only**: Return strictly raw JSON. Do NOT use Markdown code blocks.
-3. **Phonetic Handling**:
-   - English: Use standard IPA inside double quotes (e.g., "/həˈləʊ/").
-   - Chinese: Use Pinyin with tones.
-   - Ensure all JSON strings are properly escaped.
-4. **Completeness**:
-   - In Sentence Mode, you MUST translate every sentence in the input. Do not summarize or skip parts.
-5. **Language Enforcer**:
-   - If [TargetLang] is Japanese, the output "meaning", "translation", and "tips" MUST be in Japanese.
-   - If [TargetLang] is French, they MUST be in French.
-   - **Do NOT output Chinese unless [TargetLang] is Chinese.**
+1.  **Strict JSON Schema**: You must adhere **EXACTLY** to the JSON structures defined above.
+    - **DO NOT** add new keys.
+    - **DO NOT** rename keys.
+2.  **Raw JSON Only**: Return strictly raw JSON. Do NOT use Markdown code blocks.
+3.  **Phonetic Handling**:
+    - English: Use standard IPA inside double quotes (e.g., "/həˈləʊ/").
+    - Chinese: Use Pinyin with tones.
+    - Ensure all JSON strings are properly escaped.
+4.  **Completeness**:
+    - In Sentence Mode, you MUST translate every sentence in the input.
+    - In Word Mode, you MUST list all applicable morphological forms.
+5.  **Language Enforcer**:
+    - If [TargetLang] is Japanese, the output "meaning", "translation", "tips", and form "labels" MUST be in Japanese.
+    - If [TargetLang] is French, they MUST be in French.
+    - **Do NOT output Chinese unless [TargetLang] is Chinese.**
+6.  **Absolute Compliance Protocol**:
+    - Follow the Space/Length rules blindly. 
+    - Even if "Hot dog" is a noun phrase, since it has a space, output it as Sentence Mode.
+    - Even if "Schema" looks like a title, since it has no space, output it as Word Mode.
 """;
 
     public AiSelectionTranslationProvider(

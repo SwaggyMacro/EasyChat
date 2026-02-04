@@ -19,6 +19,9 @@ public abstract class SelectionTranslationResult
 {
     [JsonPropertyName("source_type")]
     public TranslationSourceType SourceType { get; set; } = TranslationSourceType.Ai;
+
+    [JsonPropertyName("detected_source_language")]
+    public string? DetectedSourceLanguage { get; set; }
 }
 
 public class WordTranslationResult : SelectionTranslationResult
@@ -37,6 +40,18 @@ public class WordTranslationResult : SelectionTranslationResult
 
     [JsonPropertyName("examples")]
     public List<WordExample> Examples { get; set; } = new();
+
+    [JsonPropertyName("forms")]
+    public List<WordForm> Forms { get; set; } = new();
+}
+
+public class WordForm
+{
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = string.Empty;
+
+    [JsonPropertyName("word")]
+    public string Word { get; set; } = string.Empty;
 }
 
 public class WordDefinition

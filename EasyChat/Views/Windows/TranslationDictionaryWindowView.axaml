@@ -71,6 +71,13 @@
         <Style Selector="Button.WordToken:pointerover Border.AnimatedUnderline">
             <Setter Property="RenderTransform" Value="scaleX(1)"/>
         </Style>
+
+        <!-- TTS Loading Button Style -->
+        <Style Selector="Button.TtsButton">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+        </Style>
     </Window.Styles>
 
     <Panel Margin="5">
@@ -98,11 +105,17 @@
                                 <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsWordMode}">
                                     <TextBlock Text="{Binding DictionaryResult.Phonetic}" 
                                                FontSize="13" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center"/>
-                                    <Button Classes="Flat" Padding="2" Width="20" Height="20" 
+                                    <Button Classes="TtsButton" 
                                             Command="{Binding PlayTtsCommand}"
                                             CommandParameter="{Binding DictionaryResult.Word}"
+                                            Tag="{Binding IsWordTtsLoading}"
                                             IsVisible="{Binding DictionaryResult.Phonetic, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                                         <icons:MaterialIcon Kind="VolumeHigh" Width="14" Height="14" Foreground="White"/>
+                                         <Panel>
+                                             <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource SukiPrimaryColor}"
+                                                                 IsVisible="{Binding !$parent[Button].Tag}"/>
+                                             <suki:Loading Width="16" Height="16" IsVisible="{Binding $parent[Button].Tag}"
+                                                           Foreground="{DynamicResource SukiPrimaryColor}"/>
+                                         </Panel>
                                     </Button>
                                 </StackPanel>
                                 
@@ -134,14 +147,46 @@
                                  </StackPanel>
                              </Border>
 
+                             <!-- Forms (Morphologies) -->
+                             <ItemsControl ItemsSource="{Binding DictionaryResult.Forms}" IsVisible="{Binding DictionaryResult.HasForms}">
+                                 <ItemsControl.ItemsPanel>
+                                     <ItemsPanelTemplate>
+                                         <WrapPanel Orientation="Horizontal" />
+                                     </ItemsPanelTemplate>
+                                 </ItemsControl.ItemsPanel>
+                                 <ItemsControl.ItemTemplate>
+                                     <DataTemplate DataType="selection:DictionaryForm">
+                                         <Border Background="{DynamicResource SukiControlBorderBrush}" CornerRadius="4" Padding="6,2" Margin="0,0,8,8">
+                                             <StackPanel Orientation="Horizontal" Spacing="6">
+                                                 <TextBlock Text="{Binding Label}" FontSize="12" Foreground="{DynamicResource SukiLowText}" FontStyle="Italic" VerticalAlignment="Center"/>
+                                                 <TextBlock Text="{Binding Word}" FontSize="13" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                 
+                                                 <!-- TTS for Form -->
+                                                 <Button Classes="TtsButton" Width="24" Height="24"
+                                                         Command="{Binding #TranslationWindow.((vm:TranslationDictionaryWindowViewModel)DataContext).PlaySourceAudioCommand}"
+                                                         CommandParameter="{Binding .}"
+                                                         Tag="{Binding IsLoading}">
+                                                     <Panel>
+                                                         <icons:MaterialIcon Kind="VolumeHigh" Width="14" Height="14" Foreground="{DynamicResource SukiPrimaryColor}"
+                                                                             IsVisible="{Binding !$parent[Button].Tag}"/>
+                                                         <suki:Loading Width="14" Height="14" IsVisible="{Binding $parent[Button].Tag}"
+                                                                       Foreground="{DynamicResource SukiPrimaryColor}"/>
+                                                     </Panel>
+                                                 </Button>
+                                             </StackPanel>
+                                         </Border>
+                                     </DataTemplate>
+                                 </ItemsControl.ItemTemplate>
+                             </ItemsControl>
+
                              <ItemsControl ItemsSource="{Binding DictionaryResult.Parts}">
                                  <ItemsControl.ItemTemplate>
                                      <DataTemplate DataType="selection:DictionaryPart">
                                          <StackPanel Margin="0,0,0,12">
-                                             <TextBlock Text="{Binding PartOfSpeech}" 
-                                                        FontWeight="Bold" FontStyle="Italic" Foreground="{DynamicResource SukiPrimaryColor}"
-                                                        Margin="0,0,0,4"
-                                                        IsVisible="{Binding PartOfSpeech, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                             <Border Background="{DynamicResource SukiControlBorderBrush}" CornerRadius="4" Padding="6,2" HorizontalAlignment="Left" Margin="0,0,0,8"
+                                                     IsVisible="{Binding PartOfSpeech, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                                 <TextBlock Text="{Binding PartOfSpeech}" FontSize="13" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold"/>
+                                             </Border>
                                              <ItemsControl ItemsSource="{Binding Definitions}">
                                                  <ItemsControl.ItemTemplate>
                                                      <DataTemplate>
@@ -166,8 +211,35 @@
                                      <ItemsControl.ItemTemplate>
                                          <DataTemplate DataType="selection:DictionaryExample">
                                              <StackPanel Margin="0,0,0,12">
-                                                 <TextBlock Text="{Binding Origin}" TextWrapping="Wrap" FontSize="14" Foreground="{DynamicResource SukiText}"/>
-                                                 <TextBlock Text="{Binding Translation}" TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource SukiLowText}" Margin="0,2,0,0"/>
+                                                  <Grid ColumnDefinitions="*,Auto">
+                                                       <TextBlock Grid.Column="0" Text="{Binding Origin}" TextWrapping="Wrap" FontSize="14" Foreground="{DynamicResource SukiText}" VerticalAlignment="Center"/>
+                                                       <Button Grid.Column="1" Classes="TtsButton" Margin="6,0,0,0" VerticalAlignment="Top"
+                                                               Command="{Binding #TranslationWindow.((vm:TranslationDictionaryWindowViewModel)DataContext).PlaySourceAudioCommand}"
+                                                               CommandParameter="{Binding .}"
+                                                               Tag="{Binding IsOriginLoading}">
+                                                           <Panel>
+                                                               <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource SukiPrimaryColor}"
+                                                                                   IsVisible="{Binding !$parent[Button].Tag}"/>
+                                                               <suki:Loading Width="16" Height="16" IsVisible="{Binding $parent[Button].Tag}"
+                                                                             Foreground="{DynamicResource SukiPrimaryColor}"/>
+                                                           </Panel>
+                                                       </Button>
+                                                  </Grid>
+                                                 
+                                                  <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
+                                                      <TextBlock Grid.Column="0" Text="{Binding Translation}" TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center"/>
+                                                      <Button Grid.Column="1" Classes="TtsButton" Margin="6,0,0,0" VerticalAlignment="Top"
+                                                               Command="{Binding #TranslationWindow.((vm:TranslationDictionaryWindowViewModel)DataContext).PlayTargetAudioCommand}"
+                                                               CommandParameter="{Binding .}"
+                                                               Tag="{Binding IsTranslationLoading}">
+                                                           <Panel>
+                                                               <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource SukiPrimaryColor}"
+                                                                                   IsVisible="{Binding !$parent[Button].Tag}"/>
+                                                               <suki:Loading Width="16" Height="16" IsVisible="{Binding $parent[Button].Tag}"
+                                                                             Foreground="{DynamicResource SukiPrimaryColor}"/>
+                                                           </Panel>
+                                                       </Button>
+                                                  </Grid>
                                              </StackPanel>
                                          </DataTemplate>
                                      </ItemsControl.ItemTemplate>
@@ -182,7 +254,18 @@
                                     <StackPanel>
                                         <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,0,8">
                                             <icons:MaterialIcon Kind="TextShort" Width="16" Height="16" Foreground="{DynamicResource SukiPrimaryColor}"/>
-                                            <TextBlock Text="{x:Static lang:Resources.SelectionTranslate_SourceLabel}" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource SukiText}"/>
+                                            <TextBlock Text="{x:Static lang:Resources.SelectionTranslate_SourceLabel}" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource SukiText}"/>
+                                            <Button Classes="TtsButton" VerticalAlignment="Center"
+                                                    Command="{Binding PlaySourceAudioCommand}"
+                                                    CommandParameter="{Binding SourceText}"
+                                                    Tag="{Binding IsSourceTtsLoading}">
+                                                <Panel>
+                                                    <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource SukiPrimaryColor}"
+                                                                        IsVisible="{Binding !$parent[Button].Tag}"/>
+                                                    <suki:Loading Width="16" Height="16" IsVisible="{Binding $parent[Button].Tag}"
+                                                                  Foreground="{DynamicResource SukiPrimaryColor}"/>
+                                                </Panel>
+                                            </Button>
                                         </StackPanel>
                                     
                                         <controls:VirtualizedTokenDisplay 
@@ -202,7 +285,18 @@
                                 <Grid RowDefinitions="Auto,*">
                                     <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,0,8" VerticalAlignment="Center">
                                         <icons:MaterialIcon Kind="Translate" Width="16" Height="16" Foreground="{DynamicResource SukiPrimaryColor}"/>
-                                        <TextBlock Text="{x:Static lang:Resources.SelectionTranslate_ResultLabel}" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource SukiText}"/>
+                                        <TextBlock Text="{x:Static lang:Resources.SelectionTranslate_ResultLabel}" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource SukiText}"/>
+                                        <Button Classes="TtsButton" VerticalAlignment="Center"
+                                                Command="{Binding PlayTargetAudioCommand}"
+                                                CommandParameter="{Binding TranslationResult}"
+                                                Tag="{Binding IsResultTtsLoading}">
+                                            <Panel>
+                                                <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource SukiPrimaryColor}"
+                                                                    IsVisible="{Binding !$parent[Button].Tag}"/>
+                                                <suki:Loading Width="16" Height="16" IsVisible="{Binding $parent[Button].Tag}"
+                                                              Foreground="{DynamicResource SukiPrimaryColor}"/>
+                                            </Panel>
+                                        </Button>
                                     </StackPanel>
                                     <TextBlock x:Name="ResultTextBlock" Grid.Row="1" 
                                                Text="{Binding TranslationResult}" 

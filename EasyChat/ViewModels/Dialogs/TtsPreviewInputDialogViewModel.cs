@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Reactive;
 using System.Threading.Tasks;
 using EasyChat.Services.Abstractions;
@@ -22,12 +21,11 @@ public class TtsPreviewInputDialogViewModel : ViewModelBase
         get => _inputText;
         set => this.RaiseAndSetIfChanged(ref _inputText, value);
     }
-    
-    private bool _isPlaying;
+
     public bool IsPlaying
     {
-        get => _isPlaying;
-        set => this.RaiseAndSetIfChanged(ref _isPlaying, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public ReactiveCommand<Unit, Unit> PlayCommand { get; }
@@ -59,7 +57,7 @@ public class TtsPreviewInputDialogViewModel : ViewModelBase
             var stream = await _ttsService.StreamAsync(InputText, _voiceId);
             
             // Enqueue to player
-            _audioPlayer.Enqueue(stream);
+            if (stream != null) _audioPlayer.Enqueue(stream);
         }
         catch (Exception ex)
         {

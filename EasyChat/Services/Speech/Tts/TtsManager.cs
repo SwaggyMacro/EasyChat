@@ -57,7 +57,7 @@ public class TtsManager : ITtsService
         return _currentProvider.SynthesizeAsync(text, voiceId, outputFile, rate, volume, pitch);
     }
 
-    public Task<Stream> StreamAsync(string text, string voiceId, string? rate = null, string? volume = null, string? pitch = null)
+    public Task<Stream?> StreamAsync(string text, string voiceId, string? rate = null, string? volume = null, string? pitch = null)
     {
         return _currentProvider.StreamAsync(text, voiceId, rate, volume, pitch);
     }

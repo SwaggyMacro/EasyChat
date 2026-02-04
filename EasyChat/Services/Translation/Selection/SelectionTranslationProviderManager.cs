@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using EasyChat.Constants;
 using EasyChat.Models.Translation.Selection;
 using EasyChat.Services.Abstractions;
-using EasyChat.Services.Translation.Ai;
 using Microsoft.Extensions.Logging;
 
 #pragma warning disable OPENAI001 // Suppress experimental warning

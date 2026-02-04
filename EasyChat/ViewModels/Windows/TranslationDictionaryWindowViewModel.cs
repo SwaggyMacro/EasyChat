@@ -9,7 +9,6 @@ using EasyChat.Models.Translation.Selection;
 using EasyChat.Services.Abstractions;
 using EasyChat.Services.Speech.Tts;
 using EasyChat.Services.Text;
-using EasyChat.Services.Translation;
 using EasyChat.Services.Translation.Selection;
 using ReactiveUI;
 
@@ -59,10 +58,34 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
         get => _sourceTokens;
         set => this.RaiseAndSetIfChanged(ref _sourceTokens, value);
     }
+    
+    // Independent Loading States for Main UI Elements
+    private bool _isWordTtsLoading;
+    public bool IsWordTtsLoading
+    {
+        get => _isWordTtsLoading;
+        set => this.RaiseAndSetIfChanged(ref _isWordTtsLoading, value);
+    }
+
+    private bool _isSourceTtsLoading;
+    public bool IsSourceTtsLoading
+    {
+        get => _isSourceTtsLoading;
+        set => this.RaiseAndSetIfChanged(ref _isSourceTtsLoading, value);
+    }
+
+    private bool _isResultTtsLoading;
+    public bool IsResultTtsLoading
+    {
+        get => _isResultTtsLoading;
+        set => this.RaiseAndSetIfChanged(ref _isResultTtsLoading, value);
+    }
 
     public ReactiveCommand<string, Unit> LookupWordCommand { get; }
     public ReactiveCommand<Unit, Unit> SwitchToSentenceModeCommand { get; }
-    public ReactiveCommand<string?, Unit> PlayTtsCommand { get; }
+    public ReactiveCommand<object?, Unit> PlayTtsCommand { get; }
+    public ReactiveCommand<object?, Unit> PlaySourceAudioCommand { get; }
+    public ReactiveCommand<object?, Unit> PlayTargetAudioCommand { get; }
 
     private bool _canNavigateBack;
     private bool _showBackButton;
@@ -88,7 +111,9 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
 
         LookupWordCommand = ReactiveCommand.CreateFromTask<string>(LookupWordAsync);
         SwitchToSentenceModeCommand = ReactiveCommand.Create(SwitchToSentenceMode);
-        PlayTtsCommand = ReactiveCommand.CreateFromTask<string?>(PlayTtsAsync);
+        PlayTtsCommand = ReactiveCommand.CreateFromTask<object?>(PlayTtsAsync);
+        PlaySourceAudioCommand = ReactiveCommand.CreateFromTask<object?>(PlaySourceAudioAsync);
+        PlayTargetAudioCommand = ReactiveCommand.CreateFromTask<object?>(PlayTargetAudioAsync);
 
         // React to SourceText changes
         this.WhenAnyValue(x => x.SourceText)
@@ -173,6 +198,12 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
 
         var result = await _translationProvider.TranslateAsync(text, sourceLang, targetLang);
 
+        // Update source language if auto-detected
+        if (result.DetectedSourceLanguage is { } detected && !string.IsNullOrWhiteSpace(detected))
+        {
+            _currentSourceLang = detected;
+        }
+
         if (result is WordTranslationResult wordResult)
         {
             IsWordMode = true;
@@ -195,6 +226,11 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
                 {
                     Origin = e.Origin,
                     Translation = e.Translation
+                }).ToList(),
+                Forms = wordResult.Forms.Select(f => new DictionaryForm
+                {
+                    Label = f.Label,
+                    Word = f.Word
                 }).ToList()
             };
         }
@@ -225,6 +261,12 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
             var targetLang = _configurationService.General?.TargetLanguage.EnglishName ?? "Chinese";
             
             var result = await _translationProvider.TranslateAsync(word, sourceLang, targetLang);
+
+            // Update source language if auto-detected
+            if (result.DetectedSourceLanguage is { } detected && !string.IsNullOrWhiteSpace(detected))
+            {
+                _currentSourceLang = detected;
+            }
             
             if (result is WordTranslationResult wordResult)
             {
@@ -247,6 +289,11 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
                     {
                          Origin = e.Origin,
                          Translation = e.Translation
+                    }).ToList(),
+                    Forms = wordResult.Forms.Select(f => new DictionaryForm
+                    {
+                        Label = f.Label,
+                        Word = f.Word
                     }).ToList()
                 };
             }
@@ -271,73 +318,127 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
         IsWordMode = false;
     }
 
-    private async Task PlayTtsAsync(string? text)
+    private async Task PlayTtsAsync(object? parameter)
     {
-        var textToSpeak = text;
+        string? textToSpeak = null;
         string langId = _currentSourceLang;
+        Action<bool>? setLoading = null;
 
-        if (string.IsNullOrEmpty(textToSpeak))
+        if (parameter is string text)
         {
-            // Auto-determine text based on mode
-            if (IsWordMode && DictionaryResult != null)
-            {
-                textToSpeak = DictionaryResult.Word;
-                langId = _currentSourceLang; 
-            }
-            else
-            {
-                textToSpeak = TranslationResult;
-                langId = _currentTargetLang;
-            }
+            textToSpeak = text;
+            langId = _currentSourceLang;
+            setLoading = val => IsWordTtsLoading = val;
+        }
+        else if (IsWordMode && DictionaryResult != null)
+        {
+            textToSpeak = DictionaryResult.Word;
+            langId = _currentSourceLang;
+            setLoading = val => IsWordTtsLoading = val;
         }
         else
         {
-            // If explicit text passed, guess language?
-            // If matches translation result, use target lang.
-            if (textToSpeak == TranslationResult)
-            {
-                langId = _currentTargetLang;
-            }
-            else
-            {
-                langId = _currentSourceLang;
-            }
+            textToSpeak = TranslationResult;
+            langId = _currentTargetLang;
+            // No specific loading indicator for generic fallback yet, or reuse Result
         }
 
-        if (string.IsNullOrWhiteSpace(textToSpeak)) return;
+        await PlayTtsWithLanguageAsync(textToSpeak, langId, setLoading);
+    }
+
+    private async Task PlaySourceAudioAsync(object? parameter)
+    {
+        string? textToSpeak = null;
+        Action<bool>? setLoading = null;
+
+        if (parameter is DictionaryForm form)
+        {
+            textToSpeak = form.Word;
+            setLoading = val => form.IsLoading = val;
+        }
+        else if (parameter is DictionaryExample example)
+        {
+            textToSpeak = example.Origin;
+            setLoading = val => example.IsOriginLoading = val;
+        }
+        else if (parameter is string text)
+        {
+            textToSpeak = text;
+            setLoading = val => IsSourceTtsLoading = val;
+        }
+
+        if (!string.IsNullOrWhiteSpace(textToSpeak))
+        {
+            await PlayTtsWithLanguageAsync(textToSpeak, _currentSourceLang, setLoading);
+        }
+    }
+
+    private async Task PlayTargetAudioAsync(object? parameter)
+    {
+        string? textToSpeak = null;
+        Action<bool>? setLoading = null;
+
+        if (parameter is DictionaryExample example)
+        {
+            textToSpeak = example.Translation;
+            setLoading = val => example.IsTranslationLoading = val;
+        }
+        else if (parameter is string text)
+        {
+            textToSpeak = text;
+            setLoading = val => IsResultTtsLoading = val;
+        }
+
+        if (!string.IsNullOrWhiteSpace(textToSpeak))
+        {
+            await PlayTtsWithLanguageAsync(textToSpeak, _currentTargetLang, setLoading);
+        }
+    }
+
+    private async Task PlayTtsWithLanguageAsync(string? text, string langId, Action<bool>? setLoadingState)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return;
 
         try
         {
             _audioPlayer.Stop(); // Ensure previous is stopped
+            setLoadingState?.Invoke(true);
 
             // Get Voice
-            var provider = _configurationService.Tts?.Provider ?? "EdgeTTS";
+            var provider = _configurationService.Tts?.Provider ?? TtsProviders.EdgeTTS;
             var voiceId = _configurationService.Tts?.GetVoiceForLanguage(provider, langId);
             
             if (string.IsNullOrEmpty(voiceId))
             {
                  // Fallback: pick first available voice for language or default
                  var voices = _ttsService.GetVoices();
-                 var match = voices.FirstOrDefault(v => v.LanguageId.Contains(langId, StringComparison.OrdinalIgnoreCase) || v.Id.Contains(langId, StringComparison.OrdinalIgnoreCase));
+                 var match = voices.FirstOrDefault(v => v.LanguageId.StartsWith(langId.Split("-").FirstOrDefault() ?? langId, StringComparison.OrdinalIgnoreCase));
                  
                  // If specific lang not found and we are defaulting to EN, try generic EN
-                 if (match == null && langId.StartsWith("en"))
+                 if (match == null && langId.StartsWith(LanguageKeys.EnglishId))
                  {
-                      match = voices.FirstOrDefault(v => v.Id.Contains("en-US"));
+                      match = voices.FirstOrDefault(v => v.Id.Contains(LanguageKeys.EnglishId));
                  }
-                 
-                 voiceId = match?.Id ?? voices.FirstOrDefault()?.Id ?? "en-US-AriaNeural"; // Safe fallback
+
+                 voiceId = match?.Id;
             }
 
-            var stream = await _ttsService.StreamAsync(textToSpeak, voiceId);
-            if (stream != null)
+            if (voiceId != null)
             {
-                _audioPlayer.Enqueue(stream);
+                var stream = await _ttsService.StreamAsync(text, voiceId);
+                if (stream != null)
+                {
+                    _audioPlayer.Enqueue(stream);
+                }
             }
         }
         catch (Exception)
         {
             // Ignore for now
+        }
+        finally
+        {
+            setLoadingState?.Invoke(false);
         }
     }
 }

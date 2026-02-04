@@ -23,5 +23,5 @@ public interface ITtsService
 
     Task SynthesizeAsync(string text, string voiceId, string outputFile, string? rate = null, string? volume = null, string? pitch = null);
     
-    Task<Stream> StreamAsync(string text, string voiceId, string? rate = null, string? volume = null, string? pitch = null);
+    Task<Stream?> StreamAsync(string text, string voiceId, string? rate = null, string? volume = null, string? pitch = null);
 }
