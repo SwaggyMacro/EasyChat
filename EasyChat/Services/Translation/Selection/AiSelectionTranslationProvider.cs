@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 using OpenAI;
 using OpenAI.Chat;
 
-namespace EasyChat.Services.Translation.Ai;
+namespace EasyChat.Services.Translation.Selection;
 
 public class AiSelectionTranslationProvider : ISelectionTranslationProvider
 {

@@ -1,4 +1,5 @@
 using System;
+using EasyChat.Services.Languages;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
@@ -6,8 +7,10 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using EasyChat.Models.Translation.Selection;
 using EasyChat.Services.Abstractions;
+using EasyChat.Services.Speech.Tts;
 using EasyChat.Services.Text;
 using EasyChat.Services.Translation;
+using EasyChat.Services.Translation.Selection;
 using ReactiveUI;
 
 namespace EasyChat.ViewModels.Windows;
@@ -16,6 +19,8 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
 {
     private readonly ISelectionTranslationProvider _translationProvider;
     private readonly IConfigurationService _configurationService;
+    private readonly ITtsService _ttsService;
+    private readonly IAudioPlayer _audioPlayer;
     private TaskCompletionSource<bool>? _initializationTcs;
 
     public string SourceText
@@ -57,6 +62,7 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
 
     public ReactiveCommand<string, Unit> LookupWordCommand { get; }
     public ReactiveCommand<Unit, Unit> SwitchToSentenceModeCommand { get; }
+    public ReactiveCommand<string?, Unit> PlayTtsCommand { get; }
 
     private bool _canNavigateBack;
     private bool _showBackButton;
@@ -68,16 +74,21 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
 
     public TranslationDictionaryWindowViewModel(
         ISelectionTranslationProvider translationProvider,
-        IConfigurationService configurationService)
+        IConfigurationService configurationService,
+        ITtsService ttsService,
+        IAudioPlayer audioPlayer)
     {
         _translationProvider = translationProvider;
         _configurationService = configurationService;
+        _ttsService = ttsService;
+        _audioPlayer = audioPlayer;
 
         // Default tokenizer for now. In a real app, inject this.
         ITextTokenizer tokenizer = new EnglishTokenizer();
 
         LookupWordCommand = ReactiveCommand.CreateFromTask<string>(LookupWordAsync);
         SwitchToSentenceModeCommand = ReactiveCommand.Create(SwitchToSentenceMode);
+        PlayTtsCommand = ReactiveCommand.CreateFromTask<string?>(PlayTtsAsync);
 
         // React to SourceText changes
         this.WhenAnyValue(x => x.SourceText)
@@ -147,10 +158,18 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
         }
     }
 
+    private string _currentSourceLang = "en";
+    private string _currentTargetLang = "zh-CN";
+
     private async Task PerformTranslationAsync(string text)
     {
-        var sourceLang = _configurationService.General?.SourceLanguage.EnglishName ?? "Auto";
+        var sourceLang = _configurationService.General?.SourceLanguage.EnglishName ?? LanguageKeys.Auto.EnglishName;
         var targetLang = _configurationService.General?.TargetLanguage.EnglishName ?? "Chinese";
+
+        _currentSourceLang = _configurationService.General?.SourceLanguage.Id ?? "en";
+        _currentTargetLang = _configurationService.General?.TargetLanguage.Id ?? "zh-CN";
+
+        if (sourceLang == LanguageKeys.Auto.EnglishName) _currentSourceLang = "en"; // Default fallback for TTS if auto?
 
         var result = await _translationProvider.TranslateAsync(text, sourceLang, targetLang);
 
@@ -199,24 +218,18 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(word)) return;
 
         IsLoading = true;
-        // Don't switch mode immediately, wait for result? 
-        // Or switch to show loading in word mode?
-        // Current UI has shared loading.
         
         try
         {
-            var sourceLang = "Auto"; // Looking up a word from sentence is usually Auto
+            var sourceLang = "Auto"; 
             var targetLang = _configurationService.General?.TargetLanguage.EnglishName ?? "Chinese";
-            
-            // Force "Word Mode" expectation? The provider detects.
-            // If I click a single word, AI should detect Word Mode.
             
             var result = await _translationProvider.TranslateAsync(word, sourceLang, targetLang);
             
             if (result is WordTranslationResult wordResult)
             {
                 IsWordMode = true;
-                _canNavigateBack = true; // Came from sentence view
+                _canNavigateBack = true; 
                 
                  DictionaryResult = new DictionaryResult
                 {
@@ -239,16 +252,13 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
             }
             else
             {
-                // Fallback if AI thinks it's a sentence?
-                // Treat as simple translation?
                  IsWordMode = false; 
                  TranslationResult = (result as SentenceTranslationResult)?.Translation ?? "";
             }
         }
         catch (Exception)
         {
-             // Fallback for lookup failure
-             // Could show a snackbar or message, for now just log/ignore or reset loading
+             // Ignore
         }
         finally
         {
@@ -259,5 +269,75 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
     private void SwitchToSentenceMode()
     {
         IsWordMode = false;
+    }
+
+    private async Task PlayTtsAsync(string? text)
+    {
+        var textToSpeak = text;
+        string langId = _currentSourceLang;
+
+        if (string.IsNullOrEmpty(textToSpeak))
+        {
+            // Auto-determine text based on mode
+            if (IsWordMode && DictionaryResult != null)
+            {
+                textToSpeak = DictionaryResult.Word;
+                langId = _currentSourceLang; 
+            }
+            else
+            {
+                textToSpeak = TranslationResult;
+                langId = _currentTargetLang;
+            }
+        }
+        else
+        {
+            // If explicit text passed, guess language?
+            // If matches translation result, use target lang.
+            if (textToSpeak == TranslationResult)
+            {
+                langId = _currentTargetLang;
+            }
+            else
+            {
+                langId = _currentSourceLang;
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(textToSpeak)) return;
+
+        try
+        {
+            _audioPlayer.Stop(); // Ensure previous is stopped
+
+            // Get Voice
+            var provider = _configurationService.Tts?.Provider ?? "EdgeTTS";
+            var voiceId = _configurationService.Tts?.GetVoiceForLanguage(provider, langId);
+            
+            if (string.IsNullOrEmpty(voiceId))
+            {
+                 // Fallback: pick first available voice for language or default
+                 var voices = _ttsService.GetVoices();
+                 var match = voices.FirstOrDefault(v => v.LanguageId.Contains(langId, StringComparison.OrdinalIgnoreCase) || v.Id.Contains(langId, StringComparison.OrdinalIgnoreCase));
+                 
+                 // If specific lang not found and we are defaulting to EN, try generic EN
+                 if (match == null && langId.StartsWith("en"))
+                 {
+                      match = voices.FirstOrDefault(v => v.Id.Contains("en-US"));
+                 }
+                 
+                 voiceId = match?.Id ?? voices.FirstOrDefault()?.Id ?? "en-US-AriaNeural"; // Safe fallback
+            }
+
+            var stream = await _ttsService.StreamAsync(textToSpeak, voiceId);
+            if (stream != null)
+            {
+                _audioPlayer.Enqueue(stream);
+            }
+        }
+        catch (Exception)
+        {
+            // Ignore for now
+        }
     }
 }

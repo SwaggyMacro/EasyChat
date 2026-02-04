@@ -3,6 +3,12 @@ using System.Text.Json.Serialization;
 
 namespace EasyChat.Models.Translation.Selection;
 
+public enum TranslationSourceType
+{
+    Ai,
+    Machine
+}
+
 /// <summary>
 /// Base class for translation results.
 /// </summary>
@@ -11,6 +17,8 @@ namespace EasyChat.Models.Translation.Selection;
 [JsonDerivedType(typeof(SentenceTranslationResult), typeDiscriminator: "sentence")]
 public abstract class SelectionTranslationResult
 {
+    [JsonPropertyName("source_type")]
+    public TranslationSourceType SourceType { get; set; } = TranslationSourceType.Ai;
 }
 
 public class WordTranslationResult : SelectionTranslationResult

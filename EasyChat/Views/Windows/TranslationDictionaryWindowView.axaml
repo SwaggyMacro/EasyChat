@@ -98,7 +98,10 @@
                                 <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsWordMode}">
                                     <TextBlock Text="{Binding DictionaryResult.Phonetic}" 
                                                FontSize="13" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center"/>
-                                    <Button Classes="Flat" Padding="2" Width="20" Height="20" IsVisible="{Binding DictionaryResult.Phonetic, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                    <Button Classes="Flat" Padding="2" Width="20" Height="20" 
+                                            Command="{Binding PlayTtsCommand}"
+                                            CommandParameter="{Binding DictionaryResult.Word}"
+                                            IsVisible="{Binding DictionaryResult.Phonetic, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                                          <icons:MaterialIcon Kind="VolumeHigh" Width="14" Height="14" Foreground="White"/>
                                     </Button>
                                 </StackPanel>
@@ -137,7 +140,8 @@
                                          <StackPanel Margin="0,0,0,12">
                                              <TextBlock Text="{Binding PartOfSpeech}" 
                                                         FontWeight="Bold" FontStyle="Italic" Foreground="{DynamicResource SukiPrimaryColor}"
-                                                        Margin="0,0,0,4"/>
+                                                        Margin="0,0,0,4"
+                                                        IsVisible="{Binding PartOfSpeech, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
                                              <ItemsControl ItemsSource="{Binding Definitions}">
                                                  <ItemsControl.ItemTemplate>
                                                      <DataTemplate>
@@ -155,7 +159,7 @@
                              </ItemsControl>
 
                              <!-- Examples -->
-                             <StackPanel IsVisible="{Binding DictionaryResult.Examples.Count}">
+                             <StackPanel IsVisible="{Binding DictionaryResult.HasExamples}">
                                  <Border Background="{DynamicResource SukiControlBorderBrush}" Height="1" Margin="0,0,0,12"/>
                                  <TextBlock Text="{x:Static lang:Resources.Examples}" FontWeight="Bold" Margin="0,0,0,8" Foreground="{DynamicResource SukiText}"/>
                                  <ItemsControl ItemsSource="{Binding DictionaryResult.Examples}">
@@ -168,7 +172,7 @@
                                          </DataTemplate>
                                      </ItemsControl.ItemTemplate>
                                  </ItemsControl>
-                             </StackPanel>
+                            </StackPanel>
                         </StackPanel>
 
                         <!-- Sentence View (Transition Mode) -->
@@ -196,7 +200,7 @@
 
                                 <!-- Translation Result -->
                                 <Grid RowDefinitions="Auto,*">
-                                    <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,0,8">
+                                    <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,0,8" VerticalAlignment="Center">
                                         <icons:MaterialIcon Kind="Translate" Width="16" Height="16" Foreground="{DynamicResource SukiPrimaryColor}"/>
                                         <TextBlock Text="{x:Static lang:Resources.SelectionTranslate_ResultLabel}" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource SukiText}"/>
                                     </StackPanel>

@@ -9,6 +9,7 @@ public class DictionaryResult
     public string? PronunciationUrl { get; set; }
     public string? Tips { get; set; }
     public List<DictionaryExample> Examples { get; set; } = new();
+    public bool HasExamples => Examples.Count > 0;
     public List<DictionaryPart> Parts { get; set; } = new();
 }
 

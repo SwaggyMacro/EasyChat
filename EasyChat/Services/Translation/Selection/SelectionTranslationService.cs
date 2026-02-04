@@ -2,13 +2,13 @@ using System;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Threading;
+using EasyChat.Common;
 using EasyChat.Services.Abstractions;
 using EasyChat.Views.Windows;
 using Microsoft.Extensions.Logging;
-using EasyChat.Common;
 using ReactiveUI;
 
-namespace EasyChat.Services.Translation;
+namespace EasyChat.Services.Translation.Selection;
 
 public class SelectionTranslationService : IDisposable
 {

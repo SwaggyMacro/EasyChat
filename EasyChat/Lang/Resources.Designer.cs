@@ -2308,5 +2308,14 @@ namespace EasyChat.Lang {
                 return ResourceManager.GetString("WindowBackgroundColor", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI models provide higher quality translations....
+        /// </summary>
+        public static string TranslationEngineInfo {
+            get {
+                return ResourceManager.GetString("TranslationEngineInfo", resourceCulture);
+            }
+        }
     }
 }

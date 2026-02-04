@@ -36,6 +36,7 @@ using SukiUI.Dialogs;
 using SukiUI.Enums;
 using SukiUI.Toasts;
 using EasyChat.Services.Translation.Ai;
+using EasyChat.Services.Translation.Selection;
 using EasyChat.ViewModels.Windows;
 
 
@@ -191,7 +192,9 @@ public class App : Application
             services.AddSingleton<ILanguageCodeProvider, AiLanguageCodeProvider>();
             
             // Selection Translation
-            services.AddSingleton<ISelectionTranslationProvider, AiSelectionTranslationProvider>();
+            services.AddSingleton<AiSelectionTranslationProvider>();
+            services.AddSingleton<MachineSelectionTranslationProvider>();
+            services.AddSingleton<ISelectionTranslationProvider, SelectionTranslationProviderManager>();
             services.AddTransient<TranslationDictionaryWindowViewModel>();
 
             // Build Provider

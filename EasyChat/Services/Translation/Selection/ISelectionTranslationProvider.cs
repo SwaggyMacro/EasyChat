@@ -2,7 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyChat.Models.Translation.Selection;
 
-namespace EasyChat.Services.Translation;
+namespace EasyChat.Services.Translation.Selection;
 
 public interface ISelectionTranslationProvider
 {

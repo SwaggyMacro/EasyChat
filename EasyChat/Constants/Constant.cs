@@ -35,6 +35,14 @@ public static class Constant
         public const string Tencent = "Tencent";
     }
 
+
+    public static class SelectionTranslationProviderType
+    {
+        public const string AiModel = "AiModel";
+        public const string Machine = "MachineTrans";
+    }
+
+
     public static class ScreenshotMode
     {
         public const string Precise = "Precise";

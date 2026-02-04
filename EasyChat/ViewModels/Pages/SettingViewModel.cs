@@ -279,6 +279,50 @@ public class SettingViewModel : Page
         set => this.RaiseAndSetIfChanged(ref _machineTransProviders, value);
     } 
 
+    public List<string> TranslationEngineTypes { get; } = [Resources.AIEngine, Resources.MachineTranslation];
+
+    public string SelectedSelectionTranslationEngine
+    {
+        get
+        {
+            var provider = SelectionTranslationConf?.Provider ?? Constant.SelectionTranslationProviderType.AiModel;
+            return provider == Constant.SelectionTranslationProviderType.AiModel ? Resources.AIEngine : Resources.MachineTranslation;
+        }
+        set
+        {
+            if (SelectionTranslationConf == null) return;
+            
+            if (value == Resources.AIEngine)
+            {
+                SelectionTranslationConf.Provider = Constant.SelectionTranslationProviderType.AiModel;
+            }
+            else
+            {
+                SelectionTranslationConf.Provider = Constant.SelectionTranslationProviderType.Machine;
+            }
+            this.RaisePropertyChanged();
+            this.RaisePropertyChanged(nameof(IsAiTranslationSelected));
+            this.RaisePropertyChanged(nameof(IsMachineTranslationSelected));
+            this.RaisePropertyChanged(nameof(SelectedMachineTranslationProvider));
+        }
+    }
+
+    public bool IsAiTranslationSelected => SelectedSelectionTranslationEngine == Resources.AIEngine;
+    public bool IsMachineTranslationSelected => SelectedSelectionTranslationEngine == Resources.MachineTranslation;
+
+    public string SelectedMachineTranslationProvider
+    {
+        get => SelectionTranslationConf?.MachineProvider ?? Constant.MachineTranslationProviders.Baidu;
+        set
+        {
+             if (SelectionTranslationConf != null && SelectionTranslationConf.MachineProvider != value)
+             {
+                 SelectionTranslationConf.MachineProvider = value;
+                 this.RaisePropertyChanged();
+             }
+        }
+    } 
+
     private List<string> _ttsProviders = new();
     public List<string> TtsProviders
     {

@@ -10,6 +10,7 @@ public class SelectionTranslationConfig : ReactiveObject
 
     private string _provider = "AI";
     private string? _aiModelId;
+    private string? _machineProvider;
 
     [JsonProperty]
     public bool Enabled
@@ -23,6 +24,13 @@ public class SelectionTranslationConfig : ReactiveObject
     {
         get => _provider;
         set => this.RaiseAndSetIfChanged(ref _provider, value);
+    }
+
+    [JsonProperty]
+    public string? MachineProvider
+    {
+        get => _machineProvider;
+        set => this.RaiseAndSetIfChanged(ref _machineProvider, value);
     }
 
     [JsonProperty]

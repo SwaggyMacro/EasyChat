@@ -773,4 +773,7 @@
     <data name="Tts" xml:space="preserve">
         <value>TTS</value>
     </data>
+    <data name="TranslationEngineInfo" xml:space="preserve">
+        <value>AI models provide higher quality translations with support for phonetics, examples, and hints, but may be slower. Machine translation is faster but offers lower quality and lacks these features.</value>
+    </data>
 </root>
