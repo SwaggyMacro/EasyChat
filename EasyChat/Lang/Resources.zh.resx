@@ -766,4 +766,13 @@
         <value>大模型翻译速度略慢，但是翻译质量更好，并且支持音标、例句、提示等功能。
 机器翻译不支持音标、例句、提示等，并且翻译质量略差，优点是翻译速度很快。</value>
     </data>
+    <data name="Speech_ClearHistory" xml:space="preserve">
+        <value>清空历史</value>
+    </data>
+    <data name="Speech_AutoClear" xml:space="preserve">
+        <value>自动清空(秒)</value>
+    </data>
+  <data name="Speech_Translating" xml:space="preserve">
+    <value>翻译中...</value>
+  </data>
 </root>

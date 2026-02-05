@@ -5,13 +5,12 @@ namespace EasyChat.Models;
 
 public class SubtitleItem : ReactiveObject
 {
-    private TimeSpan _timestamp;
     public TimeSpan Timestamp
     {
-        get => _timestamp;
+        get;
         set
         {
-            this.RaiseAndSetIfChanged(ref _timestamp, value);
+            this.RaiseAndSetIfChanged(ref field, value);
             this.RaisePropertyChanged(nameof(DisplayTimestamp));
         }
     }
@@ -20,36 +19,61 @@ public class SubtitleItem : ReactiveObject
     public string OriginalText
     {
         get => _originalText;
-        set => this.RaiseAndSetIfChanged(ref _originalText, value);
+        set 
+        {
+            this.RaiseAndSetIfChanged(ref _originalText, value);
+            this.RaisePropertyChanged(nameof(DisplayTranslatedText));
+        }
     }
 
-    private string _translatedText = string.Empty;
     public string TranslatedText
     {
-        get => _translatedText;
-        set => this.RaiseAndSetIfChanged(ref _translatedText, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = string.Empty;
 
     public string DisplayTimestamp => Timestamp.ToString(@"hh\:mm\:ss");
 
-    private bool _isTranslating;
     public bool IsTranslating
     {
-        get => _isTranslating;
-        set => this.RaiseAndSetIfChanged(ref _isTranslating, value);
+        get;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref field, value);
+            this.RaisePropertyChanged(nameof(DisplayTranslatedText));
+        }
     }
 
-    private string _confirmedOriginalText = string.Empty;
     public string ConfirmedOriginalText
     {
-        get => _confirmedOriginalText;
-        set => this.RaiseAndSetIfChanged(ref _confirmedOriginalText, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = string.Empty;
 
-    private string _confirmedTranslatedText = string.Empty;
     public string ConfirmedTranslatedText
     {
-        get => _confirmedTranslatedText;
-        set => this.RaiseAndSetIfChanged(ref _confirmedTranslatedText, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = string.Empty;
+
+    // DisplayTranslatedText is used for smooth UI display - it preserves the previous
+    // translation during retranslation to prevent flickering/jumping
+    public string DisplayTranslatedText
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(field))
+            {
+                // Show placeholder if we have actual text content (not initial "...")
+                // This ensures immediate feedback as soon as detection starts, 
+                // and persistent feedback even if the translation network request momentarily lapses.
+                if (IsTranslating && !string.IsNullOrWhiteSpace(_originalText) && _originalText != "..." && _originalText != "…")
+                {
+                    return Lang.Resources.Speech_Translating;
+                }
+            }
+            return field;
+        }
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = string.Empty;
 }

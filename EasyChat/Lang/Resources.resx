@@ -776,4 +776,13 @@
     <data name="TranslationEngineInfo" xml:space="preserve">
         <value>AI models provide higher quality translations with support for phonetics, examples, and hints, but may be slower. Machine translation is faster but offers lower quality and lacks these features.</value>
     </data>
+    <data name="Speech_ClearHistory" xml:space="preserve">
+        <value>Clear History</value>
+    </data>
+    <data name="Speech_AutoClear" xml:space="preserve">
+        <value>Auto Clear (Seconds)</value>
+    </data>
+  <data name="Speech_Translating" xml:space="preserve">
+    <value>Translating...</value>
+  </data>
 </root>

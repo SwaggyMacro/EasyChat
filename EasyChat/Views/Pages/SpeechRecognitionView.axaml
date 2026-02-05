@@ -148,7 +148,12 @@
                             <!-- Left: Source -->
                             <suki:GlassCard Grid.Column="0" Margin="0,0,5,0">
                                 <DockPanel>
-                                    <TextBlock DockPanel.Dock="Top" Text="{x:Static lang:Resources.Speech_Recognized}" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                                    <Grid DockPanel.Dock="Top" ColumnDefinitions="*, Auto" Margin="0,0,0,10">
+                                        <TextBlock Text="{x:Static lang:Resources.Speech_Recognized}" FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
+                                        <Button Grid.Column="1" Command="{Binding ClearHistoryCommand}" Classes="Flat" Padding="5" ToolTip.Tip="{x:Static lang:Resources.Speech_ClearHistory}">
+                                            <avalonia:MaterialIcon Kind="DeleteSweep" Width="20" Height="20" Opacity="0.7"/>
+                                        </Button>
+                                    </Grid>
                                     <ScrollViewer>
                                         <ItemsControl ItemsSource="{Binding SubtitleItems}">
                                             <ItemsControl.ItemTemplate>
@@ -350,6 +355,10 @@
 
                                     <TextBlock Grid.Row="2" Grid.Column="0" Text="{x:Static lang:Resources.Window_Orientation}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                     <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding OrientationOptions}" SelectedItem="{Binding FloatingWindowOrientation}" HorizontalAlignment="Stretch"/>
+                                    
+                                    <!-- Auto Clear -->
+                                    <TextBlock Grid.Row="2" Grid.Column="3" Text="{x:Static lang:Resources.Speech_AutoClear}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <NumericUpDown Grid.Row="2" Grid.Column="4" Value="{Binding AutoClearInterval}" FormatString="F0" Minimum="0" Maximum="3600" Increment="5"/>
                                     
                                     <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static lang:Resources.Speech_MaxSentencesPerLine}" VerticalAlignment="Center" Margin="0,0,10,0" IsVisible="{Binding IsSegmentedMode}"/>
                                     <NumericUpDown Grid.Row="3" Grid.Column="1" Value="{Binding MaxSentencesPerLine}" FormatString="F0" Minimum="1" Maximum="100" IsVisible="{Binding IsSegmentedMode}"/>

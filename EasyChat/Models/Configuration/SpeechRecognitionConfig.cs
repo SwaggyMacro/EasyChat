@@ -42,7 +42,6 @@ public class SpeechRecognitionConfig : ReactiveObject
     } = "";
 
     // 0 = Machine, 1 = AI. 
-    // Using int or string enum for serialization safety.
     [JsonProperty]
     public int EngineType
     {
@@ -72,10 +71,18 @@ public class SpeechRecognitionConfig : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref field, value);
     } = 2;
 
+    // 0 = Disabled
+    [JsonProperty]
+    public int AutoClearInterval
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = 0;
+
     // --- Floating Subtitle Configuration ---
 
     // Primary Subtitle (Main)
-    
+
     // Default = Original
     [JsonProperty]
     public SubtitleSource MainSubtitleSource

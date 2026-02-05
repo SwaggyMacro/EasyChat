@@ -8,6 +8,8 @@ using EasyChat.ViewModels.Pages;
 using EasyChat.Models.Configuration;
 using ReactiveUI;
 
+using EasyChat.Models;
+
 namespace EasyChat.Views.Speech;
 
 [SuppressMessage("ReSharper", "InconsistentNaming")]
@@ -91,34 +93,63 @@ public partial class SubtitleOverlayWindowView : Window
             });
             
             // Auto Scroll Logic
-            vm.FloatingSubtitles.CollectionChanged += async (s, args) => 
+            // Subscribe to existing items if any
+            foreach (var item in vm.FloatingSubtitles)
             {
+                item.PropertyChanged -= OnItemPropertyChanged;
+                item.PropertyChanged += OnItemPropertyChanged;
+            }
+
+            vm.FloatingSubtitles.CollectionChanged += (_, args) => 
+            {
+                if (args.NewItems != null)
+                {
+                    foreach (SubtitleItem item in args.NewItems)
+                        item.PropertyChanged += OnItemPropertyChanged;
+                }
+                if (args.OldItems != null)
+                {
+                    foreach (SubtitleItem item in args.OldItems)
+                        item.PropertyChanged -= OnItemPropertyChanged;
+                }
+
                 if (vm.FloatingDisplayMode == FloatingDisplayMode.AutoScroll) // Auto Scroll
                 {
-                    // Delay slightly to ensure ItemControl has materialized the new container and updated layout
-                    await System.Threading.Tasks.Task.Delay(50);
-                    Avalonia.Threading.Dispatcher.UIThread.Post(() => 
-                    {
-                        var scroll = this.FindControl<ScrollViewer>("SubtitlesScrollViewer");
-                        scroll?.ScrollToEnd();
-                    }, Avalonia.Threading.DispatcherPriority.Background);
+                    TriggerAutoScroll();
                 }
             };
             
             // Trigger scroll when switching to AutoScroll
-            vm.WhenAnyValue(x => x.FloatingDisplayMode).Subscribe(async mode => 
+            vm.WhenAnyValue(x => x.FloatingDisplayMode).Subscribe((mode) => 
             {
                 if (mode == FloatingDisplayMode.AutoScroll)
                 {
-                    await System.Threading.Tasks.Task.Delay(50);
-                    Avalonia.Threading.Dispatcher.UIThread.Post(() => 
-                    {
-                        var scroll = this.FindControl<ScrollViewer>("SubtitlesScrollViewer");
-                        scroll?.ScrollToEnd();
-                    }, Avalonia.Threading.DispatcherPriority.Background);
+                    TriggerAutoScroll();
                 }
             });
         }
+    }
+
+    private void OnItemPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (DataContext is SpeechRecognitionViewModel { FloatingDisplayMode: FloatingDisplayMode.AutoScroll } && 
+            (e.PropertyName == nameof(SubtitleItem.OriginalText) || 
+             e.PropertyName == nameof(SubtitleItem.DisplayTranslatedText) ||
+             e.PropertyName == nameof(SubtitleItem.TranslatedText)))
+        {
+            TriggerAutoScroll();
+        }
+    }
+
+    private async void TriggerAutoScroll()
+    {
+        // Delay slightly to ensure ItemControl has materialized the new container and updated layout
+        await System.Threading.Tasks.Task.Delay(50);
+        Avalonia.Threading.Dispatcher.UIThread.Post(() => 
+        {
+            var scroll = this.FindControl<ScrollViewer>("SubtitlesScrollViewer");
+            scroll?.ScrollToEnd();
+        }, Avalonia.Threading.DispatcherPriority.Background);
     }
 
     private void StartHitTestTimer()

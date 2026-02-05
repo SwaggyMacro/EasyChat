@@ -6,6 +6,7 @@
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:converts="clr-namespace:EasyChat.Converters;assembly=EasyChat"
         xmlns:suki="https://github.com/kikipoulet/SukiUI"
+        xmlns:lang="clr-namespace:EasyChat.Lang"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="150"
         x:Class="EasyChat.Views.Speech.SubtitleOverlayWindowView"
         x:DataType="vm:SpeechRecognitionViewModel"
@@ -103,7 +104,7 @@
                                         <TextBlock.Text>
                                             <MultiBinding Converter="{x:Static converts:SubtitleContentConverter.Instance}" ConverterParameter="Main">
                                                 <Binding Path="OriginalText" />
-                                                <Binding Path="TranslatedText" />
+                                                <Binding Path="DisplayTranslatedText" />
                                                 <Binding Path="$parent[Window].((vm:SpeechRecognitionViewModel)DataContext).MainSubtitleSource" />
                                             </MultiBinding>
                                         </TextBlock.Text>
@@ -123,7 +124,7 @@
                                     <Grid.IsVisible>
                                         <MultiBinding Converter="{x:Static converts:SubtitleVisibilityConverter.Instance}" ConverterParameter="Secondary">
                                             <Binding Path="OriginalText" />
-                                            <Binding Path="TranslatedText" />
+                                            <Binding Path="DisplayTranslatedText" />
                                             <Binding Path="$parent[Window].((vm:SpeechRecognitionViewModel)DataContext).SecondarySubtitleSource" />
                                         </MultiBinding>
                                     </Grid.IsVisible>
@@ -137,7 +138,7 @@
                                         <TextBlock.Text>
                                             <MultiBinding Converter="{x:Static converts:SubtitleContentConverter.Instance}" ConverterParameter="Secondary">
                                                 <Binding Path="OriginalText" />
-                                                <Binding Path="TranslatedText" />
+                                                <Binding Path="DisplayTranslatedText" />
                                                 <Binding Path="$parent[Window].((vm:SpeechRecognitionViewModel)DataContext).SecondarySubtitleSource" />
                                             </MultiBinding>
                                         </TextBlock.Text>
@@ -189,6 +190,9 @@
                     </Button>
                      <Button Command="{Binding ToggleLockCommand}" Classes="ToolbarBtn" ToolTip.Tip="Lock Window">
                         <avalonia:MaterialIcon Kind="LockOpen" Width="16" Height="16" Foreground="White"/>
+                    </Button>
+                    <Button Command="{Binding ClearHistoryCommand}" Classes="ToolbarBtn" ToolTip.Tip="{x:Static lang:Resources.Speech_ClearHistory}">
+                        <avalonia:MaterialIcon Kind="DeleteSweep" Width="16" Height="16" Foreground="White"/>
                     </Button>
                     <Button Click="CloseButton_Click" Classes="ToolbarBtn" ToolTip.Tip="Close Floating Window">
                         <avalonia:MaterialIcon Kind="Close" Width="16" Height="16" Foreground="White"/>

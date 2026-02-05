@@ -15,7 +15,7 @@ public class SubtitleContentConverter : IMultiValueConverter
     {
         // Expected inputs:
         // [0]: OriginalText (string)
-        // [1]: TranslatedText (string)
+        // [1]: DisplayTranslatedText (string) - smooth display value
         // [2]: SourceType (SubtitleSource)
         
         if (values.Count < 3) return string.Empty;

@@ -2317,5 +2317,30 @@ namespace EasyChat.Lang {
                 return ResourceManager.GetString("TranslationEngineInfo", resourceCulture);
             }
         }
+        /// <summary>
+        ///   Looks up a localized string similar to Auto Clear (Seconds).
+        /// </summary>
+        public static string Speech_AutoClear {
+            get {
+                return ResourceManager.GetString("Speech_AutoClear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Clear History.
+        /// </summary>
+        public static string Speech_ClearHistory {
+            get {
+                return ResourceManager.GetString("Speech_ClearHistory", resourceCulture);
+            }
+        }
+        /// <summary>
+        ///   Looks up a localized string similar to Translating....
+        /// </summary>
+        public static string Speech_Translating {
+            get {
+                return ResourceManager.GetString("Speech_Translating", resourceCulture);
+            }
+        }
     }
 }
