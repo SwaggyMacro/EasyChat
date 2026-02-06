@@ -82,7 +82,7 @@ jobs:
           files: |
             Releases/*Setup.exe
             Releases/*.zip
-            Releases/*-delta.nupkg
+            Releases/*-${{ env.VERSION }}-delta.nupkg
             Releases/*-${{ env.VERSION }}-full.nupkg
             Releases/RELEASES
             Releases/*.json
@@ -109,7 +109,7 @@ jobs:
         with:
           name: Velopack-Assets
           path: |
-             Releases/*-delta.nupkg
+             Releases/*-${{ env.VERSION }}-delta.nupkg
              Releases/*-${{ env.VERSION }}-full.nupkg
              Releases/RELEASES
              Releases/*.json
