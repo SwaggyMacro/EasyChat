@@ -11,6 +11,7 @@ using EasyChat.Services.Translation;
 using EasyChat.Services.Translation.Ai;
 using EasyChat.Views.Result;
 using Microsoft.Extensions.Logging;
+using EasyChat.Services.Speech.Tts;
 using SukiUI.Toasts;
 using EasyChat.Models;
 using Avalonia;
@@ -42,7 +43,10 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
     private readonly ISukiToastManager _toastManager;
     private readonly IMapper _mapper;
     private readonly ILogger<ScreenshotTranslateHandler> _logger;
-    
+    private readonly ITtsService _ttsService;
+    private readonly IAudioPlayer _audioPlayer;
+    private readonly IPlatformService _platformService;
+
     private readonly IServiceProvider _serviceProvider;
     
     private volatile bool _isExecuting;
@@ -59,6 +63,9 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
         ISukiToastManager toastManager,
         IMapper mapper,
         ILogger<ScreenshotTranslateHandler> logger,
+        ITtsService ttsService,
+        IAudioPlayer audioPlayer,
+        IPlatformService platformService,
         IServiceProvider serviceProvider)
     {
         _screenCaptureService = screenCaptureService;
@@ -68,6 +75,9 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
         _toastManager = toastManager;
         _mapper = mapper;
         _logger = logger;
+        _ttsService = ttsService;
+        _audioPlayer = audioPlayer;
+        _platformService = platformService;
         _serviceProvider = serviceProvider;
     }
 
@@ -147,87 +157,26 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
 
             if (resultMode == ResultWindowMode.Dictionary)
             {
-                 Dispatcher.UIThread.Post(async () =>
+                 Dispatcher.UIThread.Post(async void () =>
                  {
                      try 
                      {
                          var viewModel = _serviceProvider.GetRequiredService<TranslationDictionaryWindowViewModel>();
                          viewModel.IsScreenshotMode = true;
-                         viewModel.ShowCloseButton = true; // Always show close button in this mode?
+                         viewModel.ShowCloseButton = true; 
                          
                          var view = new TranslationDictionaryWindowView 
                          { 
                              DataContext = viewModel
                          };
                          
-                         // Position near mouse
-                         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-                         {
-                             var mousePos = desktop.MainWindow?.PointToScreen(desktop.MainWindow.PointToClient(new PixelPoint(0,0))); 
-                             // The above approach is tricky because we need the global mouse position, not relative to MainWindow.
-                             // Avalonia doesn't expose global mouse position easily without a window event.
-                             // However, since we just did a screenshot, we might rely on the last known position or center of screen?
-                             // A better way is using native PInvoke or ScreenCaptureService if it exposed it.
-                             
-                             // BUT, we can use the MainWindow's mouse position if it's active.
-                             // Wait, we are in a background process (screenshot).
-                             
-                             // Let's try to get cursor pos via Desktop.
-                             // desktop.MainWindow.MousePosition (Not available directly)
-                             
-                             // Ideally we use the user's last selection end point or start point?
-                             // But we don't have that info here passed from `ocrResult`.
-                             // Wait, `ProcessOcrResult` is called after capture.
-                             
-                             // Let's use `System.Windows.Forms.Cursor.Position` equivalent or PInvoke if needed. 
-                             // Or simpler: Center of the screen for now?
-                             // User EXPLICITLY asked "Display near mouse".
-                             // We need a way to get mouse position.
-                             
-                             // Avalonia 11:
-                             // var topLevel = TopLevel.GetTopLevel(desktop.MainWindow);
-                             // var point = topLevel.PointToClient(new PixelPoint((int)pos.X, (int)pos.Y));
-                             
-                             // Since we don't have easy cross-platform global mouse hook in Avalonia without extra libs,
-                             // And we are on Windows (User OS).
-                             // We can use PInvoke.
-                             
-                             // Actually, let's keep it simple. If we can't get mouse easily, we'll default to center.
-                             // BUT, we can try to use `Win32` if we are on Windows.
-                             
-                             // Or, we can check if `_screenCaptureService` recorded where the selection ended.
-                             // Looking at `ScreenSelectionSession`... it doesn't pass it back.
-                             
-                             // Let's try one commonly used hack in Avalonia:
-                             // new Window().Position (No)
-
-                             // Let's use the provided `GetCursorPos` if available or standard .NET if referencing Forms/WPF (unlikely).
-                             
-                             // Given constraints, I will add a PInvoke helper here locally or use the desktop.MainWindow input manager if possible.
-                             
-                             // Let's just try to infer from the `desktop.MainWindow` if it's open, but it might be minimized.
-                             
-                             // Alternative: Using `Pointer` from `InputManager`?
-                             // var pos = Display.Common.Screens.Primary.Bounds.Center; // Fallback
-                             
-                             // Let's use `Win32.GetCursorPos` since user is on Windows.
-                         }
-                        
                         view.WindowStartupLocation = WindowStartupLocation.Manual;
                         
-                        // Using a simple PInvoke wrapper for GetCursorPos since we are on Windows and requested specific feature.
                         try 
                         {
-                            if (OperatingSystem.IsWindows())
-                            {
-                                GetCursorPos(out var pt);
-                                // Offset slightly so it doesn't cover the text immediately
-                                view.Position = new PixelPoint(pt.X + 15, pt.Y + 15);
-                            }
-                            else
-                            {
-                                view.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                            }
+                            var pos = _platformService.GetCursorPosition();
+                            // Offset slightly so it doesn't cover the text immediately
+                            view.Position = new PixelPoint(pos.X + 15, pos.Y + 15);
                         }
                         catch
                         {
@@ -286,13 +235,87 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
 
             _logger.LogInformation("Starting translation: {Source} -> {Target}", sourceLang?.Id, targetLang?.Id);
 
+            string? finalTranslation;
+
             if (translator is OpenAiService openAi)
             {
-                await TranslateStreamingAsync(openAi, text, sourceLang, targetLang, resultWindow, isClosedCheck, intent);
+                finalTranslation = await TranslateStreamingAsync(openAi, text, sourceLang, targetLang, resultWindow, isClosedCheck, intent);
             }
             else
             {
-                await TranslateNonStreamingAsync(translator, text, sourceLang, targetLang, resultWindow, isClosedCheck, intent);
+                finalTranslation = await TranslateNonStreamingAsync(translator, text, sourceLang, targetLang, resultWindow, isClosedCheck, intent);
+            }
+
+            // Read Aloud Logic
+            var readMode = _configurationService.Result?.ReadAloudMode ?? ResultReadAloudMode.None;
+            var isClosed = isClosedCheck();
+            var hasTranslation = !string.IsNullOrEmpty(finalTranslation);
+
+            _logger.LogInformation("Read Aloud Check Code Reached. Valid: {Valid}, Closed: {Closed}, HasTranslation: {HasTranslation} (Len: {Len}), Mode: {Mode}", 
+                (!isClosed && hasTranslation), isClosed, hasTranslation, finalTranslation?.Length ?? 0, readMode);
+
+            if (!isClosed && hasTranslation && readMode != ResultReadAloudMode.None)
+            {
+                 _ = Task.Run(async () => 
+                 {
+                     try 
+                     {
+                         var currentProvider = _configurationService.Tts?.Provider;
+                         _logger.LogInformation("Read Aloud Task Started. Provider: {Provider}", currentProvider);
+                         
+                         if (string.IsNullOrEmpty(currentProvider)) return;
+
+                         // Helper to play audio
+                         async Task PlayAudio(string? content, string? languageId)
+                         {
+                             _logger.LogInformation("PlayAudio called for Lang: {Lang}, ContentLen: {Len}", languageId, content?.Length ?? 0);
+                             
+                             if (string.IsNullOrEmpty(content) || languageId == null) return;
+                             
+                             var voiceId = TtsHelper.GetPreferredVoiceId(_ttsService, _configurationService, languageId);
+                             _logger.LogInformation("Resolved Voice ID: {VoiceId}", voiceId);
+
+                             if (!string.IsNullOrEmpty(voiceId))
+                             {
+                                 try 
+                                 {
+                                     var stream = await _ttsService.StreamAsync(content, voiceId);
+                                     if (stream != null)
+                                     {
+                                         _logger.LogInformation("Stream received, enqueuing.");
+                                         _audioPlayer.Enqueue(stream);
+                                     }
+                                     else
+                                     {
+                                         _logger.LogWarning("Stream was null.");
+                                     }
+                                 }
+                                 catch (Exception argEx)
+                                 {
+                                     _logger.LogWarning(argEx, "Error during TTS StreamAsync.");
+                                 }
+                             }
+                             else
+                             {
+                                 _logger.LogWarning("No voice ID found.");
+                             }
+                         }
+
+                         if (readMode == ResultReadAloudMode.Source || readMode == ResultReadAloudMode.Both)
+                         {
+                             await PlayAudio(text, sourceLang?.Id);
+                         }
+                         
+                         if (readMode == ResultReadAloudMode.Target || readMode == ResultReadAloudMode.Both)
+                         {
+                             await PlayAudio(finalTranslation!, targetLang?.Id);
+                         }
+                     }
+                     catch (Exception ex)
+                     {
+                         _logger.LogError(ex, "Read Aloud failed.");
+                     }
+                 });
             }
 
             // Auto-close after configured delay
@@ -301,12 +324,12 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
                 var delay = _configurationService.Result?.AutoCloseDelay;
                 if (_configurationService.Result is { EnableAutoReadDelay: true })
                 {
-                    var length = text.Length;
+                    var length = finalTranslation?.Length ?? text.Length;
                     var msPerChar = _configurationService.Result.MsPerChar;
                     delay = Math.Max(2000, length * msPerChar); // Minimum 2 seconds
                 }
                 
-                resultWindow.CloseAfterDelay(delay ?? 5);
+                resultWindow.CloseAfterDelay(delay ?? 5000);
             }
         }
         catch (Exception ex)
@@ -332,7 +355,7 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
         }
     }
 
-    private async Task TranslateStreamingAsync(
+    private async Task<string?> TranslateStreamingAsync(
         OpenAiService openAi,
         string text,
         LanguageDefinition? sourceLang,
@@ -371,10 +394,7 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
                 }
             });
             
-            if (intent != CaptureIntent.Translation)
-            {
-                fullTranslation.Append(chunk);
-            }
+            fullTranslation.Append(chunk);
         }
         
         if (intent != CaptureIntent.Translation && !isClosedCheck())
@@ -390,9 +410,11 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
                  Dispatcher.UIThread.Post(() => CopyToClipboard(finalText));
             }
         }
+
+        return fullTranslation.ToString();
     }
 
-    private async Task TranslateNonStreamingAsync(
+    private async Task<string?> TranslateNonStreamingAsync(
         ITranslation translator,
         string text,
         LanguageDefinition? sourceLang,
@@ -419,6 +441,8 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
                 resultWindow.IsVisible = true;
             }
         });
+
+        return translation;
     }
 
     // TranslateAndCopyAsync removed as we integrated it into main flow
@@ -631,16 +655,5 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
         mat.WriteToStream(memoryStream);
         memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
         return new Bitmap(memoryStream);
-    }
-
-    [System.Runtime.InteropServices.DllImport("user32.dll")]
-    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
-    private static extern bool GetCursorPos(out POINT lpPoint);
-
-    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    private struct POINT
-    {
-        public int X;
-        public int Y;
     }
 }

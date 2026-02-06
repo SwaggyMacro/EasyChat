@@ -392,6 +392,7 @@ public class SettingViewModel : Page
     public List<InputDeliveryMode> InputDeliveryModes { get; } = Enum.GetValues<InputDeliveryMode>().ToList();
 
     public List<ResultWindowMode> ResultWindowModes { get; } = Enum.GetValues<ResultWindowMode>().ToList();
+    public List<ResultReadAloudMode> ResultReadAloudModes { get; } = Enum.GetValues<ResultReadAloudMode>().ToList();
 
     public ReactiveCommand<Unit, Unit> ManageFixedAreasCommand { get; }
     public ReactiveCommand<Unit, Unit> ConfigureTtsCommand { get; }

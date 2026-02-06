@@ -86,10 +86,26 @@ public class ResultConfig : ReactiveObject
         get => _screenshotResultMode;
         set => this.RaiseAndSetIfChanged(ref _screenshotResultMode, value);
     }
+
+    private ResultReadAloudMode _readAloudMode = ResultReadAloudMode.None;
+    [JsonProperty]
+    public ResultReadAloudMode ReadAloudMode
+    {
+        get => _readAloudMode;
+        set => this.RaiseAndSetIfChanged(ref _readAloudMode, value);
+    }
 }
 
 public enum ResultWindowMode
 {
     Classic,
     Dictionary
+}
+
+public enum ResultReadAloudMode
+{
+    None,
+    Source,
+    Target,
+    Both
 }

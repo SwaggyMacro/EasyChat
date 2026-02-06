@@ -437,23 +437,7 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
             setLoadingState?.Invoke(true);
 
             // Get Voice
-            var provider = _configurationService.Tts?.Provider ?? TtsProviders.EdgeTTS;
-            var voiceId = _configurationService.Tts?.GetVoiceForLanguage(provider, langId);
-            
-            if (string.IsNullOrEmpty(voiceId))
-            {
-                 // Fallback: pick first available voice for language or default
-                 var voices = _ttsService.GetVoices();
-                 var match = voices.FirstOrDefault(v => v.LanguageId.StartsWith(langId.Split("-").FirstOrDefault() ?? langId, StringComparison.OrdinalIgnoreCase));
-                 
-                 // If specific lang not found and we are defaulting to EN, try generic EN
-                 if (match == null && langId.StartsWith(LanguageKeys.EnglishId))
-                 {
-                      match = voices.FirstOrDefault(v => v.Id.Contains(LanguageKeys.EnglishId));
-                 }
-
-                 voiceId = match?.Id;
-            }
+            var voiceId = TtsHelper.GetPreferredVoiceId(_ttsService, _configurationService, langId);
 
             if (voiceId != null)
             {

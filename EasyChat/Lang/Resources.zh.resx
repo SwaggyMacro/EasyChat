@@ -784,4 +784,19 @@
   <data name="ResultWindowMode_Dictionary" xml:space="preserve">
     <value>词典</value>
   </data>
+  <data name="ReadAloudMode" xml:space="preserve">
+    <value>朗读设置</value>
+  </data>
+  <data name="ReadAloudMode_None" xml:space="preserve">
+    <value>不朗读</value>
+  </data>
+  <data name="ReadAloudMode_Source" xml:space="preserve">
+    <value>原文</value>
+  </data>
+  <data name="ReadAloudMode_Target" xml:space="preserve">
+    <value>译文</value>
+  </data>
+  <data name="ReadAloudMode_Both" xml:space="preserve">
+    <value>双语</value>
+  </data>
 </root>

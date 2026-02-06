@@ -796,6 +796,51 @@ namespace EasyChat.Lang {
                 return ResourceManager.GetString("FloatingWindow_Open", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Read Aloud.
+        /// </summary>
+        public static string ReadAloudMode {
+            get {
+                return ResourceManager.GetString("ReadAloudMode", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Bilingual.
+        /// </summary>
+        public static string ReadAloudMode_Both {
+            get {
+                return ResourceManager.GetString("ReadAloudMode_Both", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to None.
+        /// </summary>
+        public static string ReadAloudMode_None {
+            get {
+                return ResourceManager.GetString("ReadAloudMode_None", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Original Text.
+        /// </summary>
+        public static string ReadAloudMode_Source {
+            get {
+                return ResourceManager.GetString("ReadAloudMode_Source", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Translated Text.
+        /// </summary>
+        public static string ReadAloudMode_Target {
+            get {
+                return ResourceManager.GetString("ReadAloudMode_Target", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Unlock Window (Click-Through).

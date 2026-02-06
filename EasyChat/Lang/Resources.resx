@@ -794,4 +794,19 @@
   <data name="ResultWindowMode_Dictionary" xml:space="preserve">
     <value>Dictionary</value>
   </data>
+  <data name="ReadAloudMode" xml:space="preserve">
+    <value>Read Aloud</value>
+  </data>
+  <data name="ReadAloudMode_None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="ReadAloudMode_Source" xml:space="preserve">
+    <value>Original Text</value>
+  </data>
+  <data name="ReadAloudMode_Target" xml:space="preserve">
+    <value>Translated Text</value>
+  </data>
+  <data name="ReadAloudMode_Both" xml:space="preserve">
+    <value>Bilingual</value>
+  </data>
 </root>
