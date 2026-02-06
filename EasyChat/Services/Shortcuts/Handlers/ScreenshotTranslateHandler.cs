@@ -22,6 +22,10 @@ using OpenCvSharp;
 using Sdcb.PaddleOCR;
 using System.Linq;
 using Avalonia.Input.Platform;
+using Microsoft.Extensions.DependencyInjection;
+using EasyChat.ViewModels.Windows;
+using EasyChat.Views.Windows;
+using Avalonia.Controls;
 
 namespace EasyChat.Services.Shortcuts.Handlers;
 
@@ -39,6 +43,8 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
     private readonly IMapper _mapper;
     private readonly ILogger<ScreenshotTranslateHandler> _logger;
     
+    private readonly IServiceProvider _serviceProvider;
+    
     private volatile bool _isExecuting;
 
     public string ActionType => "Screenshot";
@@ -52,17 +58,17 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
         IConfigurationService configurationService,
         ISukiToastManager toastManager,
         IMapper mapper,
-        ILogger<ScreenshotTranslateHandler> logger)
+        ILogger<ScreenshotTranslateHandler> logger,
+        IServiceProvider serviceProvider)
     {
         _screenCaptureService = screenCaptureService;
         _ocrService = ocrService;
         _translationServiceFactory = translationServiceFactory;
         _configurationService = configurationService;
-        _translationServiceFactory = translationServiceFactory;
-        _configurationService = configurationService;
         _toastManager = toastManager;
         _mapper = mapper;
         _logger = logger;
+        _serviceProvider = serviceProvider;
     }
 
     public void Execute(ShortcutParameter? parameter = null)
@@ -137,6 +143,113 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
 
         try
         {
+            var resultMode = _configurationService.Result?.ScreenshotResultMode ?? ResultWindowMode.Classic;
+
+            if (resultMode == ResultWindowMode.Dictionary)
+            {
+                 Dispatcher.UIThread.Post(async () =>
+                 {
+                     try 
+                     {
+                         var viewModel = _serviceProvider.GetRequiredService<TranslationDictionaryWindowViewModel>();
+                         viewModel.IsScreenshotMode = true;
+                         viewModel.ShowCloseButton = true; // Always show close button in this mode?
+                         
+                         var view = new TranslationDictionaryWindowView 
+                         { 
+                             DataContext = viewModel
+                         };
+                         
+                         // Position near mouse
+                         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                         {
+                             var mousePos = desktop.MainWindow?.PointToScreen(desktop.MainWindow.PointToClient(new PixelPoint(0,0))); 
+                             // The above approach is tricky because we need the global mouse position, not relative to MainWindow.
+                             // Avalonia doesn't expose global mouse position easily without a window event.
+                             // However, since we just did a screenshot, we might rely on the last known position or center of screen?
+                             // A better way is using native PInvoke or ScreenCaptureService if it exposed it.
+                             
+                             // BUT, we can use the MainWindow's mouse position if it's active.
+                             // Wait, we are in a background process (screenshot).
+                             
+                             // Let's try to get cursor pos via Desktop.
+                             // desktop.MainWindow.MousePosition (Not available directly)
+                             
+                             // Ideally we use the user's last selection end point or start point?
+                             // But we don't have that info here passed from `ocrResult`.
+                             // Wait, `ProcessOcrResult` is called after capture.
+                             
+                             // Let's use `System.Windows.Forms.Cursor.Position` equivalent or PInvoke if needed. 
+                             // Or simpler: Center of the screen for now?
+                             // User EXPLICITLY asked "Display near mouse".
+                             // We need a way to get mouse position.
+                             
+                             // Avalonia 11:
+                             // var topLevel = TopLevel.GetTopLevel(desktop.MainWindow);
+                             // var point = topLevel.PointToClient(new PixelPoint((int)pos.X, (int)pos.Y));
+                             
+                             // Since we don't have easy cross-platform global mouse hook in Avalonia without extra libs,
+                             // And we are on Windows (User OS).
+                             // We can use PInvoke.
+                             
+                             // Actually, let's keep it simple. If we can't get mouse easily, we'll default to center.
+                             // BUT, we can try to use `Win32` if we are on Windows.
+                             
+                             // Or, we can check if `_screenCaptureService` recorded where the selection ended.
+                             // Looking at `ScreenSelectionSession`... it doesn't pass it back.
+                             
+                             // Let's try one commonly used hack in Avalonia:
+                             // new Window().Position (No)
+
+                             // Let's use the provided `GetCursorPos` if available or standard .NET if referencing Forms/WPF (unlikely).
+                             
+                             // Given constraints, I will add a PInvoke helper here locally or use the desktop.MainWindow input manager if possible.
+                             
+                             // Let's just try to infer from the `desktop.MainWindow` if it's open, but it might be minimized.
+                             
+                             // Alternative: Using `Pointer` from `InputManager`?
+                             // var pos = Display.Common.Screens.Primary.Bounds.Center; // Fallback
+                             
+                             // Let's use `Win32.GetCursorPos` since user is on Windows.
+                         }
+                        
+                        view.WindowStartupLocation = WindowStartupLocation.Manual;
+                        
+                        // Using a simple PInvoke wrapper for GetCursorPos since we are on Windows and requested specific feature.
+                        try 
+                        {
+                            if (OperatingSystem.IsWindows())
+                            {
+                                GetCursorPos(out var pt);
+                                // Offset slightly so it doesn't cover the text immediately
+                                view.Position = new PixelPoint(pt.X + 15, pt.Y + 15);
+                            }
+                            else
+                            {
+                                view.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                            }
+                        }
+                        catch
+                        {
+                             view.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                        }
+                         
+                         view.Show();
+                         view.Activate();
+                         
+                         // Initialize with OCR result
+                         await viewModel.InitializeAsync(ocrResult);
+                     }
+                     catch (Exception ex)
+                     {
+                         _logger.LogError(ex, "Failed to open Dictionary Window");
+                         ShowError("Error", ex.Message);
+                     }
+                 });
+                 return;
+            }
+
+            // Classic Mode Logic
             var translator = _translationServiceFactory.CreateCurrentService();
             
             // Always show ResultView
@@ -518,5 +631,16 @@ public class ScreenshotTranslateHandler : IShortcutActionHandler
         mat.WriteToStream(memoryStream);
         memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
         return new Bitmap(memoryStream);
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+    private static extern bool GetCursorPos(out POINT lpPoint);
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    private struct POINT
+    {
+        public int X;
+        public int Y;
     }
 }

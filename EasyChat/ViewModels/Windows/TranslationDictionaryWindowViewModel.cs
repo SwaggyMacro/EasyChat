@@ -23,59 +23,68 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
     private readonly ITokenizerFactory _tokenizerFactory;
     private TaskCompletionSource<bool>? _initializationTcs;
 
+    private string _sourceText = string.Empty;
     public string SourceText
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = string.Empty;
+        get => _sourceText;
+        set => this.RaiseAndSetIfChanged(ref _sourceText, value);
+    }
 
+    private string _translationResult = string.Empty;
     public string TranslationResult
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = string.Empty;
+        get => _translationResult;
+        set => this.RaiseAndSetIfChanged(ref _translationResult, value);
+    }
 
+    private bool _isLoading;
     public bool IsLoading
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        get => _isLoading;
+        set => this.RaiseAndSetIfChanged(ref _isLoading, value);
     }
 
+    private bool _isWordMode;
     public bool IsWordMode
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        get => _isWordMode;
+        set => this.RaiseAndSetIfChanged(ref _isWordMode, value);
     }
 
+    private DictionaryResult? _dictionaryResult;
     public DictionaryResult? DictionaryResult
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        get => _dictionaryResult;
+        set => this.RaiseAndSetIfChanged(ref _dictionaryResult, value);
     }
 
+    private ObservableCollection<TextToken> _sourceTokens = [];
     public ObservableCollection<TextToken> SourceTokens
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = [];
+        get => _sourceTokens;
+        set => this.RaiseAndSetIfChanged(ref _sourceTokens, value);
+    }
 
     // Independent Loading States for Main UI Elements
+    private bool _isWordTtsLoading;
     public bool IsWordTtsLoading
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        get => _isWordTtsLoading;
+        set => this.RaiseAndSetIfChanged(ref _isWordTtsLoading, value);
     }
 
+    private bool _isSourceTtsLoading;
     public bool IsSourceTtsLoading
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        get => _isSourceTtsLoading;
+        set => this.RaiseAndSetIfChanged(ref _isSourceTtsLoading, value);
     }
 
+    private bool _isResultTtsLoading;
     public bool IsResultTtsLoading
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        get => _isResultTtsLoading;
+        set => this.RaiseAndSetIfChanged(ref _isResultTtsLoading, value);
     }
 
     public ReactiveCommand<string, Unit> LookupWordCommand { get; }
@@ -86,16 +95,25 @@ public class TranslationDictionaryWindowViewModel : ViewModelBase
 
     private bool _canNavigateBack;
 
+    private bool _showBackButton;
     public bool ShowBackButton
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        get => _showBackButton;
+        set => this.RaiseAndSetIfChanged(ref _showBackButton, value);
     }
 
+    private bool _showCloseButton;
     public bool ShowCloseButton
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        get => _showCloseButton;
+        set => this.RaiseAndSetIfChanged(ref _showCloseButton, value);
+    }
+
+    private bool _isScreenshotMode;
+    public bool IsScreenshotMode
+    {
+        get => _isScreenshotMode;
+        set => this.RaiseAndSetIfChanged(ref _isScreenshotMode, value);
     }
 
     public TranslationDictionaryWindowViewModel(

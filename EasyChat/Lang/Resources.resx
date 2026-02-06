@@ -785,4 +785,13 @@
   <data name="Speech_Translating" xml:space="preserve">
     <value>Translating...</value>
   </data>
+  <data name="ResultWindowMode" xml:space="preserve">
+    <value>Result Window Mode</value>
+  </data>
+  <data name="ResultWindowMode_Classic" xml:space="preserve">
+    <value>Classic</value>
+  </data>
+  <data name="ResultWindowMode_Dictionary" xml:space="preserve">
+    <value>Dictionary</value>
+  </data>
 </root>

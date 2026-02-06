@@ -775,4 +775,13 @@
   <data name="Speech_Translating" xml:space="preserve">
     <value>翻译中...</value>
   </data>
+  <data name="ResultWindowMode" xml:space="preserve">
+    <value>结果窗口模式</value>
+  </data>
+  <data name="ResultWindowMode_Classic" xml:space="preserve">
+    <value>经典</value>
+  </data>
+  <data name="ResultWindowMode_Dictionary" xml:space="preserve">
+    <value>词典</value>
+  </data>
 </root>

@@ -34,6 +34,12 @@
                         </suki:SettingsLayoutItem.Content>
                     </suki:SettingsLayoutItem>
 
+                    <suki:SettingsLayoutItem Header="{x:Static lang:Resources.Translation}">
+                        <suki:SettingsLayoutItem.Content>
+                            <settings:TranslationSettingsView DataContext="{Binding}" />
+                        </suki:SettingsLayoutItem.Content>
+                    </suki:SettingsLayoutItem>
+
                     <suki:SettingsLayoutItem Header="{x:Static lang:Resources.SelectionTranslation}">
                         <suki:SettingsLayoutItem.Content>
                             <settings:SelectionTranslationSettingsView DataContext="{Binding}" />
@@ -43,12 +49,6 @@
                     <suki:SettingsLayoutItem Header="{x:Static lang:Resources.Tts}">
                         <suki:SettingsLayoutItem.Content>
                             <settings:TtsSettingsView DataContext="{Binding}" />
-                        </suki:SettingsLayoutItem.Content>
-                    </suki:SettingsLayoutItem>
-
-                    <suki:SettingsLayoutItem Header="{x:Static lang:Resources.Translation}">
-                        <suki:SettingsLayoutItem.Content>
-                            <settings:TranslationSettingsView DataContext="{Binding}" />
                         </suki:SettingsLayoutItem.Content>
                     </suki:SettingsLayoutItem>
 

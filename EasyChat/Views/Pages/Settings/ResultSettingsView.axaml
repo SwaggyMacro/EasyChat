@@ -15,154 +15,177 @@
     
     <suki:GlassCard>
         <StackPanel Spacing="15">
-            <!-- Font Size -->
+            <!-- Screenshot Result Mode -->
             <DockPanel>
-                <TextBlock Text="{x:Static lang:Resources.FontSize}"
+                <TextBlock Text="{x:Static lang:Resources.ResultWindowMode}"
                            VerticalAlignment="Center" FontWeight="Bold" />
-                <NumericUpDown Value="{Binding ResultConf.FontSize}"
-                               Minimum="10" Maximum="50" Increment="1"
-                               FormatString="N0"
-                               HorizontalAlignment="Right" Width="150" />
-            </DockPanel>
-
-            <!-- Font Family -->
-            <DockPanel>
-                <TextBlock Text="{x:Static lang:Resources.FontFamily}"
-                           VerticalAlignment="Center" FontWeight="Bold" />
-                <ComboBox ItemsSource="{Binding AvailableFonts}"
-                          SelectedItem="{Binding ResultConf.FontFamily}"
+                <ComboBox ItemsSource="{Binding ResultWindowModes}"
+                          SelectedItem="{Binding ResultConf.ScreenshotResultMode}"
                           HorizontalAlignment="Right" Width="150">
-                          <ComboBox.ItemTemplate>
-                              <DataTemplate>
-                                  <TextBlock Text="{Binding .}" FontFamily="{Binding ., Converter={x:Static converts:StringToFontFamilyConverter.Instance}}" VerticalAlignment="Center" />
-                              </DataTemplate>
-                          </ComboBox.ItemTemplate>
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={x:Static converts:ResultWindowModeConverter.Instance}}" 
+                                       VerticalAlignment="Center" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
                 </ComboBox>
             </DockPanel>
 
-            <Separator Opacity="0.1" />
-            
-            <!-- Font Color -->
-            <DockPanel>
-                <TextBlock Text="{x:Static lang:Resources.FontColor}"
-                           VerticalAlignment="Center" FontWeight="Bold" />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
-                    <TextBox Text="{Binding ResultConf.FontColor}"
-                             Watermark="#FFFFFFFF"
-                             Width="120" VerticalAlignment="Center"/>
-                    <Button Width="35" Height="35" CornerRadius="20" BorderThickness="1" BorderBrush="#33000000">
-                        <Button.Background>
-                            <SolidColorBrush Color="{Binding ResultConf.FontColor, Converter={StaticResource ColorToHexConverter}}"/>
-                        </Button.Background>
-                        <Button.Flyout>
-                            <Flyout Placement="Bottom">
-                                <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
-                                    <ColorView Color="{Binding ResultConf.FontColor, Converter={StaticResource ColorToHexConverter}}" 
-                                               IsAlphaEnabled="True" ColorSpectrumShape="Ring" />
-                                </Border>
-                            </Flyout>
-                        </Button.Flyout>
-                    </Button>
-                </StackPanel>
-            </DockPanel>
+            <!-- Classic Mode Settings -->
+            <StackPanel Spacing="15" IsVisible="{Binding ResultConf.ScreenshotResultMode, Converter={x:Static converts:ResultWindowModeToBooleanConverter.Instance}}">
+                <Separator Opacity="0.1" />
 
-            <Separator Opacity="0.1" />
-            
-            <!-- Transparency Level -->
-            <DockPanel>
-                <TextBlock Text="{x:Static lang:Resources.TransparencyLevel}"
-                           VerticalAlignment="Center" FontWeight="Bold" />
-                <ComboBox ItemsSource="{Binding TransparencyLevels}"
-                          SelectedItem="{Binding ResultConf.TransparencyLevel}"
-                          HorizontalAlignment="Right" Width="150" />
-            </DockPanel>
-            
-            <Separator Opacity="0.1" />
-            
-            <!-- Background Color -->
-            <DockPanel>
-                <TextBlock Text="{x:Static lang:Resources.BackgroundColor}"
-                           VerticalAlignment="Center" FontWeight="Bold" />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
-                    <TextBox Text="{Binding ResultConf.BackgroundColor}"
-                             Watermark="#CC000000"
-                             Width="120" VerticalAlignment="Center"/>
-                    <Button Width="35" Height="35" CornerRadius="20" BorderThickness="1" BorderBrush="#33000000">
-                        <Button.Background>
-                            <SolidColorBrush Color="{Binding ResultConf.BackgroundColor, Converter={StaticResource ColorToHexConverter}}"/>
-                        </Button.Background>
-                        <Button.Flyout>
-                            <Flyout Placement="Bottom">
-                                <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
-                                    <ColorView Color="{Binding ResultConf.BackgroundColor, Converter={StaticResource ColorToHexConverter}}" 
-                                               IsAlphaEnabled="True" ColorSpectrumShape="Ring" />
-                                </Border>
-                            </Flyout>
-                        </Button.Flyout>
-                    </Button>
-                </StackPanel>
-            </DockPanel>
+                <!-- Font Size -->
+                <DockPanel>
+                    <TextBlock Text="{x:Static lang:Resources.FontSize}"
+                               VerticalAlignment="Center" FontWeight="Bold" />
+                    <NumericUpDown Value="{Binding ResultConf.FontSize}"
+                                   Minimum="10" Maximum="50" Increment="1"
+                                   FormatString="N0"
+                                   HorizontalAlignment="Right" Width="150" />
+                </DockPanel>
 
-            <Separator Opacity="0.1" />
-            
-            <!-- Window Background Color -->
-            <DockPanel>
-                <TextBlock Text="{x:Static lang:Resources.WindowBackgroundColor}"
-                           VerticalAlignment="Center" FontWeight="Bold" />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
-                    <TextBox Text="{Binding ResultConf.WindowBackgroundColor}"
-                             Watermark="#00000000"
-                             Width="120" VerticalAlignment="Center"/>
-                    <Button Width="35" Height="35" CornerRadius="20" BorderThickness="1" BorderBrush="#33000000">
-                        <Button.Background>
-                            <SolidColorBrush Color="{Binding ResultConf.WindowBackgroundColor, Converter={StaticResource ColorToHexConverter}}"/>
-                        </Button.Background>
-                        <Button.Flyout>
-                            <Flyout Placement="Bottom">
-                                <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
-                                    <ColorView Color="{Binding ResultConf.WindowBackgroundColor, Converter={StaticResource ColorToHexConverter}}" 
-                                               IsAlphaEnabled="True" ColorSpectrumShape="Ring" />
-                                </Border>
-                            </Flyout>
-                        </Button.Flyout>
-                    </Button>
-                </StackPanel>
-            </DockPanel>
+                <!-- Font Family -->
+                <DockPanel>
+                    <TextBlock Text="{x:Static lang:Resources.FontFamily}"
+                               VerticalAlignment="Center" FontWeight="Bold" />
+                    <ComboBox ItemsSource="{Binding AvailableFonts}"
+                              SelectedItem="{Binding ResultConf.FontFamily}"
+                              HorizontalAlignment="Right" Width="150">
+                              <ComboBox.ItemTemplate>
+                                  <DataTemplate>
+                                      <TextBlock Text="{Binding .}" FontFamily="{Binding ., Converter={x:Static converts:StringToFontFamilyConverter.Instance}}" VerticalAlignment="Center" />
+                                  </DataTemplate>
+                              </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </DockPanel>
 
-            <Separator Opacity="0.1" />
+                <Separator Opacity="0.1" />
+                
+                <!-- Font Color -->
+                <DockPanel>
+                    <TextBlock Text="{x:Static lang:Resources.FontColor}"
+                               VerticalAlignment="Center" FontWeight="Bold" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                        <TextBox Text="{Binding ResultConf.FontColor}"
+                                 Watermark="#FFFFFFFF"
+                                 Width="120" VerticalAlignment="Center"/>
+                        <Button Width="35" Height="35" CornerRadius="20" BorderThickness="1" BorderBrush="#33000000">
+                            <Button.Background>
+                                <SolidColorBrush Color="{Binding ResultConf.FontColor, Converter={StaticResource ColorToHexConverter}}"/>
+                            </Button.Background>
+                            <Button.Flyout>
+                                <Flyout Placement="Bottom">
+                                    <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
+                                        <ColorView Color="{Binding ResultConf.FontColor, Converter={StaticResource ColorToHexConverter}}" 
+                                                   IsAlphaEnabled="True" ColorSpectrumShape="Ring" />
+                                    </Border>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                    </StackPanel>
+                </DockPanel>
 
-            <!-- Auto Calculate Delay Toggle -->
-            <DockPanel>
-                <TextBlock Text="{x:Static lang:Resources.EnableAutoReadDelay}"
-                           VerticalAlignment="Center" FontWeight="Bold" />
-                <ToggleSwitch IsChecked="{Binding ResultConf.EnableAutoReadDelay}"
-                              HorizontalAlignment="Right"
-                              OnContent="" OffContent="" />
-            </DockPanel>
+                <Separator Opacity="0.1" />
+                
+                <!-- Transparency Level -->
+                <DockPanel>
+                    <TextBlock Text="{x:Static lang:Resources.TransparencyLevel}"
+                               VerticalAlignment="Center" FontWeight="Bold" />
+                    <ComboBox ItemsSource="{Binding TransparencyLevels}"
+                              SelectedItem="{Binding ResultConf.TransparencyLevel}"
+                              HorizontalAlignment="Right" Width="150" />
+                </DockPanel>
+                
+                <Separator Opacity="0.1" />
+                
+                <!-- Background Color -->
+                <DockPanel>
+                    <TextBlock Text="{x:Static lang:Resources.BackgroundColor}"
+                               VerticalAlignment="Center" FontWeight="Bold" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                        <TextBox Text="{Binding ResultConf.BackgroundColor}"
+                                 Watermark="#CC000000"
+                                 Width="120" VerticalAlignment="Center"/>
+                        <Button Width="35" Height="35" CornerRadius="20" BorderThickness="1" BorderBrush="#33000000">
+                            <Button.Background>
+                                <SolidColorBrush Color="{Binding ResultConf.BackgroundColor, Converter={StaticResource ColorToHexConverter}}"/>
+                            </Button.Background>
+                            <Button.Flyout>
+                                <Flyout Placement="Bottom">
+                                    <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
+                                        <ColorView Color="{Binding ResultConf.BackgroundColor, Converter={StaticResource ColorToHexConverter}}" 
+                                                   IsAlphaEnabled="True" ColorSpectrumShape="Ring" />
+                                    </Border>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                    </StackPanel>
+                </DockPanel>
 
-            <!-- Fixed Delay Setting (Visible when Auto is OFF) -->
-            <DockPanel IsVisible="{Binding !ResultConf.EnableAutoReadDelay}">
-                <TextBlock Text="{x:Static lang:Resources.ResultAutoCloseDelay}"
-                           VerticalAlignment="Center" Margin="20,0,0,0" Opacity="0.8" />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
-                    <NumericUpDown Value="{Binding ResultConf.AutoCloseDelay}"
-                                   Minimum="1000" Maximum="60000" Increment="500"
-                                   FormatString="N0" Width="150" />
-                    <TextBlock Text="ms" VerticalAlignment="Center" Opacity="0.6" Width="30" />
-                </StackPanel>
-            </DockPanel>
+                <Separator Opacity="0.1" />
+                
+                <!-- Window Background Color -->
+                <DockPanel>
+                    <TextBlock Text="{x:Static lang:Resources.WindowBackgroundColor}"
+                               VerticalAlignment="Center" FontWeight="Bold" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                        <TextBox Text="{Binding ResultConf.WindowBackgroundColor}"
+                                 Watermark="#00000000"
+                                 Width="120" VerticalAlignment="Center"/>
+                        <Button Width="35" Height="35" CornerRadius="20" BorderThickness="1" BorderBrush="#33000000">
+                            <Button.Background>
+                                <SolidColorBrush Color="{Binding ResultConf.WindowBackgroundColor, Converter={StaticResource ColorToHexConverter}}"/>
+                            </Button.Background>
+                            <Button.Flyout>
+                                <Flyout Placement="Bottom">
+                                    <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
+                                        <ColorView Color="{Binding ResultConf.WindowBackgroundColor, Converter={StaticResource ColorToHexConverter}}" 
+                                                   IsAlphaEnabled="True" ColorSpectrumShape="Ring" />
+                                    </Border>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                    </StackPanel>
+                </DockPanel>
 
-            <!-- Ms Per Char Setting (Visible when Auto is ON) -->
-            <DockPanel IsVisible="{Binding ResultConf.EnableAutoReadDelay}">
-                <TextBlock Text="{x:Static lang:Resources.MsPerChar}"
-                           VerticalAlignment="Center" Margin="20,0,0,0" Opacity="0.8" />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
-                    <NumericUpDown Value="{Binding ResultConf.MsPerChar}"
-                                   Minimum="10" Maximum="1000" Increment="10"
-                                   FormatString="N0" Width="150" />
-                    <TextBlock Text="ms" VerticalAlignment="Center" Opacity="0.6" Width="30" />
-                </StackPanel>
-            </DockPanel>
+                <Separator Opacity="0.1" />
+
+                <!-- Auto Calculate Delay Toggle -->
+                <DockPanel>
+                    <TextBlock Text="{x:Static lang:Resources.EnableAutoReadDelay}"
+                               VerticalAlignment="Center" FontWeight="Bold" />
+                    <ToggleSwitch IsChecked="{Binding ResultConf.EnableAutoReadDelay}"
+                                  HorizontalAlignment="Right"
+                                  OnContent="" OffContent="" />
+                </DockPanel>
+
+                <Separator Opacity="0.1" />
+
+                <!-- Fixed Delay Setting (Visible when Auto is OFF) -->
+                <DockPanel IsVisible="{Binding !ResultConf.EnableAutoReadDelay}">
+                    <TextBlock Text="{x:Static lang:Resources.ResultAutoCloseDelay}"
+                               VerticalAlignment="Center" Margin="20,0,0,0" Opacity="0.8" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                        <NumericUpDown Value="{Binding ResultConf.AutoCloseDelay}"
+                                       Minimum="1000" Maximum="60000" Increment="500"
+                                       FormatString="N0" Width="150" />
+                        <TextBlock Text="ms" VerticalAlignment="Center" Opacity="0.6" Width="30" />
+                    </StackPanel>
+                </DockPanel>
+
+                <!-- Ms Per Char Setting (Visible when Auto is ON) -->
+                <DockPanel IsVisible="{Binding ResultConf.EnableAutoReadDelay}">
+                    <TextBlock Text="{x:Static lang:Resources.MsPerChar}"
+                               VerticalAlignment="Center" Margin="20,0,0,0" Opacity="0.8" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                        <NumericUpDown Value="{Binding ResultConf.MsPerChar}"
+                                       Minimum="10" Maximum="1000" Increment="10"
+                                       FormatString="N0" Width="150" />
+                        <TextBlock Text="ms" VerticalAlignment="Center" Opacity="0.6" Width="30" />
+                    </StackPanel>
+                </DockPanel>
+            </StackPanel>
         </StackPanel>
     </suki:GlassCard>
 </UserControl>

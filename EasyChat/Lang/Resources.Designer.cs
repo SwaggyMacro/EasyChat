@@ -1590,6 +1590,42 @@ namespace EasyChat.Lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Restore Default.
+        /// </summary>
+        public static string RestoreDefault {
+            get {
+                return ResourceManager.GetString("RestoreDefault", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Result Window Mode.
+        /// </summary>
+        public static string ResultWindowMode {
+            get {
+                return ResourceManager.GetString("ResultWindowMode", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Classic.
+        /// </summary>
+        public static string ResultWindowMode_Classic {
+            get {
+                return ResourceManager.GetString("ResultWindowMode_Classic", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Dictionary.
+        /// </summary>
+        public static string ResultWindowMode_Dictionary {
+            get {
+                return ResourceManager.GetString("ResultWindowMode_Dictionary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Set as Default.
         /// </summary>
         public static string SetAsDefault {
