@@ -25,54 +25,56 @@
         </Grid>
         
         <!-- Settings content - hidden initially, shown after lazy load -->
-        <suki:SettingsLayout x:Name="SettingsContent" IsVisible="False">
-            <suki:SettingsLayout.Items>
-                <objectModel:ObservableCollection x:TypeArguments="suki:SettingsLayoutItem">
-                    <suki:SettingsLayoutItem Header="{x:Static lang:Resources.General}">
-                        <suki:SettingsLayoutItem.Content>
-                            <settings:GeneralSettingsView DataContext="{Binding}" />
-                        </suki:SettingsLayoutItem.Content>
-                    </suki:SettingsLayoutItem>
+        <ScrollViewer x:Name="SettingsContent" IsVisible="False">
+            <suki:SettingsLayout>
+                <suki:SettingsLayout.Items>
+                    <objectModel:ObservableCollection x:TypeArguments="suki:SettingsLayoutItem">
+                        <suki:SettingsLayoutItem Header="{x:Static lang:Resources.General}">
+                            <suki:SettingsLayoutItem.Content>
+                                <settings:GeneralSettingsView DataContext="{Binding}" />
+                            </suki:SettingsLayoutItem.Content>
+                        </suki:SettingsLayoutItem>
 
-                    <suki:SettingsLayoutItem Header="{x:Static lang:Resources.Translation}">
-                        <suki:SettingsLayoutItem.Content>
-                            <settings:TranslationSettingsView DataContext="{Binding}" />
-                        </suki:SettingsLayoutItem.Content>
-                    </suki:SettingsLayoutItem>
+                        <suki:SettingsLayoutItem Header="{x:Static lang:Resources.Translation}">
+                            <suki:SettingsLayoutItem.Content>
+                                <settings:TranslationSettingsView DataContext="{Binding}" />
+                            </suki:SettingsLayoutItem.Content>
+                        </suki:SettingsLayoutItem>
 
-                    <suki:SettingsLayoutItem Header="{x:Static lang:Resources.SelectionTranslation}">
-                        <suki:SettingsLayoutItem.Content>
-                            <settings:SelectionTranslationSettingsView DataContext="{Binding}" />
-                        </suki:SettingsLayoutItem.Content>
-                    </suki:SettingsLayoutItem>
+                        <suki:SettingsLayoutItem Header="{x:Static lang:Resources.SelectionTranslation}">
+                            <suki:SettingsLayoutItem.Content>
+                                <settings:SelectionTranslationSettingsView DataContext="{Binding}" />
+                            </suki:SettingsLayoutItem.Content>
+                        </suki:SettingsLayoutItem>
 
-                    <suki:SettingsLayoutItem Header="{x:Static lang:Resources.Tts}">
-                        <suki:SettingsLayoutItem.Content>
-                            <settings:TtsSettingsView DataContext="{Binding}" />
-                        </suki:SettingsLayoutItem.Content>
-                    </suki:SettingsLayoutItem>
+                        <suki:SettingsLayoutItem Header="{x:Static lang:Resources.Tts}">
+                            <suki:SettingsLayoutItem.Content>
+                                <settings:TtsSettingsView DataContext="{Binding}" />
+                            </suki:SettingsLayoutItem.Content>
+                        </suki:SettingsLayoutItem>
 
-                    <suki:SettingsLayoutItem Header="{x:Static lang:Resources.ScreenshotMode}">
-                        <suki:SettingsLayoutItem.Content>
-                            <settings:ScreenshotSettingsView DataContext="{Binding}" />
-                        </suki:SettingsLayoutItem.Content>
-                    </suki:SettingsLayoutItem>
-                    
-                    <suki:SettingsLayoutItem Header="{x:Static lang:Resources.ResultSettings}">
-                        <suki:SettingsLayoutItem.Content>
-                            <settings:ResultSettingsView DataContext="{Binding}" />
-                        </suki:SettingsLayoutItem.Content>
-                    </suki:SettingsLayoutItem>
-                    
-                    <suki:SettingsLayoutItem Header="{x:Static lang:Resources.InputSettings}">
-                        <suki:SettingsLayoutItem.Content>
-                            <settings:InputSettingsView DataContext="{Binding}" />
-                        </suki:SettingsLayoutItem.Content>
-                    </suki:SettingsLayoutItem>
+                        <suki:SettingsLayoutItem Header="{x:Static lang:Resources.ScreenshotMode}">
+                            <suki:SettingsLayoutItem.Content>
+                                <settings:ScreenshotSettingsView DataContext="{Binding}" />
+                            </suki:SettingsLayoutItem.Content>
+                        </suki:SettingsLayoutItem>
+                        
+                        <suki:SettingsLayoutItem Header="{x:Static lang:Resources.ResultSettings}">
+                            <suki:SettingsLayoutItem.Content>
+                                <settings:ResultSettingsView DataContext="{Binding}" />
+                            </suki:SettingsLayoutItem.Content>
+                        </suki:SettingsLayoutItem>
+                        
+                        <suki:SettingsLayoutItem Header="{x:Static lang:Resources.InputSettings}">
+                            <suki:SettingsLayoutItem.Content>
+                                <settings:InputSettingsView DataContext="{Binding}" />
+                            </suki:SettingsLayoutItem.Content>
+                        </suki:SettingsLayoutItem>
 
-                </objectModel:ObservableCollection>
-            </suki:SettingsLayout.Items>
-        </suki:SettingsLayout>
+                    </objectModel:ObservableCollection>
+                </suki:SettingsLayout.Items>
+            </suki:SettingsLayout>
+        </ScrollViewer>
     </Panel>
 
 </UserControl>
