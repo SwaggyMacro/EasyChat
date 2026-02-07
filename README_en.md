@@ -6,7 +6,7 @@
 
 [![Downloads](https://img.shields.io/github/downloads/SwaggyMacro/EasyChat/total?style=flat-square&color=blue)](https://github.com/SwaggyMacro/EasyChat/releases)
 [![Stars](https://img.shields.io/github/stars/SwaggyMacro/EasyChat?style=flat-square&color=yellow)](https://github.com/SwaggyMacro/EasyChat/stargazers)
-[![License](https://img.shields.io/github/license/SwaggyMacro/EasyChat?style=flat-square&color=orange)](https://github.com/SwaggyMacro/EasyChat/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/SwaggyMacro/EasyChat?style=flat-square&color=orange)](https://github.com/SwaggyMacro/EasyChat/blob/master/LICENSE)
 
 </div>
 
