@@ -19,7 +19,11 @@ public static class Constant
     public const string SelectionTranslationConf = "SelectionTranslation";
     public const string TtsConf = "Tts";
     
+#if DEBUG
     public static readonly string ConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configuration");
+#else
+    public static readonly string ConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Configuration");
+#endif
 
     public static class TransEngineType
     {
