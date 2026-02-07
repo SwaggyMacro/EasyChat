@@ -1,4 +1,15 @@
+<div align="center">
+
 # EasyChat
+
+[English](README_en.md) | [简体中文](README.md)
+
+[![Downloads](https://img.shields.io/github/downloads/SwaggyMacro/EasyChat/total?style=flat-square&color=blue)](https://github.com/SwaggyMacro/EasyChat/releases)
+[![Stars](https://img.shields.io/github/stars/SwaggyMacro/EasyChat?style=flat-square&color=yellow)](https://github.com/SwaggyMacro/EasyChat/stargazers)
+[![License](https://img.shields.io/github/license/SwaggyMacro/EasyChat?style=flat-square&color=orange)](https://github.com/SwaggyMacro/EasyChat/blob/main/LICENSE)
+
+</div>
+
 
 EasyChat 是一款基于 Avalonia 开发的跨平台即时翻译工具，是继 2018 年高中时期使用易语言开发的“交流神器”（原官网 [https://f.julym.com](https://f.julym.com)）后的第三次重构版本。
 本项目旨在提供更流畅、更现代化的跨语言交流体验。
@@ -21,8 +32,12 @@ EasyChat 是一款基于 Avalonia 开发的跨平台即时翻译工具，是继 
 ### AI 大模型 (推荐)
 支持自定义提示词（Prompt），可完美解决特定领域术语翻译不准确的问题（如游戏术语 CS2、编程术语等）。
 
-*   **推荐渠道**: [硅基流动 (SiliconFlow)](https://cloud.siliconflow.cn/i/x8pm79KY)
+*   **硅基流动**: [申请地址](https://cloud.siliconflow.cn/i/x8pm79KY)
     *   *优势*: 提供多种免費的小参数量模型，且翻译质量和速度完全满足日常使用。
+*   **心流 iFlow**: [申请地址](https://www.iflow.cn/)
+    *   *优势*: 提供多种大参数量模型，如 Qwen3-Max，适合对翻译质量有更高要求的用户，API 限制 1 QPS，但可以多注册几个账号轮询。
+*   **魔塔 ModelScope**: [申请地址](https://www.modelscope.cn/)
+    *   *优势*: 提供多种大模型，日免费 2000 次调用。
 
 ### 机器翻译
 *   **百度翻译**: [申请地址](https://fanyi-api.baidu.com/product/11)
@@ -79,8 +94,8 @@ https://github.com/user-attachments/assets/6ab9b6a3-446d-403a-b37a-d49b39c0f9d3
 
 项目目前已完善基础功能，后续将持续迭代开发，计划加入以下功能：
 
-- [ ] **划词翻译**: 选中文本直接进行翻译。
-- [ ] **词典功能**: 截图后可点击单词查看详细解释、例句、发音及音标。
+- [x] **划词翻译**: 选中文本直接进行翻译。
+- [x] **词典功能**: 截图后可点击单词查看详细解释、例句、发音及音标。
 - [x] **实时语音翻译**: 目前该功能还在开发，需要下载模型文件，需要尝鲜的可以在下方加入QQ群，在群内询问。
 - [ ] **固定区域翻译**: 设定特定屏幕区域，快捷键一键翻译（适用于 Galgame 等场景）。
 - [ ] **同色系遮罩**: 截图翻译后，使用背景同色遮罩覆盖原文并显示译文，提供更沉浸的阅读体验。
