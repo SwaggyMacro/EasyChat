@@ -38,12 +38,39 @@ public class WindowsPlatformService : IPlatformService
                 }
             }
 
+            // Method 1: Standard SetForegroundWindow
             var result = Win32.SetForegroundWindow(hWnd);
+            
             if (!result)
             {
-                _logger.LogWarning($"SetForegroundWindow failed for hWnd: {hWnd}");
+                 // Method 2: BringWindowToTop
+                 Win32.BringWindowToTop(hWnd);
+                 result = Win32.SetForegroundWindow(hWnd);
+            }
+
+            if (!result)
+            {
+                // Method 3: SwitchToThisWindow (Deprecated but effective)
+                Win32.SwitchToThisWindow(hWnd, true);
+                result = Win32.SetForegroundWindow(hWnd);
+            }
+
+            if (!result)
+            {
+                // Method 4: The "Alt Key" Trick
+                // Simulates a user action to bypass timeout restrictions
+                Win32.keybd_event(Win32.VK_MENU, 0, 0, 0); // Alt Down
+                Win32.keybd_event(Win32.VK_MENU, 0, Win32.KEYEVENTF_KEYUP, 0); // Alt Up
+                
+                result = Win32.SetForegroundWindow(hWnd);
+            }
+
+            if (!result)
+            {
+                _logger.LogWarning($"All attempts to SetForegroundWindow failed for hWnd: {hWnd}");
             }
             
+            // Ensure focus is explicitly set
             Win32.SetFocus(hWnd);
         }
         catch (Exception ex)
@@ -498,6 +525,17 @@ public class WindowsPlatformService : IPlatformService
             public int lindex;
             public int tymed;
         }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool BringWindowToTop(IntPtr hWnd);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern void SwitchToThisWindow(IntPtr hWnd, bool fAltTab);
+
+        [DllImport("user32.dll")]
+        public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
+
+        public const byte VK_MENU = 0x12;
 
         [StructLayout(LayoutKind.Sequential)]
         public struct STGMEDIUM

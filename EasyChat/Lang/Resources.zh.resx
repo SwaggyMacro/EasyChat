@@ -159,6 +159,9 @@
     <data name="Save" xml:space="preserve">
         <value>保存</value>
     </data>
+    <data name="FollowConfig" xml:space="preserve">
+        <value>跟随配置</value>
+    </data>
     <data name="Restore" xml:space="preserve">
         <value>恢复上次</value>
     </data>
@@ -805,4 +808,7 @@
   <data name="ReverseTranslateLanguageTip" xml:space="preserve">
     <value>输入翻译时交换源语言和目标语言（例如当源语言设置成英语但你输入的是中文时）。</value>
   </data>
+    <data name="TypingFollowConfigTooltip" xml:space="preserve">
+        <value>开启后，源语言和目标语言将跟随全局配置。</value>
+    </data>
 </root>

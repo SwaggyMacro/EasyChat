@@ -1,23 +1,21 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
+using System.Linq;
 using EasyChat.Common;
 using EasyChat.Services.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Key = Avalonia.Input.Key;
+
+using EasyChat.ViewModels.Typing;
 
 namespace EasyChat.Views.Typing;
 
 public partial class TypingView : Window
 {
-    private readonly IPlatformService _platformService;
-    private readonly ILogger<TypingView> _logger;
-    private readonly IntPtr _targetHwnd;
-    
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     public TypingView() {}
@@ -26,24 +24,30 @@ public partial class TypingView : Window
     {
         InitializeComponent();
         
+        DataContext = new TypingViewModel(targetHwnd);
+        
         ApplyConfiguration();
         
         // Listen for config changes
         var configService = Global.Services?.GetRequiredService<IConfigurationService>();
         configService?.Input?.Changed.Subscribe(_ => 
             Dispatcher.UIThread.Post(ApplyConfiguration));
-
-        _targetHwnd = targetHwnd;
-        _platformService = Global.Services?.GetRequiredService<IPlatformService>() ??
-                           throw new InvalidOperationException("PlatformService not found");
-        _logger = Global.Services.GetRequiredService<ILogger<TypingView>>() ??
-                  throw new InvalidOperationException("Logger not found");
-
+        
         var inputBox = this.FindControl<TextBox>("InputBox");
 
         Opened += (_, _) => { inputBox?.Focus(); };
-
-        LostFocus += (_, _) => { Close(); };
+        
+        Deactivated += (_, _) =>
+        {
+            // If any ComboBox dropdown is open, do not close.
+            var comboBoxes = this.GetVisualDescendants().OfType<ComboBox>();
+            if (comboBoxes.Any(cb => cb.IsDropDownOpen))
+            {
+                return;
+            }
+            
+            Close();
+        };
     }
 
     private void ApplyConfiguration()
@@ -52,7 +56,6 @@ public partial class TypingView : Window
         var config = configService?.Input;
         if (config == null) return;
 
-        // Transparency Level Hint
         // Transparency Level Hint
         if (!string.IsNullOrEmpty(config.TransparencyLevel))
         {
@@ -112,112 +115,25 @@ public partial class TypingView : Window
                 return;
             }
 
-            // Hide immediately or waiting? 
-            // Better to hide or show loading state.
             inputBox.IsEnabled = false;
 
-            try
+            if (DataContext is TypingViewModel vm)
             {
-
-                var translatedText = await TranslateText(text);
-
                 // Hide first
                 Hide();
-
-                var delay = 10;
-                var mode = Models.Configuration.InputDeliveryMode.Type;
-
-                if (Global.Services?.GetRequiredService<IConfigurationService>().Input is { } inputConfig)
-                {
-                    delay = inputConfig.KeySendDelay;
-                    mode = inputConfig.DeliveryMode;
-                }
-
-                // Ensure focus with retry
-                if (await _platformService.EnsureFocused(_targetHwnd))
-                {
-                     // Wait a bit for focus to settle completely
-                     await Task.Delay(100);
-
-                     // Send text
-                     if (mode == Models.Configuration.InputDeliveryMode.Paste)
-                     {
-                         // Backup clipboard logic using helper
-                         var backup = await ClipboardHelper.BackupClipboardAsync(_logger);
-
-                         await _platformService.PasteTextAsync(translatedText);
-                         
-                         // Wait for paste to complete before restoring
-                         await Task.Delay(200);
-                         
-                         // Restore clipboard
-                         await ClipboardHelper.RestoreClipboardAsync(backup, _logger);
-                     }
-                     else if (mode == Models.Configuration.InputDeliveryMode.Message)
-                     {
-                         await _platformService.SendTextMessageAsync(_targetHwnd, translatedText, delay);
-                     }
-                     else
-                     {
-                         await _platformService.SendTextAsync(translatedText, delay);
-                     }
-                }
-                else
-                {
-                    _logger.LogWarning("Failed to ensure focus on target window, skipping text delivery.");
-                }
                 
-                // Finally close
+                await vm.TranslateAndSendAsync(text);
+                
                 Close();
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "Translation failed");
                 Close();
             }
         }
         else if (e.Key == Key.Escape)
         {
             Close();
-        }
-    }
-
-    private async Task<string> TranslateText(string text)
-    {
-        try
-        {
-            var services = Global.Services;
-            if (services == null) return "[Error] Services not initialized.";
-
-            var factory = services.GetRequiredService<ITranslationServiceFactory>();
-            var configService = services.GetRequiredService<IConfigurationService>();
-            
-            var translator = factory.CreateCurrentService();
-            var sourceLang = configService.General?.SourceLanguage;
-            var targetLang = configService.General?.TargetLanguage;
-
-            if (configService.Input?.ReverseTranslateLanguage == true)
-            {
-                (sourceLang, targetLang) = (targetLang ?? throw new InvalidOperationException("Target language not configured"), 
-                    sourceLang ?? throw new InvalidOperationException("Source language not configured"));
-            }
-
-            if (translator is Services.Translation.Ai.OpenAiService openAi)
-            {
-                var result = "";
-                await foreach (var chunk in openAi.StreamTranslateAsync(text, sourceLang, targetLang))
-                {
-                    result += chunk;
-                }
-                return result;
-            }
-            
-            return await translator.TranslateAsync(text, sourceLang, targetLang);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error during translation");
-            return $"[Error] {ex.Message}";
         }
     }
 }

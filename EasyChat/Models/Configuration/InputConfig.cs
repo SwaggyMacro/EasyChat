@@ -47,6 +47,27 @@ public class InputConfig : ReactiveObject
         get;
         set => this.RaiseAndSetIfChanged(ref field, value);
     } = true;
+
+    [JsonProperty]
+    public string TypingSourceLanguage
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "auto";
+
+    [JsonProperty]
+    public string TypingTargetLanguage
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "en";
+
+    [JsonProperty]
+    public bool FollowGlobalLanguage
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = true;
 }
 
 public enum InputDeliveryMode

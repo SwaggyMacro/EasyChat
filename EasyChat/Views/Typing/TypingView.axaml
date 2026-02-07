@@ -4,9 +4,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:suki="https://github.com/kikipoulet/SukiUI"
         xmlns:lang="clr-namespace:EasyChat.Lang"
-        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="80"
-        Width="400" Height="60"
+        xmlns:vm="clr-namespace:EasyChat.ViewModels.Typing"
+        xmlns:converters="clr-namespace:EasyChat.Converters"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="110"
+        Height="110" MinWidth="500" SizeToContent="Width"
         x:Class="EasyChat.Views.Typing.TypingView"
+        x:DataType="vm:TypingViewModel"
         WindowStartupLocation="CenterScreen"
         SystemDecorations="None"
         ExtendClientAreaToDecorationsHint="True"
@@ -19,14 +23,65 @@
 
     <Panel>
         <suki:GlassCard x:Name="MainCard" CornerRadius="10" Padding="0" Background="#CC000000">
-            <TextBox Name="InputBox"
-                     Watermark="{x:Static lang:Resources.InputToTranslate}"
-                     VerticalAlignment="Center"
-                     HorizontalAlignment="Stretch"
-                     Margin="10"
-                     BorderThickness="0"
-                     Background="Transparent"
-                     KeyDown="InputBox_OnKeyDown" />
+            <Grid RowDefinitions="*,Auto" Margin="10">
+                <TextBox Name="InputBox"
+                         Grid.Row="0"
+                         Watermark="{x:Static lang:Resources.InputToTranslate}"
+                         VerticalAlignment="Center"
+                         HorizontalAlignment="Stretch"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         KeyDown="InputBox_OnKeyDown" />
+                
+                <Grid Grid.Row="1" ColumnDefinitions="Auto, 10, Auto, 10, Auto, 10, Auto" Margin="0,5,0,0">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                        <CheckBox Content="{x:Static lang:Resources.FollowConfig}" 
+                                  IsChecked="{Binding FollowGlobalLanguage}" />
+                        <Border Background="Transparent" 
+                                ToolTip.Tip="{x:Static lang:Resources.TypingFollowConfigTooltip}"
+                                VerticalAlignment="Center">
+                            <avalonia:MaterialIcon Kind="InformationOutline" Width="16" Height="16" Opacity="0.6"
+                                                   Foreground="{DynamicResource SukiText}" />
+                        </Border>
+                    </StackPanel>
+                    
+                    <ComboBox Grid.Column="2" 
+                              IsEnabled="{Binding !FollowGlobalLanguage}"
+                              ItemsSource="{Binding SourceLanguages}" 
+                              SelectedItem="{Binding SelectedSourceLanguage}"
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Image Width="20" Height="20" Source="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.ToIcon}}" />
+                                    <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center"
+                                               Foreground="{DynamicResource SukiText}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    
+                    <TextBlock Grid.Column="4" Text="→" VerticalAlignment="Center" 
+                               Foreground="{DynamicResource SukiText}" 
+                               Opacity="0.6" />
+
+                    <ComboBox Grid.Column="6" 
+                              IsEnabled="{Binding !FollowGlobalLanguage}"
+                              ItemsSource="{Binding TargetLanguages}" 
+                              SelectedItem="{Binding SelectedTargetLanguage}"
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Image Width="20" Height="20" Source="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.ToIcon}}" />
+                                    <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center"
+                                               Foreground="{DynamicResource SukiText}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </Grid>
+            </Grid>
         </suki:GlassCard>
     </Panel>
 </Window>

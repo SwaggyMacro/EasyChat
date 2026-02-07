@@ -167,6 +167,9 @@
     <data name="Save" xml:space="preserve">
         <value>Save</value>
     </data>
+    <data name="FollowConfig" xml:space="preserve">
+        <value>Follow Configuration</value>
+    </data>
     <data name="Restore" xml:space="preserve">
         <value>Restore</value>
     </data>
@@ -815,4 +818,7 @@
   <data name="ReverseTranslateLanguageTip" xml:space="preserve">
     <value>Swap source and target languages for input translation.</value>
   </data>
+    <data name="TypingFollowConfigTooltip" xml:space="preserve">
+        <value>When enabled, source and target languages will sync with global configuration.</value>
+    </data>
 </root>

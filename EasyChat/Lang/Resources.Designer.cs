@@ -796,6 +796,33 @@ namespace EasyChat.Lang {
                 return ResourceManager.GetString("FloatingWindow_Open", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unlock Window (Click-Through).
+        /// </summary>
+        public static string FloatingWindow_Unlock {
+            get {
+                return ResourceManager.GetString("FloatingWindow_Unlock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Follow Configuration.
+        /// </summary>
+        public static string FollowConfig {
+            get {
+                return ResourceManager.GetString("FollowConfig", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Font Color.
+        /// </summary>
+        public static string FontColor {
+            get {
+                return ResourceManager.GetString("FontColor", resourceCulture);
+            }
+        }
 
         /// <summary>
         ///   Looks up a localized string similar to Read Aloud.
@@ -842,23 +869,7 @@ namespace EasyChat.Lang {
             }
         }
         
-        /// <summary>
-        ///   Looks up a localized string similar to Unlock Window (Click-Through).
-        /// </summary>
-        public static string FloatingWindow_Unlock {
-            get {
-                return ResourceManager.GetString("FloatingWindow_Unlock", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Font Color.
-        /// </summary>
-        public static string FontColor {
-            get {
-                return ResourceManager.GetString("FontColor", resourceCulture);
-            }
-        }
+
         
         /// <summary>
         ///   Looks up a localized string similar to Font Family.
@@ -2439,6 +2450,14 @@ namespace EasyChat.Lang {
         public static string Speech_Translating {
             get {
                 return ResourceManager.GetString("Speech_Translating", resourceCulture);
+            }
+        }
+        /// <summary>
+        ///   Looks up a localized string similar to When enabled, source and target languages will sync with global configuration..
+        /// </summary>
+        public static string TypingFollowConfigTooltip {
+            get {
+                return ResourceManager.GetString("TypingFollowConfigTooltip", resourceCulture);
             }
         }
     }
