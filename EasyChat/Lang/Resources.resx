@@ -716,7 +716,7 @@
     <data name="SelectionTranslate_Failed" xml:space="preserve">
         <value>Translation Failed: </value>
     </data>
-  <data name="Tips" xml:space="preserve">
+    <data name="Tips" xml:space="preserve">
     <value>Tips</value>
   </data>
   <data name="Examples" xml:space="preserve">
@@ -808,5 +808,11 @@
   </data>
   <data name="ReadAloudMode_Both" xml:space="preserve">
     <value>Bilingual</value>
+  </data>
+  <data name="ReverseTranslateLanguage" xml:space="preserve">
+    <value>Reverse Language</value>
+  </data>
+  <data name="ReverseTranslateLanguageTip" xml:space="preserve">
+    <value>Swap source and target languages for input translation.</value>
   </data>
 </root>

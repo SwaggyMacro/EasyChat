@@ -40,6 +40,13 @@ public class InputConfig : ReactiveObject
         get;
         set => this.RaiseAndSetIfChanged(ref field, value);
     } = InputDeliveryMode.Paste;
+
+    [JsonProperty]
+    public bool ReverseTranslateLanguage
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = true;
 }
 
 public enum InputDeliveryMode

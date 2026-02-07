@@ -799,4 +799,10 @@
   <data name="ReadAloudMode_Both" xml:space="preserve">
     <value>双语</value>
   </data>
+  <data name="ReverseTranslateLanguage" xml:space="preserve">
+    <value>反向翻译(输入)</value>
+  </data>
+  <data name="ReverseTranslateLanguageTip" xml:space="preserve">
+    <value>输入翻译时交换源语言和目标语言（例如当源语言设置成英语但你输入的是中文时）。</value>
+  </data>
 </root>

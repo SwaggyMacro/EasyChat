@@ -1644,6 +1644,24 @@ namespace EasyChat.Lang {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Reverse Language.
+        /// </summary>
+        public static string ReverseTranslateLanguage {
+            get {
+                return ResourceManager.GetString("ReverseTranslateLanguage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Swap source and target languages for input translation..
+        /// </summary>
+        public static string ReverseTranslateLanguageTip {
+            get {
+                return ResourceManager.GetString("ReverseTranslateLanguageTip", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Result Window Mode.
         /// </summary>
         public static string ResultWindowMode {

@@ -187,7 +187,7 @@ public partial class TypingView : Window
         try
         {
             var services = Global.Services;
-            if (services == null) return $"[Error] Services not initialized.";
+            if (services == null) return "[Error] Services not initialized.";
 
             var factory = services.GetRequiredService<ITranslationServiceFactory>();
             var configService = services.GetRequiredService<IConfigurationService>();
@@ -196,17 +196,23 @@ public partial class TypingView : Window
             var sourceLang = configService.General?.SourceLanguage;
             var targetLang = configService.General?.TargetLanguage;
 
+            if (configService.Input?.ReverseTranslateLanguage == true)
+            {
+                (sourceLang, targetLang) = (targetLang ?? throw new InvalidOperationException("Target language not configured"), 
+                    sourceLang ?? throw new InvalidOperationException("Source language not configured"));
+            }
+
             if (translator is Services.Translation.Ai.OpenAiService openAi)
             {
                 var result = "";
-                await foreach (var chunk in openAi.StreamTranslateAsync(text, targetLang, sourceLang))
+                await foreach (var chunk in openAi.StreamTranslateAsync(text, sourceLang, targetLang))
                 {
                     result += chunk;
                 }
                 return result;
             }
             
-            return await translator.TranslateAsync(text, targetLang, sourceLang);
+            return await translator.TranslateAsync(text, sourceLang, targetLang);
         }
         catch (Exception ex)
         {
