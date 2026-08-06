@@ -99,6 +99,44 @@ public sealed class TranslationUseCasesTests
     }
 
     [TestMethod]
+    public async Task Prepare_AppendsFeaturePromptOverrideToPromptSelectedById()
+    {
+        var bundle = CreateAiBundle() with
+        {
+            Prompts = new PromptSettings(
+                "selected",
+                [
+                    new PromptEntrySettings(
+                        "selected",
+                        "Selected",
+                        "Selected [SourceLang] to [TargetLang]",
+                        false),
+                    new PromptEntrySettings(
+                        "speech",
+                        "Speech",
+                        "Use the product term EasyChat when translating to [TargetLang].",
+                        false)
+                ])
+        };
+        var context = CreateContext(bundle);
+        context.Factory.Chat.CompleteResponse =
+            "{\"event\":\"translation_delta\",\"text\":\"translated\"}\n{\"event\":\"done\"}\n";
+        var session = context.UseCases.Prepare(new TranslationProviderSelection(
+            TranslationEngineNames.AiModel,
+            AiModelId: "ai-1",
+            PromptOverride: "Translate live subtitles from [SourceLang] to [TargetLang].",
+            PromptId: "speech"));
+        using var disposable = session as IDisposable;
+
+        await session.TranslateAsync(CreateRequest());
+
+        StringAssert.StartsWith(
+            context.Factory.Chat.LastRequest!.SystemPrompt,
+            "Use the product term EasyChat when translating to Simplified Chinese.\n\n"
+            + "Translate live subtitles from English to Simplified Chinese.");
+    }
+
+    [TestMethod]
     public async Task StreamAsync_DecodesChunkedJsonLinesAndEmitsOneCompletion()
     {
         var context = CreateContext(CreateAiBundle());

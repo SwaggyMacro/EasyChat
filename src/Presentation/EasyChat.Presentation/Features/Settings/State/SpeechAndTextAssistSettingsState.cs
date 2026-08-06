@@ -10,6 +10,7 @@ public sealed class LiveSpeechRecognitionSettings : LiveSettingsSection
     private string _targetLanguage;
     private string _engineId;
     private int _engineType;
+    private string? _promptId;
     private int _maxSentencesPerLine;
     private FloatingDisplayMode _floatingDisplayMode;
     private int _maxFloatingHistory;
@@ -43,6 +44,7 @@ public sealed class LiveSpeechRecognitionSettings : LiveSettingsSection
         _targetLanguage = value.TargetLanguage;
         _engineId = value.EngineId;
         _engineType = value.EngineType;
+        _promptId = value.PromptId;
         _maxSentencesPerLine = value.MaxSentencesPerLine;
         _floatingDisplayMode = value.FloatingDisplayMode;
         _maxFloatingHistory = value.MaxFloatingHistory;
@@ -72,6 +74,7 @@ public sealed class LiveSpeechRecognitionSettings : LiveSettingsSection
     public string TargetLanguage { get => _targetLanguage; set => Set(ref _targetLanguage, value); }
     public string EngineId { get => _engineId; set => Set(ref _engineId, value); }
     public int EngineType { get => _engineType; set => Set(ref _engineType, value); }
+    public string? PromptId { get => _promptId; set => Set(ref _promptId, value); }
     public int MaxSentencesPerLine { get => _maxSentencesPerLine; set => Set(ref _maxSentencesPerLine, value); }
     public FloatingDisplayMode FloatingDisplayMode { get => _floatingDisplayMode; set => Set(ref _floatingDisplayMode, value); }
     public int MaxFloatingHistory { get => _maxFloatingHistory; set => Set(ref _maxFloatingHistory, value); }
@@ -101,7 +104,7 @@ public sealed class LiveSpeechRecognitionSettings : LiveSettingsSection
         PrimaryFontColor, SecondarySubtitleSource, SecondaryFontSize, SecondaryFontFamily,
         SecondaryFontColor, BackgroundColor, SubtitleBackgroundColor, WindowOpacity,
         IsFloatingWindowLocked, FloatingWindowOrientation, WindowX, WindowY, WindowWidth,
-        WindowHeight);
+        WindowHeight, PromptId);
 }
 
 public sealed class LiveTextAssistSettings : LiveSettingsSection

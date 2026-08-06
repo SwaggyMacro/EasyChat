@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.Globalization;
 using System.Reactive;
 using Avalonia.Threading;
+using EasyChat.Contracts.ApplicationData;
 using EasyChat.Contracts.Ocr;
 using EasyChat.Contracts.Platform;
 using EasyChat.Contracts.Settings;
@@ -10,6 +11,7 @@ using EasyChat.Contracts.Speech;
 using EasyChat.Contracts.Translation;
 using EasyChat.Presentation.Lang;
 using EasyChat.Presentation.Features.Settings.State;
+using EasyChat.Presentation.Foundation.Localization;
 using EasyChat.Presentation.Foundation.Navigation;
 using EasyChat.Presentation.Foundation.UiHost;
 using Material.Icons;
@@ -22,6 +24,7 @@ public sealed class SettingViewModel : NavigationPageViewModel
     private static readonly Uri AsrModelDownloadsUri = new(
         "https://github.com/SwaggyMacro/MicroASR/releases/tag/models-v1");
     private readonly SettingsSession _settings;
+    private readonly IApplicationDataUseCases _applicationData;
     private readonly IOcrModelUseCases _ocr;
     private readonly ITranslationUseCases _translation;
     private readonly ITranslationLanguageCatalog _languages;
@@ -33,6 +36,7 @@ public sealed class SettingViewModel : NavigationPageViewModel
     private readonly IUiToastHost _toasts;
     private readonly Dictionary<OcrModelDownloadItemViewModel, CancellationTokenSource> _downloads = [];
     private bool _isOcrModelListExpanded;
+    private bool _isAsrModelListExpanded;
     private bool _isTestingBaidu;
     private bool _isTestingTencent;
     private bool _isTestingGoogle;
@@ -41,6 +45,7 @@ public sealed class SettingViewModel : NavigationPageViewModel
     private ObservableCollection<string> _availableFonts = [];
     private ObservableCollection<SpeechRecognitionModel> _asrModels = [];
     private bool _isImportingAsrModel;
+    private bool _isChangingDataLocation;
     private string _searchText = string.Empty;
     private bool _isSearchOpen;
     private SettingsPaneId _activePane = SettingsPaneId.General;
@@ -48,6 +53,7 @@ public sealed class SettingViewModel : NavigationPageViewModel
 
     public SettingViewModel(
         SettingsSession settings,
+        IApplicationDataUseCases applicationData,
         IOcrModelUseCases ocr,
         ITtsUseCases tts,
         ITranslationUseCases translation,
@@ -61,6 +67,7 @@ public sealed class SettingViewModel : NavigationPageViewModel
         : base(Resources.Settings, MaterialIconKind.Settings, 1)
     {
         _settings = settings;
+        _applicationData = applicationData;
         _ocr = ocr;
         _translation = translation;
         _languages = languages;
@@ -74,10 +81,14 @@ public sealed class SettingViewModel : NavigationPageViewModel
         DisplayLanguages = BuildDisplayLanguages();
         NativeLanguages = BuildLanguages(includeAuto: false);
         OcrModelItems = new ObservableCollection<OcrModelDownloadItemViewModel>(
-            _ocr.SupportedLanguages.Select(language => new OcrModelDownloadItemViewModel(
-                language,
-                _ocr.IsModelDownloaded(language),
-                _ocr.CanDeleteModels)));
+            _ocr.ModelPackages.Select(package => new OcrModelDownloadItemViewModel(
+                package,
+                GetOcrModelDisplayName(package.Id),
+                GetOcrModelDescription(package.Id),
+                string.Format(
+                    Resources.OcrSupportedLanguages,
+                    string.Join(", ", package.SupportedLanguages.Select(GetOcrLanguageDisplayName))),
+                _ocr.IsModelDownloaded(package))));
 
         RefreshModelCards();
         AiModelConf.ConfiguredModels.CollectionChanged += OnModelsChanged;
@@ -105,9 +116,15 @@ public sealed class SettingViewModel : NavigationPageViewModel
         DownloadOcrModelCommand = ReactiveCommand.Create<OcrModelDownloadItemViewModel>(StartDownloadOcrModel);
         CancelOcrModelCommand = ReactiveCommand.Create<OcrModelDownloadItemViewModel>(CancelOcrModel);
         DeleteOcrModelCommand = ReactiveCommand.Create<OcrModelDownloadItemViewModel>(DeleteOcrModel);
+        ShowOcrModelLanguagesCommand = ReactiveCommand.Create<OcrModelDownloadItemViewModel>(item =>
+            _dialogs.ShowInformation(item.DisplayName, item.SupportedLanguages));
         ToggleOcrModelListCommand = ReactiveCommand.Create(() =>
         {
             IsOcrModelListExpanded = !IsOcrModelListExpanded;
+        });
+        ToggleAsrModelListCommand = ReactiveCommand.Create(() =>
+        {
+            IsAsrModelListExpanded = !IsAsrModelListExpanded;
         });
 
         NavItems =
@@ -213,6 +230,7 @@ public sealed class SettingViewModel : NavigationPageViewModel
     public List<LanguageSettings> NativeLanguages { get; }
     public List<ClosingBehavior> ClosingBehaviors { get; } = Enum.GetValues<ClosingBehavior>().ToList();
     public List<string> ScreenshotModes { get; } = ["Precise", "Quick"];
+    public List<OcrRecognitionMode> OcrRecognitionModes { get; } = Enum.GetValues<OcrRecognitionMode>().ToList();
     public List<string> MachineTransProviders { get; } = ["Baidu", "Tencent", "Google", "DeepL"];
     public List<string> TranslationEngineTypes { get; } = [Resources.AIEngine, Resources.MachineTranslation];
     public List<SelectionTriggerModeOption> SelectionTriggerModes { get; } =
@@ -257,12 +275,34 @@ public sealed class SettingViewModel : NavigationPageViewModel
         private set
         {
             this.RaiseAndSetIfChanged(ref _asrModels, value);
+            this.RaisePropertyChanged(nameof(VisibleAsrModels));
             this.RaisePropertyChanged(nameof(HasAsrModels));
             this.RaisePropertyChanged(nameof(HasNoAsrModels));
+            this.RaisePropertyChanged(nameof(IsAsrModelListToggleVisible));
         }
     }
+    public IEnumerable<SpeechRecognitionModel> VisibleAsrModels =>
+        IsAsrModelListExpanded ? AsrModels : AsrModels.Take(3);
     public bool HasAsrModels => AsrModels.Count > 0;
     public bool HasNoAsrModels => !HasAsrModels;
+    public bool IsAsrModelListExpanded
+    {
+        get => _isAsrModelListExpanded;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isAsrModelListExpanded, value);
+            this.RaisePropertyChanged(nameof(VisibleAsrModels));
+            this.RaisePropertyChanged(nameof(AsrModelListToggleIcon));
+            this.RaisePropertyChanged(nameof(AsrModelListToggleText));
+        }
+    }
+    public MaterialIconKind AsrModelListToggleIcon => IsAsrModelListExpanded
+        ? MaterialIconKind.ExpandLess
+        : MaterialIconKind.ExpandMore;
+    public bool IsAsrModelListToggleVisible => AsrModels.Count > 3;
+    public string AsrModelListToggleText => IsAsrModelListExpanded
+        ? Resources.ShowLessAsrModels
+        : Resources.ShowMoreAsrModels;
     public bool IsImportingAsrModel
     {
         get => _isImportingAsrModel;
@@ -270,9 +310,22 @@ public sealed class SettingViewModel : NavigationPageViewModel
         {
             this.RaiseAndSetIfChanged(ref _isImportingAsrModel, value);
             this.RaisePropertyChanged(nameof(CanImportAsrModel));
+            this.RaisePropertyChanged(nameof(CanChangeDataLocation));
         }
     }
     public bool CanImportAsrModel => !IsImportingAsrModel;
+    public string ApplicationDataRoot => _applicationData.Current.RootDirectory;
+    public bool IsChangingDataLocation
+    {
+        get => _isChangingDataLocation;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isChangingDataLocation, value);
+            this.RaisePropertyChanged(nameof(CanChangeDataLocation));
+        }
+    }
+    public bool CanChangeDataLocation =>
+        !IsChangingDataLocation && !IsImportingAsrModel && _downloads.Count == 0;
     public List<string> AiProviders => ConfiguredModels.Select(model => model.Name).ToList();
 
     public string SearchText
@@ -393,6 +446,20 @@ public sealed class SettingViewModel : NavigationPageViewModel
         }
     }
 
+    public OcrRecognitionMode SelectedOcrRecognitionMode
+    {
+        get => ScreenshotConf.OcrMode;
+        set
+        {
+            ScreenshotConf.OcrMode = value;
+            this.RaisePropertyChanged();
+            this.RaisePropertyChanged(nameof(IsIdleReleaseOcrMode));
+        }
+    }
+
+    public bool IsIdleReleaseOcrMode =>
+        SelectedOcrRecognitionMode == OcrRecognitionMode.IdleRelease;
+
     public SelectionTriggerMode SelectedSelectionTriggerMode
     {
         get => SelectionTranslationConf.TriggerMode;
@@ -475,7 +542,9 @@ public sealed class SettingViewModel : NavigationPageViewModel
     public ReactiveCommand<OcrModelDownloadItemViewModel, Unit> DownloadOcrModelCommand { get; }
     public ReactiveCommand<OcrModelDownloadItemViewModel, Unit> CancelOcrModelCommand { get; }
     public ReactiveCommand<OcrModelDownloadItemViewModel, Unit> DeleteOcrModelCommand { get; }
+    public ReactiveCommand<OcrModelDownloadItemViewModel, Unit> ShowOcrModelLanguagesCommand { get; }
     public ReactiveCommand<Unit, Unit> ToggleOcrModelListCommand { get; }
+    public ReactiveCommand<Unit, Unit> ToggleAsrModelListCommand { get; }
     public ReactiveCommand<Unit, Unit> AddModelCommand { get; }
     public ReactiveCommand<CustomAiModelState, Unit> EditModelCommand { get; }
     public ReactiveCommand<CustomAiModelState, Unit> DeleteModelCommand { get; }
@@ -555,6 +624,50 @@ public sealed class SettingViewModel : NavigationPageViewModel
     private void ConfirmDeleteAsrModel(SpeechRecognitionModel model) =>
         _dialogs.ConfirmDeleteAsrModel(model, () => _ = DeleteAsrModelAsync(model));
 
+    public async Task ChangeApplicationDataLocationAsync(string rootDirectory)
+    {
+        if (!CanChangeDataLocation)
+        {
+            ShowToast(
+                Resources.ApplicationData,
+                Resources.ApplicationDataMoveBusy,
+                UiMessageSeverity.Information);
+            return;
+        }
+
+        IsChangingDataLocation = true;
+        try
+        {
+            var result = await _applicationData.ChangeLocationAsync(rootDirectory);
+            if (result.IsFailure)
+            {
+                ShowToast(
+                    Resources.ApplicationDataMoveFailed,
+                    result.Error.Message,
+                    UiMessageSeverity.Error);
+                return;
+            }
+
+            this.RaisePropertyChanged(nameof(ApplicationDataRoot));
+            await RefreshAsrModelsAsync();
+            ShowToast(
+                Resources.ApplicationData,
+                string.Format(Resources.ApplicationDataMoved, result.Value.RootDirectory),
+                UiMessageSeverity.Success);
+        }
+        catch (Exception exception)
+        {
+            ShowToast(
+                Resources.ApplicationDataMoveFailed,
+                exception.Message,
+                UiMessageSeverity.Error);
+        }
+        finally
+        {
+            IsChangingDataLocation = false;
+        }
+    }
+
     private async Task DeleteAsrModelAsync(SpeechRecognitionModel model)
     {
         if (IsImportingAsrModel)
@@ -616,10 +729,11 @@ public sealed class SettingViewModel : NavigationPageViewModel
 
         var cancellation = new CancellationTokenSource();
         _downloads.Add(item, cancellation);
+        this.RaisePropertyChanged(nameof(CanChangeDataLocation));
         item.StartDownload();
         try
         {
-            await _ocr.DownloadModelAsync(item.Language, new Progress<double>(item.SetProgress), cancellation.Token);
+            await _ocr.DownloadModelAsync(item.Package, new Progress<double>(item.SetProgress), cancellation.Token);
             item.CompleteDownload();
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
@@ -633,6 +747,7 @@ public sealed class SettingViewModel : NavigationPageViewModel
         finally
         {
             _downloads.Remove(item);
+            this.RaisePropertyChanged(nameof(CanChangeDataLocation));
             cancellation.Dispose();
         }
     }
@@ -647,7 +762,7 @@ public sealed class SettingViewModel : NavigationPageViewModel
     {
         try
         {
-            _ocr.DeleteModel(item.Language);
+            _ocr.DeleteModel(item.Package);
             item.MarkDeleted();
         }
         catch (Exception exception)
@@ -713,7 +828,9 @@ public sealed class SettingViewModel : NavigationPageViewModel
         var existing = new[] { GeneralConf.SourceLanguage, GeneralConf.TargetLanguage, GeneralConf.NativeLanguage }
             .Where(language => language is not null)
             .Cast<LanguageSettings>();
-        return existing.Concat(_languages.All.Select(ToSettingsLanguage))
+        return existing.Concat(_languages.All
+                .Where(language => language.Id != "sr")
+                .Select(ToSettingsLanguage))
             .Where(language => includeAuto || language.Id != "auto")
             .DistinctBy(language => language.Id)
             .OrderBy(language => language.DisplayName, StringComparer.CurrentCulture)
@@ -735,6 +852,35 @@ public sealed class SettingViewModel : NavigationPageViewModel
             display,
             language.ProviderCodes ?? new Dictionary<string, string>());
     }
+
+    private string GetOcrLanguageDisplayName(OcrLanguage language)
+    {
+        var translationLanguage = _languages.All.FirstOrDefault(candidate =>
+            string.Equals(candidate.Id, language.Id, StringComparison.Ordinal));
+        return translationLanguage is null
+            ? language.DisplayName
+            : LanguageDisplayNames.ForUi(
+                translationLanguage.NativeName,
+                translationLanguage.EnglishName);
+    }
+
+    private static string GetOcrModelDisplayName(string packageId) => packageId switch
+    {
+        "universal-v6-small" => Resources.OcrUniversalModel,
+        "korean-v4" => Resources.OcrKoreanV4Model,
+        "arabic-v4" => Resources.OcrArabicV4Model,
+        "devanagari-v4" => Resources.OcrDevanagariV4Model,
+        "tamil-v4" => Resources.OcrTamilV4Model,
+        "telugu-v4" => Resources.OcrTeluguV4Model,
+        "kannada-v4" => Resources.OcrKannadaV4Model,
+        "cyrillic-v3" => Resources.OcrCyrillicV3Model,
+        _ => packageId
+    };
+
+    private static string GetOcrModelDescription(string packageId) =>
+        packageId == "universal-v6-small"
+            ? Resources.OcrUniversalModelDescription
+            : string.Empty;
 
     private void ShowToast(string title, string content, UiMessageSeverity severity) =>
         _toasts.Show(title, content, severity);
@@ -796,4 +942,5 @@ public interface ISettingsDialogCoordinator
     void ManageFixedAreas();
     void ConfigureTts();
     void ConfirmDeleteAsrModel(SpeechRecognitionModel model, Action onConfirmed);
+    void ShowInformation(string title, string content);
 }

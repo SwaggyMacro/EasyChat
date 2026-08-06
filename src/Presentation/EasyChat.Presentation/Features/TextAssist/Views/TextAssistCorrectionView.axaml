@@ -4,6 +4,8 @@
              xmlns:controls="using:EasyChat.Presentation.Features.TextAssist.Controls"
              xmlns:dataConverters="clr-namespace:Avalonia.Data.Converters;assembly=Avalonia.Base"
              xmlns:converters="clr-namespace:EasyChat.Presentation.Foundation.Formatting"
+             xmlns:settings="clr-namespace:EasyChat.Contracts.Settings;assembly=EasyChat.Contracts"
+             xmlns:sharedControls="clr-namespace:EasyChat.Presentation.Shared.Controls;assembly=EasyChat.Presentation.Shared"
              xmlns:lang="clr-namespace:EasyChat.Presentation.Lang"
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
@@ -241,10 +243,10 @@
                                         <Panel Width="22" Height="16">
                                             <avalonia:MaterialIcon Kind="FlagOutline"
                                                                    Opacity="0.65"
-                                                                   IsVisible="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.HasNoIcon}}" />
+                                                                   IsVisible="{Binding Icon, Converter={x:Static sharedControls:LanguageFlagConverters.HasNoIcon}}" />
                                             <Image Width="22" Height="16"
-                                                   IsVisible="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.HasIcon}}"
-                                                   Source="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.ToIcon}}" />
+                                                   IsVisible="{Binding Icon, Converter={x:Static sharedControls:LanguageFlagConverters.HasIcon}}"
+                                                   Source="{Binding Icon, Converter={x:Static sharedControls:LanguageFlagConverters.ToIcon}}" />
                                         </Panel>
                                         <TextBlock Text="{Binding Converter={x:Static converters:LanguageSettingsConverters.ToDisplayName}}" />
                                     </StackPanel>

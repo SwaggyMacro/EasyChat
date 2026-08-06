@@ -22,10 +22,15 @@ public sealed class JsonSettingsPersistenceGateway : ISettingsPersistenceGateway
     private const string TextAssistFileName = "TextAssist.json";
     private const string OcrFileName = "Ocr.json";
 
-    private readonly string _configurationDirectory;
+    private readonly Func<string> _configurationDirectory;
     private readonly ISettingsFileStore _fileStore;
 
     public JsonSettingsPersistenceGateway(string configurationDirectory)
+        : this(() => configurationDirectory, new PhysicalSettingsFileStore())
+    {
+    }
+
+    internal JsonSettingsPersistenceGateway(Func<string> configurationDirectory)
         : this(configurationDirectory, new PhysicalSettingsFileStore())
     {
     }
@@ -33,11 +38,18 @@ public sealed class JsonSettingsPersistenceGateway : ISettingsPersistenceGateway
     internal JsonSettingsPersistenceGateway(
         string configurationDirectory,
         ISettingsFileStore fileStore)
+        : this(() => configurationDirectory, fileStore)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(configurationDirectory);
+    }
+
+    internal JsonSettingsPersistenceGateway(
+        Func<string> configurationDirectory,
+        ISettingsFileStore fileStore)
+    {
+        ArgumentNullException.ThrowIfNull(configurationDirectory);
         ArgumentNullException.ThrowIfNull(fileStore);
 
-        _configurationDirectory = Path.GetFullPath(configurationDirectory);
+        _configurationDirectory = configurationDirectory;
         _fileStore = fileStore;
     }
 
@@ -266,7 +278,7 @@ public sealed class JsonSettingsPersistenceGateway : ISettingsPersistenceGateway
         CancellationToken cancellationToken)
         where T : new()
     {
-        var path = Path.Combine(_configurationDirectory, fileName);
+        var path = Path.Combine(ConfigurationDirectory, fileName);
         string json;
         try
         {
@@ -299,8 +311,10 @@ public sealed class JsonSettingsPersistenceGateway : ISettingsPersistenceGateway
         var json = JsonConvert.SerializeObject(settings, Formatting.Indented);
         cancellationToken.ThrowIfCancellationRequested();
         await _fileStore.WriteAllTextAsync(
-            Path.Combine(_configurationDirectory, fileName),
+            Path.Combine(ConfigurationDirectory, fileName),
             json,
             cancellationToken).ConfigureAwait(false);
     }
+
+    private string ConfigurationDirectory => Path.GetFullPath(_configurationDirectory());
 }

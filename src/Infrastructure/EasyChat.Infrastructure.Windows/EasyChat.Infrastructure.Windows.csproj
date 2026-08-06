@@ -1,8 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <UseBundledOcrModels Condition="'$(UseBundledOcrModels)' == ''">false</UseBundledOcrModels>
-    <DefineConstants Condition="'$(UseBundledOcrModels)' == 'true'">$(DefineConstants);BUNDLED_OCR_MODELS</DefineConstants>
-  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\EasyChat.Contracts\EasyChat.Contracts.csproj" />
     <ProjectReference Include="..\..\EasyChat.Shared\EasyChat.Shared.csproj" />
@@ -12,14 +8,12 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
     <PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
-    <PackageReference Include="OpenCvSharp4.Windows" Version="4.10.0.20241108" />
-    <PackageReference Include="Sdcb.PaddleInference" Version="3.3.1" />
-    <PackageReference Include="Sdcb.PaddleInference.runtime.win64.mkl" Version="3.3.1.70" />
-    <PackageReference Include="Sdcb.PaddleOCR" Version="3.3.1" />
+    <PackageReference Include="OpenCvSharp4.Windows" Version="4.11.0.20250507" />
+    <PackageReference Include="Sdcb.OpenVINO.PaddleOCR" Version="0.8.1" />
+    <PackageReference Include="Sdcb.OpenVINO.PaddleOCR.Models.Online" Version="0.8.1" />
+    <PackageReference Include="Sdcb.OpenVINO.runtime.win-x64" Version="2026.2.0" />
     <PackageReference Include="SoundFlow" Version="1.4.0" />
     <PackageReference Include="System.Drawing.Common" Version="10.0.2" />
-    <PackageReference Condition="'$(UseBundledOcrModels)' != 'true'" Include="Sdcb.PaddleOCR.Models.Online" Version="3.3.1" />
-    <PackageReference Condition="'$(UseBundledOcrModels)' == 'true'" Include="Sdcb.PaddleOCR.Models.Local" Version="3.0.1" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="EasyChat.Infrastructure.Windows.Tests" />

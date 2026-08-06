@@ -31,19 +31,25 @@ public sealed class ImageTranslationUseCases : IImageTranslationUseCases
         ArgumentNullException.ThrowIfNull(request);
         cancellationToken.ThrowIfCancellationRequested();
 
-        var blocks = CreateBlocks(request.Recognition.Regions);
+        var blocks = CreateIndexedBlocks(request.Recognition.Regions);
         if (blocks.Count == 0)
             return new ImageTranslationResult(request.Image, ["No text detected."], 0, 0);
 
-        var warnings = new List<string>();
-        var overlays = string.Equals(
-                _settings.Current.General.TranslationEngine,
-                TranslationEngineNames.AiModel,
-                StringComparison.OrdinalIgnoreCase)
-            ? await TranslateWithAiAsync(blocks, request, warnings, cancellationToken)
-            : await TranslateWithMachineProviderAsync(blocks, request, warnings, cancellationToken);
+        var translated = await TranslateRegionsAsync(
+            new ImageRegionTranslationRequest(
+                request.Recognition,
+                blocks.Select(block => block.Index).ToArray(),
+                request.SourceLanguage,
+                request.TargetLanguage),
+            cancellationToken);
+        var warnings = translated.Warnings.ToList();
+        var overlays = translated.Translations
+            .Select(item => new ImageTranslationOverlay(
+                request.Recognition.Regions[item.RegionIndex],
+                item.Translation))
+            .ToArray();
 
-        if (overlays.Count == 0)
+        if (overlays.Length == 0)
             return new ImageTranslationResult(request.Image, warnings, blocks.Count, 0);
 
         var rendered = await _renderer.RenderAsync(request.Image, overlays, cancellationToken);
@@ -55,22 +61,76 @@ public sealed class ImageTranslationUseCases : IImageTranslationUseCases
             rendered.RenderedBlockCount);
     }
 
+    public async Task<ImageRegionTranslationResult> TranslateRegionsAsync(
+        ImageRegionTranslationRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request.Recognition);
+        ArgumentNullException.ThrowIfNull(request.RegionIndexes);
+        ArgumentNullException.ThrowIfNull(request.TargetLanguage);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var indexes = request.RegionIndexes
+            .Distinct()
+            .ToHashSet();
+        if (indexes.Any(index => index < 0 || index >= request.Recognition.Regions.Count))
+            throw new ArgumentOutOfRangeException(nameof(request), "A selected OCR region index is invalid.");
+
+        var allBlocks = CreateIndexedBlocks(request.Recognition.Regions);
+        var selected = allBlocks.Where(block => indexes.Contains(block.Index)).ToArray();
+        if (selected.Length == 0)
+            return new ImageRegionTranslationResult([], ["No selected text could be translated."]);
+
+        var warnings = new List<string>();
+        var translations = string.Equals(
+                _settings.Current.General.TranslationEngine,
+                TranslationEngineNames.AiModel,
+                StringComparison.OrdinalIgnoreCase)
+            ? await TranslateWithAiAsync(
+                allBlocks,
+                selected,
+                request.SourceLanguage,
+                request.TargetLanguage,
+                warnings,
+                cancellationToken)
+            : await TranslateWithMachineProviderAsync(
+                selected,
+                request.SourceLanguage,
+                request.TargetLanguage,
+                warnings,
+                cancellationToken);
+        return new ImageRegionTranslationResult(translations, warnings);
+    }
+
     internal static IReadOnlyList<OcrTextRegion> CreateBlocks(
         IReadOnlyList<OcrTextRegion> regions) =>
-        regions
-            .Where(region => !string.IsNullOrWhiteSpace(region.Text) && region.Polygon.Count >= 3)
-            .OrderBy(region => region.Polygon.Min(point => point.Y))
-            .ThenBy(region => region.Polygon.Min(point => point.X))
+        CreateIndexedBlocks(regions)
+            .Select(block => block.Region)
             .ToArray();
 
-    private async Task<IReadOnlyList<ImageTranslationOverlay>> TranslateWithAiAsync(
-        IReadOnlyList<OcrTextRegion> blocks,
-        ImageTranslationRequest request,
+    private static IReadOnlyList<IndexedBlock> CreateIndexedBlocks(
+        IReadOnlyList<OcrTextRegion> regions) =>
+        regions
+            .Select((region, index) => new IndexedBlock(index, region))
+            .Where(block => !string.IsNullOrWhiteSpace(block.Region.Text)
+                            && block.Region.Polygon.Count >= 3)
+            .OrderBy(block => block.Region.Polygon.Min(point => point.Y))
+            .ThenBy(block => block.Region.Polygon.Min(point => point.X))
+            .ToArray();
+
+    private async Task<IReadOnlyList<ImageRegionTranslation>> TranslateWithAiAsync(
+        IReadOnlyList<IndexedBlock> allBlocks,
+        IReadOnlyList<IndexedBlock> selectedBlocks,
+        TranslationLanguage? sourceLanguage,
+        TranslationLanguage targetLanguage,
         List<string> warnings,
         CancellationToken cancellationToken)
     {
-        var items = blocks
-            .Select((block, index) => new BatchTranslationItem($"block-{index}", block.Text.Trim()))
+        var items = allBlocks
+            .Select(block => new BatchTranslationItem(
+                $"block-{block.Index}",
+                block.Region.Text.Trim()))
             .ToArray();
         var settings = _settings.Current.General;
         var provider = !string.IsNullOrWhiteSpace(settings.AiModelId)
@@ -94,13 +154,15 @@ public sealed class ImageTranslationUseCases : IImageTranslationUseCases
 
             var payload = JsonSerializer.Serialize(new BatchTranslationPayload(
                 items,
-                items.Select(item => item.Id).ToArray()));
-            var requestedIds = items.Select(item => item.Id).ToHashSet(StringComparer.Ordinal);
+                selectedBlocks.Select(block => $"block-{block.Index}").ToArray()));
+            var requestedIds = selectedBlocks
+                .Select(block => $"block-{block.Index}")
+                .ToHashSet(StringComparer.Ordinal);
             await foreach (var delta in session.StreamIdentifiedAsync(
                                new TranslationRequest(
                                    payload,
-                                   request.SourceLanguage,
-                                   request.TargetLanguage),
+                                   sourceLanguage,
+                                   targetLanguage),
                                cancellationToken))
             {
                 if (!requestedIds.Contains(delta.Id) || string.IsNullOrEmpty(delta.Text))
@@ -117,21 +179,52 @@ public sealed class ImageTranslationUseCases : IImageTranslationUseCases
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            translations.Clear();
         }
 
-        return CreateOverlays(blocks, items, translations, warnings);
+        var missing = selectedBlocks
+            .Where(block => !translations.TryGetValue($"block-{block.Index}", out var value)
+                            || string.IsNullOrWhiteSpace(value.ToString()))
+            .ToArray();
+        if (missing.Length > 0)
+        {
+            var fallback = _translation.Prepare();
+            using var fallbackDisposable = fallback as IDisposable;
+            foreach (var block in missing)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                try
+                {
+                    var response = await fallback.TranslateAsync(
+                        new TranslationRequest(
+                            block.Region.Text.Trim(),
+                            sourceLanguage,
+                            targetLanguage),
+                        cancellationToken).ConfigureAwait(false);
+                    if (!string.IsNullOrWhiteSpace(response.Text))
+                    {
+                        translations[$"block-{block.Index}"] =
+                            new StringBuilder(response.Text.Trim());
+                    }
+                }
+                catch (Exception exception) when (exception is not OperationCanceledException)
+                {
+                }
+            }
+        }
+
+        return CreateTranslations(selectedBlocks, translations, warnings);
     }
 
-    private async Task<IReadOnlyList<ImageTranslationOverlay>> TranslateWithMachineProviderAsync(
-        IReadOnlyList<OcrTextRegion> blocks,
-        ImageTranslationRequest request,
+    private async Task<IReadOnlyList<ImageRegionTranslation>> TranslateWithMachineProviderAsync(
+        IReadOnlyList<IndexedBlock> blocks,
+        TranslationLanguage? sourceLanguage,
+        TranslationLanguage targetLanguage,
         List<string> warnings,
         CancellationToken cancellationToken)
     {
         var session = _translation.Prepare();
         using var disposable = session as IDisposable;
-        var overlays = new List<ImageTranslationOverlay>(blocks.Count);
+        var translations = new List<ImageRegionTranslation>(blocks.Count);
         foreach (var block in blocks)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -139,47 +232,50 @@ public sealed class ImageTranslationUseCases : IImageTranslationUseCases
             {
                 var response = await session.TranslateAsync(
                     new TranslationRequest(
-                        block.Text.Trim(),
-                        request.SourceLanguage,
-                        request.TargetLanguage),
+                        block.Region.Text.Trim(),
+                        sourceLanguage,
+                        targetLanguage),
                     cancellationToken);
                 if (string.IsNullOrWhiteSpace(response.Text))
-                    warnings.Add($"Unable to translate: {block.Text.Trim()}");
+                    warnings.Add($"Unable to translate: {block.Region.Text.Trim()}");
                 else
-                    overlays.Add(new ImageTranslationOverlay(block, response.Text.Trim()));
+                    translations.Add(new ImageRegionTranslation(
+                        block.Index,
+                        response.Text.Trim()));
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                warnings.Add($"Unable to translate: {block.Text.Trim()}");
+                warnings.Add($"Unable to translate: {block.Region.Text.Trim()}");
             }
         }
 
-        return overlays;
+        return translations;
     }
 
-    private static IReadOnlyList<ImageTranslationOverlay> CreateOverlays(
-        IReadOnlyList<OcrTextRegion> blocks,
-        IReadOnlyList<BatchTranslationItem> items,
+    private static IReadOnlyList<ImageRegionTranslation> CreateTranslations(
+        IReadOnlyList<IndexedBlock> blocks,
         IReadOnlyDictionary<string, StringBuilder> translations,
         List<string> warnings)
     {
-        var overlays = new List<ImageTranslationOverlay>(items.Count);
-        for (var index = 0; index < items.Count; index++)
+        var results = new List<ImageRegionTranslation>(blocks.Count);
+        foreach (var block in blocks)
         {
-            var item = items[index];
-            if (translations.TryGetValue(item.Id, out var value)
+            var id = $"block-{block.Index}";
+            if (translations.TryGetValue(id, out var value)
                 && !string.IsNullOrWhiteSpace(value.ToString()))
             {
-                overlays.Add(new ImageTranslationOverlay(blocks[index], value.ToString().Trim()));
+                results.Add(new ImageRegionTranslation(block.Index, value.ToString().Trim()));
             }
             else
             {
-                warnings.Add($"Unable to translate: {blocks[index].Text.Trim()}");
+                warnings.Add($"Unable to translate: {block.Region.Text.Trim()}");
             }
         }
 
-        return overlays;
+        return results;
     }
+
+    private sealed record IndexedBlock(int Index, OcrTextRegion Region);
 
     private sealed record BatchTranslationItem(
         [property: JsonPropertyName("id")] string Id,

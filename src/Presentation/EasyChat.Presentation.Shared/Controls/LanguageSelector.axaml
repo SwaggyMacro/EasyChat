@@ -1,0 +1,74 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sharedControls="clr-namespace:EasyChat.Presentation.Shared.Controls;assembly=EasyChat.Presentation.Shared"
+             xmlns:converters="clr-namespace:EasyChat.Presentation.Shared.Controls;assembly=EasyChat.Presentation.Shared"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             x:Class="EasyChat.Presentation.Shared.Controls.LanguageSelector"
+             x:Name="Root"
+             x:CompileBindings="False">
+    <Grid>
+        <suki:GlassCard Classes="Discrete"
+                        Padding="0"
+                        BorderBrush="{DynamicResource SukiControlBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{DynamicResource SmallCornerRadius}"
+                        ClipToBounds="True">
+            <sharedControls:LanguageAutoCompleteBox x:Name="LanguageAutoCompleteBox"
+                                                ItemsSource="{Binding Languages, ElementName=Root}"
+                                                SelectedItem="{Binding SelectedLanguage, ElementName=Root, Mode=TwoWay}"
+                                                ValueMemberBinding="{Binding Converter={x:Static converters:LanguageDisplayNameConverter.Instance}}"
+                                                FilterMode="ContainsOrdinal"
+                                                MinimumPrefixLength="0"
+                                                IsTextCompletionEnabled="False"
+                                                MaxDropDownHeight="260"
+                                                Background="Transparent"
+                                                BorderBrush="Transparent"
+                                                BorderThickness="0"
+                                                CornerRadius="0"
+                                                Padding="32,0,28,0"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch">
+                <sharedControls:LanguageAutoCompleteBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="24,*" ColumnSpacing="7" Margin="3,2,0,2"
+                              HorizontalAlignment="Stretch">
+                            <Panel Width="22" Height="16" VerticalAlignment="Center">
+                                <icons:MaterialIcon Kind="FlagOutline" Width="18" Height="18"
+                                                    IsVisible="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.HasNoIcon}}" />
+                                <Image Width="22" Height="16" Stretch="UniformToFill"
+                                       IsVisible="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.HasIcon}}"
+                                       Source="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.ToIcon}}" />
+                            </Panel>
+                            <TextBlock Grid.Column="1" Text="{Binding Converter={x:Static converters:LanguageDisplayNameConverter.Instance}}"
+                                       TextWrapping="NoWrap" TextTrimming="None"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                    </DataTemplate>
+                </sharedControls:LanguageAutoCompleteBox.ItemTemplate>
+            </sharedControls:LanguageAutoCompleteBox>
+        </suki:GlassCard>
+
+        <Panel ZIndex="10" Width="22" Height="16" Margin="8,0,0,0"
+               HorizontalAlignment="Left" VerticalAlignment="Center"
+               IsHitTestVisible="False">
+            <icons:MaterialIcon Kind="FlagOutline" Width="18" Height="18"
+                                IsVisible="{Binding SelectedLanguage.Icon, ElementName=Root, Converter={x:Static converters:LanguageFlagConverters.HasNoIcon}}" />
+            <Image Width="22" Height="16" Stretch="UniformToFill"
+                   IsVisible="{Binding SelectedLanguage.Icon, ElementName=Root, Converter={x:Static converters:LanguageFlagConverters.HasIcon}}"
+                   Source="{Binding SelectedLanguage.Icon, ElementName=Root, Converter={x:Static converters:LanguageFlagConverters.ToIcon}}" />
+        </Panel>
+
+        <Button x:Name="DropDownButton" ZIndex="11" Width="32"
+                HorizontalAlignment="Right" VerticalAlignment="Stretch"
+                Padding="0" Background="Transparent"
+                BorderBrush="Transparent" BorderThickness="0"
+                CornerRadius="0" Focusable="False" IsTabStop="False"
+                Click="DropDownButton_OnClick">
+            <icons:MaterialIcon Kind="{Binding DropDownIcon, ElementName=LanguageAutoCompleteBox}"
+                                Width="18" Height="18"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Opacity="0.65" IsHitTestVisible="False" />
+        </Button>
+    </Grid>
+</UserControl>

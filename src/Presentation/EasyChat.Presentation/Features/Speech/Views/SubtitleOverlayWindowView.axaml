@@ -15,6 +15,8 @@
         WindowDecorations="None"
         Background="Transparent"
         TransparencyLevelHint="Transparent"
+        TransparencyBackgroundFallback="Transparent"
+        CornerRadius="8"
         Topmost="True"
         ShowInTaskbar="False">
 

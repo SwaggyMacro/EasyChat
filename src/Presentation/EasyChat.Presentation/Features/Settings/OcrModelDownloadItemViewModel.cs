@@ -11,21 +11,32 @@ public sealed class OcrModelDownloadItemViewModel : ReactiveObject
     private bool _isFailed;
     private double _progress;
     private string? _errorMessage;
-    private readonly bool _canDelete;
-
-    public OcrModelDownloadItemViewModel(OcrLanguage language, bool isDownloaded, bool canDelete)
+    public OcrModelDownloadItemViewModel(
+        OcrModelPackage package,
+        string displayName,
+        string description,
+        string supportedLanguages,
+        bool isDownloaded)
     {
-        Language = language;
-        _canDelete = canDelete;
+        Package = package ?? throw new ArgumentNullException(nameof(package));
+        DisplayName = displayName;
+        Description = description;
+        SupportedLanguages = supportedLanguages;
+        IsSupportedLanguageListCompact = package.SupportedLanguages.Count >= 20;
+        SupportedLanguagesSummary = IsSupportedLanguageListCompact
+            ? string.Format(Resources.OcrSupportedLanguageCount, package.SupportedLanguages.Count)
+            : supportedLanguages;
         _isDownloaded = isDownloaded;
         _progress = isDownloaded ? 1 : 0;
     }
 
-    public OcrLanguage Language { get; }
-
-    public string DisplayName => Language.NativeName is { Length: > 0 }
-        ? $"{Language.NativeName} ({Language.DisplayName})"
-        : Language.DisplayName;
+    public OcrModelPackage Package { get; }
+    public string DisplayName { get; }
+    public string Description { get; }
+    public string SupportedLanguages { get; }
+    public string SupportedLanguagesSummary { get; }
+    public bool IsSupportedLanguageListCompact { get; }
+    public bool IsSupportedLanguageListInline => !IsSupportedLanguageListCompact;
 
     public bool IsDownloaded
     {
@@ -83,7 +94,7 @@ public sealed class OcrModelDownloadItemViewModel : ReactiveObject
 
     public bool IsActionVisible => !IsDownloading && !IsDownloaded;
     public bool IsCancelVisible => IsDownloading;
-    public bool IsDeleteVisible => _canDelete && IsDownloaded && !IsDownloading;
+    public bool IsDeleteVisible => IsDownloaded && !IsDownloading;
     public bool IsProgressVisible => true;
     public bool IsProgressIndeterminate => IsDownloading && Progress <= 0;
     public string ProgressText => IsDownloading && Progress > 0 ? $"{Progress:P0}" : string.Empty;

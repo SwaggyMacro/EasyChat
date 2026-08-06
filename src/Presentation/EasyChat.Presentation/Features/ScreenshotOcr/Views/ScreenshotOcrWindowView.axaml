@@ -1,0 +1,209 @@
+<suki:SukiWindow xmlns="https://github.com/avaloniaui"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:vm="using:EasyChat.Presentation.Features.ScreenshotOcr"
+                 xmlns:controls="using:EasyChat.Presentation.Features.ScreenshotOcr.Controls"
+                 xmlns:sharedControls="clr-namespace:EasyChat.Presentation.Shared.Controls;assembly=EasyChat.Presentation.Shared"
+                 xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+                 xmlns:suki="https://github.com/kikipoulet/SukiUI"
+                 x:Class="EasyChat.Presentation.Features.ScreenshotOcr.Views.ScreenshotOcrWindowView"
+                 x:DataType="vm:ScreenshotOcrWindowViewModel"
+                 Title="Screenshot OCR"
+                 Width="1200" Height="720" MinWidth="900" MinHeight="560"
+                 Foreground="{DynamicResource SukiText}"
+                 CanResize="True"
+                 IsTitleBarVisible="True"
+                 ShowTitlebarBackground="True"
+                 RootCornerRadius="10"
+                 CornerRadius="10"
+                 ShowActivated="True"
+                 WindowStartupLocation="CenterScreen">
+    <suki:SukiWindow.LogoContent>
+        <Border Width="24" Height="24" CornerRadius="5"
+                Background="{DynamicResource SukiLowAddColor}">
+            <icons:MaterialIcon Kind="TextRecognition" Width="16" Height="16"
+                                Foreground="{DynamicResource SukiPrimaryColor}"
+                                HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+    </suki:SukiWindow.LogoContent>
+
+    <suki:SukiWindow.RightWindowTitleBarControls>
+        <Button x:Name="PinButton" Classes="Basic"
+                Width="32" Height="32" Padding="0"
+                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                Click="Pin_OnClick" ToolTip.Tip="Pin on screen">
+            <icons:MaterialIcon x:Name="PinIcon" Kind="PinOutline" Width="16" Height="16" />
+        </Button>
+    </suki:SukiWindow.RightWindowTitleBarControls>
+
+    <suki:SukiWindow.Hosts>
+        <suki:SukiDialogHost Manager="{Binding DialogManager}" />
+    </suki:SukiWindow.Hosts>
+
+    <suki:SukiWindow.Styles>
+        <Style Selector="Button.ToolButton">
+            <Setter Property="Width" Value="34" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="6" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Button.ContextButton">
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="9,4" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+    </suki:SukiWindow.Styles>
+
+    <Grid>
+        <Border x:Name="MainSurface"
+                CornerRadius="10"
+                ClipToBounds="True"
+                Background="{DynamicResource SukiBackground}"
+                BorderBrush="{DynamicResource SukiBorderBrush}"
+                BorderThickness="1">
+            <Grid ColumnDefinitions="*,8,*" Background="{DynamicResource SukiBackground}">
+                    <Grid Grid.Column="0" Margin="10,10,4,10">
+                        <Border CornerRadius="7" ClipToBounds="True"
+                                BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1">
+                            <controls:OcrImageViewport x:Name="Viewport"
+                                                       IsSelectionBusy="{Binding IsEditingImage}" />
+                        </Border>
+
+                        <Border HorizontalAlignment="Center" VerticalAlignment="Top" Margin="14"
+                                Padding="4" CornerRadius="7"
+                                Background="{DynamicResource SukiCardBackground}"
+                                BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1"
+                                IsEnabled="{Binding !IsEditingImage}"
+                                IsVisible="{Binding HasSelection}">
+                            <StackPanel Orientation="Horizontal" Spacing="2">
+                                <Button Classes="ContextButton" Click="CopySelection_OnClick" ToolTip.Tip="Copy selected text">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <icons:MaterialIcon Kind="ContentCopy" Width="16" Height="16" />
+                                        <TextBlock Text="Copy" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Classes="ContextButton" Click="TranslateSelection_OnClick" ToolTip.Tip="Translate selection">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <icons:MaterialIcon Kind="Translate" Width="16" Height="16" />
+                                        <TextBlock Text="Translate" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Classes="ContextButton" Click="ExplainSelection_OnClick" ToolTip.Tip="Explain with AI">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <icons:MaterialIcon Kind="LightbulbOnOutline" Width="16" Height="16" />
+                                        <TextBlock Text="Explain" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Classes="ContextButton" Click="ReplaceSelection_OnClick" ToolTip.Tip="Replace with translation">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <icons:MaterialIcon Kind="ImageEditOutline" Width="16" Height="16" />
+                                        <TextBlock Text="Replace" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
+                        <Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="14"
+                                Padding="4" CornerRadius="7"
+                                Background="{DynamicResource SukiCardBackground}"
+                                BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal" Spacing="1">
+                                <Button Classes="ToolButton" Click="ZoomOut_OnClick" ToolTip.Tip="Zoom out">
+                                    <icons:MaterialIcon Kind="MagnifyMinusOutline" Width="18" Height="18" />
+                                </Button>
+                                <TextBlock Width="50" Text="{Binding ZoomText}" TextAlignment="Center" VerticalAlignment="Center" />
+                                <Button Classes="ToolButton" Click="ZoomIn_OnClick" ToolTip.Tip="Zoom in">
+                                    <icons:MaterialIcon Kind="MagnifyPlusOutline" Width="18" Height="18" />
+                                </Button>
+                                <Border Width="1" Margin="4,6" Background="{DynamicResource SukiBorderBrush}" />
+                                <Button Classes="ToolButton" Click="OpenImage_OnClick" ToolTip.Tip="Open image">
+                                    <icons:MaterialIcon Kind="FileImageOutline" Width="18" Height="18" />
+                                </Button>
+                                <Button Classes="ToolButton" Click="Recapture_OnClick" ToolTip.Tip="Capture again">
+                                    <icons:MaterialIcon Kind="MonitorScreenshot" Width="18" Height="18" />
+                                </Button>
+                                <Button Classes="ToolButton" Click="CopyImage_OnClick" ToolTip.Tip="Copy current image">
+                                    <icons:MaterialIcon Kind="ImageMultipleOutline" Width="18" Height="18" />
+                                </Button>
+                                <Border Width="1" Margin="4,6" Background="{DynamicResource SukiBorderBrush}" />
+                                <Button Classes="ToolButton" Click="Undo_OnClick" ToolTip.Tip="Undo" IsEnabled="{Binding CanUndo}">
+                                    <icons:MaterialIcon Kind="Undo" Width="18" Height="18" />
+                                </Button>
+                                <Button Classes="ToolButton" Click="Redo_OnClick" ToolTip.Tip="Redo" IsEnabled="{Binding CanRedo}">
+                                    <icons:MaterialIcon Kind="Redo" Width="18" Height="18" />
+                                </Button>
+                                <Button Classes="ToolButton" Click="Restore_OnClick" ToolTip.Tip="Restore original">
+                                    <icons:MaterialIcon Kind="BackupRestore" Width="18" Height="18" />
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="#73000000" CornerRadius="7" IsVisible="{Binding IsRecognizing}">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                                <suki:Loading Width="34" Height="34" />
+                                <TextBlock Text="Recognizing text..." Foreground="White" FontSize="14" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <GridSplitter Grid.Column="1" Width="2" Margin="3,0"
+                                  Background="{DynamicResource SukiBorderBrush}"
+                                  HorizontalAlignment="Stretch" ResizeDirection="Columns" />
+
+                    <Border Grid.Column="2" Margin="4,10,10,10"
+                            CornerRadius="7"
+                            Background="{DynamicResource SukiCardBackground}"
+                            BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1">
+                        <Grid RowDefinitions="Auto,*,Auto" Margin="14">
+                            <Grid>
+                                <StackPanel Spacing="2" VerticalAlignment="Center">
+                                    <TextBlock Text="Recognized text" FontSize="14" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding SourceText.Length, StringFormat='{}{0:N0} characters'}"
+                                               FontSize="11" Opacity="0.55" />
+                                    <TextBlock Text="{Binding ErrorMessage}" Foreground="IndianRed"
+                                               FontSize="11" TextWrapping="Wrap" MaxHeight="34" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Grid.Row="1" Margin="0,12,0,0">
+                                <TextBox Text="{Binding SourceText, Mode=TwoWay}"
+                                         IsVisible="{Binding !IsShowingTranslation}"
+                                         AcceptsReturn="True" TextWrapping="Wrap"
+                                         VerticalContentAlignment="Top"
+                                         Padding="12" CornerRadius="6" />
+                                <TextBox Text="{Binding TranslatedText, Mode=TwoWay}"
+                                         IsVisible="{Binding IsShowingTranslation}"
+                                         AcceptsReturn="True" TextWrapping="Wrap"
+                                         VerticalContentAlignment="Top"
+                                         Padding="12" CornerRadius="6" />
+                                <Border Background="#50000000" CornerRadius="6"
+                                        IsVisible="{Binding IsTranslating}">
+                                    <suki:Loading Width="30" Height="30"
+                                                  HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                            </Grid>
+
+                            <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto" ColumnSpacing="4" Margin="0,10,0,0">
+                                <Button Grid.Column="0" Classes="ToolButton" Click="Retry_OnClick" ToolTip.Tip="Retry OCR">
+                                    <icons:MaterialIcon Kind="Refresh" Width="18" Height="18" />
+                                </Button>
+                                <Button Grid.Column="1" Classes="ToolButton" Click="CopyText_OnClick" ToolTip.Tip="Copy text">
+                                    <icons:MaterialIcon Kind="ContentCopy" Width="18" Height="18" />
+                                </Button>
+                                <Button Grid.Column="2" Classes="ToolButton" Click="TranslateText_OnClick" ToolTip.Tip="Translate text">
+                                    <icons:MaterialIcon Kind="Translate" Width="18" Height="18" />
+                                </Button>
+                                <Button Grid.Column="3" Classes="ToolButton" Click="ShowOriginal_OnClick" ToolTip.Tip="Show original text">
+                                    <icons:MaterialIcon Kind="TextBoxOutline" Width="18" Height="18" />
+                                </Button>
+                                <sharedControls:LanguageSelector Grid.Column="5" Width="178" Height="32"
+                                                              Languages="{Binding Languages}"
+                                                              SelectedLanguage="{Binding CandidateLanguage, Mode=TwoWay}" />
+                            </Grid>
+                        </Grid>
+                    </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</suki:SukiWindow>

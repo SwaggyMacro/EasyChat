@@ -4,7 +4,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:lang="clr-namespace:EasyChat.Presentation.Lang"
         xmlns:vm="clr-namespace:EasyChat.Presentation.Features.Input"
+        xmlns:settings="clr-namespace:EasyChat.Contracts.Settings;assembly=EasyChat.Contracts"
         xmlns:converters="clr-namespace:EasyChat.Presentation.Foundation.Formatting"
+        xmlns:controls="clr-namespace:EasyChat.Presentation.Shared.Controls;assembly=EasyChat.Presentation.Shared"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="148"
         Height="148" MinWidth="560" SizeToContent="Width"
@@ -66,7 +68,7 @@
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <Image Width="18" Height="18"
-                                                   Source="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.ToIcon}}" />
+                                                   Source="{Binding Icon, Converter={x:Static controls:LanguageFlagConverters.ToIcon}}" />
                                             <TextBlock Text="{Binding Converter={x:Static converters:LanguageSettingsConverters.ToDisplayName}}"
                                                        VerticalAlignment="Center"
                                                        Foreground="{DynamicResource EcTextPrimary}" />
@@ -94,7 +96,7 @@
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <Image Width="18" Height="18"
-                                                   Source="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.ToIcon}}" />
+                                                   Source="{Binding Icon, Converter={x:Static controls:LanguageFlagConverters.ToIcon}}" />
                                             <TextBlock Text="{Binding Converter={x:Static converters:LanguageSettingsConverters.ToDisplayName}}"
                                                        VerticalAlignment="Center"
                                                        Foreground="{DynamicResource EcTextPrimary}" />

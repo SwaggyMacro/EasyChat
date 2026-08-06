@@ -1,4 +1,5 @@
 using EasyChat.Contracts.Updates;
+using EasyChat.Presentation.Features.Capture;
 using EasyChat.Presentation.Features.Settings.State;
 using EasyChat.Presentation.Features.Shell;
 using EasyChat.Presentation.Foundation.UiHost;
@@ -11,4 +12,5 @@ public sealed record DesktopUiContext(
     IUiDialogHost Dialogs,
     DesktopInteractionLifecycle Interactions,
     IApplicationUpdateService Updates,
-    IUiToastHost Toasts);
+    IUiToastHost Toasts,
+    IScreenshotCaptureSession ScreenshotCapture);

@@ -4,6 +4,10 @@ namespace EasyChat.Contracts.Ocr;
 
 public sealed record OcrLanguage(string Id, string DisplayName, string? NativeName = null);
 
+public sealed record OcrModelPackage(
+    string Id,
+    IReadOnlyList<OcrLanguage> SupportedLanguages);
+
 public static class OcrLanguages
 {
     public static OcrLanguage ChineseSimplified { get; } =
@@ -28,13 +32,114 @@ public static class OcrLanguages
         ChineseTraditional,
         English,
         Japanese,
+        new("fr", "French"),
+        new("de", "German"),
+        new("it", "Italian"),
+        new("es", "Spanish"),
+        new("pt", "Portuguese"),
+        new("nl", "Dutch"),
+        new("pl", "Polish"),
+        new("ro", "Romanian"),
+        new("cs", "Czech"),
+        new("sv", "Swedish"),
+        new("no", "Norwegian"),
+        new("da", "Danish"),
+        new("fi", "Finnish"),
+        new("hu", "Hungarian"),
+        new("tr", "Turkish"),
+        new("vi", "Vietnamese"),
+        new("id", "Indonesian"),
+        new("ms", "Malay"),
+        new("az", "Azerbaijani"),
+        new("af", "Afrikaans"),
+        new("bs", "Bosnian"),
+        new("hr", "Croatian"),
+        new("cy", "Welsh"),
+        new("et", "Estonian"),
+        new("ga", "Irish"),
+        new("is", "Icelandic"),
+        new("ku", "Kurdish"),
+        new("lt", "Lithuanian"),
+        new("lv", "Latvian"),
+        new("mt", "Maltese"),
+        new("mi", "Maori"),
+        new("oc", "Occitan"),
+        new("sk", "Slovak"),
+        new("sl", "Slovenian"),
+        new("sq", "Albanian"),
+        new("sw", "Swahili"),
+        new("tl", "Tagalog"),
+        new("uz", "Uzbek"),
+        new("la", "Latin"),
+        new("sr-Latn", "Serbian (Latin)"),
+        new("ca", "Catalan"),
+        new("eu", "Basque"),
+        new("gl", "Galician"),
+        new("lb", "Luxembourgish"),
+        new("rm", "Romansh"),
+        new("qu", "Quechua"),
         Korean,
         Arabic,
+        new("fa", "Persian"),
+        new("ug", "Uyghur"),
+        new("ur", "Urdu"),
         Devanagari,
+        new("mr", "Marathi"),
+        new("ne", "Nepali"),
+        new("bh", "Bihari"),
+        new("mai", "Maithili"),
+        new("ang", "Angika"),
+        new("bho", "Bhojpuri"),
+        new("mah", "Magahi"),
+        new("sck", "Sadri"),
+        new("new", "Newari"),
+        new("gom", "Konkani"),
+        new("sa", "Sanskrit"),
+        new("bgc", "Haryanvi"),
         Tamil,
         Telugu,
-        Kannada
+        Kannada,
+        new("ru", "Russian"),
+        new("sr-Cyrl", "Serbian (Cyrillic)"),
+        new("be", "Belarusian"),
+        new("bg", "Bulgarian"),
+        new("uk", "Ukrainian"),
+        new("mn", "Mongolian"),
+        new("abq", "Abaza"),
+        new("ady", "Adyghe"),
+        new("kbd", "Kabardian"),
+        new("ava", "Avar"),
+        new("dar", "Dargwa"),
+        new("inh", "Ingush"),
+        new("che", "Chechen"),
+        new("lbe", "Lak"),
+        new("lez", "Lezghian"),
+        new("tab", "Tabassaran")
     ];
+
+    private static readonly IReadOnlyDictionary<string, OcrLanguage> ById =
+        Supported.ToDictionary(language => language.Id, StringComparer.OrdinalIgnoreCase);
+
+    public static bool TryGet(string? id, out OcrLanguage language)
+    {
+        if (string.Equals(id, Auto.Id, StringComparison.OrdinalIgnoreCase))
+        {
+            language = Auto;
+            return true;
+        }
+
+        if (string.Equals(id, "sr", StringComparison.OrdinalIgnoreCase))
+            id = "sr-Cyrl";
+
+        if (id is not null && ById.TryGetValue(id, out var resolved))
+        {
+            language = resolved;
+            return true;
+        }
+
+        language = null!;
+        return false;
+    }
 }
 
 public readonly record struct ImagePoint(double X, double Y);
@@ -50,10 +155,19 @@ public sealed record OcrRecognitionResult(IReadOnlyList<OcrTextRegion> Regions)
     public string Text => string.Join("\n", Regions.Select(region => region.Text));
 }
 
+public enum OcrRecognitionMode
+{
+    Fast = 0,
+    Normal = 1,
+    IdleRelease = 2
+}
+
 public sealed record OcrRecognitionRequest(
     ImageFrame Image,
     OcrLanguage? Language = null,
-    bool EnableRotation = false);
+    bool EnableRotation = false,
+    OcrRecognitionMode Mode = OcrRecognitionMode.Normal,
+    int IdleTimeoutSeconds = 300);
 
 public sealed record OcrModelDownloadOptions(string? ProxyUrl, bool UseProxy);
 
@@ -66,19 +180,17 @@ public interface IOcrRecognizer
 
 public interface IOcrModelStore
 {
-    IReadOnlyList<OcrLanguage> SupportedLanguages { get; }
+    IReadOnlyList<OcrModelPackage> ModelPackages { get; }
 
-    bool CanDeleteModels { get; }
-
-    bool IsModelDownloaded(OcrLanguage language);
+    bool IsModelDownloaded(OcrModelPackage package);
 
     Task DownloadModelAsync(
-        OcrLanguage language,
+        OcrModelPackage package,
         OcrModelDownloadOptions options,
         IProgress<double>? progress = null,
         CancellationToken cancellationToken = default);
 
-    void DeleteModel(OcrLanguage language);
+    void DeleteModel(OcrModelPackage package);
 }
 
 public interface IOcrRecognitionUseCases
@@ -90,18 +202,16 @@ public interface IOcrRecognitionUseCases
 
 public interface IOcrModelUseCases
 {
-    IReadOnlyList<OcrLanguage> SupportedLanguages { get; }
+    IReadOnlyList<OcrModelPackage> ModelPackages { get; }
 
-    bool CanDeleteModels { get; }
-
-    bool IsModelDownloaded(OcrLanguage language);
+    bool IsModelDownloaded(OcrModelPackage package);
 
     Task DownloadModelAsync(
-        OcrLanguage language,
+        OcrModelPackage package,
         IProgress<double>? progress = null,
         CancellationToken cancellationToken = default);
 
-    void DeleteModel(OcrLanguage language);
+    void DeleteModel(OcrModelPackage package);
 }
 
 public sealed class OcrModelNotDownloadedException : Exception

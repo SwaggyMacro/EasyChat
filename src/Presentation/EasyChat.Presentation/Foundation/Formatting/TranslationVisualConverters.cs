@@ -18,7 +18,6 @@ public static class AiModelTypeConverters
     public static readonly IValueConverter IsGemini = new AiModelTypeMatchConverter(AiModelType.Gemini);
     public static readonly IValueConverter IsClaude = new AiModelTypeMatchConverter(AiModelType.Claude);
 }
-
 public sealed class AiModelTypeToIconConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
@@ -96,13 +95,6 @@ public sealed class EngineTypeToBoolConverter(string expected) : IValueConverter
         value is true ? expected : BindingOperations.DoNothing;
 }
 
-public static class LanguageFlagConverters
-{
-    public static readonly IValueConverter ToIcon = new LanguageFlagToIconConverter();
-    public static readonly IValueConverter HasIcon = new LanguageFlagHasIconConverter();
-    public static readonly IValueConverter HasNoIcon = new LanguageFlagHasNoIconConverter();
-}
-
 public static class LanguageSettingsConverters
 {
     public static readonly IValueConverter ToDisplayName = new LanguageSettingsDisplayNameConverter();
@@ -130,35 +122,6 @@ public sealed class LanguageSettingsDisplayNameConverter : IValueConverter
         value is LanguageSettings language
             ? LanguageDisplayNames.ForUi(language.ChineseName, language.EnglishName)
             : null;
-
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
-        throw new NotSupportedException();
-}
-
-public sealed class LanguageFlagToIconConverter : IValueConverter
-{
-    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        return LanguageFlagAssetLoader.Load(value as string);
-    }
-
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
-        throw new NotSupportedException();
-}
-
-public sealed class LanguageFlagHasIconConverter : IValueConverter
-{
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
-        LanguageFlagAssetLoader.Exists(value as string);
-
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
-        throw new NotSupportedException();
-}
-
-public sealed class LanguageFlagHasNoIconConverter : IValueConverter
-{
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
-        !LanguageFlagAssetLoader.Exists(value as string);
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
         throw new NotSupportedException();
@@ -230,42 +193,6 @@ internal static class AssetIconLoader
             using var stream = AssetLoader.Open(
                 new Uri($"avares://EasyChat.Desktop/Assets/Images/Engine/{file}"));
             return stream.CanRead;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-}
-
-internal static class LanguageFlagAssetLoader
-{
-    private const string AssetRoot = "avares://EasyChat.Desktop/Assets/Images/Flags/mini/";
-
-    public static Bitmap? Load(string? file)
-    {
-        if (string.IsNullOrWhiteSpace(file))
-            return null;
-
-        try
-        {
-            using var stream = AssetLoader.Open(new Uri($"{AssetRoot}{file}"));
-            return new Bitmap(stream);
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    public static bool Exists(string? file)
-    {
-        if (string.IsNullOrWhiteSpace(file))
-            return false;
-
-        try
-        {
-            return AssetLoader.Exists(new Uri($"{AssetRoot}{file}"));
         }
         catch
         {

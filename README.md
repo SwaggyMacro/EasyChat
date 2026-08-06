@@ -53,7 +53,7 @@ EasyChat 是一款基于 Avalonia 开发的跨平台即时翻译工具，是继 
 本项目使用现代 .NET 技术栈构建，致力于未来的跨平台支持：
 *   **核心框架**: [Avalonia UI](https://avaloniaui.net/) (为后续跨平台支持做准备)
 *   **UI 组件库**: [SukiUI](https://github.com/kikipoulet/SukiUI)
-*   **OCR 引擎**: [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)
+*   **OCR 引擎**: [OpenVINO.NET PaddleOCR](https://github.com/sdcb/OpenVINO.NET)
 
 ## 📖 使用教程
 

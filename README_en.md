@@ -52,7 +52,7 @@ Supports custom Prompts, perfectly solving the problem of inaccurate translation
 This project is built using the modern .NET technology stack, dedicated to future cross-platform support:
 *   **Core Framework**: [Avalonia UI](https://avaloniaui.net/) (Preparing for subsequent cross-platform support)
 *   **UI Component Library**: [SukiUI](https://github.com/kikipoulet/SukiUI)
-*   **OCR Engine**: [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)
+*   **OCR Engine**: [OpenVINO.NET PaddleOCR](https://github.com/sdcb/OpenVINO.NET)
 
 ## 📖 Usage Tutorial
 

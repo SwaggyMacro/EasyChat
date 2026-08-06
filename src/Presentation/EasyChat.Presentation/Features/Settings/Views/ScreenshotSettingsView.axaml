@@ -12,6 +12,8 @@
              mc:Ignorable="d">
     <UserControl.Resources>
         <converts:ScreenshotModeConverter x:Key="ScreenshotModeConverter" />
+        <converts:OcrRecognitionModeConverter x:Key="OcrRecognitionModeConverter" />
+        <converts:OcrRecognitionModeDescriptionConverter x:Key="OcrRecognitionModeDescriptionConverter" />
     </UserControl.Resources>
 
     <StackPanel Classes="EcSettingsList"

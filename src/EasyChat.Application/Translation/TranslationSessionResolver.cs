@@ -43,11 +43,24 @@ internal sealed class TranslationSessionResolver
 
     private ITranslationSession CreateAiSession(TranslationProviderSelection selected)
     {
-        var prompt = string.IsNullOrWhiteSpace(selected.PromptOverride)
-            ? _providers.ResolvePrompt(null)
-            : selected.PromptOverride;
+        var prompt = ResolvePrompt(selected);
         var resolved = _providers.CreateSelectedAi(selected.AiModelId, selected.AiModelName);
         return new AiTranslationSession(resolved.Provider, prompt);
+    }
+
+    private string ResolvePrompt(TranslationProviderSelection selected)
+    {
+        if (string.IsNullOrWhiteSpace(selected.PromptId))
+        {
+            return string.IsNullOrWhiteSpace(selected.PromptOverride)
+                ? _providers.ResolvePrompt(null)
+                : selected.PromptOverride;
+        }
+
+        var prompt = _providers.ResolvePrompt(selected.PromptId);
+        return string.IsNullOrWhiteSpace(selected.PromptOverride)
+            ? prompt
+            : prompt + "\n\n" + selected.PromptOverride;
     }
 
     private static TranslationProviderSelection FromDefaults(GeneralSettings settings) => new(

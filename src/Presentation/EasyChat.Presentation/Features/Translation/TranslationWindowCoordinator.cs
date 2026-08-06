@@ -69,7 +69,7 @@ public sealed class TranslationWindowCoordinator(
         var window = await ShowShellAsync(anchor, centerOnScreen: false, showCloseButton, cancellationToken);
         await window.ViewModel.InitializeAsync(text);
         if (anchor is { } point)
-            await OnUiAsync(() => PositionNear(window.View, point), cancellationToken);
+            await OnUiAsync(() => PositionNearIfUnadjusted(window.View, point), cancellationToken);
     }
 
     public async ValueTask ShowDictionaryAsync(
@@ -86,7 +86,7 @@ public sealed class TranslationWindowCoordinator(
         var window = await ShowShellAsync(anchor, centerOnScreen, showCloseButton: true, cancellationToken);
         await window.ViewModel.InitializeDictionaryAsync(text, sourceLanguageId, targetLanguageId);
         if (!centerOnScreen && anchor is { } point)
-            await OnUiAsync(() => PositionNear(window.View, point), cancellationToken);
+            await OnUiAsync(() => PositionNearIfUnadjusted(window.View, point), cancellationToken);
     }
 
     public ValueTask<bool> ContainsAsync(
@@ -179,6 +179,14 @@ public sealed class TranslationWindowCoordinator(
             logicalWidth,
             logicalHeight,
             logicalOffset: 20);
+    }
+
+    private static void PositionNearIfUnadjusted(
+        TranslationDictionaryWindowView window,
+        PhysicalScreenPoint point)
+    {
+        if (!window.HasUserAdjustedBounds)
+            PositionNear(window, point);
     }
 
     private static async ValueTask OnUiAsync(

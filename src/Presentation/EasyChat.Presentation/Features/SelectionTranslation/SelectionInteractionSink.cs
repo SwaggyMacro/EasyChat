@@ -88,6 +88,7 @@ public sealed class SelectionInteractionSink(
         _toolbar.CorrectionClicked += (_, _) => Run(TextAssistOperation.Correction);
         _toolbar.PolishClicked += (_, _) => Run(TextAssistOperation.Polish);
         _toolbar.SummaryClicked += (_, _) => Run(TextAssistOperation.Summary);
+        _toolbar.ExplanationClicked += (_, _) => Run(TextAssistOperation.Explanation);
         return _toolbar;
     }
 

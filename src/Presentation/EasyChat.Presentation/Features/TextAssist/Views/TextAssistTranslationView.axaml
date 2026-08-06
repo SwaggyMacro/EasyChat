@@ -4,6 +4,8 @@
              xmlns:textAssist="using:EasyChat.Presentation.Features.TextAssist"
              xmlns:lang="clr-namespace:EasyChat.Presentation.Lang"
              xmlns:converters="clr-namespace:EasyChat.Presentation.Foundation.Formatting"
+             xmlns:settings="clr-namespace:EasyChat.Contracts.Settings;assembly=EasyChat.Contracts"
+             xmlns:sharedControls="clr-namespace:EasyChat.Presentation.Shared.Controls;assembly=EasyChat.Presentation.Shared"
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              x:Class="EasyChat.Presentation.Features.TextAssist.Views.TextAssistTranslationView"
@@ -78,18 +80,7 @@
                                 <avalonia:MaterialIcon Kind="VolumeHigh" />
                             </Button>
                         </Grid>
-                        <ComboBox Grid.Row="1" ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedSourceLanguage}">
-                            <ComboBox.ItemTemplate><DataTemplate><StackPanel Orientation="Horizontal" Spacing="6">
-                                <Panel Width="22" Height="16">
-                                    <avalonia:MaterialIcon Kind="FlagOutline" Opacity="0.65"
-                                                           IsVisible="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.HasNoIcon}}" />
-                                    <Image Width="22" Height="16"
-                                           IsVisible="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.HasIcon}}"
-                                           Source="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.ToIcon}}" />
-                                </Panel>
-                                <TextBlock Text="{Binding Converter={x:Static converters:LanguageSettingsConverters.ToDisplayName}}" />
-                            </StackPanel></DataTemplate></ComboBox.ItemTemplate>
-                        </ComboBox>
+                        <sharedControls:LanguageSelector Grid.Row="1" Languages="{Binding Languages}" SelectedLanguage="{Binding SelectedSourceLanguage, Mode=TwoWay}" />
                         <Grid Grid.Row="2">
                             <TextBox x:Name="SourceTextBox" Classes="EditorTextBox" Text="{Binding InputText, Mode=TwoWay}"
                                      AcceptsReturn="True" TextWrapping="Wrap"
@@ -122,18 +113,7 @@
                                 <avalonia:MaterialIcon Kind="VolumeHigh" />
                             </Button>
                         </Grid>
-                        <ComboBox Grid.Row="1" ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedTargetLanguage}">
-                            <ComboBox.ItemTemplate><DataTemplate><StackPanel Orientation="Horizontal" Spacing="6">
-                                <Panel Width="22" Height="16">
-                                    <avalonia:MaterialIcon Kind="FlagOutline" Opacity="0.65"
-                                                           IsVisible="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.HasNoIcon}}" />
-                                    <Image Width="22" Height="16"
-                                           IsVisible="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.HasIcon}}"
-                                           Source="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.ToIcon}}" />
-                                </Panel>
-                                <TextBlock Text="{Binding Converter={x:Static converters:LanguageSettingsConverters.ToDisplayName}}" />
-                            </StackPanel></DataTemplate></ComboBox.ItemTemplate>
-                        </ComboBox>
+                        <sharedControls:LanguageSelector Grid.Row="1" Languages="{Binding Languages}" SelectedLanguage="{Binding SelectedTargetLanguage, Mode=TwoWay}" />
                         <Grid Grid.Row="2">
                             <TextBox x:Name="ResultTextBox" Classes="EditorTextBox" Text="{Binding TranslationResult}" IsReadOnly="True"
                                      AcceptsReturn="True" TextWrapping="Wrap" FontSize="18"

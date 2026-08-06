@@ -567,6 +567,12 @@
     <data name="Speech_EnableTranslation" xml:space="preserve">
         <value>启用翻译</value>
     </data>
+    <data name="Speech_FontSizeDecrease" xml:space="preserve">
+        <value>减小字号</value>
+    </data>
+    <data name="Speech_FontSizeIncrease" xml:space="preserve">
+        <value>增大字号</value>
+    </data>
     <data name="Speech_RealTimePreview" xml:space="preserve">
         <value>实时预览</value>
     </data>
@@ -891,7 +897,12 @@
   <data name="TextAssistTranslate" xml:space="preserve"><value>翻译</value></data>
   <data name="TextAssistCorrect" xml:space="preserve"><value>纠正</value></data>
   <data name="TextAssistPolish" xml:space="preserve"><value>润色</value></data>
+  <data name="TextAssistPolishExplanationTitle" xml:space="preserve"><value>润色说明</value></data>
+  <data name="TextAssistPolishOriginalLabel" xml:space="preserve"><value>原表达</value></data>
+  <data name="TextAssistPolishRevisedLabel" xml:space="preserve"><value>润色后</value></data>
+  <data name="TextAssistProcessing" xml:space="preserve"><value>文本处理</value></data>
   <data name="TextAssistSummary" xml:space="preserve"><value>总结</value></data>
+  <data name="TextAssistExplain" xml:space="preserve"><value>解释</value></data>
   <data name="TextAssistNoAiModel" xml:space="preserve"><value>未配置可用的 AI 模型，请在设置中添加 AI 模型。</value></data>
   <data name="TextAssistNoVoice" xml:space="preserve"><value>没有可用的语音。</value></data>
   <data name="TextAssistInputPlaceholderText" xml:space="preserve"><value>输入文本...</value></data>
@@ -919,7 +930,17 @@
     <data name="Action_QuickTranslate" xml:space="preserve"><value>快捷翻译</value></data>
     <data name="Action_QuickCorrect" xml:space="preserve"><value>快捷纠正</value></data>
     <data name="ReadSelectedText" xml:space="preserve"><value>读取选中文本</value></data>
-    <data name="OcrModels" xml:space="preserve"><value>OCR 模型</value></data>
+    <data name="OcrModels" xml:space="preserve"><value>截图翻译</value></data>
+    <data name="OcrModelsDescription" xml:space="preserve"><value>（用于截图提取文字的模型，需要下载后才可以正常使用截图翻译）</value></data>
+    <data name="OcrRecognitionMode" xml:space="preserve"><value>OCR 模式</value></data>
+    <data name="OcrRecognitionMode_Fast" xml:space="preserve"><value>快速</value></data>
+    <data name="OcrRecognitionMode_Normal" xml:space="preserve"><value>普通</value></data>
+    <data name="OcrRecognitionMode_IdleRelease" xml:space="preserve"><value>闲置释放</value></data>
+    <data name="OcrRecognitionModeDescription_Fast" xml:space="preserve"><value>OCR 会保持加载，可能长时间额外占用约 500 MB 内存，但后续截图文字识别速度更快，适合内存充足且追求识别速度的用户。</value></data>
+    <data name="OcrRecognitionModeDescription_Normal" xml:space="preserve"><value>仅在截图文字识别时使用临时独立进程，识别完成后退出进程并回收其内存。</value></data>
+    <data name="OcrRecognitionModeDescription_IdleRelease" xml:space="preserve"><value>OCR 会保持加载以加快连续识别，并在指定时间内没有新的截图识别后退出进程、回收内存。</value></data>
+    <data name="OcrIdleTimeout" xml:space="preserve"><value>闲置关闭时间</value></data>
+    <data name="Seconds" xml:space="preserve"><value>秒</value></data>
     <data name="OcrUseProxy" xml:space="preserve"><value>下载模型时使用代理</value></data>
     <data name="DownloadOcrModels" xml:space="preserve"><value>下载 OCR 模型</value></data>
     <data name="DownloadOcrModel" xml:space="preserve"><value>下载</value></data>
@@ -936,12 +957,14 @@
     <data name="OcrModelDownloadFailed" xml:space="preserve"><value>OCR 模型下载失败</value></data>
   <data name="Retry" xml:space="preserve"><value>重试</value></data>
     <data name="Tts_ConfigureVoices" xml:space="preserve"><value>配置语音</value></data>
-    <data name="AsrModels" xml:space="preserve"><value>ASR 模型</value></data>
-    <data name="AsrModelsDescription" xml:space="preserve"><value>可一次导入一个或多个模型文件夹、包含模型的文件夹，或受支持的模型压缩包。</value></data>
+    <data name="AsrModels" xml:space="preserve"><value>语音实时识别</value></data>
+    <data name="AsrModelsDescription" xml:space="preserve"><value>（用于语音实时识别文字的模型，需要下载后才可以正常使用语音实时识别）</value></data>
     <data name="ImportAsrModelFolder" xml:space="preserve"><value>导入文件夹</value></data>
     <data name="ImportAsrModelArchive" xml:space="preserve"><value>导入压缩包</value></data>
     <data name="AsrModelArchives" xml:space="preserve"><value>模型压缩包</value></data>
     <data name="NoAsrModels" xml:space="preserve"><value>尚未安装 ASR 模型。</value></data>
+    <data name="ShowMoreAsrModels" xml:space="preserve"><value>显示更多 ASR 模型</value></data>
+    <data name="ShowLessAsrModels" xml:space="preserve"><value>收起 ASR 模型</value></data>
     <data name="AsrModelsImported" xml:space="preserve"><value>已导入：{0}</value></data>
     <data name="AsrModelsSkipped" xml:space="preserve"><value>已跳过（已安装或重复）：{0}</value></data>
     <data name="AsrModelsAlreadyInstalled" xml:space="preserve"><value>所选模型已经安装。</value></data>
@@ -1095,5 +1118,65 @@
   </data>
   <data name="OpenReleases" xml:space="preserve">
     <value>打开发布页</value>
+  </data>
+  <data name="ApplicationData" xml:space="preserve">
+    <value>应用数据</value>
+  </data>
+  <data name="ApplicationDataDescription" xml:space="preserve">
+    <value>所有配置、ASR 模型和 OCR 模型统一保存在此目录中。</value>
+  </data>
+  <data name="ChangeApplicationDataLocation" xml:space="preserve">
+    <value>更改保存位置</value>
+  </data>
+  <data name="SelectApplicationDataLocation" xml:space="preserve">
+    <value>选择一个空的应用数据目录</value>
+  </data>
+  <data name="ApplicationDataMoved" xml:space="preserve">
+    <value>配置和模型已迁移到 {0}。</value>
+  </data>
+  <data name="ApplicationDataMoveFailed" xml:space="preserve">
+    <value>无法更改保存位置</value>
+  </data>
+  <data name="ApplicationDataMoveBusy" xml:space="preserve">
+    <value>请先等待当前模型操作完成，再更改保存位置。</value>
+  </data>
+  <data name="OcrUniversalModel" xml:space="preserve">
+    <value>通用模型</value>
+  </data>
+  <data name="OcrUniversalModelDescription" xml:space="preserve">
+    <value>覆盖中、英、日及多种拉丁语系语言。</value>
+  </data>
+  <data name="OcrKoreanV4Model" xml:space="preserve">
+    <value>韩文模型</value>
+  </data>
+  <data name="OcrArabicV4Model" xml:space="preserve">
+    <value>阿拉伯文字模型</value>
+  </data>
+  <data name="OcrDevanagariV4Model" xml:space="preserve">
+    <value>天城文模型</value>
+  </data>
+  <data name="OcrTamilV4Model" xml:space="preserve">
+    <value>泰米尔文模型</value>
+  </data>
+  <data name="OcrTeluguV4Model" xml:space="preserve">
+    <value>泰卢固文模型</value>
+  </data>
+  <data name="OcrKannadaV4Model" xml:space="preserve">
+    <value>卡纳达文模型</value>
+  </data>
+  <data name="OcrCyrillicV3Model" xml:space="preserve">
+    <value>西里尔文字模型</value>
+  </data>
+  <data name="OcrSupportedLanguages" xml:space="preserve">
+    <value>支持语言：{0}</value>
+  </data>
+  <data name="OcrSupportedLanguageCount" xml:space="preserve">
+    <value>支持 {0} 种语言</value>
+  </data>
+  <data name="ViewOcrSupportedLanguages" xml:space="preserve">
+    <value>查看全部支持语言</value>
+  </data>
+  <data name="Action_ScreenshotOcr" xml:space="preserve">
+    <value>截图 OCR</value>
   </data>
 </root>

@@ -13,6 +13,7 @@ public sealed class AvaloniaImageTranslationRenderer : IImageTranslationRenderer
 {
     private const double MinimumFontSize = 1;
     private readonly IImageBackgroundCleaner _backgroundCleaner;
+    private readonly SemaphoreSlim _renderGate = new(1, 1);
 
     public AvaloniaImageTranslationRenderer(IImageBackgroundCleaner backgroundCleaner)
     {
@@ -20,7 +21,7 @@ public sealed class AvaloniaImageTranslationRenderer : IImageTranslationRenderer
                              ?? throw new ArgumentNullException(nameof(backgroundCleaner));
     }
 
-    public Task<ImageTranslationRenderResult> RenderAsync(
+    public async Task<ImageTranslationRenderResult> RenderAsync(
         ImageFrame source,
         IReadOnlyList<ImageTranslationOverlay> overlays,
         CancellationToken cancellationToken = default)
@@ -29,80 +30,76 @@ public sealed class AvaloniaImageTranslationRenderer : IImageTranslationRenderer
         ArgumentNullException.ThrowIfNull(overlays);
         cancellationToken.ThrowIfCancellationRequested();
 
-        using var sourceBitmap = AvaloniaImageFrames.ToBitmap(source);
-        var warnings = new List<string>();
-        var renderable = overlays
-            .Where(overlay => CanFitText(overlay, sourceBitmap))
-            .ToArray();
-        foreach (var overlay in overlays.Except(renderable))
-            warnings.Add($"Translation did not fit: {overlay.Region.Text.Trim()}");
-
-        if (renderable.Length == 0)
+        await _renderGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
         {
-            return Task.FromResult(new ImageTranslationRenderResult(
+            var warnings = new List<string>();
+            var renderable = overlays
+                .Where(overlay => CanFitText(overlay, source))
+                .ToArray();
+            foreach (var overlay in overlays.Except(renderable))
+                warnings.Add($"Translation did not fit: {overlay.Region.Text.Trim()}");
+
+            if (renderable.Length == 0)
+                return new ImageTranslationRenderResult(source, warnings, 0);
+
+            var backgroundFrame = _backgroundCleaner.RemoveText(
                 source,
-                warnings,
-                0));
-        }
+                renderable.Select(overlay => overlay.Region).ToArray(),
+                cancellationToken);
+            using var background = AvaloniaImageFrames.ToBitmap(backgroundFrame);
+            using var output = new RenderTargetBitmap(background.PixelSize, background.Dpi);
+            var pixelToDip = PixelToDipScale(background.PixelSize, background.Size);
 
-        var backgroundFrame = _backgroundCleaner.RemoveText(
-            source,
-            renderable.Select(overlay => overlay.Region).ToArray(),
-            cancellationToken);
-        using var background = AvaloniaImageFrames.ToBitmap(backgroundFrame);
-        var output = new RenderTargetBitmap(background.PixelSize, background.Dpi);
-        var pixelToDip = PixelToDipScale(background.PixelSize, background.Size);
-
-        using (var context = output.CreateDrawingContext())
-        {
-            context.DrawImage(background, new Rect(background.Size));
-            foreach (var overlay in renderable)
+            using (var context = output.CreateDrawingContext())
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                var geometry = GetGeometry(overlay.Region);
-                var boxWidth = geometry.BoxWidth * pixelToDip.X;
-                var boxHeight = geometry.BoxHeight * pixelToDip.Y;
-                var originalBounds = new Rect(0, 0, boxWidth, boxHeight);
-                var brightness = SampleBrightness(backgroundFrame, geometry.Bounds);
-                var brush = brightness < 135 ? Brushes.White : Brushes.Black;
-                var preferredFontSize = CalculatePreferredFontSize(
-                    originalBounds,
-                    overlay.Region.Angle);
-                var layout = CreateLayout(
-                    overlay.Translation,
-                    boxWidth,
-                    boxHeight,
-                    preferredFontSize,
-                    brush);
-                if (layout is null)
+                context.DrawImage(background, new Rect(background.Size));
+                foreach (var overlay in renderable)
                 {
-                    warnings.Add($"Translation did not fit: {overlay.Region.Text.Trim()}");
-                    continue;
-                }
-
-                var center = new Point(
-                    geometry.Center.X * pixelToDip.X,
-                    geometry.Center.Y * pixelToDip.Y);
-                var matrix = Matrix.CreateRotation(overlay.Region.Angle * Math.PI / 180d)
-                             * Matrix.CreateTranslation(center.X, center.Y);
-                using (context.PushTransform(matrix))
-                {
-                    var y = -layout.Height / 2;
-                    foreach (var line in layout.Lines)
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var geometry = GetGeometry(overlay.Region);
+                    var boxWidth = geometry.BoxWidth * pixelToDip.X;
+                    var boxHeight = geometry.BoxHeight * pixelToDip.Y;
+                    var originalBounds = new Rect(0, 0, boxWidth, boxHeight);
+                    var brightness = SampleBrightness(backgroundFrame, geometry.Bounds);
+                    var brush = brightness < 135 ? Brushes.White : Brushes.Black;
+                    var preferredFontSize = CalculatePreferredFontSize(originalBounds, overlay.Region.Angle);
+                    var layout = CreateLayout(
+                        overlay.Translation,
+                        boxWidth,
+                        boxHeight,
+                        preferredFontSize,
+                        brush);
+                    if (layout is null)
                     {
-                        context.DrawText(line, new Point(-boxWidth / 2, y));
-                        y += line.Height;
+                        warnings.Add($"Translation did not fit: {overlay.Region.Text.Trim()}");
+                        continue;
+                    }
+
+                    var center = new Point(
+                        geometry.Center.X * pixelToDip.X,
+                        geometry.Center.Y * pixelToDip.Y);
+                    var matrix = Matrix.CreateRotation(overlay.Region.Angle * Math.PI / 180d)
+                                 * Matrix.CreateTranslation(center.X, center.Y);
+                    using (context.PushTransform(matrix))
+                    {
+                        var y = -layout.Height / 2;
+                        foreach (var line in layout.Lines)
+                        {
+                            context.DrawText(line, new Point(-boxWidth / 2, y));
+                            y += line.Height;
+                        }
                     }
                 }
             }
-        }
 
-        var result = AvaloniaImageFrames.ToImageFrame(output);
-        output.Dispose();
-        return Task.FromResult(new ImageTranslationRenderResult(
-            result,
-            warnings,
-            renderable.Length));
+            var result = AvaloniaImageFrames.ToImageFrame(output);
+            return new ImageTranslationRenderResult(result, warnings, renderable.Length);
+        }
+        finally
+        {
+            _renderGate.Release();
+        }
     }
 
     public static Vector PixelToDipScale(PixelSize pixelSize, Size dipSize) =>
@@ -124,11 +121,11 @@ public sealed class AvaloniaImageTranslationRenderer : IImageTranslationRenderer
         double boxHeight) =>
         layoutWidth <= boxWidth && layoutHeight <= boxHeight;
 
-    private static bool CanFitText(ImageTranslationOverlay overlay, Bitmap bitmap)
+    private static bool CanFitText(ImageTranslationOverlay overlay, ImageFrame image)
     {
         var geometry = GetGeometry(overlay.Region);
-        var scaleX = bitmap.Size.Width / Math.Max(1, bitmap.PixelSize.Width);
-        var scaleY = bitmap.Size.Height / Math.Max(1, bitmap.PixelSize.Height);
+        var scaleX = 96d / Math.Max(1d, image.DpiX);
+        var scaleY = 96d / Math.Max(1d, image.DpiY);
         var boxWidth = geometry.BoxWidth * scaleX;
         var boxHeight = geometry.BoxHeight * scaleY;
         var preferredFontSize = CalculatePreferredFontSize(

@@ -127,7 +127,7 @@ public sealed class ArchitectureRulesTests
         string[] forbidden =
         [
             "Avalonia", "ReactiveUI", "DllImport", "LibraryImport", "Microsoft.Win32",
-            "OpenCv", "Paddle", "SoundFlow", "Velopack", "user32", "kernel32", "HWND", "AXUIElement"
+            "OpenCv", "OpenVINO", "Paddle", "SoundFlow", "Velopack", "user32", "kernel32", "HWND", "AXUIElement"
         ];
 
         foreach (var layer in layers)
@@ -178,8 +178,8 @@ public sealed class ArchitectureRulesTests
         var root = FindRepositoryRoot();
         string[] forbiddenPackages =
         [
-            "GlobalHotKeys.Windows", "OpenCvSharp4.Windows", "Sdcb.PaddleInference",
-            "Sdcb.PaddleOCR", "SoundFlow"
+            "GlobalHotKeys.Windows", "OpenCvSharp4.Windows", "Sdcb.OpenVINO",
+            "Sdcb.PaddleInference", "Sdcb.PaddleOCR", "SoundFlow"
         ];
 
         foreach (var project in Directory.EnumerateFiles(Path.Combine(root, "src"), "*.csproj", SearchOption.AllDirectories)
@@ -291,7 +291,44 @@ public sealed class ArchitectureRulesTests
 
         Assert.AreEqual("EasyChat", properties["AssemblyName"]);
         Assert.AreEqual("WinExe", properties["OutputType"]);
-        Assert.AreEqual("1.0.7", properties["Version"]);
+        Assert.IsTrue(
+            Regex.IsMatch(
+                properties["Version"],
+                @"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$"),
+            "Windows host Version must be an explicit semantic version.");
+    }
+
+    [TestMethod]
+    public void DesktopApp_PreservesEcAndMarkdownResources()
+    {
+        var root = FindRepositoryRoot();
+        var document = XDocument.Load(Path.Combine(root, "src", "Host", "EasyChat.Desktop", "App.axaml"));
+        var application = document.Root!;
+
+        var resources = application.Elements()
+            .Where(element => element.Name.LocalName == "Application.Resources")
+            .ToArray();
+        Assert.HasCount(1, resources);
+
+        var resourceSources = resources[0]
+            .Descendants()
+            .Where(element => element.Name.LocalName == "ResourceInclude")
+            .Select(element => element.Attribute("Source")?.Value)
+            .Where(source => source is not null)
+            .ToHashSet(StringComparer.Ordinal);
+        StringAssert.Contains(string.Join("\n", resourceSources), "EcTokens.axaml");
+        StringAssert.Contains(string.Join("\n", resourceSources), "EcSettingRowTheme.axaml");
+        StringAssert.Contains(string.Join("\n", resourceSources), "LiveMarkdown.Avalonia/Defaults.axaml");
+
+        var styleSources = application.Elements()
+            .Where(element => element.Name.LocalName == "Application.Styles")
+            .Descendants()
+            .Where(element => element.Name.LocalName == "StyleInclude")
+            .Select(element => element.Attribute("Source")?.Value)
+            .Where(source => source is not null)
+            .ToHashSet(StringComparer.Ordinal);
+        StringAssert.Contains(string.Join("\n", styleSources), "LiveMarkdown.Avalonia/Styles.axaml");
+        StringAssert.Contains(string.Join("\n", styleSources), "EcControls.axaml");
     }
 
     [TestMethod]

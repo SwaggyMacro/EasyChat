@@ -22,7 +22,7 @@ public static class TranslationPromptDefaults
         * **NO conversational filler**: Do not say "Here is the translation", "Sure", or "Step 1".
         * **NO meta-data**: Do not explain your process.
         * **Direct Output**: Your response must start directly with the translated text.
-        * **Format**: Plain text. Keep original code blocks/LaTeX unchanged.
+        * **Format**: Preserve meaningful Markdown structure, code blocks, and LaTeX from the source.
 
         # Interaction Example
         User: [Content]

@@ -27,17 +27,11 @@ jobs:
       - name: Install Velopack CLI
         run: dotnet tool install -g vpk --version 1.2.0
 
-      - name: Restore online OCR dependencies
-        run: dotnet restore ./src/Host/EasyChat.Desktop.Windows/EasyChat.Desktop.Windows.csproj -r win-x64 -p:UseBundledOcrModels=false
+      - name: Restore Windows dependencies
+        run: dotnet restore ./src/Host/EasyChat.Desktop.Windows/EasyChat.Desktop.Windows.csproj -r win-x64
 
-      - name: Publish EasyChat (online OCR channel)
-        run: dotnet publish ./src/Host/EasyChat.Desktop.Windows/EasyChat.Desktop.Windows.csproj -c Release -r win-x64 --self-contained false --no-restore -p:UseBundledOcrModels=false -o ./publish-online
-
-      - name: Restore bundled OCR dependencies
-        run: dotnet restore ./src/Host/EasyChat.Desktop.Windows/EasyChat.Desktop.Windows.csproj -r win-x64 -p:UseBundledOcrModels=true
-
-      - name: Publish EasyChat (bundled OCR channel)
-        run: dotnet publish ./src/Host/EasyChat.Desktop.Windows/EasyChat.Desktop.Windows.csproj -c Release -r win-x64 --self-contained false --no-restore -p:UseBundledOcrModels=true -o ./publish-bundled
+      - name: Publish EasyChat
+        run: dotnet publish ./src/Host/EasyChat.Desktop.Windows/EasyChat.Desktop.Windows.csproj -c Release -r win-x64 --self-contained false --no-restore -o ./publish
 
       - name: Get Version
         id: get_version
@@ -53,23 +47,94 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Download Previous Release Assets
-        continue-on-error: true
         shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
           mkdir -p Releases
-          gh release download -p "RELEASES*" -p "assets.*.json" -p "releases.*.json" -p "*.nupkg" --dir ./Releases || echo "No previous release found, skipping delta generation."
 
-      - name: Pack online Velopack channel (win compatibility channel)
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            PREVIOUS_TAG=$(git describe --tags --match 'v*.*.*' --abbrev=0 "${GITHUB_REF_NAME}^" 2>/dev/null || true)
+          else
+            PREVIOUS_TAG=$(git describe --tags --match 'v*.*.*' --abbrev=0 HEAD 2>/dev/null || true)
+            if [[ "${PREVIOUS_TAG#v}" == "${VERSION}" ]]; then
+              PREVIOUS_TAG=$(git describe --tags --match 'v*.*.*' --abbrev=0 "${PREVIOUS_TAG}^" 2>/dev/null || true)
+            fi
+          fi
+
+          if [[ -z "${PREVIOUS_TAG}" ]]; then
+            echo "No previous release tag found; this release will establish the delta baseline."
+            {
+              echo "PREVIOUS_TAG="
+              echo "EXPECT_WIN_DELTA=false"
+            } >> "${GITHUB_ENV}"
+            exit 0
+          fi
+
+          echo "Downloading full packages from previous release ${PREVIOUS_TAG}."
+          PREVIOUS_VERSION="${PREVIOUS_TAG#v}"
+          gh release download "${PREVIOUS_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pattern "EasyChat-${PREVIOUS_VERSION}-full.nupkg" \
+            --dir ./Releases
+
+          WIN_BASE="./Releases/EasyChat-${PREVIOUS_VERSION}-full.nupkg"
+          if [[ ! -f "${WIN_BASE}" ]]; then
+            echo "::error::Previous release ${PREVIOUS_TAG} does not contain ${WIN_BASE##*/}."
+            exit 1
+          fi
+
+          {
+            echo "PREVIOUS_TAG=${PREVIOUS_TAG}"
+            echo "EXPECT_WIN_DELTA=true"
+          } >> "${GITHUB_ENV}"
+
+      - name: Pack Velopack win channel
         run: |
           # Velopack 1.2.0 maps msiBanner to the dialog image and msiLogo to the top banner.
-          vpk pack -u EasyChat -v ${{ env.VERSION }} -p ./publish-online -e EasyChat.exe -c win -o ./Releases --msi true --instLocation Either -i ./src/Host/EasyChat.Desktop/Assets/easychat-logo.ico --msiBanner ./.github/assets/installer/msi-dialog.bmp --msiLogo ./.github/assets/installer/msi-banner.bmp
+          vpk pack -u EasyChat -v ${{ env.VERSION }} -p ./publish -e EasyChat.exe -c win -o ./Releases --msi true --instLocation Either -i ./src/Host/EasyChat.Desktop/Assets/easychat-logo.ico --msiBanner ./.github/assets/installer/msi-dialog.bmp --msiLogo ./.github/assets/installer/msi-banner.bmp
 
-      - name: Pack bundled Velopack channel
+      - name: Verify Velopack update packages
+        shell: pwsh
         run: |
-          # Velopack 1.2.0 maps msiBanner to the dialog image and msiLogo to the top banner.
-          vpk pack -u EasyChat -v ${{ env.VERSION }} -p ./publish-bundled -e EasyChat.exe -c bundled -o ./Releases --msi true --instLocation Either -i ./src/Host/EasyChat.Desktop/Assets/easychat-logo.ico --msiBanner ./.github/assets/installer/msi-dialog.bmp --msiLogo ./.github/assets/installer/msi-banner.bmp
+          $ErrorActionPreference = 'Stop'
+          $version = $env:VERSION
+          $channels = @([pscustomobject]@{
+            Name = 'win'
+            Full = "EasyChat-$version-full.nupkg"
+            Delta = "EasyChat-$version-delta.nupkg"
+            ExpectDelta = $env:EXPECT_WIN_DELTA -eq 'true'
+          })
+
+          foreach ($channel in $channels) {
+            $fullPath = Join-Path ./Releases $channel.Full
+            if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
+              throw "Expected full package was not generated: $fullPath"
+            }
+
+            $feedPath = Join-Path ./Releases "releases.$($channel.Name).json"
+            if (-not (Test-Path -LiteralPath $feedPath -PathType Leaf)) {
+              throw "Expected release feed was not generated: $feedPath"
+            }
+
+            $feed = Get-Content -LiteralPath $feedPath -Raw | ConvertFrom-Json
+            $currentAssets = @($feed.Assets | Where-Object { "$($_.Version)" -eq $version })
+            if (-not ($currentAssets | Where-Object { $_.Type -eq 'Full' -and $_.FileName -eq $channel.Full })) {
+              throw "Release feed $feedPath does not contain full package $($channel.Full)."
+            }
+
+            if ($channel.ExpectDelta) {
+              $deltaPath = Join-Path ./Releases $channel.Delta
+              if (-not (Test-Path -LiteralPath $deltaPath -PathType Leaf)) {
+                throw "Expected delta package was not generated: $deltaPath"
+              }
+
+              if (-not ($currentAssets | Where-Object { $_.Type -eq 'Delta' -and $_.FileName -eq $channel.Delta })) {
+                throw "Release feed $feedPath does not contain delta package $($channel.Delta)."
+              }
+            }
+          }
 
       - name: Remove EXE installer packages
         shell: pwsh
@@ -89,7 +154,6 @@ jobs:
         run: |
           $names = @{
             'EasyChat-win.msi' = "EasyChat-Win-${{ env.VERSION }}.msi"
-            'EasyChat-bundled.msi' = "EasyChat-Bundled-${{ env.VERSION }}.msi"
           }
 
           foreach ($entry in $names.GetEnumerator()) {
@@ -121,8 +185,8 @@ jobs:
           files: |
             Releases/*.msi
             Releases/*.zip
-            Releases/*-${{ env.VERSION }}-delta.nupkg
-            Releases/*-${{ env.VERSION }}-full.nupkg
+            Releases/EasyChat-${{ env.VERSION }}-full.nupkg
+            Releases/EasyChat-${{ env.VERSION }}-delta.nupkg
             Releases/RELEASES*
             Releases/assets.*.json
             Releases/releases.*.json
@@ -151,8 +215,8 @@ jobs:
         with:
           name: Velopack-Assets
           path: |
-             Releases/*-${{ env.VERSION }}-delta.nupkg
-             Releases/*-${{ env.VERSION }}-full.nupkg
-             Releases/RELEASES*
-             Releases/assets.*.json
-             Releases/releases.*.json
+            Releases/EasyChat-${{ env.VERSION }}-full.nupkg
+            Releases/EasyChat-${{ env.VERSION }}-delta.nupkg
+            Releases/RELEASES*
+            Releases/assets.*.json
+            Releases/releases.*.json

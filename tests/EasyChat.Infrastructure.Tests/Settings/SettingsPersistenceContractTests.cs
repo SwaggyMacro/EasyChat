@@ -1,4 +1,5 @@
 using System.Globalization;
+using EasyChat.Contracts.Ocr;
 using EasyChat.Contracts.Settings;
 using EasyChat.Contracts.Settings.Persistence;
 using EasyChat.Infrastructure.Settings.Persistence;
@@ -51,10 +52,62 @@ public sealed class SettingsPersistenceContractTests
             Assert.AreEqual(ThemeMode.System, result.Value.General.BaseTheme);
             Assert.AreEqual(5000, result.Value.Result.AutoCloseDelay);
             Assert.AreEqual(InputDeliveryMode.Paste, result.Value.Input.DeliveryMode);
+            Assert.AreEqual(OcrRecognitionMode.Normal, result.Value.Screenshot.OcrMode);
+            Assert.AreEqual(
+                ScreenshotSettings.DefaultOcrIdleTimeoutSeconds,
+                result.Value.Screenshot.OcrIdleTimeoutSeconds);
             Assert.AreEqual("EdgeTTS", result.Value.Tts.Provider);
             StringAssert.Contains(
                 await File.ReadAllTextAsync(Path.Combine(directory, "General.json")),
                 "\"BaseTheme\": \"Default\"");
+        }
+        finally
+        {
+            DeleteTemporaryDirectory(directory);
+        }
+    }
+
+    [TestMethod]
+    public async Task ScreenshotOcrMode_RoundTripsAndOldFilesDefaultToNormal()
+    {
+        var directory = CreateTemporaryDirectory();
+        try
+        {
+            var gateway = new JsonSettingsPersistenceGateway(directory);
+            var initial = await gateway.ReadAllAsync();
+            Assert.IsTrue(initial.IsSuccess, initial.Error.Message);
+            var changed = initial.Value with
+            {
+                Screenshot = initial.Value.Screenshot with
+                {
+                    OcrMode = OcrRecognitionMode.IdleRelease,
+                    OcrIdleTimeoutSeconds = 45
+                }
+            };
+
+            var write = await gateway.WriteAsync(SettingsSection.Screenshot, changed);
+            var reread = await gateway.ReadAllAsync();
+
+            Assert.IsTrue(write.IsSuccess, write.Error.Message);
+            Assert.IsTrue(reread.IsSuccess, reread.Error.Message);
+            Assert.AreEqual(OcrRecognitionMode.IdleRelease, reread.Value.Screenshot.OcrMode);
+            Assert.AreEqual(45, reread.Value.Screenshot.OcrIdleTimeoutSeconds);
+
+            await File.WriteAllTextAsync(
+                Path.Combine(directory, "Screenshot.json"),
+                """
+                {
+                  "Mode": "Precise",
+                  "FixedAreas": []
+                }
+                """);
+            var previous = await gateway.ReadAllAsync();
+
+            Assert.IsTrue(previous.IsSuccess, previous.Error.Message);
+            Assert.AreEqual(OcrRecognitionMode.Normal, previous.Value.Screenshot.OcrMode);
+            Assert.AreEqual(
+                ScreenshotSettings.DefaultOcrIdleTimeoutSeconds,
+                previous.Value.Screenshot.OcrIdleTimeoutSeconds);
         }
         finally
         {
@@ -219,6 +272,47 @@ public sealed class SettingsPersistenceContractTests
 
             Assert.IsTrue(previous.IsSuccess, previous.Error.Message);
             Assert.IsNull(previous.Value.Shortcut.Entries.Single().Remark);
+        }
+        finally
+        {
+            DeleteTemporaryDirectory(directory);
+        }
+    }
+
+    [TestMethod]
+    public async Task SpeechRecognitionPromptId_RoundTripsAndOldFilesRemainCompatible()
+    {
+        var directory = CreateTemporaryDirectory();
+        try
+        {
+            var gateway = new JsonSettingsPersistenceGateway(directory);
+            var initial = await gateway.ReadAllAsync();
+            Assert.IsTrue(initial.IsSuccess, initial.Error.Message);
+            var changed = initial.Value with
+            {
+                SpeechRecognition = initial.Value.SpeechRecognition with
+                {
+                    PromptId = "speech-prompt"
+                }
+            };
+
+            var write = await gateway.WriteAsync(SettingsSection.SpeechRecognition, changed);
+            var reread = await gateway.ReadAllAsync();
+
+            Assert.IsTrue(write.IsSuccess, write.Error.Message);
+            Assert.IsTrue(reread.IsSuccess, reread.Error.Message);
+            Assert.AreEqual("speech-prompt", reread.Value.SpeechRecognition.PromptId);
+            StringAssert.Contains(
+                await File.ReadAllTextAsync(Path.Combine(directory, "SpeechRecognition.json")),
+                "\"PromptId\": \"speech-prompt\"");
+
+            await File.WriteAllTextAsync(
+                Path.Combine(directory, "SpeechRecognition.json"),
+                "{}");
+            var previous = await gateway.ReadAllAsync();
+
+            Assert.IsTrue(previous.IsSuccess, previous.Error.Message);
+            Assert.IsNull(previous.Value.SpeechRecognition.PromptId);
         }
         finally
         {

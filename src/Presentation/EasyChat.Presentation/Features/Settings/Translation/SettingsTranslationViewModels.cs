@@ -313,10 +313,10 @@ namespace EasyChat.Presentation.Features.Settings.Translation
         {
             (ApiUrl, Model, Name) = type switch
             {
-                AiModelType.OpenAi => ("https://api.openai.com/v1", "gpt-4o", "OpenAI"),
-                AiModelType.Gemini => ("https://generativelanguage.googleapis.com/v1beta/openai/", "gemini-pro", "Gemini"),
-                AiModelType.Claude => ("https://api.anthropic.com/v1/", "claude-3-opus-20240229", "Claude"),
-                AiModelType.DeepSeek => ("https://api.deepseek.com/v1", "deepseek-chat", "DeepSeek"),
+                AiModelType.OpenAi => ("https://api.openai.com/v1", string.Empty, "OpenAI"),
+                AiModelType.Gemini => ("https://generativelanguage.googleapis.com/v1beta/openai/", string.Empty, "Gemini"),
+                AiModelType.Claude => ("https://api.anthropic.com/v1/", string.Empty, "Claude"),
+                AiModelType.DeepSeek => ("https://api.deepseek.com/v1", string.Empty, "DeepSeek"),
                 _ => ("https://api.openai.com/v1", string.Empty, string.Empty)
             };
         }

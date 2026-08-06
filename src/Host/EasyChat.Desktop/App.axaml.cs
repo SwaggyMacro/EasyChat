@@ -8,6 +8,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using EasyChat.Contracts.Settings;
+using EasyChat.Presentation.Features.Capture;
 using EasyChat.Presentation.Features.Shell.Views;
 using Material.Icons;
 using Material.Icons.Avalonia;
@@ -58,6 +59,7 @@ public sealed partial class App(Func<DesktopUiContext> createUiContext) : Avalon
             ui.Settings.Changed += OnSettingsChanged;
             UpdateTrayIcon(ui.Settings.General.ClosingBehavior);
             ui.Interactions.Start();
+            _ = WarmUpScreenshotCaptureAsync(ui.ScreenshotCapture);
             _ = CheckForUpdatesAsync();
         }
         base.OnFrameworkInitializationCompleted();
@@ -241,6 +243,18 @@ public sealed partial class App(Func<DesktopUiContext> createUiContext) : Avalon
             string.Format(EasyChat.Presentation.Lang.Resources.NewVersionContent, result.Value.LatestVersion),
             new UiToastAction(EasyChat.Presentation.Lang.Resources.Later, static () => { }),
             new UiToastAction(EasyChat.Presentation.Lang.Resources.Update, () => { _ = DownloadUpdateAsync(ui); }));
+    }
+
+    private static async Task WarmUpScreenshotCaptureAsync(IScreenshotCaptureSession capture)
+    {
+        try
+        {
+            await capture.WarmUpAsync();
+        }
+        catch
+        {
+            // Capture retries by rebuilding the worker when the shortcut is used.
+        }
     }
 
     private static async Task DownloadUpdateAsync(DesktopUiContext ui)

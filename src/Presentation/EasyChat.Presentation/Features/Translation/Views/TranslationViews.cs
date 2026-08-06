@@ -18,6 +18,8 @@ namespace EasyChat.Presentation.Features.Translation.Views
         private ILogger<TranslationDictionaryWindowView>? _logger;
         private readonly ScrollViewer? _contentScrollViewer;
 
+        internal bool HasUserAdjustedBounds { get; private set; }
+
         public TranslationDictionaryWindowView()
         {
             InitializeComponent();
@@ -60,7 +62,10 @@ namespace EasyChat.Presentation.Features.Translation.Views
         {
             if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed
                 && !IsInteractivePointerSource(e.Source))
+            {
+                HasUserAdjustedBounds = true;
                 BeginMoveDrag(e);
+            }
         }
 
         private static bool IsInteractivePointerSource(object? source)

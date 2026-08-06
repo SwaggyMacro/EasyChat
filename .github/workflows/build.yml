@@ -32,32 +32,17 @@ jobs:
         continue-on-error: true
         run: dotnet test ./EasyChat.sln -c Release
 
-      - name: Restore online OCR dependencies
-        run: dotnet restore ./src/Host/EasyChat.Desktop.Windows/EasyChat.Desktop.Windows.csproj -r win-x64 -p:UseBundledOcrModels=false
+      - name: Restore Windows dependencies
+        run: dotnet restore ./src/Host/EasyChat.Desktop.Windows/EasyChat.Desktop.Windows.csproj -r win-x64
 
-      - name: Publish EasyChat (online OCR models)
-        run: dotnet publish ./src/Host/EasyChat.Desktop.Windows/EasyChat.Desktop.Windows.csproj -c Release -r win-x64 --self-contained false --no-restore -p:UseBundledOcrModels=false -o ./publish-online
+      - name: Publish EasyChat
+        run: dotnet publish ./src/Host/EasyChat.Desktop.Windows/EasyChat.Desktop.Windows.csproj -c Release -r win-x64 --self-contained false --no-restore -o ./publish
 
-      - name: Restore bundled OCR dependencies
-        run: dotnet restore ./src/Host/EasyChat.Desktop.Windows/EasyChat.Desktop.Windows.csproj -r win-x64 -p:UseBundledOcrModels=true
+      - name: Compress Build
+        run: Compress-Archive -Path ./publish/* -DestinationPath ./EasyChat-Build-${{ steps.vars.outputs.SHORT_SHA }}.zip
 
-      - name: Publish EasyChat (bundled OCR models)
-        run: dotnet publish ./src/Host/EasyChat.Desktop.Windows/EasyChat.Desktop.Windows.csproj -c Release -r win-x64 --self-contained false --no-restore -p:UseBundledOcrModels=true -o ./publish-bundled
-
-      - name: Compress Online Build
-        run: Compress-Archive -Path ./publish-online/* -DestinationPath ./EasyChat-Build-Online-${{ steps.vars.outputs.SHORT_SHA }}.zip
-
-      - name: Compress Bundled Build
-        run: Compress-Archive -Path ./publish-bundled/* -DestinationPath ./EasyChat-Build-Bundled-${{ steps.vars.outputs.SHORT_SHA }}.zip
-
-      - name: Upload Online Build Artifact
+      - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: EasyChat-Build-Online-${{ steps.vars.outputs.SHORT_SHA }}
-          path: ./EasyChat-Build-Online-${{ steps.vars.outputs.SHORT_SHA }}.zip
-
-      - name: Upload Bundled Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: EasyChat-Build-Bundled-${{ steps.vars.outputs.SHORT_SHA }}
-          path: ./EasyChat-Build-Bundled-${{ steps.vars.outputs.SHORT_SHA }}.zip
+          name: EasyChat-Build-${{ steps.vars.outputs.SHORT_SHA }}
+          path: ./EasyChat-Build-${{ steps.vars.outputs.SHORT_SHA }}.zip

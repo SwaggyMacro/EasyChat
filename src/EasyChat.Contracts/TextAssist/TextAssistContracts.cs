@@ -8,7 +8,8 @@ public enum TextAssistOperation
     Translation,
     Correction,
     Polish,
-    Summary
+    Summary,
+    Explanation
 }
 
 public sealed record TextAssistProfile(

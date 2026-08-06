@@ -16,9 +16,13 @@ public sealed class OcrRecognitionUseCases : IOcrRecognitionUseCases
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var resolved = request.Language is null
-            ? request with { Language = OcrLanguages.ChineseSimplified }
-            : request;
+        var language = request.Language;
+        var resolvedLanguage = language is not null
+            && !string.Equals(language.Id, OcrLanguages.Auto.Id, StringComparison.OrdinalIgnoreCase)
+            && OcrLanguages.TryGet(language.Id, out var canonical)
+                ? canonical
+                : OcrLanguages.ChineseSimplified;
+        var resolved = request with { Language = resolvedLanguage };
         return _recognizer.RecognizeAsync(resolved, cancellationToken);
     }
 }

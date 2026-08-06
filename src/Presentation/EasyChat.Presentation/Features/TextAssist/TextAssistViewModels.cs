@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Reactive;
 using System.Reactive.Threading.Tasks;
 using System.Text;
@@ -13,6 +12,7 @@ using EasyChat.Presentation.Features.Settings.State;
 using EasyChat.Presentation.Features.Translation;
 using EasyChat.Presentation.Foundation.Localization;
 using EasyChat.Presentation.Foundation.Navigation;
+using LiveMarkdown.Avalonia;
 using Material.Icons;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
@@ -706,25 +706,29 @@ namespace EasyChat.Presentation.Features.TextAssist
         public bool IsCorrection => Operation == TextAssistOperation.Correction;
         public bool IsPolish => Operation == TextAssistOperation.Polish;
         public bool IsSummary => Operation == TextAssistOperation.Summary;
-        public bool ShowPlainResult => !IsCorrection;
+        public bool IsExplanation => Operation == TextAssistOperation.Explanation;
+        public bool ShowPlainResult => Operation is TextAssistOperation.Translation
+            or TextAssistOperation.Summary
+            or TextAssistOperation.Explanation;
         public MaterialIconKind WindowIcon => Operation switch
         {
             TextAssistOperation.Correction => MaterialIconKind.Spellcheck,
             TextAssistOperation.Polish => MaterialIconKind.FormatPaint,
             TextAssistOperation.Summary => MaterialIconKind.TextShort,
+            TextAssistOperation.Explanation => MaterialIconKind.LightbulbOnOutline,
             _ => MaterialIconKind.TextBoxEditOutline
         };
         public string Title => Operation switch
         {
+            TextAssistOperation.Explanation => Resources.TextAssistExplain,
             TextAssistOperation.Correction => Resources.TextAssistCorrect,
-            TextAssistOperation.Polish => IsChineseUi ? "润色" : "Polish",
-            TextAssistOperation.Summary => IsChineseUi ? "总结" : "Summarize",
-            _ => IsChineseUi ? "文本处理" : "Text assist"
+            TextAssistOperation.Polish => Resources.TextAssistPolish,
+            TextAssistOperation.Summary => Resources.TextAssistSummary,
+            _ => Resources.TextAssistProcessing
         };
-        public string PolishExplanationTitle => IsChineseUi ? "润色说明" : "Polish notes";
-        public string PolishOriginalLabel => IsChineseUi ? "原表达" : "Original";
-        public string PolishRevisedLabel => IsChineseUi ? "润色后" : "Revised";
-        private static bool IsChineseUi => CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "zh";
+        public string PolishExplanationTitle => Resources.TextAssistPolishExplanationTitle;
+        public string PolishOriginalLabel => Resources.TextAssistPolishOriginalLabel;
+        public string PolishRevisedLabel => Resources.TextAssistPolishRevisedLabel;
 
         public LanguageSettings SelectedSourceLanguage
         {
@@ -738,6 +742,7 @@ namespace EasyChat.Presentation.Features.TextAssist
         }
 
         public string Result { get => _result; private set => this.RaiseAndSetIfChanged(ref _result, value); }
+        public ObservableStringBuilder ResultMarkdown { get; } = new();
         public string CorrectedResult { get => _correctedResult; private set => this.RaiseAndSetIfChanged(ref _correctedResult, value); }
         public string CorrectionTranslation { get => _correctionTranslation; private set => this.RaiseAndSetIfChanged(ref _correctionTranslation, value); }
         public ObservableCollection<TextAssistIssueViewModel> Issues { get; } = [];
@@ -777,7 +782,7 @@ namespace EasyChat.Presentation.Features.TextAssist
             _request?.Dispose();
             _request = new CancellationTokenSource();
             var token = _request.Token;
-            ResetResults();
+            await ResetResultsAsync();
             IsBusy = true;
             try
             {
@@ -832,6 +837,7 @@ namespace EasyChat.Presentation.Features.TextAssist
             {
                 case TextAssistTranslationDeltaEvent delta:
                     Result += delta.Text;
+                    ResultMarkdown.Append(delta.Text);
                     this.RaisePropertyChanged(nameof(CopyText));
                     break;
                 case TextAssistPolishExplanationEvent explanation:
@@ -841,9 +847,13 @@ namespace EasyChat.Presentation.Features.TextAssist
             }
         }
 
-        private void ResetResults()
+        private async Task ResetResultsAsync()
         {
             Result = string.Empty;
+            if (Dispatcher.UIThread.CheckAccess())
+                ResultMarkdown.Clear();
+            else
+                await Dispatcher.UIThread.InvokeAsync(() => ResultMarkdown.Clear());
             CorrectedResult = string.Empty;
             CorrectionTranslation = string.Empty;
             Issues.Clear();
@@ -861,6 +871,7 @@ namespace EasyChat.Presentation.Features.TextAssist
             this.RaisePropertyChanged(nameof(IsCorrection));
             this.RaisePropertyChanged(nameof(IsPolish));
             this.RaisePropertyChanged(nameof(IsSummary));
+            this.RaisePropertyChanged(nameof(IsExplanation));
             this.RaisePropertyChanged(nameof(ShowPlainResult));
             this.RaisePropertyChanged(nameof(WindowIcon));
             this.RaisePropertyChanged(nameof(Title));

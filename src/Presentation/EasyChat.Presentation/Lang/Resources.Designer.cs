@@ -9,8 +9,8 @@
 
 namespace EasyChat.Presentation.Lang {
     using System;
-    
-    
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -22,15 +22,15 @@ namespace EasyChat.Presentation.Lang {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Resources {
-        
+
         private static global::System.Resources.ResourceManager resourceMan;
-        
+
         private static global::System.Globalization.CultureInfo resourceCulture;
-        
+
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal Resources() {
         }
-        
+
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
@@ -44,7 +44,7 @@ namespace EasyChat.Presentation.Lang {
                 return resourceMan;
             }
         }
-        
+
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
@@ -58,7 +58,7 @@ namespace EasyChat.Presentation.Lang {
                 resourceCulture = value;
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to About.
         /// </summary>
@@ -67,7 +67,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("About", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to A translator chatbot that can translate your messages to different languages..
         /// </summary>
@@ -76,7 +76,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("AboutLine1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to This is a refactored version of the original EasyChat project..
         /// </summary>
@@ -85,7 +85,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("AboutLine2", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Accent Color.
         /// </summary>
@@ -94,7 +94,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("AccentColor", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Action.
         /// </summary>
@@ -103,7 +103,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Action", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Typing Translate.
         /// </summary>
@@ -166,7 +166,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ReplaceCurrentInputTip", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Quick correct.
         /// </summary>
@@ -175,7 +175,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Action_QuickCorrect", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Quick translate.
         /// </summary>
@@ -184,7 +184,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Action_QuickTranslate", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Screenshot Translate.
         /// </summary>
@@ -193,7 +193,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Action_ScreenshotTranslate", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Selection Translation.
         /// </summary>
@@ -202,7 +202,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Action_SelectionTranslate", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Switch Engine, Source &amp; Target.
         /// </summary>
@@ -211,7 +211,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Action_SwitchEngineSourceTarget", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Switch Source Language.
         /// </summary>
@@ -220,7 +220,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Action_SwitchSourceLang", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Switch Target Language.
         /// </summary>
@@ -229,7 +229,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Action_SwitchTargetLang", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Action Type.
         /// </summary>
@@ -256,7 +256,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ShortcutRemarkPlaceholder", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Add.
         /// </summary>
@@ -265,7 +265,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Add", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Add Basic Shortcut.
         /// </summary>
@@ -274,7 +274,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("AddBasicShortcut", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Add Fixed Area.
         /// </summary>
@@ -283,7 +283,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("AddFixedArea", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Add Key.
         /// </summary>
@@ -292,7 +292,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("AddKey", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Add Language Shortcut.
         /// </summary>
@@ -301,7 +301,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("AddLanguageShortcut", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Add Model.
         /// </summary>
@@ -310,7 +310,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("AddModel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Add Prompt.
         /// </summary>
@@ -319,7 +319,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("AddPrompt", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Add text assist shortcut.
         /// </summary>
@@ -328,7 +328,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("AddTextAssistShortcut", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to AI Model.
         /// </summary>
@@ -337,7 +337,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("AIEngine", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Apply To.
         /// </summary>
@@ -346,7 +346,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ApplyTo", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to EasyChat.
         /// </summary>
@@ -355,7 +355,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("AppName", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Area.
         /// </summary>
@@ -364,7 +364,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Area", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Are you sure you want to delete this shortcut?.
         /// </summary>
@@ -373,7 +373,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("AreYouSureDelete", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Background Color.
         /// </summary>
@@ -382,7 +382,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("BackgroundColor", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Baidu.
         /// </summary>
@@ -391,7 +391,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Baidu", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Basic Shortcuts.
         /// </summary>
@@ -400,7 +400,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("BasicShortcuts", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
@@ -409,7 +409,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Cancel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Cannot delete the default prompt. Please set another prompt as default first..
         /// </summary>
@@ -418,7 +418,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("CannotDeleteDefaultPrompt", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Cannot delete the last prompt..
         /// </summary>
@@ -427,7 +427,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("CannotDeleteLastPrompt", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Please check your network connection..
         /// </summary>
@@ -436,7 +436,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("CheckNetwork", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Claude.
         /// </summary>
@@ -445,7 +445,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Claude", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Click to Record.
         /// </summary>
@@ -454,7 +454,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ClickToRecord", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Close.
         /// </summary>
@@ -463,7 +463,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Close", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Close to Tray.
         /// </summary>
@@ -472,7 +472,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("CloseToTray", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Do you want to minimize to tray or exit the application?.
         /// </summary>
@@ -481,7 +481,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("CloseToTrayPromptMessage", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Closing Action.
         /// </summary>
@@ -490,7 +490,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("CloseToTrayPromptTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Exit Action.
         /// </summary>
@@ -499,7 +499,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ClosingBehavior", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Color has changed to.
         /// </summary>
@@ -508,7 +508,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ColorChangedContent", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Color Changed.
         /// </summary>
@@ -517,7 +517,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ColorChangedTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Confirm.
         /// </summary>
@@ -526,7 +526,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Confirm", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Are you sure you want to delete this model?.
         /// </summary>
@@ -535,7 +535,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ConfirmDeleteModel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Are you sure you want to delete this prompt?.
         /// </summary>
@@ -544,7 +544,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ConfirmDeletePrompt", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Confirm Deletion.
         /// </summary>
@@ -553,7 +553,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ConfirmDeletion", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Connection failed.
         /// </summary>
@@ -562,7 +562,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ConnectionFailed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Connection successful!.
         /// </summary>
@@ -571,7 +571,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ConnectionSuccess", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Copy.
         /// </summary>
@@ -589,7 +589,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Copied", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Copy Bilingual.
         /// </summary>
@@ -598,7 +598,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("CopyBilingual", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Copy Original.
         /// </summary>
@@ -607,7 +607,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("CopyOriginal", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ©️ EasyChatOrg.
         /// </summary>
@@ -616,7 +616,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Copyright", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Copy Translated.
         /// </summary>
@@ -625,7 +625,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("CopyTranslated", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Create.
         /// </summary>
@@ -634,7 +634,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Create", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Create Custom.
         /// </summary>
@@ -643,7 +643,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("CreateCustom", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Current Version.
         /// </summary>
@@ -652,7 +652,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("CurrentVersion", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Custom Model.
         /// </summary>
@@ -661,7 +661,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("CustomModel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Dark.
         /// </summary>
@@ -679,7 +679,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FollowSystemMode", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to DeepL.
         /// </summary>
@@ -688,7 +688,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("DeepL", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Default.
         /// </summary>
@@ -697,7 +697,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("DefaultPrompt", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Delete.
         /// </summary>
@@ -706,7 +706,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Delete", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Delete Model.
         /// </summary>
@@ -715,7 +715,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("DeleteModel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Message (Compatibility).
         /// </summary>
@@ -724,7 +724,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("DeliveryMode_Message", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Paste (Clipboard).
         /// </summary>
@@ -733,7 +733,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("DeliveryMode_Paste", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Typing (Simulate).
         /// </summary>
@@ -742,7 +742,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("DeliveryMode_Type", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Dismiss.
         /// </summary>
@@ -760,7 +760,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("DownloadOcrModel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Download OCR models.
         /// </summary>
@@ -769,7 +769,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("DownloadOcrModels", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Edit.
         /// </summary>
@@ -778,7 +778,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Edit", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Edit Keys.
         /// </summary>
@@ -787,7 +787,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("EditKeys", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Edit Model.
         /// </summary>
@@ -796,7 +796,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("EditModel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Edit Prompt.
         /// </summary>
@@ -805,7 +805,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("EditPrompt", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Auto Calculate Delay.
         /// </summary>
@@ -814,7 +814,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("EnableAutoReadDelay", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Enabled.
         /// </summary>
@@ -823,7 +823,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Enabled", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Enable Selection Translation.
         /// </summary>
@@ -832,7 +832,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("EnableSelectionTranslation", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Enable thinking.
         /// </summary>
@@ -841,7 +841,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("EnableThinking", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Enable System Tray.
         /// </summary>
@@ -850,7 +850,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("EnableTray", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Examples.
         /// </summary>
@@ -859,7 +859,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Examples", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Exit Application.
         /// </summary>
@@ -868,7 +868,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ExitApp", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Fetching....
         /// </summary>
@@ -877,7 +877,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FetchingModels", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Fetch models.
         /// </summary>
@@ -886,7 +886,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FetchModels", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Failed to fetch models: {0}.
         /// </summary>
@@ -895,7 +895,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FetchModelsFailed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Select a region for the fixed area..
         /// </summary>
@@ -904,7 +904,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FixedArea_Hint", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Fixed Areas.
         /// </summary>
@@ -913,7 +913,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FixedAreas", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Fixed Area Settings.
         /// </summary>
@@ -922,7 +922,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FixedAreaSettings", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Subtitle Window.
         /// </summary>
@@ -931,7 +931,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FloatingWindow", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Close Window.
         /// </summary>
@@ -940,7 +940,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FloatingWindow_Close", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Floating Window Configuration.
         /// </summary>
@@ -949,7 +949,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FloatingWindow_Config", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Lock Window.
         /// </summary>
@@ -958,7 +958,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FloatingWindow_Lock", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Open Window.
         /// </summary>
@@ -967,7 +967,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FloatingWindow_Open", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Unlock Window (Click-Through).
         /// </summary>
@@ -976,7 +976,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FloatingWindow_Unlock", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Follow Configuration.
         /// </summary>
@@ -985,7 +985,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FollowConfig", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Font Color.
         /// </summary>
@@ -994,7 +994,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FontColor", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Font Family.
         /// </summary>
@@ -1003,7 +1003,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FontFamily", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Font Size.
         /// </summary>
@@ -1012,7 +1012,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FontSize", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Full Screen.
         /// </summary>
@@ -1021,7 +1021,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FullScreen", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Makes the app fullscreen..
         /// </summary>
@@ -1030,7 +1030,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("FullScreenTip", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Gemini.
         /// </summary>
@@ -1039,7 +1039,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Gemini", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to General.
         /// </summary>
@@ -1048,7 +1048,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("General", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Google.
         /// </summary>
@@ -1057,7 +1057,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Google", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Provider,Source,Target (e.g. Baidu,en,zh).
         /// </summary>
@@ -1066,7 +1066,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Hint_SwitchConfig", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Home.
         /// </summary>
@@ -1075,7 +1075,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Home", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Image Translate.
         /// </summary>
@@ -1084,7 +1084,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ImageTranslate", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Text Delivery Mode.
         /// </summary>
@@ -1093,7 +1093,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("InputDeliveryMode", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Input Window.
         /// </summary>
@@ -1102,7 +1102,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("InputSettings", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Input text to translate....
         /// </summary>
@@ -1111,7 +1111,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("InputToTranslate", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Key Combination.
         /// </summary>
@@ -1120,7 +1120,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("KeyCombination", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Keys.
         /// </summary>
@@ -1129,7 +1129,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Keys", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Key Send Delay.
         /// </summary>
@@ -1138,7 +1138,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("KeySendDelay", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Language.
         /// </summary>
@@ -1165,7 +1165,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("NativeLanguage", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Language Changed.
         /// </summary>
@@ -1174,7 +1174,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("LanguageChanged", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Language Switch Shortcuts.
         /// </summary>
@@ -1183,7 +1183,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("LanguageShortcuts", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Later.
         /// </summary>
@@ -1192,7 +1192,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Later", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Latest Version.
         /// </summary>
@@ -1201,7 +1201,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("LatestVersion", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Light.
         /// </summary>
@@ -1210,7 +1210,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("LightMode", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Loading....
         /// </summary>
@@ -1219,7 +1219,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Loading", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Machine Trans.
         /// </summary>
@@ -1228,7 +1228,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("MachineTranslation", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Manifest.
         /// </summary>
@@ -1237,7 +1237,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Manifest", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Minimize to Tray.
         /// </summary>
@@ -1246,7 +1246,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("MinimizeToTray", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Model.
         /// </summary>
@@ -1273,7 +1273,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ModelNotInListConfirmation", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to API URL is required..
         /// </summary>
@@ -1282,7 +1282,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ModelApiUrlRequired", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Model Name.
         /// </summary>
@@ -1291,7 +1291,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ModelName", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Model Type.
         /// </summary>
@@ -1300,7 +1300,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ModelType", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Ms/Char.
         /// </summary>
@@ -1309,7 +1309,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("MsPerChar", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Name.
         /// </summary>
@@ -1318,7 +1318,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Name", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to New Version Available.
         /// </summary>
@@ -1327,7 +1327,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("NewVersionAvailable", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to A new version {0} is available!.
         /// </summary>
@@ -1336,7 +1336,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("NewVersionContent", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to No fixed areas..
         /// </summary>
@@ -1345,7 +1345,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("NoFixedAreas", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to No models were returned by this provider..
         /// </summary>
@@ -1354,7 +1354,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("NoModelsFound", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Not Set.
         /// </summary>
@@ -1363,7 +1363,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("NotSet", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to OCR.
         /// </summary>
@@ -1372,7 +1372,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("OcrKey", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to OCR models downloaded successfully..
         /// </summary>
@@ -1381,7 +1381,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("OcrModelDownloadCompleted", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to OCR model download failed.
         /// </summary>
@@ -1435,7 +1435,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ShowMoreOcrModels", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to OCR models.
         /// </summary>
@@ -1444,7 +1444,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("OcrModelDownloadTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Please download the OCR model package in Settings before using screenshot OCR..
         /// </summary>
@@ -1453,7 +1453,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("OcrModelRequiredMessage", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to OCR model required.
         /// </summary>
@@ -1462,7 +1462,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("OcrModelRequiredTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to OCR models.
         /// </summary>
@@ -1471,7 +1471,139 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("OcrModels", resourceCulture);
             }
         }
-        
+
+        public static string OcrModelsDescription {
+            get {
+                return ResourceManager.GetString("OcrModelsDescription", resourceCulture);
+            }
+        }
+
+        public static string OcrRecognitionMode {
+            get {
+                return ResourceManager.GetString("OcrRecognitionMode", resourceCulture);
+            }
+        }
+
+        public static string OcrRecognitionMode_Fast {
+            get {
+                return ResourceManager.GetString("OcrRecognitionMode_Fast", resourceCulture);
+            }
+        }
+
+        public static string OcrRecognitionMode_Normal {
+            get {
+                return ResourceManager.GetString("OcrRecognitionMode_Normal", resourceCulture);
+            }
+        }
+
+        public static string OcrRecognitionMode_IdleRelease {
+            get {
+                return ResourceManager.GetString("OcrRecognitionMode_IdleRelease", resourceCulture);
+            }
+        }
+
+        public static string OcrRecognitionModeDescription_Fast {
+            get {
+                return ResourceManager.GetString("OcrRecognitionModeDescription_Fast", resourceCulture);
+            }
+        }
+
+        public static string OcrRecognitionModeDescription_Normal {
+            get {
+                return ResourceManager.GetString("OcrRecognitionModeDescription_Normal", resourceCulture);
+            }
+        }
+
+        public static string OcrRecognitionModeDescription_IdleRelease {
+            get {
+                return ResourceManager.GetString("OcrRecognitionModeDescription_IdleRelease", resourceCulture);
+            }
+        }
+
+        public static string OcrIdleTimeout {
+            get {
+                return ResourceManager.GetString("OcrIdleTimeout", resourceCulture);
+            }
+        }
+
+        public static string Seconds {
+            get {
+                return ResourceManager.GetString("Seconds", resourceCulture);
+            }
+        }
+
+        public static string OcrUniversalModel {
+            get {
+                return ResourceManager.GetString("OcrUniversalModel", resourceCulture);
+            }
+        }
+
+        public static string OcrUniversalModelDescription {
+            get {
+                return ResourceManager.GetString("OcrUniversalModelDescription", resourceCulture);
+            }
+        }
+
+        public static string OcrKoreanV4Model {
+            get {
+                return ResourceManager.GetString("OcrKoreanV4Model", resourceCulture);
+            }
+        }
+
+        public static string OcrArabicV4Model {
+            get {
+                return ResourceManager.GetString("OcrArabicV4Model", resourceCulture);
+            }
+        }
+
+        public static string OcrDevanagariV4Model {
+            get {
+                return ResourceManager.GetString("OcrDevanagariV4Model", resourceCulture);
+            }
+        }
+
+        public static string OcrTamilV4Model {
+            get {
+                return ResourceManager.GetString("OcrTamilV4Model", resourceCulture);
+            }
+        }
+
+        public static string OcrTeluguV4Model {
+            get {
+                return ResourceManager.GetString("OcrTeluguV4Model", resourceCulture);
+            }
+        }
+
+        public static string OcrKannadaV4Model {
+            get {
+                return ResourceManager.GetString("OcrKannadaV4Model", resourceCulture);
+            }
+        }
+
+        public static string OcrCyrillicV3Model {
+            get {
+                return ResourceManager.GetString("OcrCyrillicV3Model", resourceCulture);
+            }
+        }
+
+        public static string OcrSupportedLanguages {
+            get {
+                return ResourceManager.GetString("OcrSupportedLanguages", resourceCulture);
+            }
+        }
+
+        public static string OcrSupportedLanguageCount {
+            get {
+                return ResourceManager.GetString("OcrSupportedLanguageCount", resourceCulture);
+            }
+        }
+
+        public static string ViewOcrSupportedLanguages {
+            get {
+                return ResourceManager.GetString("ViewOcrSupportedLanguages", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Use proxy for model download.
         /// </summary>
@@ -1489,7 +1621,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("RetryOcrModel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to OpenAI.
         /// </summary>
@@ -1498,7 +1630,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("OpenAI", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Open on Github..
         /// </summary>
@@ -1507,7 +1639,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("OpenOnGithub", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Open on official site..
         /// </summary>
@@ -1516,7 +1648,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("OpenOnOfficialSite", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Ask Every Time.
         /// </summary>
@@ -1525,7 +1657,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Option_Ask", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Exit Application.
         /// </summary>
@@ -1534,7 +1666,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Option_Exit", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Minimize to Tray.
         /// </summary>
@@ -1543,7 +1675,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Option_Minimize", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Other.
         /// </summary>
@@ -1552,7 +1684,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Other", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Speech Recognition.
         /// </summary>
@@ -1561,7 +1693,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Page_SpeechRecognition", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Parameter.
         /// </summary>
@@ -1570,7 +1702,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Parameter", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Parameter (e.g. zh, en).
         /// </summary>
@@ -1579,7 +1711,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ParameterHint", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Primary Color.
         /// </summary>
@@ -1588,7 +1720,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("PrimaryColor", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Content.
         /// </summary>
@@ -1597,7 +1729,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("PromptContent", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Name.
         /// </summary>
@@ -1606,7 +1738,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("PromptName", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Supported parameters: [SourceLang], [TargetLang], [源语言], [目标语言].
         /// </summary>
@@ -1615,7 +1747,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("PromptParametersHint", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Prompts.
         /// </summary>
@@ -1624,7 +1756,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Prompts", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Proxy.
         /// </summary>
@@ -1633,7 +1765,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Proxy", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to http://username:password@server:port.
         /// </summary>
@@ -1642,7 +1774,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ProxyAddrQuestion", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Proxy Type.
         /// </summary>
@@ -1651,7 +1783,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ProxyType", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Using for TranslationAPI requests. Like OpenAI, Gemini etc..
         /// </summary>
@@ -1660,7 +1792,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ProxyTypeQuestion", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Proxy Url.
         /// </summary>
@@ -1669,7 +1801,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ProxyUrl", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Read Aloud.
         /// </summary>
@@ -1678,7 +1810,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ReadAloudMode", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Bilingual.
         /// </summary>
@@ -1687,7 +1819,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ReadAloudMode_Both", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to None.
         /// </summary>
@@ -1696,7 +1828,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ReadAloudMode_None", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Original Text.
         /// </summary>
@@ -1705,7 +1837,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ReadAloudMode_Source", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Translated Text.
         /// </summary>
@@ -1714,7 +1846,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ReadAloudMode_Target", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Read selected text.
         /// </summary>
@@ -1723,7 +1855,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ReadSelectedText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Press a key combination....
         /// </summary>
@@ -1732,7 +1864,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("RecordingShortcut", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Record Shortcut.
         /// </summary>
@@ -1741,7 +1873,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("RecordShortcut", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Remember my choice.
         /// </summary>
@@ -1750,7 +1882,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("RememberMyChoice", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Request error, maybe internet connection issues..
         /// </summary>
@@ -1759,7 +1891,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("RequestError", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Reselect Area.
         /// </summary>
@@ -1768,7 +1900,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ReselectArea", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Reset.
         /// </summary>
@@ -1786,7 +1918,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Retry", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Please restart the application to take effect..
         /// </summary>
@@ -1795,7 +1927,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("RestartToTakeEffect", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Restore.
         /// </summary>
@@ -1804,7 +1936,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Restore", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Restored!.
         /// </summary>
@@ -1813,7 +1945,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("RestoreSuccess", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Auto Close Delay.
         /// </summary>
@@ -1822,7 +1954,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ResultAutoCloseDelay", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Result Window.
         /// </summary>
@@ -1831,7 +1963,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ResultSettings", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Result Window Mode.
         /// </summary>
@@ -1840,7 +1972,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ResultWindowMode", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Classic.
         /// </summary>
@@ -1849,7 +1981,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ResultWindowMode_Classic", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Dictionary.
         /// </summary>
@@ -1858,7 +1990,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ResultWindowMode_Dictionary", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Reverse Language.
         /// </summary>
@@ -1867,7 +1999,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ReverseTranslateLanguage", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Swap source and target languages for input translation..
         /// </summary>
@@ -1876,7 +2008,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ReverseTranslateLanguageTip", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Save.
         /// </summary>
@@ -1885,7 +2017,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Save", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Saved!.
         /// </summary>
@@ -1894,7 +2026,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SaveSuccess", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Screenshot.
         /// </summary>
@@ -1903,7 +2035,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Screenshot", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Select the area to translate. Right-click or ESC to cancel..
         /// </summary>
@@ -1912,7 +2044,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Screenshot_Hint", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Screenshot Mode.
         /// </summary>
@@ -1921,7 +2053,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ScreenshotMode", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Precise (Toolbar).
         /// </summary>
@@ -1930,7 +2062,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ScreenshotMode_Precise", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Quick (No Confirm).
         /// </summary>
@@ -1939,7 +2071,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ScreenshotMode_Quick", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Select.
         /// </summary>
@@ -1948,7 +2080,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Select", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Auto Detect.
         /// </summary>
@@ -1957,7 +2089,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SelectionTranslate_AutoDetect", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Copy Translation.
         /// </summary>
@@ -1966,7 +2098,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SelectionTranslate_CopyTooltip", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Translation Failed: .
         /// </summary>
@@ -1975,7 +2107,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SelectionTranslate_Failed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to [Translation Pending] Source: .
         /// </summary>
@@ -1984,7 +2116,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SelectionTranslate_ImplementationPending", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Chinese.
         /// </summary>
@@ -1993,7 +2125,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SelectionTranslate_Language_Chinese", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Translation.
         /// </summary>
@@ -2002,7 +2134,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SelectionTranslate_ResultLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Source.
         /// </summary>
@@ -2011,7 +2143,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SelectionTranslate_SourceLabel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Selected text will appear here....
         /// </summary>
@@ -2020,7 +2152,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SelectionTranslate_SourcePlaceholderText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Selection Translation.
         /// </summary>
@@ -2029,7 +2161,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SelectionTranslate_Title", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Translate.
         /// </summary>
@@ -2038,7 +2170,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SelectionTranslate_TranslateButton", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Selection Translation.
         /// </summary>
@@ -2047,7 +2179,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SelectionTranslation", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Selection Method.
         /// </summary>
@@ -2056,7 +2188,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SelectionTriggerMode", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to All.
         /// </summary>
@@ -2065,7 +2197,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SelectionTriggerModeAll", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Double Click.
         /// </summary>
@@ -2074,7 +2206,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SelectionTriggerModeDoubleClick", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Drag Selection.
         /// </summary>
@@ -2083,7 +2215,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SelectionTriggerModeDragSelection", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Set as Default.
         /// </summary>
@@ -2110,7 +2242,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ExpandSettings", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Setting.
         /// </summary>
@@ -2119,7 +2251,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Settings", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Shortcut.
         /// </summary>
@@ -2128,7 +2260,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Shortcut", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Source Lang.
         /// </summary>
@@ -2137,7 +2269,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SourceLang", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Global (All System Audio).
         /// </summary>
@@ -2146,7 +2278,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_AllSystemAudio", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Audio Source.
         /// </summary>
@@ -2155,7 +2287,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_AudioSource", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Auto Clear (Seconds).
         /// </summary>
@@ -2164,7 +2296,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_AutoClear", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Clear History.
         /// </summary>
@@ -2173,7 +2305,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_ClearHistory", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Display Mode.
         /// </summary>
@@ -2182,7 +2314,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_DisplayMode", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Auto Scroll.
         /// </summary>
@@ -2191,7 +2323,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_DisplayMode_AutoScroll", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Segmented.
         /// </summary>
@@ -2200,7 +2332,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_DisplayMode_Segmented", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Enable Translation.
         /// </summary>
@@ -2209,7 +2341,25 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_EnableTranslation", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Decrease Font Size.
+        /// </summary>
+        public static string Speech_FontSizeDecrease {
+            get {
+                return ResourceManager.GetString("Speech_FontSizeDecrease", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Increase Font Size.
+        /// </summary>
+        public static string Speech_FontSizeIncrease {
+            get {
+                return ResourceManager.GetString("Speech_FontSizeIncrease", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Max Visible Lines.
         /// </summary>
@@ -2218,7 +2368,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_MaxHistory", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Sentences Per Line.
         /// </summary>
@@ -2227,7 +2377,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_MaxSentencesPerLine", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to This feature is only supported on Windows..
         /// </summary>
@@ -2236,7 +2386,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_NotSupported", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Real-time Preview.
         /// </summary>
@@ -2245,7 +2395,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_RealTimePreview", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Enable to translate partial results. Disable to translate only confirmed sentences..
         /// </summary>
@@ -2254,7 +2404,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_RealTimePreviewTip", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Recognized.
         /// </summary>
@@ -2263,7 +2413,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_Recognized", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Refresh.
         /// </summary>
@@ -2272,7 +2422,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_Refresh", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Selected {0} apps.
         /// </summary>
@@ -2281,7 +2431,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_SelectedAppsCount", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Select Audio Source.
         /// </summary>
@@ -2290,7 +2440,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_SelectSourceTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Start Recognition.
         /// </summary>
@@ -2299,7 +2449,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_Start", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Stop Recognition.
         /// </summary>
@@ -2308,7 +2458,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_Stop", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Translated.
         /// </summary>
@@ -2317,7 +2467,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_Translated", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Translating....
         /// </summary>
@@ -2326,7 +2476,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_Translating", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Subtitle BG.
         /// </summary>
@@ -2335,7 +2485,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Subtitle_Background", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Primary Subtitle (Main).
         /// </summary>
@@ -2344,7 +2494,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Subtitle_Primary", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Secondary Subtitle (Aux).
         /// </summary>
@@ -2353,7 +2503,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Subtitle_Secondary", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to None.
         /// </summary>
@@ -2362,7 +2512,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Subtitle_Source_None", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Original.
         /// </summary>
@@ -2371,7 +2521,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Subtitle_Source_Original", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Translated.
         /// </summary>
@@ -2380,7 +2530,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Subtitle_Source_Translated", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Success!.
         /// </summary>
@@ -2389,7 +2539,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Success", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Switch To....
         /// </summary>
@@ -2398,7 +2548,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("SwitchTo", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Recognition.
         /// </summary>
@@ -2407,7 +2557,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Tab_Recognition", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Target Lang.
         /// </summary>
@@ -2416,7 +2566,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TargetLang", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Tencent.
         /// </summary>
@@ -2425,7 +2575,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Tencent", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Test Connection.
         /// </summary>
@@ -2434,7 +2584,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TestConnection", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Testing....
         /// </summary>
@@ -2443,7 +2593,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Testing", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Translate / Correct.
         /// </summary>
@@ -2452,7 +2602,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssist", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Issues in the original text.
         /// </summary>
@@ -2461,7 +2611,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistAnnotatedOriginal", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Collocation.
         /// </summary>
@@ -2470,7 +2620,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistAnnotationCollocation", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Key word.
         /// </summary>
@@ -2479,7 +2629,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistAnnotationImportantWord", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Detailed notes.
         /// </summary>
@@ -2488,7 +2638,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistAnnotations", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Uncommon word.
         /// </summary>
@@ -2497,7 +2647,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistAnnotationUncommonWord", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Usage tip.
         /// </summary>
@@ -2506,7 +2656,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistAnnotationUsageTip", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Grammar.
         /// </summary>
@@ -2515,7 +2665,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistCategoryGrammar", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Spelling.
         /// </summary>
@@ -2524,7 +2674,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistCategorySpelling", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Style.
         /// </summary>
@@ -2533,7 +2683,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistCategoryStyle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Word choice.
         /// </summary>
@@ -2542,7 +2692,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistCategoryWordChoice", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Correct.
         /// </summary>
@@ -2562,6 +2712,42 @@ namespace EasyChat.Presentation.Lang {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Polish notes.
+        /// </summary>
+        public static string TextAssistPolishExplanationTitle {
+            get {
+                return ResourceManager.GetString("TextAssistPolishExplanationTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Original.
+        /// </summary>
+        public static string TextAssistPolishOriginalLabel {
+            get {
+                return ResourceManager.GetString("TextAssistPolishOriginalLabel", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Revised.
+        /// </summary>
+        public static string TextAssistPolishRevisedLabel {
+            get {
+                return ResourceManager.GetString("TextAssistPolishRevisedLabel", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Text assist.
+        /// </summary>
+        public static string TextAssistProcessing {
+            get {
+                return ResourceManager.GetString("TextAssistProcessing", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Summary.
         /// </summary>
         public static string TextAssistSummary {
@@ -2569,7 +2755,16 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistSummary", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Explain.
+        /// </summary>
+        public static string TextAssistExplain {
+            get {
+                return ResourceManager.GetString("TextAssistExplain", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Corrected result.
         /// </summary>
@@ -2578,7 +2773,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistCorrectedResult", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Detailed notes.
         /// </summary>
@@ -2587,7 +2782,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistDetailedExplanation", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Show meanings, collocations, key words, uncommon words, and usage tips. Available with AI translation..
         /// </summary>
@@ -2596,7 +2791,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistDetailedExplanationTip", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Follow global settings.
         /// </summary>
@@ -2605,7 +2800,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistFollowGlobal", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Enter text....
         /// </summary>
@@ -2614,7 +2809,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistInputPlaceholderText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Issues and suggestions.
         /// </summary>
@@ -2623,7 +2818,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistIssues", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to No AI model is configured. Add an AI model in Settings..
         /// </summary>
@@ -2632,7 +2827,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistNoAiModel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to No voice is available for this language..
         /// </summary>
@@ -2641,7 +2836,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistNoVoice", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Related.
         /// </summary>
@@ -2650,7 +2845,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistRelatedTerms", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Run.
         /// </summary>
@@ -2659,7 +2854,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistRun", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Text assist shortcuts.
         /// </summary>
@@ -2668,7 +2863,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistShortcuts", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Translate naturally or polish your writing with streaming feedback..
         /// </summary>
@@ -2677,7 +2872,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistSubtitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Translate.
         /// </summary>
@@ -2686,7 +2881,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TextAssistTranslate", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Theme.
         /// </summary>
@@ -2695,7 +2890,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Theme", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Theme has changed to .
         /// </summary>
@@ -2704,7 +2899,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ThemeChangedContent", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Theme Changed.
         /// </summary>
@@ -2713,7 +2908,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ThemeChangedTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Theme Name.
         /// </summary>
@@ -2722,7 +2917,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ThemeName", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Tips.
         /// </summary>
@@ -2731,7 +2926,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Tips", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Title Bar.
         /// </summary>
@@ -2740,7 +2935,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TitleBar", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Window title bar has been .
         /// </summary>
@@ -2749,7 +2944,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TitleBarContent", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Toggles the title bar..
         /// </summary>
@@ -2758,7 +2953,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TitleBarTip", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Title Bar .
         /// </summary>
@@ -2767,7 +2962,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TitleBarTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Click To Toggle Top Menu..
         /// </summary>
@@ -2776,7 +2971,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ToggleMenuTip", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Toggle.
         /// </summary>
@@ -2785,7 +2980,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ToggleMode", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Translate Engine.
         /// </summary>
@@ -2794,7 +2989,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TransEngine", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Translate to Window.
         /// </summary>
@@ -2803,7 +2998,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TranslateToWindow", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Translation.
         /// </summary>
@@ -2812,7 +3007,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Translation", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to AI models provide higher quality translations with support for phonetics, examples, and hints, but may be slower. Machine translation is faster but offers lower quality and lacks these features..
         /// </summary>
@@ -2821,7 +3016,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TranslationEngineInfo", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Transparency Level.
         /// </summary>
@@ -2830,7 +3025,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TransparencyLevel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Exit.
         /// </summary>
@@ -2839,7 +3034,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TrayExit", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Show.
         /// </summary>
@@ -2848,7 +3043,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TrayShow", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to TTS.
         /// </summary>
@@ -2857,7 +3052,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Tts", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Add Voice Mapping.
         /// </summary>
@@ -2866,7 +3061,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Tts_AddVoiceMapping", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to TTS Voice Configuration.
         /// </summary>
@@ -2884,7 +3079,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Tts_ConfigureVoices", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Edit Voice Mapping.
         /// </summary>
@@ -2893,7 +3088,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Tts_EditVoiceMapping", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Error Opening Dialog.
         /// </summary>
@@ -2902,7 +3097,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Tts_ErrorOpeningDialog", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to No voices configured. Click &apos;Add&apos; to configure a voice for a language..
         /// </summary>
@@ -2911,7 +3106,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Tts_NoVoicesConfigured", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Play.
         /// </summary>
@@ -2920,7 +3115,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Tts_Play", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Hello, this is a distinct voice preview..
         /// </summary>
@@ -2929,7 +3124,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Tts_PreviewDefaultText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Enter text to preview:.
         /// </summary>
@@ -2938,7 +3133,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Tts_PreviewInputPrompt", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Preview Voice.
         /// </summary>
@@ -2947,7 +3142,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Tts_PreviewVoice", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Provider:.
         /// </summary>
@@ -2956,7 +3151,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Tts_Provider", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Search voices....
         /// </summary>
@@ -2965,7 +3160,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Tts_SearchVoices", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Voice.
         /// </summary>
@@ -2974,7 +3169,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Tts_Voice", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Type something here.
         /// </summary>
@@ -2983,7 +3178,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TypeSomethingHere", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to When enabled, source and target languages will sync with global configuration..
         /// </summary>
@@ -2992,7 +3187,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TypingFollowConfigTooltip", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Typing to translate.
         /// </summary>
@@ -3001,7 +3196,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("TypingViewTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Unknown.
         /// </summary>
@@ -3010,7 +3205,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Unknown", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Update.
         /// </summary>
@@ -3019,7 +3214,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Update", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Update Failed.
         /// </summary>
@@ -3028,7 +3223,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("UpdateFailed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Updating....
         /// </summary>
@@ -3037,7 +3232,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Updating", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Use Proxy.
         /// </summary>
@@ -3046,7 +3241,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("UseProxy", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Model.
         /// </summary>
@@ -3055,7 +3250,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("UsingAiModel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to MachineTrans.
         /// </summary>
@@ -3064,7 +3259,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("UsingMachineTransEngine", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to View Release.
         /// </summary>
@@ -3073,7 +3268,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("ViewRelease", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Window Appearance.
         /// </summary>
@@ -3082,7 +3277,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Window_Appearance", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Window BG.
         /// </summary>
@@ -3091,7 +3286,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Window_Background", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Opacity.
         /// </summary>
@@ -3100,7 +3295,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Window_Opacity", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Orientation.
         /// </summary>
@@ -3109,7 +3304,7 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Window_Orientation", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Window Background.
         /// </summary>
@@ -3141,6 +3336,14 @@ namespace EasyChat.Presentation.Lang {
 
         public static string NoAsrModels {
             get { return ResourceManager.GetString("NoAsrModels", resourceCulture); }
+        }
+
+        public static string ShowMoreAsrModels {
+            get { return ResourceManager.GetString("ShowMoreAsrModels", resourceCulture); }
+        }
+
+        public static string ShowLessAsrModels {
+            get { return ResourceManager.GetString("ShowLessAsrModels", resourceCulture); }
         }
 
         public static string AsrModelsImported {
@@ -3364,5 +3567,34 @@ namespace EasyChat.Presentation.Lang {
         public static string SubtitlePreset_NeonDesc {
             get { return ResourceManager.GetString("SubtitlePreset_NeonDesc", resourceCulture); }
         }
+
+        public static string ApplicationData {
+            get { return ResourceManager.GetString("ApplicationData", resourceCulture); }
+        }
+
+        public static string ApplicationDataDescription {
+            get { return ResourceManager.GetString("ApplicationDataDescription", resourceCulture); }
+        }
+
+        public static string ChangeApplicationDataLocation {
+            get { return ResourceManager.GetString("ChangeApplicationDataLocation", resourceCulture); }
+        }
+
+        public static string SelectApplicationDataLocation {
+            get { return ResourceManager.GetString("SelectApplicationDataLocation", resourceCulture); }
+        }
+
+        public static string ApplicationDataMoved {
+            get { return ResourceManager.GetString("ApplicationDataMoved", resourceCulture); }
+        }
+
+        public static string ApplicationDataMoveFailed {
+            get { return ResourceManager.GetString("ApplicationDataMoveFailed", resourceCulture); }
+        }
+
+        public static string ApplicationDataMoveBusy {
+            get { return ResourceManager.GetString("ApplicationDataMoveBusy", resourceCulture); }
+        }
+
     }
 }

@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Documents;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
@@ -10,15 +11,21 @@ using EasyChat.Contracts.Platform;
 using EasyChat.Presentation.Features.Settings.State;
 using EasyChat.Presentation.Foundation.Platform;
 using EasyChat.Presentation.Shared.Feedback;
+using LiveMarkdown.Avalonia;
 using Key = Avalonia.Input.Key;
 
 namespace EasyChat.Presentation.Features.Capture.Views;
 
 public partial class ResultView : Window
 {
+    private readonly ObservableStringBuilder _markdown = new();
     private Screen? _screen;
 
-    public ResultView() => InitializeComponent();
+    public ResultView()
+    {
+        InitializeComponent();
+        MarkdownResult.MarkdownBuilder = _markdown;
+    }
 
     public ResultView(
         SettingsSession settings,
@@ -33,7 +40,7 @@ public partial class ResultView : Window
             new PixelPoint(completionPoint.X, completionPoint.Y)) ?? Screens.Primary;
         if (_screen is not null)
         {
-            TextBlockResult.MaxWidth = _screen.Bounds.Width / _screen.Scaling * 0.8;
+            MarkdownResult.MaxWidth = _screen.Bounds.Width / _screen.Scaling * 0.8;
             Position = new PixelPoint(_screen.Bounds.X, _screen.Bounds.Y);
         }
         Loaded += (_, _) =>
@@ -51,14 +58,15 @@ public partial class ResultView : Window
     {
         if (LoadingIndicator.IsVisible)
             ShowResult();
-        TextBlockResult.Text += text;
+        _markdown.Append(text);
         Dispatcher.UIThread.Post(ReCenterPosition);
     });
 
     public void ShowLoading() => Dispatcher.UIThread.Post(() =>
     {
+        _markdown.Clear();
         LoadingIndicator.IsVisible = true;
-        TextBlockResult.IsVisible = false;
+        MarkdownResult.IsVisible = false;
         if (ResultToolbar is not null)
             ResultToolbar.IsVisible = false;
     });
@@ -66,7 +74,7 @@ public partial class ResultView : Window
     public void ShowResult() => Dispatcher.UIThread.Post(() =>
     {
         LoadingIndicator.IsVisible = false;
-        TextBlockResult.IsVisible = true;
+        MarkdownResult.IsVisible = true;
         if (ResultToolbar is not null)
             ResultToolbar.IsVisible = true;
         ReCenterPosition();
@@ -98,7 +106,7 @@ public partial class ResultView : Window
 
     private async Task CopyResultAsync(Control? anchor)
     {
-        var text = TextBlockResult.Text;
+        var text = _markdown.ToString();
         if (string.IsNullOrWhiteSpace(text))
             return;
 
@@ -123,9 +131,9 @@ public partial class ResultView : Window
         TransparencyLevelHint = WindowTransparencyLevels.ForPreference(settings.TransparencyLevel);
         TrySetBrush(settings.BackgroundColor, brush => MainCard.Background = brush);
         TrySetBrush(settings.WindowBackgroundColor, brush => Background = brush);
-        TrySetBrush(settings.FontColor, brush => TextBlockResult.Foreground = brush);
-        TextBlockResult.FontSize = settings.FontSize;
-        TextBlockResult.FontFamily = EcFontFamilies.Resolve(settings.FontFamily);
+        TrySetBrush(settings.FontColor, brush => MarkdownResult.SetValue(TextElement.ForegroundProperty, brush));
+        MarkdownResult.SetValue(TextElement.FontSizeProperty, settings.FontSize);
+        MarkdownResult.SetValue(TextElement.FontFamilyProperty, EcFontFamilies.Resolve(settings.FontFamily));
     }
 
     private static void TrySetBrush(string? value, Action<IBrush> apply)

@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:suki="https://github.com/kikipoulet/SukiUI"
+        xmlns:md="clr-namespace:LiveMarkdown.Avalonia;assembly=LiveMarkdown.Avalonia"
         xmlns:lang="clr-namespace:EasyChat.Presentation.Lang"
         xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -32,13 +33,11 @@
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Center"
                                   IsVisible="True" />
-                    <TextBlock TextWrapping="Wrap"
-                               x:Name="TextBlockResult"
-                               IsVisible="False"
-                               FontSize="14"
-                               LineHeight="22"
-                               MaxWidth="480"
-                               Foreground="{DynamicResource EcTextPrimary}" />
+                    <md:MarkdownRenderer x:Name="MarkdownResult"
+                                         IsVisible="False"
+                                         HorizontalAlignment="Stretch"
+                                         VerticalAlignment="Top"
+                                         MaxWidth="480" />
                 </Panel>
 
                 <!-- Action bar: Copy is primary, Close secondary. Esc closes. -->

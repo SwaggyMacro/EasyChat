@@ -28,7 +28,9 @@ First trim whitespace and trailing punctuation.
 Do not override these rules based on meaning or grammar.
 
 # Output Protocol: JSON Lines
-Return raw NDJSON only: one complete JSON object per line, no Markdown or explanatory text.
+Return raw NDJSON only: one complete JSON object per line, with no prose outside the documented JSONL events.
+Markdown is allowed inside translation, meaning, tips, and other text fields when it improves readability.
+Never wrap the JSONL response in a Markdown code fence.
 Every line must contain the `event` property shown below. Escape all JSON strings correctly.
 Emit events in exactly the documented order and always finish with `{"event":"done"}`.
 

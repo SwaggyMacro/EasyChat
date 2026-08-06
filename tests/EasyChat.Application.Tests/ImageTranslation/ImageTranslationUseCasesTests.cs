@@ -46,6 +46,38 @@ public sealed class ImageTranslationUseCasesTests
         Assert.AreEqual(2, result.TranslatedBlockCount);
     }
 
+    [TestMethod]
+    public async Task TranslateRegionsAsync_FallsBackForMissingAiBatchItems()
+    {
+        var settings = SettingsTestData.CreateBundle() with
+        {
+            General = SettingsTestData.CreateBundle().General with
+            {
+                TranslationEngine = TranslationEngineNames.AiModel
+            }
+        };
+        var useCases = new ImageTranslationUseCases(
+            new PartialBatchTranslationUseCases(),
+            new FakeSettingsUseCases(settings),
+            new FakeRenderer());
+        var recognition = new OcrRecognitionResult(
+        [
+            Region("first", 0, 0),
+            Region("second", 20, 0)
+        ]);
+
+        var result = await useCases.TranslateRegionsAsync(
+            new ImageRegionTranslationRequest(
+                recognition,
+                [0, 1],
+                new TranslationLanguage("en", "English"),
+                new TranslationLanguage("zh-Hans", "Chinese")));
+
+        Assert.HasCount(2, result.Translations);
+        Assert.AreEqual("batch:first", result.Translations.Single(item => item.RegionIndex == 0).Translation);
+        Assert.AreEqual("fallback:second", result.Translations.Single(item => item.RegionIndex == 1).Translation);
+    }
+
     private static OcrTextRegion Region(string text, double x, double y) =>
         new(text,
         [
@@ -103,6 +135,77 @@ public sealed class ImageTranslationUseCasesTests
             TranslationRequest request,
             CancellationToken cancellationToken = default) =>
             Task.FromResult(new TranslationResponse($"translated:{request.Text}"));
+
+        public async IAsyncEnumerable<TranslationEvent> StreamAsync(
+            TranslationRequest request,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            await Task.CompletedTask;
+            yield break;
+        }
+
+        public async IAsyncEnumerable<IdentifiedTranslationDelta> StreamIdentifiedAsync(
+            TranslationRequest request,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            await Task.CompletedTask;
+            yield break;
+        }
+    }
+
+    private sealed class PartialBatchTranslationUseCases : ITranslationUseCases
+    {
+        public ITranslationSession Prepare(TranslationProviderSelection? provider = null) =>
+            provider?.PromptOverride is not null
+                ? new PartialBatchSession()
+                : new FallbackSession();
+
+        public Task<Result<TranslationResponse>> TranslateAsync(
+            TranslationRequest request,
+            CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+        public async IAsyncEnumerable<TranslationEvent> StreamAsync(
+            TranslationRequest request,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            await Task.CompletedTask;
+            yield break;
+        }
+    }
+
+    private sealed class PartialBatchSession : ITranslationSession
+    {
+        public bool SupportsIdentifiedStreaming => true;
+
+        public Task<TranslationResponse> TranslateAsync(
+            TranslationRequest request,
+            CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+        public async IAsyncEnumerable<TranslationEvent> StreamAsync(
+            TranslationRequest request,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            await Task.CompletedTask;
+            yield break;
+        }
+
+        public async IAsyncEnumerable<IdentifiedTranslationDelta> StreamIdentifiedAsync(
+            TranslationRequest request,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            await Task.CompletedTask;
+            yield return new IdentifiedTranslationDelta("block-0", "batch:first");
+        }
+    }
+
+    private sealed class FallbackSession : ITranslationSession
+    {
+        public bool SupportsIdentifiedStreaming => true;
+
+        public Task<TranslationResponse> TranslateAsync(
+            TranslationRequest request,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(new TranslationResponse($"fallback:{request.Text}"));
 
         public async IAsyncEnumerable<TranslationEvent> StreamAsync(
             TranslationRequest request,

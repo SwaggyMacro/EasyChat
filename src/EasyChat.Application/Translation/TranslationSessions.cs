@@ -109,7 +109,7 @@ internal sealed class AiTranslationSession :
         ValidateLanguages(request);
         var response = await _provider.CompleteAsync(
             new ChatTranslationProviderRequest(
-                CreateStructuredPrompt(request.Source!, request.Target),
+                CreateStructuredPrompt(request.Source!, request.Target, request.PlainText),
                 request.Text),
             cancellationToken).ConfigureAwait(false);
         return new TranslationResponse(ExtractTranslation(response));
@@ -129,7 +129,7 @@ internal sealed class AiTranslationSession :
 
         await foreach (var chunk in _provider.StreamAsync(
                            new ChatTranslationProviderRequest(
-                               CreateStructuredPrompt(request.Source!, request.Target),
+                               CreateStructuredPrompt(request.Source!, request.Target, request.PlainText),
                                request.Text),
                            cancellationToken).ConfigureAwait(false))
         {
@@ -235,7 +235,8 @@ internal sealed class AiTranslationSession :
 
     private string CreateStructuredPrompt(
         TranslationLanguage source,
-        TranslationLanguage target)
+        TranslationLanguage target,
+        bool plainText)
     {
         var prompt = ApplyLanguages(_promptTemplate, source, target);
         var contract = "\n\n# Runtime JSONL translation contract (highest priority)\n"
@@ -249,6 +250,11 @@ internal sealed class AiTranslationSession :
                        + "Emit one or more {\"event\":\"translation_delta\",\"text\":\"...\"} events. "
                        + "Concatenating all text values must be the complete translation.\n"
                        + "Finish with exactly {\"event\":\"done\"}.\n";
+        if (plainText)
+        {
+            contract += "The translated text must be plain text for direct input delivery. "
+                        + "Do not use Markdown formatting, headings, list markers, or code fences.\n";
+        }
         return ApplyLanguages(prompt + contract, source, target);
     }
 

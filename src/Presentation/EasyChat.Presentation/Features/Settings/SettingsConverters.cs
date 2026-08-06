@@ -1,5 +1,6 @@
 using System.Globalization;
 using Avalonia.Data.Converters;
+using EasyChat.Contracts.Ocr;
 using EasyChat.Contracts.Settings;
 using EasyChat.Presentation.Lang;
 
@@ -78,6 +79,34 @@ public sealed class ScreenshotModeConverter : IValueConverter
         "Quick" => Resources.ScreenshotMode_Quick,
         "Precise" => Resources.ScreenshotMode_Precise,
         _ => value
+    };
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
+}
+
+public sealed class OcrRecognitionModeConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value switch
+    {
+        OcrRecognitionMode.Fast => Resources.OcrRecognitionMode_Fast,
+        OcrRecognitionMode.Normal => Resources.OcrRecognitionMode_Normal,
+        OcrRecognitionMode.IdleRelease => Resources.OcrRecognitionMode_IdleRelease,
+        _ => value?.ToString()
+    };
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
+}
+
+public sealed class OcrRecognitionModeDescriptionConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value switch
+    {
+        OcrRecognitionMode.Fast => Resources.OcrRecognitionModeDescription_Fast,
+        OcrRecognitionMode.Normal => Resources.OcrRecognitionModeDescription_Normal,
+        OcrRecognitionMode.IdleRelease => Resources.OcrRecognitionModeDescription_IdleRelease,
+        _ => null
     };
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>

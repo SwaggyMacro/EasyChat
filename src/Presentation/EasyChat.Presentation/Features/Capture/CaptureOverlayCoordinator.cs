@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using EasyChat.Contracts.Capture;
 using EasyChat.Contracts.Platform;
 using EasyChat.Presentation.Features.Capture.Views;
 using EasyChat.Presentation.ImageTranslation;
@@ -15,12 +16,10 @@ internal sealed record CaptureOverlayOutcome(
     Bitmap? Image);
 
 public sealed class CaptureOverlayCoordinator(
-    IPlatformAccessUseCases platformAccess,
     IScreenCatalog screens,
     IScreenCapture capture,
     IPointerPosition pointer)
 {
-    private readonly IPlatformAccessUseCases _platformAccess = platformAccess;
     private readonly IScreenCatalog _screens = screens;
     private readonly IScreenCapture _capture = capture;
     private readonly IPointerPosition _pointer = pointer;
@@ -29,21 +28,13 @@ public sealed class CaptureOverlayCoordinator(
     internal async Task<CaptureOverlayOutcome?> SelectAsync(
         bool precise,
         bool regionOnly,
-        bool ensureAccess = true,
+        CaptureOverlayAction defaultAction = CaptureOverlayAction.Translation,
+        CaptureToolbarMode toolbarMode = CaptureToolbarMode.Full,
         CancellationToken cancellationToken = default)
     {
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            if (ensureAccess)
-            {
-                var access = await _platformAccess.EnsureAvailableAsync(
-                    PlatformCapability.ScreenCapture,
-                    cancellationToken).ConfigureAwait(false);
-                if (access.IsFailure)
-                    throw new InvalidOperationException(access.Error.Message);
-            }
-
             var availableScreens = (await _screens.GetScreensAsync(cancellationToken)
                     .ConfigureAwait(false))
                 .Where(screen => !screen.Bounds.IsEmpty)
@@ -52,13 +43,9 @@ public sealed class CaptureOverlayCoordinator(
                 throw new InvalidOperationException("No display screen is available.");
 
             var desktopBounds = Union(availableScreens.Select(screen => screen.Bounds));
-            var captured = await _capture.CaptureAsync(
-                new ScreenCaptureRequest(ScreenCaptureTarget.Region, Region: desktopBounds),
+            using var desktopImage = await CaptureDesktopImageAsync(
+                desktopBounds,
                 cancellationToken).ConfigureAwait(false);
-            if (captured.IsFailure)
-                throw new InvalidOperationException(captured.Error.Message);
-
-            using var desktopImage = AvaloniaImageFrames.ToBitmap(captured.Value);
             var initialPointer = GetInitialPointer(availableScreens);
             var session = await OnUiAsync(
                 () => new CaptureOverlaySession(
@@ -66,7 +53,9 @@ public sealed class CaptureOverlayCoordinator(
                     desktopBounds,
                     desktopImage,
                     precise,
-                    regionOnly),
+                    regionOnly,
+                    defaultAction,
+                    regionOnly ? CaptureToolbarMode.ImageSelection : toolbarMode),
                 cancellationToken);
             try
             {
@@ -86,6 +75,18 @@ public sealed class CaptureOverlayCoordinator(
         {
             _gate.Release();
         }
+    }
+
+    private async Task<Bitmap> CaptureDesktopImageAsync(
+        PhysicalScreenRegion desktopBounds,
+        CancellationToken cancellationToken)
+    {
+        var captured = await _capture.CaptureAsync(
+            new ScreenCaptureRequest(ScreenCaptureTarget.Region, Region: desktopBounds),
+            cancellationToken).ConfigureAwait(false);
+        if (captured.IsFailure)
+            throw new InvalidOperationException(captured.Error.Message);
+        return AvaloniaImageFrames.ToBitmap(captured.Value);
     }
 
     private PhysicalScreenPoint GetInitialPointer(IReadOnlyList<ScreenDescriptor> availableScreens)
@@ -149,6 +150,7 @@ internal sealed class CaptureOverlaySession : IDisposable
     private readonly Bitmap _desktopImage;
     private readonly bool _precise;
     private readonly bool _regionOnly;
+    private readonly CaptureOverlayAction _defaultAction;
     private readonly PhysicalSelectionState _selection;
     private readonly List<OverlaySurface> _surfaces = [];
     private readonly TaskCompletionSource<CaptureOverlayOutcome?> _completion = new(
@@ -165,13 +167,16 @@ internal sealed class CaptureOverlaySession : IDisposable
         PhysicalScreenRegion desktopBounds,
         Bitmap desktopImage,
         bool precise,
-        bool regionOnly)
+        bool regionOnly,
+        CaptureOverlayAction defaultAction,
+        CaptureToolbarMode toolbarMode)
     {
         _screens = screens;
         _desktopBounds = desktopBounds;
         _desktopImage = desktopImage;
         _precise = precise;
         _regionOnly = regionOnly;
+        _defaultAction = defaultAction;
         _selection = new PhysicalSelectionState(ToPixelRect(desktopBounds));
 
         try
@@ -185,7 +190,12 @@ internal sealed class CaptureOverlaySession : IDisposable
                 OverlayWindowView? view = null;
                 try
                 {
-                    view = new OverlayWindowView(screen, background, regionOnly);
+                    view = new OverlayWindowView(
+                        screen,
+                        background,
+                        regionOnly,
+                        defaultAction,
+                        toolbarMode);
                     Subscribe(view);
                     _surfaces.Add(new OverlaySurface(view, background));
                 }
@@ -370,7 +380,7 @@ internal sealed class CaptureOverlaySession : IDisposable
             _toolbarView.Activate();
         }
         else
-            Complete(CaptureOverlayAction.Translation);
+            Complete(_defaultAction);
     }
 
     private void OnActionRequested(OverlayWindowView view, CaptureOverlayAction action)

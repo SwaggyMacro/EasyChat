@@ -23,7 +23,8 @@ public static class DesktopApplication
     public static void Run(
         string[] args,
         Action<IServiceCollection> addPlatformServices,
-        Action? initializeDeployment = null)
+        Action? initializeDeployment = null,
+        Action<AppBuilder>? configureAppBuilder = null)
     {
         ArgumentNullException.ThrowIfNull(args);
         ArgumentNullException.ThrowIfNull(addPlatformServices);
@@ -44,9 +45,10 @@ public static class DesktopApplication
             initializeDeployment?.Invoke();
             shell = StartShell(services);
             InitializeSettings(services);
-            AppBuilder.Configure(() => new App(() => ui ??= CreateUiContext(services)))
-                .UsePlatformDetect()
-                .WithInterFont()
+            var builder = AppBuilder.Configure(() => new App(() => ui ??= CreateUiContext(services)))
+                .UsePlatformDetect();
+            configureAppBuilder?.Invoke(builder);
+            builder.WithInterFont()
                 .LogToTrace()
                 .StartWithClassicDesktopLifetime(args);
         }
@@ -92,7 +94,8 @@ public static class DesktopApplication
         services.GetRequiredService<EasyChat.Presentation.Foundation.UiHost.IUiDialogHost>(),
         services.GetRequiredService<DesktopInteractionLifecycle>(),
         services.GetRequiredService<IApplicationUpdateService>(),
-        services.GetRequiredService<EasyChat.Presentation.Foundation.UiHost.IUiToastHost>());
+        services.GetRequiredService<EasyChat.Presentation.Foundation.UiHost.IUiToastHost>(),
+        services.GetRequiredService<EasyChat.Presentation.Features.Capture.IScreenshotCaptureSession>());
 
     private static IShellLifecycle StartShell(IServiceProvider services)
     {

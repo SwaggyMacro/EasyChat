@@ -4,9 +4,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:EasyChat.Presentation.Features.Speech;assembly=EasyChat.Presentation"
+             xmlns:speech="clr-namespace:EasyChat.Contracts.Speech;assembly=EasyChat.Contracts"
+             xmlns:settings="clr-namespace:EasyChat.Contracts.Settings;assembly=EasyChat.Contracts"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
              xmlns:converts="clr-namespace:EasyChat.Presentation.Foundation.Formatting;assembly=EasyChat.Presentation"
+             xmlns:sharedControls="clr-namespace:EasyChat.Presentation.Shared.Controls;assembly=EasyChat.Presentation.Shared"
              xmlns:lang="clr-namespace:EasyChat.Presentation.Lang;assembly=EasyChat.Presentation"
              xmlns:ec="clr-namespace:EasyChat.Presentation.Shared.Controls;assembly=EasyChat.Presentation.Shared"
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
@@ -81,7 +84,7 @@
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                                     <Border ClipToBounds="True" CornerRadius="2" Width="20" Height="14">
-                                                        <Image Source="{Binding Icon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
+                                                        <Image Source="{Binding Icon, Converter={x:Static sharedControls:LanguageFlagConverters.ToIcon}}"
                                                                Stretch="UniformToFill" />
                                                     </Border>
                                                     <TextBlock Text="{Binding Converter={x:Static converts:SpeechRecognitionModelConverters.ToDisplayName}}"
@@ -152,7 +155,7 @@
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                                     <Border ClipToBounds="True" CornerRadius="2" Width="20" Height="14">
-                                                        <Image Source="{Binding Icon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
+                                                        <Image Source="{Binding Icon, Converter={x:Static sharedControls:LanguageFlagConverters.ToIcon}}"
                                                                Stretch="UniformToFill" />
                                                     </Border>
                                                     <TextBlock Text="{Binding Converter={x:Static converts:LanguageSettingsConverters.ToDisplayName}}"

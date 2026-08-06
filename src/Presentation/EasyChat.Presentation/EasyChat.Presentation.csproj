@@ -15,6 +15,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
     <PackageReference Include="ReactiveUI" Version="22.3.1" />
     <PackageReference Include="SukiUI" Version="7.0.1" />
+    <PackageReference Include="LiveMarkdown.Avalonia" Version="2.2.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\EasyChat.Contracts\EasyChat.Contracts.csproj" />

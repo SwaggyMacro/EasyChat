@@ -255,6 +255,13 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
         RecognitionLanguages = [];
         EngineOptions = [];
         TargetLanguages = [];
+        PromptEntries = settings.Prompts.Entries;
+        if (!PromptEntries.Any(prompt => prompt.Id == settings.SpeechRecognition.PromptId))
+        {
+            settings.SpeechRecognition.PromptId =
+                PromptEntries.FirstOrDefault(prompt => prompt.Id == settings.Prompts.SelectedPromptId)?.Id
+                ?? PromptEntries.FirstOrDefault(prompt => prompt.IsDefault)?.Id;
+        }
         AvailableFonts = new ObservableCollection<string>(
             FontManager.Current.SystemFonts.Select(font => font.Name).Order(StringComparer.CurrentCulture));
         AudioSources = [];
@@ -297,6 +304,7 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
     public ObservableCollection<SpeechRecognitionModel> RecognitionLanguages { get; }
     public ObservableCollection<SpeechEngineOption> EngineOptions { get; }
     public ObservableCollection<LanguageSettings> TargetLanguages { get; }
+    public ObservableCollection<PromptEntryState> PromptEntries { get; }
     public ObservableCollection<string> AvailableFonts { get; }
     public ObservableCollection<SpeechAudioSourceItem> AudioSources { get; }
     public ObservableCollection<SpeechSubtitleItemViewModel> SubtitleItems { get; }
@@ -397,6 +405,7 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
             }
             this.RaisePropertyChanged(nameof(IsMaxSentencesPerLineVisible));
             this.RaisePropertyChanged(nameof(IsRealTimePreviewVisible));
+            this.RaisePropertyChanged(nameof(IsPromptSelectionVisible));
             UpdateTargetLanguages(commitSelection: true);
         }
     }
@@ -412,10 +421,32 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
         }
     }
 
-    public bool IsTranslationEnabled { get => _settings.SpeechRecognition.IsTranslationEnabled; set { Set(value, _settings.SpeechRecognition.IsTranslationEnabled, next => _settings.SpeechRecognition.IsTranslationEnabled = next); this.RaisePropertyChanged(nameof(IsRealTimePreviewVisible)); } }
+    public string? SelectedPromptId
+    {
+        get
+        {
+            var configured = _settings.SpeechRecognition.PromptId;
+            if (PromptEntries.Any(prompt => prompt.Id == configured))
+                return configured;
+            var globallySelected = _settings.Prompts.SelectedPromptId;
+            return PromptEntries.FirstOrDefault(prompt => prompt.Id == globallySelected)?.Id
+                   ?? PromptEntries.FirstOrDefault(prompt => prompt.IsDefault)?.Id;
+        }
+        set
+        {
+            if (value == _settings.SpeechRecognition.PromptId)
+                return;
+            _settings.SpeechRecognition.PromptId = value;
+            this.RaisePropertyChanged();
+        }
+    }
+
+    public bool IsTranslationEnabled { get => _settings.SpeechRecognition.IsTranslationEnabled; set { Set(value, _settings.SpeechRecognition.IsTranslationEnabled, next => _settings.SpeechRecognition.IsTranslationEnabled = next); this.RaisePropertyChanged(nameof(IsRealTimePreviewVisible)); this.RaisePropertyChanged(nameof(IsPromptSelectionVisible)); } }
     public bool IsRealTimePreviewEnabled { get => _settings.SpeechRecognition.IsRealTimePreviewEnabled; set => Set(value, _settings.SpeechRecognition.IsRealTimePreviewEnabled, next => _settings.SpeechRecognition.IsRealTimePreviewEnabled = next); }
     public bool IsRealTimePreviewVisible =>
         ShouldShowRealTimePreview(IsTranslationEnabled, SelectedEngineOption?.IsMachine == true);
+    public bool IsPromptSelectionVisible =>
+        IsTranslationEnabled && SelectedEngineOption?.IsMachine == false;
     public int AutoClearInterval { get => _settings.SpeechRecognition.AutoClearInterval; set => Set(value, _settings.SpeechRecognition.AutoClearInterval, next => _settings.SpeechRecognition.AutoClearInterval = next); }
     public int MaxSentencesPerLine { get => _settings.SpeechRecognition.MaxSentencesPerLine; set => Set(value, _settings.SpeechRecognition.MaxSentencesPerLine, next => _settings.SpeechRecognition.MaxSentencesPerLine = next); }
     public FloatingDisplayMode FloatingDisplayMode { get => _settings.SpeechRecognition.FloatingDisplayMode; set { Set(value, _settings.SpeechRecognition.FloatingDisplayMode, next => _settings.SpeechRecognition.FloatingDisplayMode = next); this.RaisePropertyChanged(nameof(IsSegmentedMode)); this.RaisePropertyChanged(nameof(IsMaxSentencesPerLineVisible)); } }
@@ -697,6 +728,7 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
         this.RaisePropertyChanged(nameof(SelectedEngineOption));
         this.RaisePropertyChanged(nameof(IsMaxSentencesPerLineVisible));
         this.RaisePropertyChanged(nameof(IsRealTimePreviewVisible));
+        this.RaisePropertyChanged(nameof(IsPromptSelectionVisible));
         UpdateTargetLanguages(commitSelection: engineFellBack);
     }
 

@@ -7,9 +7,8 @@ using EasyChat.Contracts.Shortcuts;
 using EasyChat.Contracts.Speech;
 using EasyChat.Contracts.Translation;
 using EasyChat.Presentation.Features.Capture;
+using EasyChat.Presentation.Features.ScreenshotOcr;
 using EasyChat.Presentation.Features.Settings.State;
-using EasyChat.Presentation.ImageTranslation;
-using EasyChat.Presentation.Features.Capture.Views;
 using Microsoft.Extensions.Logging;
 
 namespace EasyChat.Presentation.Features.Shortcuts;
@@ -19,6 +18,7 @@ public sealed class ScreenshotShortcutAction(
     ScreenshotResultCoordinator results,
     IScreenshotUseCases screenshots,
     ITtsUseCases tts,
+    ScreenshotOcrWindowCoordinator ocrWorkbench,
     SettingsSession settings,
     ILogger<ScreenshotShortcutAction> logger) : IShortcutAction
 {
@@ -26,6 +26,7 @@ public sealed class ScreenshotShortcutAction(
     private readonly ScreenshotResultCoordinator _results = results;
     private readonly IScreenshotUseCases _screenshots = screenshots;
     private readonly ITtsUseCases _tts = tts;
+    private readonly ScreenshotOcrWindowCoordinator _ocrWorkbench = ocrWorkbench;
     private readonly SettingsSession _settings = settings;
     private readonly ILogger<ScreenshotShortcutAction> _logger = logger;
     private CancellationTokenSource? _imageTranslationCancellation;
@@ -39,14 +40,13 @@ public sealed class ScreenshotShortcutAction(
     {
         try
         {
-            using var selection = await _capture.CaptureAsync(
+            var selection = await _capture.CaptureAsync(
                 _settings.Screenshot.Mode,
-                cancellationToken);
+                cancellationToken: cancellationToken);
             if (selection is null)
                 return;
 
-            var frame = AvaloniaImageFrames.ToImageFrame(selection.Image);
-            _ = ProcessAsync(frame, selection.Action, selection.CompletionPoint);
+            _ = ProcessAsync(selection.Image, selection.Action, selection.CompletionPoint);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -58,7 +58,7 @@ public sealed class ScreenshotShortcutAction(
         }
     }
 
-    private async Task ProcessAsync(
+    internal async Task ProcessAsync(
         ImageFrame image,
         CaptureOverlayAction action,
         PhysicalScreenPoint completionPoint)
@@ -66,6 +66,12 @@ public sealed class ScreenshotShortcutAction(
         CancellationTokenSource? imageCancellation = null;
         try
         {
+            if (action == CaptureOverlayAction.OcrWorkbench)
+            {
+                await _ocrWorkbench.OpenAsync(image, completionPoint);
+                return;
+            }
+
             if (action == CaptureOverlayAction.CopyImageTranslated)
             {
                 imageCancellation = new CancellationTokenSource();
@@ -80,14 +86,17 @@ public sealed class ScreenshotShortcutAction(
             var recognition = await _screenshots.RecognizeAsync(
                 image,
                 enableRotation: action == CaptureOverlayAction.CopyImageTranslated,
-                cancellationToken);
+                cancellationToken: cancellationToken);
             if (action == CaptureOverlayAction.CopyImageTranslated)
             {
                 await ProcessImageAsync(image, recognition, completionPoint, cancellationToken);
                 return;
             }
 
-            await ProcessTextAsync(recognition.Text, action, completionPoint);
+            var text = recognition.Text;
+            image = null!;
+            recognition = null!;
+            await ProcessTextAsync(text, action, completionPoint);
         }
         catch (OperationCanceledException) when (imageCancellation?.IsCancellationRequested == true)
         {

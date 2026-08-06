@@ -569,6 +569,12 @@
     <data name="Speech_EnableTranslation" xml:space="preserve">
         <value>Enable Translation</value>
     </data>
+    <data name="Speech_FontSizeDecrease" xml:space="preserve">
+        <value>Decrease Font Size</value>
+    </data>
+    <data name="Speech_FontSizeIncrease" xml:space="preserve">
+        <value>Increase Font Size</value>
+    </data>
     <data name="Speech_RealTimePreview" xml:space="preserve">
         <value>Real-time Preview</value>
     </data>
@@ -902,7 +908,12 @@ Machine translation: faster; lower quality; no phonetics, examples, or tips.</va
   <data name="TextAssistTranslate" xml:space="preserve"><value>Translate</value></data>
   <data name="TextAssistCorrect" xml:space="preserve"><value>Correct</value></data>
   <data name="TextAssistPolish" xml:space="preserve"><value>Polish</value></data>
+  <data name="TextAssistPolishExplanationTitle" xml:space="preserve"><value>Polish notes</value></data>
+  <data name="TextAssistPolishOriginalLabel" xml:space="preserve"><value>Original</value></data>
+  <data name="TextAssistPolishRevisedLabel" xml:space="preserve"><value>Revised</value></data>
+  <data name="TextAssistProcessing" xml:space="preserve"><value>Text assist</value></data>
   <data name="TextAssistSummary" xml:space="preserve"><value>Summary</value></data>
+  <data name="TextAssistExplain" xml:space="preserve"><value>Explain</value></data>
   <data name="TextAssistNoAiModel" xml:space="preserve"><value>No AI model is configured. Add an AI model in Settings.</value></data>
   <data name="TextAssistNoVoice" xml:space="preserve"><value>No voice is available for this language.</value></data>
   <data name="TextAssistInputPlaceholderText" xml:space="preserve"><value>Enter text...</value></data>
@@ -932,7 +943,17 @@ Machine translation: faster; lower quality; no phonetics, examples, or tips.</va
   <data name="Retry" xml:space="preserve"><value>Retry</value></data>
   <data name="Tts_ConfigureVoices" xml:space="preserve"><value>Configure Voices</value></data>
   <data name="ReadSelectedText" xml:space="preserve"><value>Read selected text</value></data>
-  <data name="OcrModels" xml:space="preserve"><value>OCR models</value></data>
+  <data name="OcrModels" xml:space="preserve"><value>Screenshot translation</value></data>
+  <data name="OcrModelsDescription" xml:space="preserve"><value>(Models used to extract text from screenshots; download one before using screenshot translation)</value></data>
+  <data name="OcrRecognitionMode" xml:space="preserve"><value>OCR mode</value></data>
+  <data name="OcrRecognitionMode_Fast" xml:space="preserve"><value>Fast</value></data>
+  <data name="OcrRecognitionMode_Normal" xml:space="preserve"><value>Normal</value></data>
+  <data name="OcrRecognitionMode_IdleRelease" xml:space="preserve"><value>Idle release</value></data>
+  <data name="OcrRecognitionModeDescription_Fast" xml:space="preserve"><value>Keeps OCR loaded and may use about 500 MB of memory for longer, but subsequent screenshot text recognition is faster. Recommended for users with ample memory who prioritize recognition speed.</value></data>
+  <data name="OcrRecognitionModeDescription_Normal" xml:space="preserve"><value>Runs OCR in a temporary process only while recognizing screenshot text, then exits the process to reclaim its memory.</value></data>
+  <data name="OcrRecognitionModeDescription_IdleRelease" xml:space="preserve"><value>Keeps OCR loaded for faster consecutive recognition, then exits the process to reclaim memory after the configured period without a new screenshot recognition.</value></data>
+  <data name="OcrIdleTimeout" xml:space="preserve"><value>Close after idle</value></data>
+  <data name="Seconds" xml:space="preserve"><value>seconds</value></data>
   <data name="OcrUseProxy" xml:space="preserve"><value>Use proxy for model download</value></data>
   <data name="DownloadOcrModels" xml:space="preserve"><value>Download OCR models</value></data>
   <data name="DownloadOcrModel" xml:space="preserve"><value>Download</value></data>
@@ -947,12 +968,14 @@ Machine translation: faster; lower quality; no phonetics, examples, or tips.</va
   <data name="OcrModelDownloadTitle" xml:space="preserve"><value>OCR models</value></data>
   <data name="OcrModelDownloadCompleted" xml:space="preserve"><value>OCR models downloaded successfully.</value></data>
   <data name="OcrModelDownloadFailed" xml:space="preserve"><value>OCR model download failed</value></data>
-  <data name="AsrModels" xml:space="preserve"><value>ASR models</value></data>
-  <data name="AsrModelsDescription" xml:space="preserve"><value>Import one or more model folders, folders containing models, or supported model archives.</value></data>
+  <data name="AsrModels" xml:space="preserve"><value>Real-time speech recognition</value></data>
+  <data name="AsrModelsDescription" xml:space="preserve"><value>(Models used for real-time speech-to-text recognition; download one before using real-time speech recognition)</value></data>
   <data name="ImportAsrModelFolder" xml:space="preserve"><value>Import folders</value></data>
   <data name="ImportAsrModelArchive" xml:space="preserve"><value>Import archives</value></data>
   <data name="AsrModelArchives" xml:space="preserve"><value>Model archives</value></data>
   <data name="NoAsrModels" xml:space="preserve"><value>No ASR models installed.</value></data>
+  <data name="ShowMoreAsrModels" xml:space="preserve"><value>Show more ASR models</value></data>
+  <data name="ShowLessAsrModels" xml:space="preserve"><value>Show fewer ASR models</value></data>
   <data name="AsrModelsImported" xml:space="preserve"><value>Imported: {0}</value></data>
   <data name="AsrModelsSkipped" xml:space="preserve"><value>Skipped (already installed or duplicated): {0}</value></data>
   <data name="AsrModelsAlreadyInstalled" xml:space="preserve"><value>The selected models are already installed.</value></data>
@@ -1106,5 +1129,65 @@ Machine translation: faster; lower quality; no phonetics, examples, or tips.</va
   </data>
   <data name="OpenReleases" xml:space="preserve">
     <value>Open releases</value>
+  </data>
+  <data name="ApplicationData" xml:space="preserve">
+    <value>Application data</value>
+  </data>
+  <data name="ApplicationDataDescription" xml:space="preserve">
+    <value>All configuration, ASR models, and OCR models are stored together in this directory.</value>
+  </data>
+  <data name="ChangeApplicationDataLocation" xml:space="preserve">
+    <value>Change storage location</value>
+  </data>
+  <data name="SelectApplicationDataLocation" xml:space="preserve">
+    <value>Select an empty application data directory</value>
+  </data>
+  <data name="ApplicationDataMoved" xml:space="preserve">
+    <value>Configuration and models were migrated to {0}.</value>
+  </data>
+  <data name="ApplicationDataMoveFailed" xml:space="preserve">
+    <value>Unable to change storage location</value>
+  </data>
+  <data name="ApplicationDataMoveBusy" xml:space="preserve">
+    <value>Finish the current model operation before changing the storage location.</value>
+  </data>
+  <data name="OcrUniversalModel" xml:space="preserve">
+    <value>Universal model</value>
+  </data>
+  <data name="OcrUniversalModelDescription" xml:space="preserve">
+    <value>Covers Chinese, English, Japanese, and Latin-script languages.</value>
+  </data>
+  <data name="OcrKoreanV4Model" xml:space="preserve">
+    <value>Korean model</value>
+  </data>
+  <data name="OcrArabicV4Model" xml:space="preserve">
+    <value>Arabic-script model</value>
+  </data>
+  <data name="OcrDevanagariV4Model" xml:space="preserve">
+    <value>Devanagari model</value>
+  </data>
+  <data name="OcrTamilV4Model" xml:space="preserve">
+    <value>Tamil model</value>
+  </data>
+  <data name="OcrTeluguV4Model" xml:space="preserve">
+    <value>Telugu model</value>
+  </data>
+  <data name="OcrKannadaV4Model" xml:space="preserve">
+    <value>Kannada model</value>
+  </data>
+  <data name="OcrCyrillicV3Model" xml:space="preserve">
+    <value>Cyrillic model</value>
+  </data>
+  <data name="OcrSupportedLanguages" xml:space="preserve">
+    <value>Supported languages: {0}</value>
+  </data>
+  <data name="OcrSupportedLanguageCount" xml:space="preserve">
+    <value>Supports {0} languages</value>
+  </data>
+  <data name="ViewOcrSupportedLanguages" xml:space="preserve">
+    <value>View all supported languages</value>
+  </data>
+  <data name="Action_ScreenshotOcr" xml:space="preserve">
+    <value>Screenshot OCR</value>
   </data>
 </root>

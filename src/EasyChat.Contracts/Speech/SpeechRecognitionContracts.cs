@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Serialization;
 using EasyChat.Contracts.Platform;
 
@@ -34,6 +35,12 @@ public sealed record SpeechRecognitionModel
     public string ChineseName { get; }
     public string EnglishName { get; }
     public string Icon { get; }
+
+    public string DisplayName =>
+        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "zh"
+        && !string.IsNullOrWhiteSpace(ChineseName)
+            ? ChineseName
+            : EnglishName;
 }
 
 public interface ISpeechRecognitionModelCatalog

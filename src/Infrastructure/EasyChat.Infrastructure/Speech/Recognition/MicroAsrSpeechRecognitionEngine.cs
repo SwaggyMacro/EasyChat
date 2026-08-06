@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
+using EasyChat.Contracts.ApplicationData;
 using EasyChat.Contracts.Platform;
 
 namespace EasyChat.Infrastructure.Speech.Recognition;
@@ -8,7 +9,7 @@ public sealed class MicroAsrSpeechRecognitionEngine : ISpeechRecognitionEngine, 
 {
     private readonly IPcmAudioCapture _audioCapture;
     private readonly IMicroAsrRecognizerFactory _recognizers;
-    private readonly string _modelsDirectory;
+    private readonly Func<string> _modelsDirectory;
     private readonly SemaphoreSlim _sessionGate = new(1, 1);
     private readonly object _lifecycleSync = new();
     private TaskCompletionSource? _sessionsDrained;
@@ -16,22 +17,33 @@ public sealed class MicroAsrSpeechRecognitionEngine : ISpeechRecognitionEngine, 
     private int _sessionOperations;
     private bool _disposed;
 
-    public MicroAsrSpeechRecognitionEngine(IPcmAudioCapture audioCapture)
+    public MicroAsrSpeechRecognitionEngine(
+        IPcmAudioCapture audioCapture,
+        IApplicationDataPaths applicationData)
         : this(
             audioCapture,
             new MicroAsrRecognizerFactory(),
-            Path.Combine(AppContext.BaseDirectory, "Models"))
+            () => applicationData.SpeechModelsDirectory)
     {
+        ArgumentNullException.ThrowIfNull(applicationData);
     }
 
     internal MicroAsrSpeechRecognitionEngine(
         IPcmAudioCapture audioCapture,
         IMicroAsrRecognizerFactory recognizers,
         string modelsDirectory)
+        : this(audioCapture, recognizers, () => modelsDirectory)
+    {
+    }
+
+    private MicroAsrSpeechRecognitionEngine(
+        IPcmAudioCapture audioCapture,
+        IMicroAsrRecognizerFactory recognizers,
+        Func<string> modelsDirectory)
     {
         _audioCapture = audioCapture ?? throw new ArgumentNullException(nameof(audioCapture));
         _recognizers = recognizers ?? throw new ArgumentNullException(nameof(recognizers));
-        _modelsDirectory = Path.GetFullPath(modelsDirectory);
+        _modelsDirectory = modelsDirectory;
     }
 
     public async IAsyncEnumerable<SpeechRecognitionEvent> RecognizeAsync(
@@ -252,10 +264,11 @@ public sealed class MicroAsrSpeechRecognitionEngine : ISpeechRecognitionEngine, 
     private string ResolveModelDirectory(string modelPath)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(modelPath);
-        var candidate = Path.GetFullPath(Path.Combine(_modelsDirectory, modelPath));
-        var root = _modelsDirectory.EndsWith(Path.DirectorySeparatorChar)
-            ? _modelsDirectory
-            : _modelsDirectory + Path.DirectorySeparatorChar;
+        var modelsDirectory = Path.GetFullPath(_modelsDirectory());
+        var candidate = Path.GetFullPath(Path.Combine(modelsDirectory, modelPath));
+        var root = modelsDirectory.EndsWith(Path.DirectorySeparatorChar)
+            ? modelsDirectory
+            : modelsDirectory + Path.DirectorySeparatorChar;
         var pathComparison = OperatingSystem.IsWindows()
             ? StringComparison.OrdinalIgnoreCase
             : StringComparison.Ordinal;

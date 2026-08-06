@@ -1,13 +1,54 @@
+using System.Reflection;
 using EasyChat.Contracts.AiModels;
 using EasyChat.Contracts.Settings;
+using EasyChat.Presentation.Features.Settings.State;
 using EasyChat.Presentation.Features.Settings.Translation;
-using EasyChat.Presentation.Foundation.UiHost;
+using SukiUI.Dialogs;
 
 namespace EasyChat.Presentation.Tests;
 
 [TestClass]
 public sealed class AiModelEditDialogViewModelTests
 {
+    [TestMethod]
+    public void NewModel_DoesNotUseHardCodedModelDefaults()
+    {
+        var viewModel = CreateViewModel(new RecordingCatalog([]));
+
+        Assert.AreEqual(string.Empty, viewModel.Model);
+
+        foreach (var modelType in Enum.GetValues<AiModelType>())
+        {
+            viewModel.SelectedModelType = modelType;
+            Assert.AreEqual(string.Empty, viewModel.Model, modelType.ToString());
+        }
+    }
+
+    [TestMethod]
+    public async Task ModelTypeChange_SelectsModelReturnedByFetch()
+    {
+        var existing = new CustomAiModelState(
+            new CustomAiModelSettings(
+                "model-id",
+                "Existing",
+                AiModelType.OpenAi,
+                ["api-key"],
+                "https://api.openai.com/v1",
+                "existing-model",
+                false,
+                false),
+            _ => EasyChat.Shared.Results.Result.Success());
+        var viewModel = CreateViewModel(new RecordingCatalog(["fetched-model"]), existing: existing);
+
+        viewModel.SelectedModelType = AiModelType.DeepSeek;
+        Assert.AreEqual(string.Empty, viewModel.Model);
+
+        ((System.Windows.Input.ICommand)viewModel.FetchModelsCommand).Execute(null);
+        await WaitForAsync(() => viewModel.Model == "fetched-model");
+
+        Assert.AreEqual("fetched-model", viewModel.Model);
+    }
+
     [TestMethod]
     public async Task ApiKeyChange_SilentlyFetchesModelsAfterDebounce()
     {
@@ -26,6 +67,7 @@ public sealed class AiModelEditDialogViewModelTests
     {
         CustomAiModelSettings? saved = null;
         var viewModel = CreateViewModel(new RecordingCatalog([]), result => saved = result);
+        viewModel.Model = "manually-entered-model";
 
         await WaitForAsync(() => ((System.Windows.Input.ICommand)viewModel.SaveCommand).CanExecute(null));
         ((System.Windows.Input.ICommand)viewModel.SaveCommand).Execute(null);
@@ -44,8 +86,9 @@ public sealed class AiModelEditDialogViewModelTests
 
     private static AiModelEditDialogViewModel CreateViewModel(
         IAiModelCatalogTransport catalog,
-        Action<CustomAiModelSettings?>? onClose = null) =>
-        new(new NullDialogSession(), catalog)
+        Action<CustomAiModelSettings?>? onClose = null,
+        CustomAiModelState? existing = null) =>
+        new(DispatchProxy.Create<ISukiDialog, NullDialogProxy>(), catalog, existing)
         {
             OnClose = onClose
         };
@@ -57,10 +100,15 @@ public sealed class AiModelEditDialogViewModelTests
             await Task.Delay(25, timeout.Token);
     }
 
-    private sealed class NullDialogSession : IUiDialogSession
+    public class NullDialogProxy : DispatchProxy
     {
-        public void Dismiss()
+        protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
         {
+            if (targetMethod is null || targetMethod.ReturnType == typeof(void))
+                return null;
+            return targetMethod.ReturnType.IsValueType
+                ? Activator.CreateInstance(targetMethod.ReturnType)
+                : null;
         }
     }
 

@@ -75,16 +75,49 @@ public sealed class JsonLinesSubtitlePlanBuilderTests
     }
 
     [TestMethod]
-    [DataRow("{\"seq\":0,\"source\":\"First. Second.\",\"translation\":\"combined\",\"final\":true}")]
+    public void CombinedCompleteSentencesRemainAValidReadableSegment()
+    {
+        const string source = "First. Second.";
+        var builder = new JsonLinesSubtitlePlanBuilder(source);
+
+        Assert.IsTrue(builder.TryAdd(
+            Parse("""
+                {"seq":0,"source":"First. Second.","translation":"combined","final":true}
+                """),
+            out _));
+        Assert.IsTrue(builder.TryComplete(out var plan));
+        Assert.AreEqual(source, plan.Segments[0].Source);
+    }
+
+    [TestMethod]
     [DataRow("{\"seq\":0,\"source\":\"First. unfinished\",\"translation\":\"combined\",\"final\":true}")]
     [DataRow("{\"seq\":0,\"source\":\"First.\",\"translation\":\"translated\",\"final\":false}")]
-    public void RecordCannotCombineOrMislabelCompletedSentences(string json)
+    public void RecordCannotMislabelCompletedSentences(string json)
     {
         var source = Parse(json).GetProperty("source").GetString()!;
         var builder = new JsonLinesSubtitlePlanBuilder(source);
 
         Assert.IsFalse(builder.TryAdd(Parse(json), out _));
         Assert.IsFalse(builder.TryComplete(out _));
+    }
+
+    [TestMethod]
+    public void BoundaryWhitespaceOmittedByLlmIsRecoveredFromTheSourceSnapshot()
+    {
+        var builder = new JsonLinesSubtitlePlanBuilder("Hello. Next.");
+
+        Assert.IsTrue(builder.TryAdd(
+            Parse("""
+                {"seq":0,"source":"Hello.","translation":"first","final":true}
+                """),
+            out _));
+        Assert.IsTrue(builder.TryAdd(
+            Parse("""
+                {"seq":1,"source":"Next.","translation":"second","final":true}
+                """),
+            out _));
+        Assert.IsTrue(builder.TryComplete(out var plan));
+        Assert.AreEqual(" Next.", plan.Segments[1].Source);
     }
 
     [TestMethod]
