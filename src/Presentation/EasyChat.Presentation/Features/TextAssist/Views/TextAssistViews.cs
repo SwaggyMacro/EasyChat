@@ -22,16 +22,6 @@ namespace EasyChat.Presentation.Features.TextAssist.Views
         public TextAssistView() => InitializeComponent();
     }
 
-    public partial class TextAssistTranslationPageView : UserControl
-    {
-        public TextAssistTranslationPageView() => InitializeComponent();
-    }
-
-    public partial class TextAssistCorrectionPageView : UserControl
-    {
-        public TextAssistCorrectionPageView() => InitializeComponent();
-    }
-
     public partial class TextAssistTranslationView : UserControl
     {
         public TextAssistTranslationView() => InitializeComponent();
@@ -109,8 +99,13 @@ namespace EasyChat.Presentation.Features.TextAssist.Views
         {
             _viewModel = viewModel;
             DataContext = viewModel;
+            viewModel.PropertyChanged += OnViewModelPropertyChanged;
             Loaded += OnLoaded;
-            Closed += (_, _) => viewModel.Cancel();
+            Closed += (_, _) =>
+            {
+                viewModel.PropertyChanged -= OnViewModelPropertyChanged;
+                viewModel.Cancel();
+            };
             KeyDown += (_, args) => { if (args.Key == Key.Escape) Close(); };
         }
 
@@ -134,10 +129,27 @@ namespace EasyChat.Presentation.Features.TextAssist.Views
             ApplyEditor();
         }
 
+        private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName is nameof(TextAssistViewModel.SelectedTabIndex)
+                or nameof(TextAssistViewModel.IsCorrectionMode)
+                or nameof(TextAssistViewModel.IsTranslationMode))
+            {
+                _correction = _viewModel?.IsCorrectionMode == true;
+                ApplyEditor();
+            }
+        }
+
         private void ApplyEditor()
         {
             if (_editorHost is null || _viewModel is null) return;
-            _editorHost.Content = _correction
+            var wantCorrection = _viewModel.IsCorrectionMode || _correction;
+            // Avoid rebuilding the same editor on every property noise.
+            if (_editorHost.Content is TextAssistCorrectionView && wantCorrection)
+                return;
+            if (_editorHost.Content is TextAssistTranslationView && !wantCorrection)
+                return;
+            _editorHost.Content = wantCorrection
                 ? new TextAssistCorrectionView { DataContext = _viewModel.Correction, Classes = { "Compact" } }
                 : new TextAssistTranslationView { DataContext = _viewModel.Translation, Classes = { "Compact" } };
         }
@@ -146,6 +158,10 @@ namespace EasyChat.Presentation.Features.TextAssist.Views
         {
             if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) BeginMoveDrag(e);
         }
+
+        // Segmented radios live in the drag header; don't start a move drag on them.
+        private void OnHeaderChromePointerPressed(object? sender, PointerPressedEventArgs e) =>
+            e.Handled = true;
 
         private void OnResizePointerPressed(object? sender, PointerPressedEventArgs e)
         {
@@ -161,6 +177,20 @@ namespace EasyChat.Presentation.Features.TextAssist.Views
     public partial class TextAssistActionWindowView : SukiWindow
     {
         public TextAssistActionWindowView() => InitializeComponent();
+
+        private async void OnCopyClick(object? sender, RoutedEventArgs e)
+        {
+            if (DataContext is not TextAssistResultWindowViewModel viewModel)
+                return;
+            var text = viewModel.CopyText;
+            if (string.IsNullOrWhiteSpace(text))
+                return;
+            var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+            if (clipboard is null)
+                return;
+            await clipboard.SetTextAsync(text);
+            CopyFeedback.Show(sender as Control, EasyChat.Presentation.Lang.Resources.Copied);
+        }
     }
 
     public partial class TextAssistResultWindowView : Window

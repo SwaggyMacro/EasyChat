@@ -111,7 +111,8 @@ public sealed record GeneralSettings(
     string? CustomThemePrimaryColor,
     string? CustomThemeAccentColor,
     bool TitleBarVisible,
-    bool FullScreen);
+    bool FullScreen,
+    bool HomeOnboardingDismissed = false);
 
 public sealed record AiModelSettings(
     IReadOnlyList<CustomAiModelSettings> ConfiguredModels);

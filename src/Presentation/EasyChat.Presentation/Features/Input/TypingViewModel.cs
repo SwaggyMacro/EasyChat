@@ -1,3 +1,4 @@
+using System.Reactive;
 using EasyChat.Contracts.Input;
 using EasyChat.Contracts.Platform;
 using EasyChat.Contracts.Settings;
@@ -34,9 +35,12 @@ public sealed class TypingViewModel : ReactiveObject, IDisposable
         _logger = logger;
         SourceLanguages = languages.All;
         TargetLanguages = languages.All;
+        SwapLanguagesCommand = ReactiveCommand.Create(SwapLanguages);
         UpdateFromSettings();
         settings.Changed += OnSettingsChanged;
     }
+
+    public ReactiveCommand<Unit, Unit> SwapLanguagesCommand { get; }
 
     public IReadOnlyList<LanguageSettings> SourceLanguages { get; }
     public IReadOnlyList<LanguageSettings> TargetLanguages { get; }
@@ -98,6 +102,16 @@ public sealed class TypingViewModel : ReactiveObject, IDisposable
     }
 
     public void Dispose() => _settings.Changed -= OnSettingsChanged;
+
+    private void SwapLanguages()
+    {
+        if (FollowGlobalLanguage)
+            return;
+
+        var source = SelectedSourceLanguage;
+        SelectedSourceLanguage = SelectedTargetLanguage;
+        SelectedTargetLanguage = source;
+    }
 
     private void OnSettingsChanged(object? sender, SettingsChangedEventArgs eventArgs)
     {

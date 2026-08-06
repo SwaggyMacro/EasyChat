@@ -3,12 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:suki="https://github.com/kikipoulet/SukiUI"
              xmlns:viewModels="clr-namespace:EasyChat.Presentation.Features.Settings"
              xmlns:lang="clr-namespace:EasyChat.Presentation.Lang;assembly=EasyChat.Presentation"
              xmlns:converts="clr-namespace:EasyChat.Presentation.Features.Settings;assembly=EasyChat.Presentation"
              xmlns:formatting="clr-namespace:EasyChat.Presentation.Foundation.Formatting;assembly=EasyChat.Presentation"
-             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:ec="clr-namespace:EasyChat.Presentation.Shared.Controls;assembly=EasyChat.Presentation.Shared"
              x:DataType="viewModels:SettingViewModel"
              mc:Ignorable="d">
     <UserControl.Resources>
@@ -16,118 +15,107 @@
         <converts:DeliveryModeToBoolConverter x:Key="DeliveryModeToBoolConverter" />
         <converts:DeliveryModeToStringConverter x:Key="DeliveryModeToStringConverter" />
     </UserControl.Resources>
-    
-    <suki:GlassCard>
-        <StackPanel Spacing="15">
-            <!-- Transparency Level -->
-            <DockPanel>
-                <TextBlock Text="{x:Static lang:Resources.TransparencyLevel}"
-                           VerticalAlignment="Center" FontWeight="Bold" />
+
+    <StackPanel Classes="EcSettingsList"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Stretch">
+            <ec:EcSettingRow Label="{x:Static lang:Resources.TransparencyLevel}"
+                             IsVisible="{Binding SearchText, Converter={x:Static converts:SettingsFieldVisibleConverter.Instance}, ConverterParameter='transparency acrylic blur 透明'}">
                 <ComboBox ItemsSource="{Binding TransparencyLevels}"
                           SelectedItem="{Binding InputConf.TransparencyLevel}"
-                          HorizontalAlignment="Right" Width="150" />
-            </DockPanel>
-            
-            <Separator Opacity="0.1" />
-            
-            <!-- Background Color -->
-            <DockPanel>
-                <TextBlock Text="{x:Static lang:Resources.BackgroundColor}"
-                           VerticalAlignment="Center" FontWeight="Bold" />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                          HorizontalAlignment="Stretch" />
+            </ec:EcSettingRow>
+
+            <ec:EcSettingRow Label="{x:Static lang:Resources.BackgroundColor}"
+                             IsVisible="{Binding SearchText, Converter={x:Static converts:SettingsFieldVisibleConverter.Instance}, ConverterParameter='background color 背景'}">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                     <TextBox Text="{Binding InputConf.BackgroundColor}"
                              PlaceholderText="#CC000000"
-                             Width="120" VerticalAlignment="Center"/>
-                    <Button Width="35" Height="35" CornerRadius="20" BorderThickness="1" BorderBrush="#33000000">
+                             HorizontalAlignment="Stretch"
+                             VerticalAlignment="Center" />
+                    <Button Grid.Column="1"
+                            Classes="EcColorSwatch"
+                            VerticalAlignment="Center">
                         <Button.Background>
-                            <SolidColorBrush Color="{Binding InputConf.BackgroundColor, Converter={StaticResource ColorToHexConverter}}"/>
+                            <SolidColorBrush Color="{Binding InputConf.BackgroundColor, Converter={StaticResource ColorToHexConverter}}" />
                         </Button.Background>
                         <Button.Flyout>
-                            <Flyout Placement="Bottom">
-                                <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
-                                    <ColorView Color="{Binding InputConf.BackgroundColor, Converter={StaticResource ColorToHexConverter}}" 
+                            <Flyout Placement="Bottom" ShowMode="Standard">
+                                <Border CornerRadius="12" Padding="12"
+                                        Background="{DynamicResource EcBgElevated}"
+                                        BorderBrush="{DynamicResource EcBorder}"
+                                        BorderThickness="1">
+                                    <ColorView Color="{Binding InputConf.BackgroundColor, Converter={StaticResource ColorToHexConverter}}"
                                                IsAlphaEnabled="True" ColorSpectrumShape="Ring" />
                                 </Border>
                             </Flyout>
                         </Button.Flyout>
                     </Button>
-                </StackPanel>
-            </DockPanel>
+                </Grid>
+            </ec:EcSettingRow>
 
-            <Separator Opacity="0.1" />
-
-            <!-- Font Color -->
-            <DockPanel>
-                <TextBlock Text="{x:Static lang:Resources.FontColor}"
-                           VerticalAlignment="Center" FontWeight="Bold" />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+            <ec:EcSettingRow Label="{x:Static lang:Resources.FontColor}"
+                             IsVisible="{Binding SearchText, Converter={x:Static converts:SettingsFieldVisibleConverter.Instance}, ConverterParameter='font color 字体 颜色'}">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                     <TextBox Text="{Binding InputConf.FontColor}"
                              PlaceholderText="#FFFFFFFF"
-                             Width="120" VerticalAlignment="Center"/>
-                    <Button Width="35" Height="35" CornerRadius="20" BorderThickness="1" BorderBrush="#33000000">
+                             HorizontalAlignment="Stretch"
+                             VerticalAlignment="Center" />
+                    <Button Grid.Column="1"
+                            Classes="EcColorSwatch"
+                            VerticalAlignment="Center">
                         <Button.Background>
-                            <SolidColorBrush Color="{Binding InputConf.FontColor, Converter={StaticResource ColorToHexConverter}}"/>
+                            <SolidColorBrush Color="{Binding InputConf.FontColor, Converter={StaticResource ColorToHexConverter}}" />
                         </Button.Background>
                         <Button.Flyout>
-                            <Flyout Placement="Bottom">
-                                <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
-                                    <ColorView Color="{Binding InputConf.FontColor, Converter={StaticResource ColorToHexConverter}}" 
+                            <Flyout Placement="Bottom" ShowMode="Standard">
+                                <Border CornerRadius="12" Padding="12"
+                                        Background="{DynamicResource EcBgElevated}"
+                                        BorderBrush="{DynamicResource EcBorder}"
+                                        BorderThickness="1">
+                                    <ColorView Color="{Binding InputConf.FontColor, Converter={StaticResource ColorToHexConverter}}"
                                                IsAlphaEnabled="True" ColorSpectrumShape="Ring" />
                                 </Border>
                             </Flyout>
                         </Button.Flyout>
                     </Button>
-                </StackPanel>
-            </DockPanel>
+                </Grid>
+            </ec:EcSettingRow>
 
-            <Separator Opacity="0.1" />
-
-            <!-- Delivery Mode -->
-            <DockPanel>
-                <TextBlock Text="{x:Static lang:Resources.InputDeliveryMode}"
-                           VerticalAlignment="Center" FontWeight="Bold" />
+            <ec:EcSettingRow Label="{x:Static lang:Resources.InputDeliveryMode}"
+                             IsVisible="{Binding SearchText, Converter={x:Static converts:SettingsFieldVisibleConverter.Instance}, ConverterParameter='delivery paste type message 投递 粘贴'}">
                 <ComboBox ItemsSource="{Binding InputDeliveryModes}"
                           SelectedItem="{Binding InputConf.DeliveryMode}"
-                          HorizontalAlignment="Right" MinWidth="200">
+                          HorizontalAlignment="Stretch">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Converter={StaticResource DeliveryModeToStringConverter}}"/>
+                            <TextBlock Text="{Binding Converter={StaticResource DeliveryModeToStringConverter}}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
-            </DockPanel>
+            </ec:EcSettingRow>
 
-            <Separator Opacity="0.1" />
-
-            <!-- Key Send Delay (Linked to DeliveryMode) -->
-            <DockPanel IsVisible="{Binding InputConf.DeliveryMode, Converter={StaticResource DeliveryModeToBoolConverter}}">
-                <TextBlock Text="{x:Static lang:Resources.KeySendDelay}"
-                           VerticalAlignment="Center" FontWeight="Bold" />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+            <ec:EcSettingRow Label="{x:Static lang:Resources.KeySendDelay}"
+                             IsVisible="{Binding InputConf.DeliveryMode, Converter={StaticResource DeliveryModeToBoolConverter}}">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                     <NumericUpDown Value="{Binding InputConf.KeySendDelay}"
                                    Minimum="0" Maximum="1000" Increment="10"
-                                   FormatString="N0" Width="150" />
-                    <TextBlock Text="ms" VerticalAlignment="Center" Opacity="0.6" Width="30" />
-                </StackPanel>
-            </DockPanel>
+                                   FormatString="N0"
+                                   HorizontalAlignment="Stretch" />
+                    <TextBlock Grid.Column="1"
+                               Text="ms"
+                               VerticalAlignment="Center"
+                               Classes="EcMuted"
+                               MinWidth="28" />
+                </Grid>
+            </ec:EcSettingRow>
 
-            <Separator Opacity="0.1" />
-
-            <!-- Reverse Translate Language -->
-            <DockPanel>
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBlock Text="{x:Static lang:Resources.ReverseTranslateLanguage}"
-                               VerticalAlignment="Center" FontWeight="Bold" />
-                    <Button Classes="Basic" VerticalAlignment="Center"
-                            ToolTip.Tip="{x:Static lang:Resources.ReverseTranslateLanguageTip}">
-                        <avalonia:MaterialIcon Kind="InformationOutline" Width="16" Height="16" 
-                                               Foreground="{DynamicResource SukiLowText}"/>
-                    </Button>
-                </StackPanel>
+            <ec:EcSettingRow Label="{x:Static lang:Resources.ReverseTranslateLanguage}"
+                             Helper="{x:Static lang:Resources.ReverseTranslateLanguageTip}"
+                             IsVisible="{Binding SearchText, Converter={x:Static converts:SettingsFieldVisibleConverter.Instance}, ConverterParameter='reverse translate language 反转 语向'}">
                 <ToggleSwitch IsChecked="{Binding InputConf.ReverseTranslateLanguage}"
-                              HorizontalAlignment="Right"
-                              OnContent="" OffContent="" />
-            </DockPanel>
-        </StackPanel>
-    </suki:GlassCard>
+                              OnContent="" OffContent=""
+                              HorizontalAlignment="Right" />
+            </ec:EcSettingRow>
+    </StackPanel>
 </UserControl>

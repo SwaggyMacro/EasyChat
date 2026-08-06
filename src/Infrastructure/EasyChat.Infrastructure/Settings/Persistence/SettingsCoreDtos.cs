@@ -136,6 +136,9 @@ internal sealed class GeneralSettingsDto
 
     [JsonProperty]
     public bool FullScreen { get; set; }
+
+    [JsonProperty]
+    public bool HomeOnboardingDismissed { get; set; }
 }
 
 [JsonObject(MemberSerialization.OptIn)]

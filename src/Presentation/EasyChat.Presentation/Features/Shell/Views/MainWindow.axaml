@@ -5,54 +5,52 @@
                  xmlns:suki="https://github.com/kikipoulet/SukiUI"
                  xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
                  IsTitleBarVisible="{Binding TitleBarVisible, Mode=TwoWay}"
-                 Width="1120"
-                 Height="700"
+                 Width="1180"
+                 Height="740"
+                 MinWidth="960"
+                 MinHeight="620"
                  x:Class="EasyChat.Presentation.Features.Shell.Views.MainWindow"
                  x:DataType="vm:MainWindowViewModel"
                  Icon="avares://EasyChat.Desktop/Assets/easychat-logo.ico"
                  WindowStartupLocation="CenterScreen"
-                 Title="EasyChat">
+                 Title="EasyChat"
+                 BackgroundAnimationEnabled="False"
+                 BackgroundTransitionsEnabled="False">
 
     <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <!-- ReSharper disable once Xaml.ConstructorWarning -->
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
     <suki:SukiWindow.LogoContent>
-        <avalonia:MaterialIcon Width="20"
-                               Height="20"
-                               VerticalAlignment="Center"
-                               Foreground="{DynamicResource SukiPrimaryColor}"
-                               Kind="Translate">
-            <avalonia:MaterialIcon.Transitions>
-                <Transitions>
-                    <BrushTransition Property="Foreground" Duration="{DynamicResource ShortAnimationDuration}" />
-                </Transitions>
-            </avalonia:MaterialIcon.Transitions>
-        </avalonia:MaterialIcon>
+        <Border Width="28" Height="28"
+                CornerRadius="8"
+                Background="{DynamicResource EcAccentMuted}"
+                VerticalAlignment="Center">
+            <avalonia:MaterialIcon Width="16"
+                                   Height="16"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource EcAccent}"
+                                   Kind="Translate" />
+        </Border>
     </suki:SukiWindow.LogoContent>
 
     <suki:SukiWindow.RightWindowTitleBarControls>
-        <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
-            <Button Classes="Basic"
+        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" Margin="0,0,4,0">
+            <Button Classes="EcToolbarBtn"
                     Command="{Binding CycleBaseThemeCommand}"
                     ToolTip.Tip="{Binding CurrentThemeModeName}"
-                    Width="32"
-                    Height="32"
-                    Padding="0"
+                    AutomationProperties.Name="{Binding CurrentThemeModeName}"
                     HorizontalContentAlignment="Center"
                     VerticalContentAlignment="Center">
                 <avalonia:MaterialIcon Kind="{Binding ThemeToggleIcon}"
                                        Width="18"
                                        Height="18" />
             </Button>
-            <Button Classes="Basic"
+            <Button Classes="EcToolbarBtn"
                     ToolTip.Tip="{x:Static lang:Resources.Settings}"
-                    Width="32"
-                    Height="32"
-                    Padding="0"
+                    AutomationProperties.Name="{x:Static lang:Resources.Settings}"
                     HorizontalContentAlignment="Center"
                     VerticalContentAlignment="Center">
                 <avalonia:MaterialIcon Kind="DotsVertical"
@@ -60,72 +58,54 @@
                                        Height="18" />
                 <Button.Flyout>
                     <Flyout Placement="BottomEdgeAlignedRight" ShowMode="Standard">
-                        <Border Width="245"
-                                Padding="8"
-                                Background="{DynamicResource SukiCardBackground}"
-                                BorderBrush="{DynamicResource SukiControlBorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="8"
-                                BoxShadow="{DynamicResource SukiLowShadow}">
-                            <Border.Styles>
-                                <Style Selector="Button.MenuItem">
-                                    <Setter Property="Background" Value="Transparent" />
-                                    <Setter Property="BorderThickness" Value="0" />
-                                    <Setter Property="CornerRadius" Value="6" />
-                                    <Setter Property="Foreground" Value="{DynamicResource SukiText}" />
-                                    <Style Selector="^:pointerover">
-                                        <Setter Property="Background" Value="{DynamicResource SukiControlBorderBrush}" />
-                                    </Style>
-                                </Style>
-                            </Border.Styles>
+                        <Border Width="268"
+                                Padding="12"
+                                Classes="EcFloatShell">
                             <StackPanel Spacing="4">
-                            <TextBlock FontWeight="Bold"
-                                       Margin="8,4,8,6"
-                                       Text="{x:Static lang:Resources.Settings}" />
+                                <TextBlock Classes="EcSectionTitle"
+                                           Text="{x:Static lang:Resources.Settings}"
+                                           Margin="8,2,8,6" />
 
-                            <Button Classes="MenuItem"
-                                    HorizontalContentAlignment="Left"
-                                    Command="{Binding ToggleFullScreenCommand}"
-                                    Padding="8,6">
-                                <StackPanel Orientation="Horizontal" Spacing="10">
-                                    <avalonia:MaterialIcon Kind="Fullscreen"
-                                                           Width="18"
-                                                           Height="18" />
-                                    <TextBlock VerticalAlignment="Center"
-                                               Text="{x:Static lang:Resources.FullScreen}" />
-                                </StackPanel>
-                            </Button>
+                                <Button Classes="EcMenuItem"
+                                        Command="{Binding ToggleFullScreenCommand}">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <avalonia:MaterialIcon Kind="Fullscreen" Width="18" Height="18" />
+                                        <TextBlock VerticalAlignment="Center"
+                                                   Text="{x:Static lang:Resources.FullScreen}" />
+                                    </StackPanel>
+                                </Button>
 
-                            <Separator Margin="8,4" />
-                            <TextBlock FontWeight="Bold"
-                                       Margin="8,2,8,4"
-                                       Text="{x:Static lang:Resources.Theme}" />
-                            <ItemsControl ItemsSource="{Binding Themes}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate DataType="{x:Type suki:SukiColorTheme}">
-                                        <Button Classes="MenuItem"
-                                                HorizontalContentAlignment="Left"
-                                                Padding="8,6"
-                                                Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).ChangeThemeCommand}"
-                                                CommandParameter="{Binding}">
-                                            <TextBlock Foreground="{Binding PrimaryBrush}"
-                                                       Text="{Binding DisplayName}" />
-                                        </Button>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                            <Button Classes="MenuItem"
-                                    HorizontalContentAlignment="Left"
-                                    Padding="8,6"
-                                    Command="{Binding CreateCustomThemeCommand}">
-                                <StackPanel Orientation="Horizontal" Spacing="10">
-                                    <avalonia:MaterialIcon Kind="Colorize"
-                                                           Width="18"
-                                                           Height="18" />
-                                    <TextBlock VerticalAlignment="Center"
-                                               Text="{x:Static lang:Resources.CreateCustom}" />
-                                </StackPanel>
-                            </Button>
+                                <Separator Classes="EcDivider" Margin="4,8" />
+                                <TextBlock Classes="EcSectionTitle"
+                                           Text="{x:Static lang:Resources.Theme}"
+                                           Margin="8,2,8,4" />
+                                <ItemsControl Classes="EcStackList" ItemsSource="{Binding Themes}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type suki:SukiColorTheme}">
+                                            <Button Classes="EcMenuItem"
+                                                    Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).ChangeThemeCommand}"
+                                                    CommandParameter="{Binding}">
+                                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                                    <Ellipse Width="12" Height="12"
+                                                             Fill="{Binding PrimaryBrush}"
+                                                             Stroke="{DynamicResource EcBorderStrong}"
+                                                             StrokeThickness="1" />
+                                                    <TextBlock Text="{Binding DisplayName}"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource EcTextPrimary}" />
+                                                </StackPanel>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Button Classes="EcMenuItem"
+                                        Command="{Binding CreateCustomThemeCommand}">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <avalonia:MaterialIcon Kind="Colorize" Width="18" Height="18" />
+                                        <TextBlock VerticalAlignment="Center"
+                                                   Text="{x:Static lang:Resources.CreateCustom}" />
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </Border>
                     </Flyout>
@@ -140,48 +120,27 @@
     </suki:SukiWindow.Hosts>
 
     <suki:SukiSideMenu IsSearchEnabled="False"
-                       ItemsSource="{Binding Pages}" SelectedItem="{Binding ActivePage}">
+                       OpenPaneLength="232"
+                       ItemsSource="{Binding Pages}"
+                       SelectedItem="{Binding ActivePage}">
 
         <suki:SukiSideMenu.ItemTemplate>
             <DataTemplate>
-                <suki:SukiSideMenuItem Header="{Binding DisplayName}">
+                <suki:SukiSideMenuItem Header="{Binding DisplayName}"
+                                       AutomationProperties.Name="{Binding DisplayName}">
                     <suki:SukiSideMenuItem.Icon>
-                        <avalonia:MaterialIcon Kind="{Binding Icon}" />
+                        <Panel Width="22" Height="22">
+                            <Border Width="22" Height="22"
+                                    CornerRadius="6"
+                                    Background="{DynamicResource EcAccentSoft}" />
+                            <avalonia:MaterialIcon Kind="{Binding Icon}"
+                                                   Width="15" Height="15"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                        </Panel>
                     </suki:SukiSideMenuItem.Icon>
                 </suki:SukiSideMenuItem>
             </DataTemplate>
         </suki:SukiSideMenu.ItemTemplate>
-
-        <suki:SukiSideMenu.FooterContent>
-            <StackPanel>
-                <!-- <TextBlock HorizontalAlignment="Center" Text="{x:Static lang:Resources.Copyright}" /> -->
-                <TextBlock HorizontalAlignment="Center" Text="@ SwaggyMacro" />
-                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                    <StackPanel.Styles>
-                        <Style Selector="Button">
-                            <Setter Property="Command" Value="{Binding OpenUrlCommand}" />
-                        </Style>
-                        <Style Selector="avalonia|MaterialIcon">
-                            <Setter Property="Width" Value="25" />
-                            <Setter Property="Height" Value="25" />
-                        </Style>
-                    </StackPanel.Styles>
-                    <!-- ReSharper disable once Xaml.StyleClassNotFound -->
-                    <Button Classes="Basic"
-                            Cursor="Hand"
-                            CommandParameter="https://github.com/SwaggyMacro/EasyChat"
-                            ToolTip.Tip="{x:Static lang:Resources.OpenOnGithub}">
-                        <avalonia:MaterialIcon Kind="Github" />
-                    </Button>
-                    <!-- ReSharper disable once Xaml.StyleClassNotFound -->
-                    <Button Classes="Basic"
-                            Cursor="Hand"
-                            CommandParameter="https://github.com/SwaggyMacro/EasyChat"
-                            ToolTip.Tip="{x:Static lang:Resources.OpenOnOfficialSite}">
-                        <avalonia:MaterialIcon Kind="Web" />
-                    </Button>
-                </StackPanel>
-            </StackPanel>
-        </suki:SukiSideMenu.FooterContent>
     </suki:SukiSideMenu>
 </suki:SukiWindow>

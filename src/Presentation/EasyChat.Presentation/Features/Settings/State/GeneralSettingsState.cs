@@ -22,6 +22,7 @@ public sealed class LiveGeneralSettings : LiveSettingsSection
     private string? _customThemeAccentColor;
     private bool _titleBarVisible;
     private bool _fullScreen;
+    private bool _homeOnboardingDismissed;
 
     public LiveGeneralSettings(GeneralSettings value, Func<SettingsSection, EasyChat.Shared.Results.Result> commit)
         : base(SettingsSection.General, commit)
@@ -42,6 +43,7 @@ public sealed class LiveGeneralSettings : LiveSettingsSection
         _customThemeAccentColor = value.CustomThemeAccentColor;
         _titleBarVisible = value.TitleBarVisible;
         _fullScreen = value.FullScreen;
+        _homeOnboardingDismissed = value.HomeOnboardingDismissed;
     }
 
     public LanguageSettings SourceLanguage { get => _sourceLanguage; set => Set(ref _sourceLanguage, value); }
@@ -60,12 +62,17 @@ public sealed class LiveGeneralSettings : LiveSettingsSection
     public string? CustomThemeAccentColor { get => _customThemeAccentColor; set => Set(ref _customThemeAccentColor, value); }
     public bool TitleBarVisible { get => _titleBarVisible; set => Set(ref _titleBarVisible, value); }
     public bool FullScreen { get => _fullScreen; set => Set(ref _fullScreen, value); }
+    public bool HomeOnboardingDismissed
+    {
+        get => _homeOnboardingDismissed;
+        set => Set(ref _homeOnboardingDismissed, value);
+    }
 
     public GeneralSettings ToContract() => new(
         SourceLanguage, TargetLanguage, DisplayLanguage, NativeLanguage, ClosingBehavior,
         TransEngine, UsingAiModel, UsingAiModelId, UsingMachineTransId, UsingMachineTrans,
         BaseTheme, ColorTheme, CustomThemePrimaryColor, CustomThemeAccentColor,
-        TitleBarVisible, FullScreen);
+        TitleBarVisible, FullScreen, HomeOnboardingDismissed);
 }
 
 public sealed class LiveProxySettings : LiveSettingsSection

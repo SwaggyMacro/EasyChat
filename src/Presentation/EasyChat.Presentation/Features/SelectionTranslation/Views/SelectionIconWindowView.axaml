@@ -5,9 +5,10 @@
         xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:lang="clr-namespace:EasyChat.Presentation.Lang"
         xmlns:suki="https://github.com/kikipoulet/SukiUI"
-        mc:Ignorable="d" d:DesignWidth="153" d:DesignHeight="40"
+        mc:Ignorable="d" d:DesignWidth="168" d:DesignHeight="44"
         x:Class="EasyChat.Presentation.Features.SelectionTranslation.Views.SelectionIconWindowView"
-        Width="153" Height="40"
+        Width="168" Height="44"
+        MinWidth="40" MinHeight="36"
         WindowDecorations="None"
         TransparencyLevelHint="Transparent"
         Background="Transparent"
@@ -17,18 +18,65 @@
         Focusable="False"
         ShowActivated="False"
         WindowStartupLocation="Manual">
-    
-    <Border CornerRadius="8" Background="{DynamicResource SukiPrimaryColor}" Padding="4"
-            HorizontalAlignment="Center" VerticalAlignment="Center">
+
+    <Border CornerRadius="999"
+            Background="{DynamicResource EcFloatBg}"
+            BorderBrush="{DynamicResource EcFloatBorder}"
+            BorderThickness="1"
+            Padding="5,4"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
         <Grid>
+            <!-- Translate is the primary action (filled); others are secondary icon buttons. -->
             <StackPanel x:Name="Toolbar" Orientation="Horizontal" Spacing="3">
-                <Button x:Name="TranslateButton" Classes="Basic" Width="34" Height="32" Padding="5" ToolTip.Tip="{x:Static lang:Resources.TextAssistTranslate}" Click="OnTranslateClick"><icons:MaterialIcon Kind="Translate" Width="20" Height="20" Foreground="White" /></Button>
-                <Button x:Name="CorrectionButton" Classes="Basic" Width="34" Height="32" Padding="5" ToolTip.Tip="{x:Static lang:Resources.TextAssistCorrect}" Click="OnCorrectionClick"><icons:MaterialIcon Kind="Spellcheck" Width="20" Height="20" Foreground="White" /></Button>
-                <Button x:Name="PolishButton" Classes="Basic" Width="34" Height="32" Padding="5" ToolTip.Tip="{x:Static lang:Resources.TextAssistPolish}" Click="OnPolishClick"><icons:MaterialIcon Kind="FormatPaint" Width="20" Height="20" Foreground="White" /></Button>
-                <Button x:Name="SummaryButton" Classes="Basic" Width="34" Height="32" Padding="5" ToolTip.Tip="{x:Static lang:Resources.TextAssistSummary}" Click="OnSummaryClick"><icons:MaterialIcon Kind="TextShort" Width="20" Height="20" Foreground="White" /></Button>
+                <Button x:Name="TranslateButton"
+                        Classes="EcPrimary"
+                        MinWidth="36"
+                        Height="34"
+                        Padding="10,6"
+                        CornerRadius="999"
+                        ToolTip.Tip="{x:Static lang:Resources.TextAssistTranslate}"
+                        Click="OnTranslateClick">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <icons:MaterialIcon Kind="Translate" Width="16" Height="16" />
+                        <TextBlock x:Name="TranslateLabel"
+                                   Text="{x:Static lang:Resources.TextAssistTranslate}"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button x:Name="CorrectionButton"
+                        Classes="EcToolbarBtn"
+                        Width="34" Height="34" Padding="6"
+                        ToolTip.Tip="{x:Static lang:Resources.TextAssistCorrect}"
+                        Click="OnCorrectionClick">
+                    <icons:MaterialIcon Kind="Spellcheck" Width="17" Height="17"
+                                        Foreground="{DynamicResource EcTextPrimary}" />
+                </Button>
+                <Button x:Name="PolishButton"
+                        Classes="EcToolbarBtn"
+                        Width="34" Height="34" Padding="6"
+                        ToolTip.Tip="{x:Static lang:Resources.TextAssistPolish}"
+                        Click="OnPolishClick">
+                    <icons:MaterialIcon Kind="FormatPaint" Width="17" Height="17"
+                                        Foreground="{DynamicResource EcTextPrimary}" />
+                </Button>
+                <Button x:Name="SummaryButton"
+                        Classes="EcToolbarBtn"
+                        Width="34" Height="34" Padding="6"
+                        ToolTip.Tip="{x:Static lang:Resources.TextAssistSummary}"
+                        Click="OnSummaryClick">
+                    <icons:MaterialIcon Kind="TextShort" Width="17" Height="17"
+                                        Foreground="{DynamicResource EcTextPrimary}" />
+                </Button>
             </StackPanel>
-            <suki:Loading x:Name="LoadingSpinner" Width="18" Height="18" Foreground="White"
-                          HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False"/>
+            <suki:Loading x:Name="LoadingSpinner"
+                          Width="18" Height="18"
+                          Foreground="{DynamicResource EcAccent}"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          IsVisible="False" />
         </Grid>
     </Border>
 </Window>

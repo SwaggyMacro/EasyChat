@@ -173,8 +173,11 @@ public sealed class TranslationDictionaryWindowViewModel : EasyChat.Presentation
         var stream = dictionary
             ? _translation.StreamDictionaryAsync(request)
             : _translation.StreamAsync(request);
+        // Background priority: coalesce layout passes so stream deltas don't hitch the float.
         await foreach (var item in stream)
-            await Dispatcher.UIThread.InvokeAsync(() => Apply(item, canNavigateBack, dictionary));
+            await Dispatcher.UIThread.InvokeAsync(
+                () => Apply(item, canNavigateBack, dictionary),
+                DispatcherPriority.Background);
     }
 
     private void Apply(SelectionTranslationEvent item, bool canNavigateBack, bool lookup)

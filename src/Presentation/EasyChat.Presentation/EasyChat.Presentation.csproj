@@ -20,6 +20,11 @@
     <ProjectReference Include="..\..\EasyChat.Contracts\EasyChat.Contracts.csproj" />
     <ProjectReference Include="..\EasyChat.Presentation.Shared\EasyChat.Presentation.Shared.csproj" />
   </ItemGroup>
+  <!-- Theme dictionaries have no x:Class; keep them as AvaloniaResource for avares:// includes. -->
+  <ItemGroup>
+    <AvaloniaResource Include="Themes\**\*.axaml" />
+    <AvaloniaXaml Remove="Themes\**\*.axaml" />
+  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Lang\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

@@ -15,6 +15,7 @@ using EasyChat.Presentation.Features.Shortcuts;
 using EasyChat.Presentation.Features.Speech;
 using EasyChat.Presentation.Features.Shell;
 using EasyChat.Presentation.Foundation.Navigation;
+using EasyChat.Presentation.Foundation.UiHost;
 using Microsoft.Extensions.DependencyInjection;
 using SukiUI.Dialogs;
 using SukiUI.Toasts;
@@ -28,6 +29,9 @@ public static class EasyChatPresentationServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
         services.AddSingleton<ISukiDialogManager, SukiDialogManager>();
         services.AddSingleton<ISukiToastManager, SukiToastManager>();
+        // Feature code uses IUi*Host; Suki managers remain only for MainWindow host chrome + adapters.
+        services.AddSingleton<IUiDialogHost, SukiUiDialogHost>();
+        services.AddSingleton<IUiToastHost, SukiUiToastHost>();
         services.AddSingleton<SettingsSession>();
         services.AddSingleton<PageNavigation>();
         services.AddSingleton<TranslationLanguageOptions>();
@@ -64,8 +68,7 @@ public static class EasyChatPresentationServiceCollectionExtensions
         services.AddTransient<NavigationPageViewModel, ShortcutViewModel>();
         services.AddTransient<NavigationPageViewModel, PromptViewModel>();
         services.AddTransient<NavigationPageViewModel, SpeechRecognitionViewModel>();
-        services.AddTransient<NavigationPageViewModel, TextAssistTranslationPageViewModel>();
-        services.AddTransient<NavigationPageViewModel, TextAssistCorrectionPageViewModel>();
+        services.AddTransient<NavigationPageViewModel, TextAssistViewModel>();
         services.AddTransient<NavigationPageViewModel, AboutViewModel>();
         services.AddSingleton<MainWindowViewModel>();
         return services;

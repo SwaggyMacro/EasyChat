@@ -11,9 +11,19 @@
         <local:ViewLocator />
     </Application.DataTemplates>
 
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://EasyChat.Presentation/Themes/EcTokens.axaml" />
+                <ResourceInclude Source="avares://EasyChat.Presentation/Themes/EcSettingRowTheme.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
     <Application.Styles>
         <suki:SukiTheme ThemeColor="Blue" />
         <avalonia:MaterialIconStyles />
         <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+        <StyleInclude Source="avares://EasyChat.Presentation/Themes/EcControls.axaml" />
     </Application.Styles>
 </Application>

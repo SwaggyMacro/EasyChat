@@ -11,17 +11,19 @@
         x:Class="EasyChat.Presentation.Features.Translation.Views.TranslationDictionaryWindowView"
         x:DataType="vm:TranslationDictionaryWindowViewModel"
         x:Name="TranslationWindow"
-        Width="450" MinHeight="250" MaxHeight="900" MinWidth="150"
+        Width="450" Height="480"
+        MinWidth="280" MinHeight="280"
+        MaxWidth="720" MaxHeight="720"
         WindowDecorations="None"
         Background="Transparent"
         Topmost="True"
         ShowInTaskbar="False"
-        CornerRadius="12"
+        CornerRadius="16"
         CanResize="True"
         Focusable="False"
         ShowActivated="False"
         WindowStartupLocation="Manual"
-        SizeToContent="Height">
+        SizeToContent="Manual">
 
     <Window.Styles>
         <!-- Style for interactive word tokens -->
@@ -44,14 +46,14 @@
                  <Setter Property="IsEnabled" Value="False"/> 
                  <Style Selector="^ /template/ ContentPresenter">
                      <Setter Property="Background" Value="Transparent"/>
-                     <Setter Property="Foreground" Value="{DynamicResource SukiText}"/>
+                     <Setter Property="Foreground" Value="{DynamicResource EcTextPrimary}"/>
                  </Style>
             </Style>
         </Style>
 
         <!-- Animated Underline Base Style -->
         <Style Selector="Border.AnimatedUnderline">
-            <Setter Property="Background" Value="{DynamicResource SukiPrimaryColor}"/>
+            <Setter Property="Background" Value="{DynamicResource EcAccent}"/>
             <Setter Property="Height" Value="3"/> <!-- Thicker as requested -->
             <Setter Property="VerticalAlignment" Value="Bottom"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
@@ -92,25 +94,13 @@
             </Style>
         </Style>
 
+        <!--
+          Skeleton: opacity pulse only. Height 0→125 transitions fought SizeToContent
+          and made the float hitch while dictionary parts streamed in.
+        -->
         <Style Selector="StackPanel.StreamingSkeleton">
-            <Setter Property="Opacity" Value="0"/>
-            <Setter Property="Height" Value="0"/>
             <Setter Property="ClipToBounds" Value="True"/>
             <Setter Property="IsHitTestVisible" Value="False"/>
-            <Setter Property="Transitions">
-                <Transitions>
-                    <DoubleTransition Property="Opacity" Duration="0:0:0.18"/>
-                    <DoubleTransition Property="Height" Duration="0:0:0.18"/>
-                </Transitions>
-            </Setter>
-            <Style Selector="^.loading">
-                <Setter Property="Opacity" Value="1"/>
-                <Setter Property="Height" Value="125"/>
-            </Style>
-        </Style>
-
-        <Style Selector="StackPanel.StreamingSkeleton.TranslationSkeleton.loading">
-            <Setter Property="Height" Value="68"/>
         </Style>
 
         <Style Selector="StackPanel.StreamingSkeleton.loading">
@@ -130,13 +120,16 @@
         </Style>
     </Window.Styles>
 
-    <Panel Margin="5">
-        <suki:GlassCard Padding="0" CornerRadius="12">
+    <Panel>
+        <Border Classes="EcFloatShell" Padding="0">
+            <Border Classes="EcFloatClip">
             <Grid RowDefinitions="Auto,*,Auto">
-                
-                <!-- Header -->
-                <Border Grid.Row="0" Background="{DynamicResource SukiCardBackground}" 
-                        CornerRadius="12,12,0,0" Padding="16,12"
+
+                <!-- Header: no own top radius — EcFloatClip rounds the shell -->
+                <Border Grid.Row="0" Background="{DynamicResource EcBgElevated}"
+                        Padding="16,12"
+                        BorderBrush="{DynamicResource EcBorder}"
+                        BorderThickness="0,0,0,1"
                         IsVisible="{Binding IsWordMode}">
                     <Grid ColumnDefinitions="*,Auto">
                         <!-- Dynamic Title -->
@@ -144,27 +137,28 @@
                             <!-- Back Button (Word Mode) -->
                             <Button IsVisible="{Binding ShowBackButton}" 
                                     Command="{Binding SwitchToSentenceModeCommand}"
-                                    Classes="Flat" Padding="4" Width="28" Height="28">
-                                <icons:MaterialIcon Kind="ArrowLeft" Width="18" Height="18" Foreground="White"/>
+                                    Classes="EcToolbarBtn" Padding="4" Width="28" Height="28">
+                                <icons:MaterialIcon Kind="ArrowLeft" Width="18" Height="18"
+                                                    Foreground="{DynamicResource EcTextPrimary}"/>
                             </Button>
 
                             <StackPanel Orientation="Vertical" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding DictionaryResult.Word, FallbackValue='Translation'}" 
                                            IsVisible="{Binding IsWordMode}"
-                                           FontWeight="Bold" FontSize="18" Foreground="{DynamicResource SukiText}"/>
+                                           FontWeight="Bold" FontSize="18" Foreground="{DynamicResource EcTextPrimary}"/>
                                 <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsWordMode}">
                                     <TextBlock Text="{Binding DictionaryResult.Phonetic}" 
-                                               FontSize="13" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center"/>
+                                               FontSize="13" Foreground="{DynamicResource EcTextSecondary}" VerticalAlignment="Center"/>
                                     <Button Classes="TtsButton" 
                                             Command="{Binding PlayTtsCommand}"
                                             CommandParameter="{Binding DictionaryResult.Word}"
                                             Tag="{Binding IsWordTtsLoading}"
                                             IsVisible="{Binding DictionaryResult.Phonetic, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                                          <Panel>
-                                             <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource SukiPrimaryColor}"
+                                             <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource EcAccent}"
                                                                  IsVisible="{Binding !$parent[Button].Tag}"/>
                                              <suki:Loading Width="16" Height="16" IsVisible="{Binding $parent[Button].Tag}"
-                                                           Foreground="{DynamicResource SukiPrimaryColor}"/>
+                                                           Foreground="{DynamicResource EcAccent}"/>
                                          </Panel>
                                     </Button>
                                 </StackPanel>
@@ -178,16 +172,20 @@
                                       Height="16"
                                       IsVisible="{Binding IsLoading}"
                                       IsHitTestVisible="False"
-                                      Foreground="{DynamicResource SukiPrimaryColor}"
+                                      Foreground="{DynamicResource EcAccent}"
                                       ToolTip.Tip="{x:Static lang:Resources.Speech_Translating}"/>
                         
                     </Grid>
                 </Border>
                 
-                <!-- Main Content -->
+                <!-- Main Content: star row + scroll — window height stays fixed while stream updates. -->
                 <Panel Grid.Row="1">
-                    <Border Background="{DynamicResource SukiCardBackground}">
-                        <ScrollViewer x:Name="ContentScrollViewer" MaxHeight="400">
+                    <Border Background="{DynamicResource EcBgElevated}">
+                        <ScrollViewer x:Name="ContentScrollViewer"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch">
                     <Panel>
                         <!-- Loading State Removed from inside Panel -->
 
@@ -200,26 +198,29 @@
                                           IsVisible="{Binding ShowDictionarySkeleton}"
                                           Spacing="10">
                                   <Border Height="18" Width="150" HorizontalAlignment="Left"
-                                          Background="{DynamicResource SukiControlBorderBrush}" CornerRadius="4"/>
-                                  <Border Height="14" Background="{DynamicResource SukiControlBorderBrush}" CornerRadius="4"/>
+                                          Background="{DynamicResource EcBgMuted}" CornerRadius="4"/>
+                                  <Border Height="14" Background="{DynamicResource EcBgMuted}" CornerRadius="4"/>
                                   <Border Height="14" Width="320" HorizontalAlignment="Left"
-                                          Background="{DynamicResource SukiControlBorderBrush}" CornerRadius="4"/>
-                                  <Border Height="1" Background="{DynamicResource SukiControlBorderBrush}" Margin="0,6"/>
+                                          Background="{DynamicResource EcBgMuted}" CornerRadius="4"/>
+                                  <Border Height="1" Background="{DynamicResource EcBgMuted}" Margin="0,6"/>
                                   <Border Height="14" Width="370" HorizontalAlignment="Left"
-                                          Background="{DynamicResource SukiControlBorderBrush}" CornerRadius="4"/>
+                                          Background="{DynamicResource EcBgMuted}" CornerRadius="4"/>
                                   <Border Height="14" Width="280" HorizontalAlignment="Left"
-                                          Background="{DynamicResource SukiControlBorderBrush}" CornerRadius="4"/>
+                                          Background="{DynamicResource EcBgMuted}" CornerRadius="4"/>
                               </StackPanel>
                               
                               <!-- Tips -->
-                             <Border Background="#1AFFFF00" CornerRadius="8" Padding="12" 
+                             <Border Background="{DynamicResource EcBgMuted}" CornerRadius="8" Padding="12"
+                                     BorderBrush="{DynamicResource EcWarning}" BorderThickness="1" 
                                      IsVisible="{Binding DictionaryResult.Tips, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                                  <StackPanel Spacing="4">
                                      <StackPanel Orientation="Horizontal" Spacing="6">
-                                         <icons:MaterialIcon Kind="LightbulbOutline" Width="16" Height="16" Foreground="#E6E600"/>
-                                         <TextBlock Text="{x:Static lang:Resources.Tips}" FontWeight="Bold" FontSize="12" Foreground="#E6E600"/>
+                                         <icons:MaterialIcon Kind="LightbulbOutline" Width="16" Height="16"
+                                                             Foreground="{DynamicResource EcWarning}"/>
+                                         <TextBlock Text="{x:Static lang:Resources.Tips}" FontWeight="SemiBold" FontSize="12"
+                                                    Foreground="{DynamicResource EcWarning}"/>
                                      </StackPanel>
-                                     <TextBlock Text="{Binding DictionaryResult.Tips}" TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource SukiText}"/>
+                                     <TextBlock Text="{Binding DictionaryResult.Tips}" TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource EcTextPrimary}"/>
                                  </StackPanel>
                              </Border>
 
@@ -232,10 +233,10 @@
                                  </ItemsControl.ItemsPanel>
                                  <ItemsControl.ItemTemplate>
                                      <DataTemplate DataType="vm:DictionaryFormViewModel">
-                                         <Border Background="{DynamicResource SukiControlBorderBrush}" CornerRadius="4" Padding="6,2" Margin="0,0,8,8">
+                                         <Border Background="{DynamicResource EcBgMuted}" CornerRadius="4" Padding="6,2" Margin="0,0,8,8">
                                              <StackPanel Orientation="Horizontal" Spacing="6">
-                                                 <TextBlock Text="{Binding Label}" FontSize="12" Foreground="{DynamicResource SukiLowText}" FontStyle="Italic" VerticalAlignment="Center"/>
-                                                 <TextBlock Text="{Binding Word}" FontSize="13" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                 <TextBlock Text="{Binding Label}" FontSize="12" Foreground="{DynamicResource EcTextSecondary}" FontStyle="Italic" VerticalAlignment="Center"/>
+                                                 <TextBlock Text="{Binding Word}" FontSize="13" Foreground="{DynamicResource EcTextPrimary}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                                  
                                                  <!-- TTS for Form -->
                                                  <Button Classes="TtsButton" Width="24" Height="24"
@@ -243,10 +244,10 @@
                                                          CommandParameter="{Binding .}"
                                                          Tag="{Binding IsLoading}">
                                                      <Panel>
-                                                         <icons:MaterialIcon Kind="VolumeHigh" Width="14" Height="14" Foreground="{DynamicResource SukiPrimaryColor}"
+                                                         <icons:MaterialIcon Kind="VolumeHigh" Width="14" Height="14" Foreground="{DynamicResource EcAccent}"
                                                                              IsVisible="{Binding !$parent[Button].Tag}"/>
                                                          <suki:Loading Width="14" Height="14" IsVisible="{Binding $parent[Button].Tag}"
-                                                                       Foreground="{DynamicResource SukiPrimaryColor}"/>
+                                                                       Foreground="{DynamicResource EcAccent}"/>
                                                      </Panel>
                                                  </Button>
                                              </StackPanel>
@@ -259,17 +260,17 @@
                                  <ItemsControl.ItemTemplate>
                                      <DataTemplate DataType="vm:DictionaryPartViewModel">
                                          <StackPanel Margin="0,0,0,12">
-                                             <Border Background="{DynamicResource SukiControlBorderBrush}" CornerRadius="4" Padding="6,2" HorizontalAlignment="Left" Margin="0,0,0,8"
+                                             <Border Background="{DynamicResource EcBgMuted}" CornerRadius="4" Padding="6,2" HorizontalAlignment="Left" Margin="0,0,0,8"
                                                      IsVisible="{Binding PartOfSpeech, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                                                 <TextBlock Text="{Binding PartOfSpeech}" FontSize="13" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold"/>
+                                                 <TextBlock Text="{Binding PartOfSpeech}" FontSize="13" Foreground="{DynamicResource EcTextPrimary}" FontWeight="SemiBold"/>
                                              </Border>
                                              <ItemsControl ItemsSource="{Binding Definitions}">
                                                  <ItemsControl.ItemTemplate>
                                                      <DataTemplate>
                                                          <Grid ColumnDefinitions="Auto, *" Margin="4,2,0,4">
-                                                             <Border Width="4" Height="4" Background="{DynamicResource SukiText}" CornerRadius="2" Margin="0,8,8,0" VerticalAlignment="Top" Opacity="0.6"/>
+                                                             <Border Width="4" Height="4" Background="{DynamicResource EcTextPrimary}" CornerRadius="2" Margin="0,8,8,0" VerticalAlignment="Top" Opacity="0.6"/>
                                                              <TextBlock Grid.Column="1" Text="{Binding}" TextWrapping="Wrap"
-                                                                    FontSize="14" Foreground="{DynamicResource SukiText}"/>
+                                                                    FontSize="14" Foreground="{DynamicResource EcTextPrimary}"/>
                                                          </Grid>
                                                      </DataTemplate>
                                                  </ItemsControl.ItemTemplate>
@@ -281,38 +282,38 @@
 
                              <!-- Examples -->
                              <StackPanel IsVisible="{Binding DictionaryResult.HasExamples}">
-                                 <Border Background="{DynamicResource SukiControlBorderBrush}" Height="1" Margin="0,0,0,12"/>
-                                 <TextBlock Text="{x:Static lang:Resources.Examples}" FontWeight="Bold" Margin="0,0,0,8" Foreground="{DynamicResource SukiText}"/>
+                                 <Border Background="{DynamicResource EcBorder}" Height="1" Margin="0,0,0,12"/>
+                                 <TextBlock Text="{x:Static lang:Resources.Examples}" FontWeight="Bold" Margin="0,0,0,8" Foreground="{DynamicResource EcTextPrimary}"/>
                                  <ItemsControl ItemsSource="{Binding DictionaryResult.Examples}">
                                      <ItemsControl.ItemTemplate>
                                          <DataTemplate DataType="vm:DictionaryExampleViewModel">
                                              <StackPanel Margin="0,0,0,12">
                                                   <Grid ColumnDefinitions="*,Auto">
-                                                       <TextBlock Grid.Column="0" Text="{Binding Origin}" TextWrapping="Wrap" FontSize="14" Foreground="{DynamicResource SukiText}" VerticalAlignment="Center"/>
+                                                       <TextBlock Grid.Column="0" Text="{Binding Origin}" TextWrapping="Wrap" FontSize="14" Foreground="{DynamicResource EcTextPrimary}" VerticalAlignment="Center"/>
                                                        <Button Grid.Column="1" Classes="TtsButton" Margin="6,0,0,0" VerticalAlignment="Top"
                                                                Command="{Binding #TranslationWindow.((vm:TranslationDictionaryWindowViewModel)DataContext).PlaySourceAudioCommand}"
                                                                CommandParameter="{Binding .}"
                                                                Tag="{Binding IsOriginLoading}">
                                                            <Panel>
-                                                               <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource SukiPrimaryColor}"
+                                                               <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource EcAccent}"
                                                                                    IsVisible="{Binding !$parent[Button].Tag}"/>
                                                                <suki:Loading Width="16" Height="16" IsVisible="{Binding $parent[Button].Tag}"
-                                                                             Foreground="{DynamicResource SukiPrimaryColor}"/>
+                                                                             Foreground="{DynamicResource EcAccent}"/>
                                                            </Panel>
                                                        </Button>
                                                   </Grid>
                                                  
                                                   <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
-                                                      <TextBlock Grid.Column="0" Text="{Binding Translation}" TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center"/>
+                                                      <TextBlock Grid.Column="0" Text="{Binding Translation}" TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource EcTextSecondary}" VerticalAlignment="Center"/>
                                                       <Button Grid.Column="1" Classes="TtsButton" Margin="6,0,0,0" VerticalAlignment="Top"
                                                                Command="{Binding #TranslationWindow.((vm:TranslationDictionaryWindowViewModel)DataContext).PlayTargetAudioCommand}"
                                                                CommandParameter="{Binding .}"
                                                                Tag="{Binding IsTranslationLoading}">
                                                            <Panel>
-                                                               <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource SukiPrimaryColor}"
+                                                               <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource EcAccent}"
                                                                                    IsVisible="{Binding !$parent[Button].Tag}"/>
                                                                <suki:Loading Width="16" Height="16" IsVisible="{Binding $parent[Button].Tag}"
-                                                                             Foreground="{DynamicResource SukiPrimaryColor}"/>
+                                                                             Foreground="{DynamicResource EcAccent}"/>
                                                            </Panel>
                                                        </Button>
                                                   </Grid>
@@ -335,8 +336,8 @@
                                                         Spacing="6"
                                                         VerticalAlignment="Center"
                                                         IsHitTestVisible="False">
-                                            <icons:MaterialIcon Kind="Translate" Width="16" Height="16" Foreground="{DynamicResource SukiPrimaryColor}"/>
-                                            <TextBlock Text="{x:Static lang:Resources.SelectionTranslate_ResultLabel}" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource SukiText}"/>
+                                            <icons:MaterialIcon Kind="Translate" Width="16" Height="16" Foreground="{DynamicResource EcAccent}"/>
+                                            <TextBlock Text="{x:Static lang:Resources.SelectionTranslate_ResultLabel}" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource EcTextPrimary}"/>
                                             </StackPanel>
                                         </Border>
 
@@ -347,10 +348,10 @@
                                                 CommandParameter="{Binding TranslationResult}"
                                                 Tag="{Binding IsResultTtsLoading}">
                                             <Panel>
-                                                <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource SukiPrimaryColor}"
+                                                <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource EcAccent}"
                                                                     IsVisible="{Binding !$parent[Button].Tag}"/>
                                                 <suki:Loading Width="16" Height="16" IsVisible="{Binding $parent[Button].Tag}"
-                                                              Foreground="{DynamicResource SukiPrimaryColor}"/>
+                                                              Foreground="{DynamicResource EcAccent}"/>
                                             </Panel>
                                         </Button>
 
@@ -364,44 +365,45 @@
                                                       VerticalAlignment="Center"
                                                       IsVisible="{Binding IsLoading}"
                                                       IsHitTestVisible="False"
-                                                      Foreground="{DynamicResource SukiPrimaryColor}"
+                                                      Foreground="{DynamicResource EcAccent}"
                                                       ToolTip.Tip="{x:Static lang:Resources.Speech_Translating}"/>
                                     </Grid>
                                     <Panel Grid.Row="1">
-                                        <!-- Appears only before the first streamed translation fragment. -->
+                                        <!-- Must hide with IsVisible — Classes.loading only toggles pulse opacity. -->
                                         <StackPanel Classes="StreamingSkeleton TranslationSkeleton"
                                                     Classes.loading="{Binding ShowTranslationSkeleton}"
+                                                    IsVisible="{Binding ShowTranslationSkeleton}"
                                                     Spacing="10">
                                             <Border Height="16" Width="360" HorizontalAlignment="Left"
-                                                    Background="{DynamicResource SukiControlBorderBrush}" CornerRadius="4"/>
+                                                    Background="{DynamicResource EcBgMuted}" CornerRadius="4"/>
                                             <Border Height="16" Width="280" HorizontalAlignment="Left"
-                                                    Background="{DynamicResource SukiControlBorderBrush}" CornerRadius="4"/>
+                                                    Background="{DynamicResource EcBgMuted}" CornerRadius="4"/>
                                             <Border Height="16" Width="320" HorizontalAlignment="Left"
-                                                    Background="{DynamicResource SukiControlBorderBrush}" CornerRadius="4"/>
+                                                    Background="{DynamicResource EcBgMuted}" CornerRadius="4"/>
                                         </StackPanel>
                                         <TextBlock x:Name="ResultTextBlock"
                                                    Text="{Binding TranslationResult}"
                                                    TextWrapping="Wrap" FontSize="15" LineHeight="24"
-                                                   Foreground="{DynamicResource SukiText}"/>
+                                                   Foreground="{DynamicResource EcTextPrimary}"/>
                                     </Panel>
                                 </Grid>
 
-                                <Separator Background="{DynamicResource SukiControlBorderBrush}" Height="1"/>
+                                <Separator Background="{DynamicResource EcBorder}" Height="1"/>
 
                                 <!-- Interactive Source Text -->
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,0,8">
-                                        <icons:MaterialIcon Kind="TextShort" Width="16" Height="16" Foreground="{DynamicResource SukiPrimaryColor}"/>
-                                        <TextBlock Text="{x:Static lang:Resources.SelectionTranslate_SourceLabel}" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource SukiText}"/>
+                                        <icons:MaterialIcon Kind="TextShort" Width="16" Height="16" Foreground="{DynamicResource EcAccent}"/>
+                                        <TextBlock Text="{x:Static lang:Resources.SelectionTranslate_SourceLabel}" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource EcTextPrimary}"/>
                                         <Button Classes="TtsButton" VerticalAlignment="Center"
                                                 Command="{Binding PlaySourceAudioCommand}"
                                                 CommandParameter="{Binding SourceText}"
                                                 Tag="{Binding IsSourceTtsLoading}">
                                             <Panel>
-                                                <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource SukiPrimaryColor}"
+                                                <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource EcAccent}"
                                                                     IsVisible="{Binding !$parent[Button].Tag}"/>
                                                 <suki:Loading Width="16" Height="16" IsVisible="{Binding $parent[Button].Tag}"
-                                                              Foreground="{DynamicResource SukiPrimaryColor}"/>
+                                                              Foreground="{DynamicResource EcAccent}"/>
                                             </Panel>
                                         </Button>
                                     </StackPanel>
@@ -411,10 +413,10 @@
                                         WordClickedCommand="{Binding LookupWordCommand}"
                                         FontSize="15"
                                         LineHeight="24"
-                                        Foreground="{DynamicResource SukiText}"
-                                        NonWordForeground="Gray"
+                                        Foreground="{DynamicResource EcTextPrimary}"
+                                        NonWordForeground="{DynamicResource EcTextMuted}"
                                         FontWeight="Bold"
-                                        UnderlineColor="{DynamicResource SukiPrimaryColor}"/>
+                                        UnderlineColor="{DynamicResource EcAccent}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
@@ -423,32 +425,52 @@
                     </Border>
                 </Panel>
 
-                <!-- Footer Actions -->
-                <Border Grid.Row="2" Background="{DynamicResource SukiCardBackground}" 
-                        CornerRadius="0,0,12,12" Padding="12,8" BorderBrush="{DynamicResource SukiControlBorderBrush}" BorderThickness="0,1,0,0">
+                <!-- Footer: no own bottom radius — EcFloatClip rounds the shell -->
+                <Border Grid.Row="2"
+                        Background="{DynamicResource EcBgElevated}"
+                        Padding="12,8"
+                        BorderBrush="{DynamicResource EcBorder}"
+                        BorderThickness="0,1,0,0">
                     <Grid ColumnDefinitions="Auto,*,Auto">
-                         <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                             <Border Background="{DynamicResource SukiControlBorderBrush}" CornerRadius="4" Padding="6,2">
-                                 <TextBlock Text="Auto Detect" FontSize="11" Foreground="{DynamicResource SukiText}"/>
+                         <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                             <Border Background="{DynamicResource EcBgMuted}"
+                                     BorderBrush="{DynamicResource EcBorder}"
+                                     BorderThickness="1"
+                                     CornerRadius="999"
+                                     Padding="8,3">
+                                 <TextBlock Text="Auto Detect" FontSize="11"
+                                            Foreground="{DynamicResource EcTextSecondary}"/>
                              </Border>
-                             <icons:MaterialIcon Kind="ArrowRight" Width="14" Height="14" Foreground="{DynamicResource SukiText}"/>
-                             <Border Background="{DynamicResource SukiControlBorderBrush}" CornerRadius="4" Padding="6,2">
-                                 <TextBlock Text="{x:Static lang:Resources.SelectionTranslate_Language_Chinese}" FontSize="11" Foreground="{DynamicResource SukiText}"/>
+                             <icons:MaterialIcon Kind="ArrowRight" Width="14" Height="14"
+                                                 Foreground="{DynamicResource EcTextMuted}"/>
+                             <Border Background="{DynamicResource EcAccentMuted}"
+                                     BorderBrush="{DynamicResource EcBorder}"
+                                     BorderThickness="1"
+                                     CornerRadius="999"
+                                     Padding="8,3">
+                                 <TextBlock Text="{x:Static lang:Resources.SelectionTranslate_Language_Chinese}"
+                                            FontSize="11"
+                                            Foreground="{DynamicResource EcTextPrimary}"/>
                              </Border>
                          </StackPanel>
 
                         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                            <Button Click="OnCopyClick" ToolTip.Tip="{x:Static lang:Resources.SelectionTranslate_CopyTooltip}" 
-                                    Classes="Flat" Padding="6" Width="32" Height="32">
-                                <icons:MaterialIcon Kind="ContentCopy" Width="18" Height="18" Foreground="White"/>
+                            <Button Click="OnCopyClick"
+                                    Classes="EcPrimary"
+                                    Width="34" Height="34"
+                                    Padding="0"
+                                    ToolTip.Tip="{x:Static lang:Resources.SelectionTranslate_CopyTooltip}"
+                                    HorizontalContentAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    AutomationProperties.Name="{x:Static lang:Resources.Copy}">
+                                <icons:MaterialIcon Kind="ContentCopy" Width="16" Height="16" />
                             </Button>
-                            
-                            <!-- Close Button -->
                             <Button Click="OnCloseClick"
                                     IsVisible="{Binding ShowCloseButton}"
-                                    ToolTip.Tip="{x:Static lang:Resources.Close}" 
-                                    Classes="Danger" Padding="6" Width="32" Height="32">
-                                <icons:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="White"/>
+                                    Classes="EcToolbarBtn"
+                                    ToolTip.Tip="{x:Static lang:Resources.Close}"
+                                    AutomationProperties.Name="{x:Static lang:Resources.Close}">
+                                <icons:MaterialIcon Kind="Close" Width="16" Height="16" />
                             </Button>
                         </StackPanel>
                     </Grid>
@@ -458,7 +480,7 @@
                 <icons:MaterialIcon Kind="ResizeBottomRight" 
                                    Grid.Row="2"
                                    Width="20" Height="20" 
-                                   Foreground="{DynamicResource SukiText}"
+                                   Foreground="{DynamicResource EcTextPrimary}"
                                    Opacity="0.5"
                                    VerticalAlignment="Bottom"
                                    HorizontalAlignment="Right"
@@ -466,6 +488,7 @@
                                    PointerPressed="OnResizePointerPressed"
                                    Margin="0,0,2,2"/>
             </Grid>
-        </suki:GlassCard>
+            </Border>
+        </Border>
     </Panel>
 </Window>

@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="EasyChat.Presentation.Shared.Controls.EcSectionCard"
+             x:Name="Root">
+    <Border Classes="EcSurface" Padding="22">
+        <StackPanel Spacing="16">
+            <Grid ColumnDefinitions="Auto,*,Auto"
+                  IsVisible="{Binding Header, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                <Border Width="36" Height="36"
+                        CornerRadius="10"
+                        Background="{DynamicResource EcAccentMuted}"
+                        IsVisible="{Binding ShowHeaderIcon, ElementName=Root}"
+                        Margin="0,0,12,0">
+                    <avalonia:MaterialIcon Width="18"
+                                           Height="18"
+                                           Kind="{Binding HeaderIcon, ElementName=Root}"
+                                           Foreground="{DynamicResource EcAccent}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                </Border>
+                <TextBlock Grid.Column="1"
+                           Text="{Binding Header, ElementName=Root}"
+                           FontWeight="SemiBold"
+                           FontSize="15"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource EcTextPrimary}" />
+            </Grid>
+            <ContentPresenter Content="{Binding Body, ElementName=Root}" />
+        </StackPanel>
+    </Border>
+</UserControl>

@@ -1,8 +1,7 @@
-using System.Reflection;
 using EasyChat.Contracts.AiModels;
 using EasyChat.Contracts.Settings;
 using EasyChat.Presentation.Features.Settings.Translation;
-using SukiUI.Dialogs;
+using EasyChat.Presentation.Foundation.UiHost;
 
 namespace EasyChat.Presentation.Tests;
 
@@ -46,7 +45,7 @@ public sealed class AiModelEditDialogViewModelTests
     private static AiModelEditDialogViewModel CreateViewModel(
         IAiModelCatalogTransport catalog,
         Action<CustomAiModelSettings?>? onClose = null) =>
-        new(DispatchProxy.Create<ISukiDialog, NullDialogProxy>(), catalog)
+        new(new NullDialogSession(), catalog)
         {
             OnClose = onClose
         };
@@ -58,15 +57,10 @@ public sealed class AiModelEditDialogViewModelTests
             await Task.Delay(25, timeout.Token);
     }
 
-    public class NullDialogProxy : DispatchProxy
+    private sealed class NullDialogSession : IUiDialogSession
     {
-        protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
+        public void Dismiss()
         {
-            if (targetMethod is null || targetMethod.ReturnType == typeof(void))
-                return null;
-            return targetMethod.ReturnType.IsValueType
-                ? Activator.CreateInstance(targetMethod.ReturnType)
-                : null;
         }
     }
 

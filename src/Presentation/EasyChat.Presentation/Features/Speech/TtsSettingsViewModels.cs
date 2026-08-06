@@ -7,9 +7,8 @@ using EasyChat.Presentation.Lang;
 using EasyChat.Presentation.Features.Settings.State;
 using EasyChat.Presentation.Foundation.Localization;
 using EasyChat.Presentation.Foundation.Navigation;
+using EasyChat.Presentation.Foundation.UiHost;
 using ReactiveUI;
-using SukiUI.Dialogs;
-using SukiUI.Toasts;
 
 namespace EasyChat.Presentation.Features.Speech;
 
@@ -33,9 +32,9 @@ public sealed class ConfiguredVoiceItem
 
 public sealed class TtsVoiceSettingsDialogViewModel : ConventionViewModelBase
 {
-    private readonly ISukiDialogManager _dialogManager;
-    private readonly ISukiDialog _dialog;
-    private readonly ISukiToastManager _toasts;
+    private readonly IUiDialogHost _dialogHost;
+    private readonly IUiDialogSession _dialog;
+    private readonly IUiToastHost _toasts;
     private readonly ITtsUseCases _tts;
     private readonly LiveTtsSettings _settings;
     private IReadOnlyList<TtsVoice> _voices = [];
@@ -45,13 +44,13 @@ public sealed class TtsVoiceSettingsDialogViewModel : ConventionViewModelBase
     private string _selectedProvider;
 
     public TtsVoiceSettingsDialogViewModel(
-        ISukiDialogManager dialogManager,
-        ISukiDialog dialog,
-        ISukiToastManager toasts,
+        IUiDialogHost dialogHost,
+        IUiDialogSession dialog,
+        IUiToastHost toasts,
         ITtsUseCases tts,
         LiveTtsSettings settings)
     {
-        _dialogManager = dialogManager;
+        _dialogHost = dialogHost;
         _dialog = dialog;
         _toasts = toasts;
         _tts = tts;
@@ -152,13 +151,13 @@ public sealed class TtsVoiceSettingsDialogViewModel : ConventionViewModelBase
 
     private void ShowEditor(ConfiguredVoiceItem? current)
     {
-        _dialogManager.CreateDialog()
-            .WithTitle(current is null ? Resources.Tts_AddVoiceMapping : Resources.Tts_EditVoiceMapping)
-            .WithViewModel(dialog => new TtsEditVoiceDialogViewModel(
-                dialog,
-                _dialogManager,
+        _dialogHost.ShowContent(new UiContentDialogOptions
+        {
+            Title = current is null ? Resources.Tts_AddVoiceMapping : Resources.Tts_EditVoiceMapping,
+            CreateContent = session => new TtsEditVoiceDialogViewModel(
+                session,
+                _dialogHost,
                 _tts,
-                _toasts,
                 SelectedProvider,
                 _languages,
                 _voices,
@@ -173,8 +172,8 @@ public sealed class TtsVoiceSettingsDialogViewModel : ConventionViewModelBase
                     ReopenSettings();
                 },
                 OnCancel = ReopenSettings
-            })
-            .TryShow();
+            }
+        });
     }
 
     private void DeleteVoiceMapping(ConfiguredVoiceItem? item)
@@ -185,25 +184,22 @@ public sealed class TtsVoiceSettingsDialogViewModel : ConventionViewModelBase
         RefreshConfiguredVoices();
     }
 
-    private void ReopenSettings() => _dialogManager.CreateDialog()
-        .WithTitle(Resources.Tts_Configuration)
-        .WithViewModel(dialog => new TtsVoiceSettingsDialogViewModel(
-            _dialogManager, dialog, _toasts, _tts, _settings))
-        .TryShow();
+    private void ReopenSettings() => _dialogHost.ShowContent(new UiContentDialogOptions
+    {
+        Title = Resources.Tts_Configuration,
+        CreateContent = session => new TtsVoiceSettingsDialogViewModel(
+            _dialogHost, session, _toasts, _tts, _settings)
+    });
 
-    private void ShowError(string message) => _toasts.CreateToast()
-        .WithTitle(Resources.Tts_ErrorOpeningDialog)
-        .WithContent(message)
-        .OfType(Avalonia.Controls.Notifications.NotificationType.Error)
-        .Queue();
+    private void ShowError(string message) =>
+        _toasts.Show(Resources.Tts_ErrorOpeningDialog, message, UiMessageSeverity.Error);
 }
 
 public sealed class TtsEditVoiceDialogViewModel : ConventionViewModelBase
 {
-    private readonly ISukiDialog _dialog;
-    private readonly ISukiDialogManager _dialogManager;
+    private readonly IUiDialogSession _dialog;
+    private readonly IUiDialogHost _dialogHost;
     private readonly ITtsUseCases _tts;
-    private readonly ISukiToastManager _toasts;
     private readonly string _provider;
     private readonly IReadOnlyList<TtsVoice> _allVoices;
     private TtsLanguageItem? _selectedLanguage;
@@ -212,10 +208,9 @@ public sealed class TtsEditVoiceDialogViewModel : ConventionViewModelBase
     private ObservableCollection<TtsVoice> _filteredVoices = [];
 
     public TtsEditVoiceDialogViewModel(
-        ISukiDialog dialog,
-        ISukiDialogManager dialogManager,
+        IUiDialogSession dialog,
+        IUiDialogHost dialogHost,
         ITtsUseCases tts,
-        ISukiToastManager toasts,
         string provider,
         IReadOnlyList<TtsLanguageItem> languages,
         IReadOnlyList<TtsVoice> voices,
@@ -223,9 +218,8 @@ public sealed class TtsEditVoiceDialogViewModel : ConventionViewModelBase
         string? initialVoiceId = null)
     {
         _dialog = dialog;
-        _dialogManager = dialogManager;
+        _dialogHost = dialogHost;
         _tts = tts;
-        _toasts = toasts;
         _provider = provider;
         AvailableLanguages = languages;
         _allVoices = voices;
@@ -305,31 +299,33 @@ public sealed class TtsEditVoiceDialogViewModel : ConventionViewModelBase
         if (SelectedVoice is null)
             return;
         _dialog.Dismiss();
-        _dialogManager.CreateDialog()
-            .WithViewModel(dialog => new TtsPreviewInputDialogViewModel(
-                dialog, _tts, _provider, SelectedVoice.Id)
+        _dialogHost.ShowContent(new UiContentDialogOptions
+        {
+            CreateContent = session => new TtsPreviewInputDialogViewModel(
+                session, _tts, _provider, SelectedVoice.Id)
             {
                 OnDismiss = Reopen
-            })
-            .TryShow();
+            }
+        });
     }
 
-    private void Reopen() => _dialogManager.CreateDialog()
-        .WithTitle(Resources.Tts_EditVoiceMapping)
-        .WithViewModel(dialog => new TtsEditVoiceDialogViewModel(
-            dialog, _dialogManager, _tts, _toasts, _provider,
+    private void Reopen() => _dialogHost.ShowContent(new UiContentDialogOptions
+    {
+        Title = Resources.Tts_EditVoiceMapping,
+        CreateContent = session => new TtsEditVoiceDialogViewModel(
+            session, _dialogHost, _tts, _provider,
             AvailableLanguages, _allVoices, SelectedLanguage, SelectedVoice?.Id)
         {
             SearchText = SearchText,
             OnSave = OnSave,
             OnCancel = OnCancel
-        })
-        .TryShow();
+        }
+    });
 }
 
 public sealed class TtsPreviewInputDialogViewModel : ConventionViewModelBase
 {
-    private readonly ISukiDialog _dialog;
+    private readonly IUiDialogSession _dialog;
     private readonly ITtsUseCases _tts;
     private readonly string _provider;
     private readonly string _voiceId;
@@ -337,7 +333,7 @@ public sealed class TtsPreviewInputDialogViewModel : ConventionViewModelBase
     private bool _isPlaying;
 
     public TtsPreviewInputDialogViewModel(
-        ISukiDialog dialog,
+        IUiDialogSession dialog,
         ITtsUseCases tts,
         string provider,
         string voiceId)

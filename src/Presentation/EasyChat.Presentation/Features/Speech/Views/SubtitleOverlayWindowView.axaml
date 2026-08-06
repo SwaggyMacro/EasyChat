@@ -18,26 +18,8 @@
         Topmost="True"
         ShowInTaskbar="False">
 
-    <Window.Styles>
-        <Style Selector="Button.ToolbarBtn">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="4"/>
-            <Setter Property="CornerRadius" Value="4"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-        <Style Selector="Button.ToolbarBtn:hover">
-            <Setter Property="Background" Value="#44888888"/>
-        </Style>
-    </Window.Styles>
-
-    <!-- Root container that handles hit testing strategy -->
-    <!-- Background is Transparent (HitTestVisible) when Unlocked, 
-         and Null (Click-Through) when Locked. 
-         But we need 'Unlock' button to be clickable, so we handle that by keeping the window HitTestVisible 
-         but making the 'empty' areas null. -->
-    
-    <Grid Name="RootGrid" >
+    <!-- Root: unlocked hit-testable chrome; locked click-through except unlock control. -->
+    <Grid Name="RootGrid">
         
         <!-- Window Container (Background + Toolbar) -->
         <!-- Visible when: Unlocked AND (Hovering OR Dragging) -->
@@ -167,63 +149,97 @@
             </ItemsControl>
         </ScrollViewer>
 
-        <!-- 3. Toolbar Layer (Top Z-Index) -->
-        <Border x:Name="Toolbar" 
-                Background="#22FFFFFF" 
-                CornerRadius="4" 
+        <!-- Hover toolbar: lock / clear / close + font size -->
+        <Border x:Name="Toolbar"
+                Classes="EcFloatShell"
                 Margin="10,10,10,0"
-                Height="26"
+                Height="36"
                 VerticalAlignment="Top"
+                Padding="6,3"
                 IsVisible="{Binding !IsFloatingWindowLocked}">
-            
+
              <Border.Styles>
-                <!-- Apply same Smart Visibility to Toolbar -->
                 <Style Selector="Grid:not(:pointerover) Border#Toolbar">
                      <Setter Property="IsVisible" Value="False"/>
                 </Style>
             </Border.Styles>
-            
-            <Grid ColumnDefinitions="Auto, *, Auto"> 
-                <StackPanel Orientation="Horizontal" Spacing="2">
-                    <avalonia:MaterialIcon Kind="Drag" Width="16" Height="16" Opacity="0.5" VerticalAlignment="Center" Margin="5,0"/>
-                </StackPanel>
-                
-                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2">
-                    <Button Command="{Binding IncreaseFontSizeCommand}" Classes="ToolbarBtn" ToolTip.Tip="Increase Font Size">
-                        <TextBlock Text="A+" Foreground="White" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
+
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <avalonia:MaterialIcon Kind="Drag" Width="15" Height="15" Opacity="0.5"
+                                       VerticalAlignment="Center" Margin="4,0,6,0"
+                                       Foreground="{DynamicResource EcTextMuted}"/>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="1">
+                    <Button Command="{Binding IncreaseFontSizeCommand}" Classes="EcToolbarBtnSm"
+                            ToolTip.Tip="{x:Static lang:Resources.FloatingWindow_IncreaseFont}"
+                            AutomationProperties.Name="{x:Static lang:Resources.FloatingWindow_IncreaseFont}">
+                        <TextBlock Text="A+" Foreground="{DynamicResource EcTextPrimary}"
+                                   FontWeight="Bold" FontSize="11" VerticalAlignment="Center"/>
                     </Button>
-                    <Button Command="{Binding DecreaseFontSizeCommand}" Classes="ToolbarBtn" ToolTip.Tip="Decrease Font Size">
-                        <TextBlock Text="A-" Foreground="White" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
+                    <Button Command="{Binding DecreaseFontSizeCommand}" Classes="EcToolbarBtnSm"
+                            ToolTip.Tip="{x:Static lang:Resources.FloatingWindow_DecreaseFont}"
+                            AutomationProperties.Name="{x:Static lang:Resources.FloatingWindow_DecreaseFont}">
+                        <TextBlock Text="A-" Foreground="{DynamicResource EcTextPrimary}"
+                                   FontWeight="Bold" FontSize="11" VerticalAlignment="Center"/>
                     </Button>
-                     <Button Command="{Binding ToggleLockCommand}" Classes="ToolbarBtn" ToolTip.Tip="Lock Window">
-                        <avalonia:MaterialIcon Kind="LockOpen" Width="16" Height="16" Foreground="White"/>
+                    <Button Command="{Binding ToggleLockCommand}" Classes="EcToolbarBtnSm"
+                            ToolTip.Tip="{x:Static lang:Resources.FloatingWindow_Lock}"
+                            AutomationProperties.Name="{x:Static lang:Resources.FloatingWindow_Lock}">
+                        <avalonia:MaterialIcon Kind="LockOpen" Width="15" Height="15"
+                                               Foreground="{DynamicResource EcTextPrimary}"/>
                     </Button>
-                    <Button Command="{Binding ClearHistoryCommand}" Classes="ToolbarBtn" ToolTip.Tip="{x:Static lang:Resources.Speech_ClearHistory}">
-                        <avalonia:MaterialIcon Kind="DeleteSweep" Width="16" Height="16" Foreground="White"/>
+                    <Button Command="{Binding ClearHistoryCommand}" Classes="EcToolbarBtnSm"
+                            ToolTip.Tip="{x:Static lang:Resources.Speech_ClearHistory}"
+                            AutomationProperties.Name="{x:Static lang:Resources.Speech_ClearHistory}">
+                        <avalonia:MaterialIcon Kind="DeleteSweep" Width="15" Height="15"
+                                               Foreground="{DynamicResource EcTextPrimary}"/>
                     </Button>
-                    <Button Click="CloseButton_Click" Classes="ToolbarBtn" ToolTip.Tip="Close Floating Window">
-                        <avalonia:MaterialIcon Kind="Close" Width="16" Height="16" Foreground="White"/>
+                    <Button Click="CloseButton_Click" Classes="EcToolbarBtnSm"
+                            ToolTip.Tip="{x:Static lang:Resources.FloatingWindow_Close}"
+                            AutomationProperties.Name="{x:Static lang:Resources.FloatingWindow_Close}">
+                        <avalonia:MaterialIcon Kind="Close" Width="15" Height="15"
+                                               Foreground="{DynamicResource EcTextPrimary}"/>
                     </Button>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- Unlock Button (Floating, Visible ONLY when Locked) -->
-        <Button x:Name="UnlockBtn"
-                Command="{Binding ToggleLockCommand}" 
-                Classes="ToolbarBtn" 
-                IsVisible="{Binding IsFloatingWindowLocked}"
+        <!-- Locked chrome: click-through elsewhere, but drag + unlock stay interactive. -->
+        <Border x:Name="LockedChrome"
+                Classes="EcFloatShell"
+                Padding="4,3"
                 HorizontalAlignment="Right" VerticalAlignment="Top"
-                Margin="5"
-                ToolTip.Tip="Unlock Window">
-             <avalonia:MaterialIcon Kind="Lock" Width="16" Height="16" Foreground="White" Opacity="0.5"/>
-        </Button>
+                Margin="8"
+                IsVisible="{Binding IsFloatingWindowLocked}"
+                Opacity="0">
+            <StackPanel Orientation="Horizontal" Spacing="2">
+                <Border x:Name="LockedDragHandle"
+                        Padding="6,4"
+                        CornerRadius="6"
+                        Cursor="SizeAll"
+                        Background="Transparent"
+                        ToolTip.Tip="{x:Static lang:Resources.FloatingWindow}"
+                        PointerPressed="OnLockedDragPointerPressed">
+                    <avalonia:MaterialIcon Kind="Drag" Width="16" Height="16"
+                                           Foreground="{DynamicResource EcTextPrimary}"
+                                           Opacity="0.85"/>
+                </Border>
+                <Button x:Name="UnlockBtn"
+                        Command="{Binding ToggleLockCommand}"
+                        Classes="EcToolbarBtnSm"
+                        ToolTip.Tip="{x:Static lang:Resources.FloatingWindow_Unlock}"
+                        AutomationProperties.Name="{x:Static lang:Resources.FloatingWindow_Unlock}">
+                    <avalonia:MaterialIcon Kind="Lock" Width="15" Height="15"
+                                           Foreground="{DynamicResource EcTextPrimary}" Opacity="0.9"/>
+                </Button>
+            </StackPanel>
+        </Border>
 
         <!-- Resize Grip -->
-         <avalonia:MaterialIcon Kind="ResizeBottomRight" 
-                               Width="24" Height="24" 
-                               Foreground="White"
-                               Opacity="0.8"
+         <avalonia:MaterialIcon Kind="ResizeBottomRight"
+                               Width="24" Height="24"
+                               Foreground="{DynamicResource EcTextPrimary}"
+                               Opacity="0.75"
                                VerticalAlignment="Bottom"
                                HorizontalAlignment="Right"
                                Cursor="BottomRightCorner"

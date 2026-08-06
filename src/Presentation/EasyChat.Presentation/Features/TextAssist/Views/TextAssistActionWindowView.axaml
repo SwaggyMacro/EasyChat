@@ -3,17 +3,19 @@
                  xmlns:suki="https://github.com/kikipoulet/SukiUI"
                  xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
                  xmlns:converters="clr-namespace:EasyChat.Presentation.Foundation.Formatting"
+                 xmlns:lang="clr-namespace:EasyChat.Presentation.Lang"
                  xmlns:vm="using:EasyChat.Presentation.Features.TextAssist"
                  x:Class="EasyChat.Presentation.Features.TextAssist.Views.TextAssistActionWindowView"
                  x:DataType="vm:TextAssistResultWindowViewModel"
                  Width="820" Height="520" WindowStartupLocation="CenterScreen" Title="{Binding Title}"
-                 Foreground="{DynamicResource SukiText}">
-    <Grid Margin="24" RowDefinitions="Auto,*,Auto" RowSpacing="12">
-        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+                 Foreground="{DynamicResource EcTextPrimary}">
+    <Grid Margin="24" RowDefinitions="Auto,*,Auto,Auto" RowSpacing="14">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
             <StackPanel Orientation="Horizontal" Spacing="9" VerticalAlignment="Center">
-                <icons:MaterialIcon Kind="{Binding WindowIcon}" Width="24" Height="24"
-                                    Foreground="{DynamicResource SukiPrimaryColor}" />
-                <TextBlock Text="{Binding Title}" FontSize="22" FontWeight="Bold" />
+                <icons:MaterialIcon Kind="{Binding WindowIcon}" Width="22" Height="22"
+                                    Foreground="{DynamicResource EcAccent}" />
+                <TextBlock Text="{Binding Title}" FontSize="20" FontWeight="SemiBold"
+                           Foreground="{DynamicResource EcTextPrimary}" />
             </StackPanel>
             <ComboBox Grid.Column="1" Width="180" ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedSourceLanguage}" IsVisible="{Binding ShowLanguageSelector}">
                 <ComboBox.ItemTemplate><DataTemplate><StackPanel Orientation="Horizontal" Spacing="7">
@@ -27,22 +29,47 @@
                         <TextBlock Text="{Binding Converter={x:Static converters:LanguageSettingsConverters.ToDisplayName}}" VerticalAlignment="Center" />
                 </StackPanel></DataTemplate></ComboBox.ItemTemplate>
             </ComboBox>
-            <Button Grid.Column="2" Classes="Basic" Command="{Binding RetryCommand}"><icons:MaterialIcon Kind="Refresh" /></Button>
         </Grid>
         <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="14">
-            <TextBox Text="{Binding SourceText, Mode=TwoWay}" AcceptsReturn="True" TextWrapping="Wrap" PlaceholderText="Enter text..." />
-            <Border Grid.Column="1" Padding="12" Background="{DynamicResource SukiCardBackground}" CornerRadius="8">
+            <Border Classes="EcSurface" Padding="12">
+                <TextBox Text="{Binding SourceText, Mode=TwoWay}"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         PlaceholderText="{x:Static lang:Resources.TextAssistInputPlaceholderText}" />
+            </Border>
+            <Border Grid.Column="1" Classes="EcSurface" Padding="14">
                 <Grid>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding !IsBusy}">
-                        <StackPanel Spacing="16">
-                            <TextBlock Text="{Binding Result}" TextWrapping="Wrap" />
+                        <StackPanel Spacing="14">
+                            <TextBlock Text="{Binding Result}"
+                                       TextWrapping="Wrap"
+                                       Foreground="{DynamicResource EcTextPrimary}" />
                             <StackPanel Spacing="8" IsVisible="{Binding HasPolishExplanations}">
-                                <StackPanel Orientation="Horizontal" Spacing="7"><icons:MaterialIcon Kind="BookOpenVariant" Foreground="{DynamicResource SukiPrimaryColor}" /><TextBlock Text="{Binding PolishExplanationTitle}" FontWeight="SemiBold" /></StackPanel>
-                                <ItemsControl ItemsSource="{Binding PolishExplanations}"><ItemsControl.ItemTemplate><DataTemplate>
-                                    <Border Padding="10" Margin="0,0,0,7" CornerRadius="6" Background="{DynamicResource SukiBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1">
-                                        <StackPanel Spacing="4"><TextBlock Text="{Binding Category}" FontWeight="SemiBold" Foreground="{DynamicResource SukiPrimaryColor}" /><TextBlock Text="{Binding Explanation}" TextWrapping="Wrap" /><TextBlock Text="{Binding Revised}" TextWrapping="Wrap" Opacity="0.7" IsVisible="{Binding HasRevised}" /></StackPanel>
-                                    </Border>
-                                </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+                                <StackPanel Orientation="Horizontal" Spacing="7">
+                                    <icons:MaterialIcon Kind="BookOpenVariant" Foreground="{DynamicResource EcAccent}" />
+                                    <TextBlock Text="{Binding PolishExplanationTitle}"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource EcTextPrimary}" />
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding PolishExplanations}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Padding="10" Margin="0,0,0,7" Classes="EcSurfaceMuted">
+                                                <StackPanel Spacing="4">
+                                                    <TextBlock Text="{Binding Category}" FontWeight="SemiBold"
+                                                               Foreground="{DynamicResource EcAccent}" />
+                                                    <TextBlock Text="{Binding Explanation}" TextWrapping="Wrap"
+                                                               Foreground="{DynamicResource EcTextPrimary}" />
+                                                    <TextBlock Text="{Binding Revised}" TextWrapping="Wrap"
+                                                               Foreground="{DynamicResource EcTextSecondary}"
+                                                               IsVisible="{Binding HasRevised}" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
@@ -50,6 +77,32 @@
                 </Grid>
             </Border>
         </Grid>
-        <TextBlock Grid.Row="2" Text="{Binding ErrorMessage}" Foreground="IndianRed" TextWrapping="Wrap" />
+        <TextBlock Grid.Row="2"
+                   Text="{Binding ErrorMessage}"
+                   Foreground="{DynamicResource EcDanger}"
+                   TextWrapping="Wrap" />
+        <!-- Sticky action bar: Retry + Copy as primary outcomes -->
+        <Border Grid.Row="3"
+                Classes="EcSurfaceMuted"
+                Padding="12,10">
+            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+                <Button Classes="EcGhost"
+                        Command="{Binding RetryCommand}"
+                        IsEnabled="{Binding !IsBusy}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <icons:MaterialIcon Kind="Refresh" Width="16" Height="16" />
+                        <TextBlock Text="{x:Static lang:Resources.Retry}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="EcPrimary"
+                        Click="OnCopyClick"
+                        IsEnabled="{Binding !IsBusy}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <icons:MaterialIcon Kind="ContentCopy" Width="16" Height="16" />
+                        <TextBlock Text="{x:Static lang:Resources.Copy}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
     </Grid>
 </suki:SukiWindow>

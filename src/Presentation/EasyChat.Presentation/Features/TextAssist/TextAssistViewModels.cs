@@ -53,6 +53,8 @@ namespace EasyChat.Presentation.Features.TextAssist
             get => _selectedTabIndex;
             set
             {
+                if (_selectedTabIndex == value)
+                    return;
                 this.RaiseAndSetIfChanged(ref _selectedTabIndex, value);
                 this.RaisePropertyChanged(nameof(IsTranslationMode));
                 this.RaisePropertyChanged(nameof(IsCorrectionMode));
@@ -63,8 +65,25 @@ namespace EasyChat.Presentation.Features.TextAssist
             }
         }
 
-        public bool IsTranslationMode => SelectedTabIndex == 0;
-        public bool IsCorrectionMode => SelectedTabIndex == 1;
+        public bool IsTranslationMode
+        {
+            get => SelectedTabIndex == 0;
+            set
+            {
+                if (value)
+                    SelectedTabIndex = 0;
+            }
+        }
+
+        public bool IsCorrectionMode
+        {
+            get => SelectedTabIndex == 1;
+            set
+            {
+                if (value)
+                    SelectedTabIndex = 1;
+            }
+        }
         public string WindowTitle => IsCorrectionMode ? Resources.TextAssistCorrect : Resources.TextAssistTranslate;
         public MaterialIconKind WindowIcon => IsCorrectionMode ? MaterialIconKind.Spellcheck : MaterialIconKind.Translate;
         public bool IsCapturingInput { get => _isCapturingInput; private set => this.RaiseAndSetIfChanged(ref _isCapturingInput, value); }
@@ -96,38 +115,6 @@ namespace EasyChat.Presentation.Features.TextAssist
             Translation.CancelCurrent();
             Correction.CancelCurrent();
         }
-    }
-
-    public sealed class TextAssistTranslationPageViewModel : NavigationPageViewModel
-    {
-        public TextAssistTranslationPageViewModel(
-            SettingsSession settings,
-            TranslationLanguageOptions languages,
-            ITextAssistUseCases textAssist,
-            ITranslationWindowCoordinator dictionary,
-            ITtsUseCases tts,
-            ILogger<TextAssistTranslationPageViewModel> logger)
-            : base(Resources.TextAssistTranslate, MaterialIconKind.Translate, 5)
-        {
-            Translation = new TextAssistTranslationViewModel(settings, languages, textAssist, dictionary, tts, logger);
-        }
-
-        public TextAssistTranslationViewModel Translation { get; }
-    }
-
-    public sealed class TextAssistCorrectionPageViewModel : NavigationPageViewModel
-    {
-        public TextAssistCorrectionPageViewModel(
-            SettingsSession settings,
-            TranslationLanguageOptions languages,
-            ITextAssistUseCases textAssist,
-            ILogger<TextAssistCorrectionPageViewModel> logger)
-            : base(Resources.TextAssistCorrect, MaterialIconKind.Spellcheck, 6)
-        {
-            Correction = new TextAssistCorrectionViewModel(settings, languages, textAssist, logger);
-        }
-
-        public TextAssistCorrectionViewModel Correction { get; }
     }
 
     public abstract class TextAssistEditorViewModel : ViewModelBase
@@ -516,6 +503,7 @@ namespace EasyChat.Presentation.Features.TextAssist
         public ObservableCollection<CorrectionTextSegment> CorrectionSegments { get; } = [];
         public bool HasCorrectedResults => CorrectionVariants.Count > 0;
         public bool HasCorrectionIssues => Issues.Count > 0;
+        public bool HasCorrectionOutput => HasCorrectedResults || HasCorrectionIssues;
 
         protected override async Task RunCoreAsync(CancellationToken cancellationToken)
         {
@@ -546,6 +534,7 @@ namespace EasyChat.Presentation.Features.TextAssist
             RebuildCorrectionSegments();
             this.RaisePropertyChanged(nameof(HasCorrectedResults));
             this.RaisePropertyChanged(nameof(HasCorrectionIssues));
+            this.RaisePropertyChanged(nameof(HasCorrectionOutput));
         }
 
         private void ResetResults()
@@ -556,6 +545,7 @@ namespace EasyChat.Presentation.Features.TextAssist
             CorrectionSegments.Clear();
             this.RaisePropertyChanged(nameof(HasCorrectedResults));
             this.RaisePropertyChanged(nameof(HasCorrectionIssues));
+            this.RaisePropertyChanged(nameof(HasCorrectionOutput));
         }
 
         private void RebuildCorrectionSegments()

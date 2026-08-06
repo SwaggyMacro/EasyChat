@@ -1,4 +1,3 @@
-using Avalonia.Controls.Notifications;
 using EasyChat.Contracts.AiModels;
 using EasyChat.Contracts.Settings;
 using EasyChat.Contracts.Speech;
@@ -7,50 +6,56 @@ using EasyChat.Presentation.Features.Capture;
 using EasyChat.Presentation.Features.Settings.State;
 using EasyChat.Presentation.Features.Settings.Translation;
 using EasyChat.Presentation.Features.Speech;
-using SukiUI.Dialogs;
-using SukiUI.Toasts;
+using EasyChat.Presentation.Foundation.UiHost;
 
 namespace EasyChat.Presentation.Features.Settings;
 
 public sealed class SukiSettingsDialogCoordinator(
-    ISukiDialogManager dialogs,
-    ISukiToastManager toasts,
+    IUiDialogHost dialogs,
+    IUiToastHost toasts,
     SettingsSession settings,
     IAiModelCatalogTransport modelCatalog,
     ITtsUseCases tts,
     IScreenRegionPicker regionPicker) : ISettingsDialogCoordinator
 {
-    private readonly ISukiDialogManager _dialogs = dialogs;
-    private readonly ISukiToastManager _toasts = toasts;
+    private readonly IUiDialogHost _dialogs = dialogs;
+    private readonly IUiToastHost _toasts = toasts;
     private readonly SettingsSession _settings = settings;
     private readonly IAiModelCatalogTransport _modelCatalog = modelCatalog;
     private readonly ITtsUseCases _tts = tts;
     private readonly IScreenRegionPicker _regionPicker = regionPicker;
 
-    public void EditAiModel(CustomAiModelState? model) => _dialogs.CreateDialog()
-        .WithTitle(model is null ? Resources.AddModel : Resources.EditModel)
-        .WithViewModel(dialog => new AiModelEditDialogViewModel(dialog, _modelCatalog, model)
+    public void EditAiModel(CustomAiModelState? model) => _dialogs.ShowContent(new UiContentDialogOptions
+    {
+        Title = model is null ? Resources.AddModel : Resources.EditModel,
+        CreateContent = session => new AiModelEditDialogViewModel(session, _modelCatalog, model)
         {
             OnClose = result => SaveModel(model, result)
-        })
-        .TryShow();
+        }
+    });
 
-    public void DeleteAiModel(CustomAiModelState model) => _dialogs.CreateDialog()
-        .WithTitle(Resources.ConfirmDeletion)
-        .WithContent(Resources.ConfirmDeleteModel)
-        .OfType(NotificationType.Warning)
-        .WithActionButton(Resources.Delete, _ => _settings.AiModel.ConfiguredModels.Remove(model), true, "Flat", "Danger")
-        .WithActionButton(Resources.Cancel, _ => { }, true, string.Empty)
-        .TryShow();
+    public void DeleteAiModel(CustomAiModelState model) => _dialogs.ShowMessage(new UiMessageDialogOptions
+    {
+        Title = Resources.ConfirmDeletion,
+        Message = Resources.ConfirmDeleteModel,
+        Severity = UiMessageSeverity.Warning,
+        PrimaryText = Resources.Delete,
+        PrimaryIsDanger = true,
+        OnPrimary = () => _settings.AiModel.ConfiguredModels.Remove(model),
+        SecondaryText = Resources.Cancel
+    });
 
     public void ConfirmDeleteAsrModel(SpeechRecognitionModel model, Action onConfirmed) =>
-        _dialogs.CreateDialog()
-            .WithTitle(Resources.ConfirmDeletion)
-            .WithContent(string.Format(Resources.ConfirmDeleteAsrModel, model.Id))
-            .OfType(NotificationType.Warning)
-            .WithActionButton(Resources.Delete, _ => onConfirmed(), true, "Flat", "Danger")
-            .WithActionButton(Resources.Cancel, _ => { }, true, string.Empty)
-            .TryShow();
+        _dialogs.ShowMessage(new UiMessageDialogOptions
+        {
+            Title = Resources.ConfirmDeletion,
+            Message = string.Format(Resources.ConfirmDeleteAsrModel, model.Id),
+            Severity = UiMessageSeverity.Warning,
+            PrimaryText = Resources.Delete,
+            PrimaryIsDanger = true,
+            OnPrimary = onConfirmed,
+            SecondaryText = Resources.Cancel
+        });
 
     public void EditAiModelKeys(CustomAiModelState model) => ShowStringKeys(
         $"{model.Name} API Keys",
@@ -113,17 +118,19 @@ public sealed class SukiSettingsDialogCoordinator(
         _settings.MachineTranslation.DeepL.ApiKeys,
         values => Replace(_settings.MachineTranslation.DeepL.ApiKeys, values));
 
-    public void ManageFixedAreas() => _dialogs.CreateDialog()
-        .WithTitle(Resources.FixedAreas)
-        .WithViewModel(dialog => new FixedAreaEditDialogViewModel(
-            _dialogs, dialog, _settings, _regionPicker))
-        .TryShow();
+    public void ManageFixedAreas() => _dialogs.ShowContent(new UiContentDialogOptions
+    {
+        Title = Resources.FixedAreas,
+        CreateContent = session => new FixedAreaEditDialogViewModel(
+            _dialogs, session, _settings, _regionPicker)
+    });
 
-    public void ConfigureTts() => _dialogs.CreateDialog()
-        .WithTitle(Resources.Tts_Configuration)
-        .WithViewModel(dialog => new TtsVoiceSettingsDialogViewModel(
-            _dialogs, dialog, _toasts, _tts, _settings.Tts))
-        .TryShow();
+    public void ConfigureTts() => _dialogs.ShowContent(new UiContentDialogOptions
+    {
+        Title = Resources.Tts_Configuration,
+        CreateContent = session => new TtsVoiceSettingsDialogViewModel(
+            _dialogs, session, _toasts, _tts, _settings.Tts)
+    });
 
     private void SaveModel(CustomAiModelState? existing, CustomAiModelSettings? value)
     {
@@ -162,13 +169,14 @@ public sealed class SukiSettingsDialogCoordinator(
         string title,
         KeyListType type,
         IEnumerable<KeyItemViewModelBase> items,
-        Action<IReadOnlyList<KeyItemViewModelBase>> save) => _dialogs.CreateDialog()
-        .WithTitle(title)
-        .WithViewModel(dialog => new KeyListEditorViewModel(dialog, title, type, items)
+        Action<IReadOnlyList<KeyItemViewModelBase>> save) => _dialogs.ShowContent(new UiContentDialogOptions
+    {
+        Title = title,
+        CreateContent = session => new KeyListEditorViewModel(session, title, type, items)
         {
             OnSave = save
-        })
-        .TryShow();
+        }
+    });
 
     private static void Replace<T>(ICollection<T> target, IEnumerable<T> values)
     {

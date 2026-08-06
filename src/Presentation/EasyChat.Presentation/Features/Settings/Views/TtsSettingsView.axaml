@@ -6,24 +6,24 @@
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
              xmlns:viewModels="clr-namespace:EasyChat.Presentation.Features.Settings"
              xmlns:lang="clr-namespace:EasyChat.Presentation.Lang;assembly=EasyChat.Presentation"
+             xmlns:ec="clr-namespace:EasyChat.Presentation.Shared.Controls;assembly=EasyChat.Presentation.Shared"
              x:DataType="viewModels:SettingViewModel"
              mc:Ignorable="d">
-    <suki:GlassCard>
-        <StackPanel>
-            <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
-                <TextBlock FontWeight="Bold" VerticalAlignment="Center"
-                           Text="{x:Static lang:Resources.TransEngine}" />
-                <!-- Using TransEngine label for Provider/Engine -->
+    <StackPanel Classes="EcSettingsList"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Stretch">
+            <ec:EcSettingRow Label="{x:Static lang:Resources.Tts_Provider}"
+                             IsVisible="{Binding SearchText, Converter={x:Static viewModels:SettingsFieldVisibleConverter.Instance}, ConverterParameter='tts provider voice 语音 提供商'}">
                 <ComboBox ItemsSource="{Binding TtsProviders}"
                           SelectedItem="{Binding SelectedTtsProvider}"
-                          MinWidth="150" />
-            </StackPanel>
-            
+                          HorizontalAlignment="Stretch" />
+            </ec:EcSettingRow>
+
             <Button Content="{x:Static lang:Resources.Tts_ConfigureVoices}"
-                    Command="{Binding ConfigureTtsCommand}" 
-                    HorizontalAlignment="Left"
-                    Classes="Flat"
-                    Margin="0,5,0,0"/>
-        </StackPanel>
-    </suki:GlassCard>
+                    Command="{Binding ConfigureTtsCommand}"
+                    HorizontalAlignment="Stretch"
+                    Classes="EcGhost"
+                    Margin="8,8,8,0"
+                    IsVisible="{Binding SearchText, Converter={x:Static viewModels:SettingsFieldVisibleConverter.Instance}, ConverterParameter='tts voice configure 音色 配置'}" />
+    </StackPanel>
 </UserControl>

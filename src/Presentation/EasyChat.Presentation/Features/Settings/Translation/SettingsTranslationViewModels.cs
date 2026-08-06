@@ -5,14 +5,14 @@ using EasyChat.Contracts.Settings;
 using EasyChat.Presentation.Features.Settings.State;
 using EasyChat.Presentation.Foundation.Navigation;
 using EasyChat.Presentation.Lang;
+using EasyChat.Presentation.Foundation.UiHost;
 using ReactiveUI;
-using SukiUI.Dialogs;
 
 namespace EasyChat.Presentation.Features.Settings.Translation
 {
     public sealed class AiModelEditDialogViewModel : ConventionViewModelBase
     {
-        private readonly ISukiDialog _dialog;
+        private readonly IUiDialogSession _dialog;
         private readonly IAiModelCatalogTransport _catalog;
         private readonly CustomAiModelState? _existing;
         private CancellationTokenSource? _scheduledModelFetch;
@@ -30,7 +30,7 @@ namespace EasyChat.Presentation.Features.Settings.Translation
         private bool _enableThinking;
 
         public AiModelEditDialogViewModel(
-            ISukiDialog dialog,
+            IUiDialogSession dialog,
             IAiModelCatalogTransport catalog,
             CustomAiModelState? existing = null)
         {
@@ -358,11 +358,11 @@ namespace EasyChat.Presentation.Features.Settings.Translation
 
     public sealed class KeyListEditorViewModel : ConventionViewModelBase
     {
-        private readonly ISukiDialog _dialog;
+        private readonly IUiDialogSession _dialog;
         private readonly KeyListType _type;
 
         public KeyListEditorViewModel(
-            ISukiDialog dialog,
+            IUiDialogSession dialog,
             string title,
             KeyListType type,
             IEnumerable<KeyItemViewModelBase> items)

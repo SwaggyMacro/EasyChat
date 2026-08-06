@@ -1,0 +1,1616 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:suki="https://github.com/kikipoulet/SukiUI"
+        xmlns:content="clr-namespace:SukiUI.Content;assembly=SukiUI"
+        xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:ec="clr-namespace:EasyChat.Presentation.Shared.Controls;assembly=EasyChat.Presentation.Shared">
+
+    <!-- EcSettingRow template lives in EcSettingRowTheme.axaml (ControlTheme). -->
+
+    <!--
+      Compact product tooltip — overrides Suki's padded card (16×8 / r12 / heavy popup shadow)
+      that reads as a floating white blob on toolbar icons.
+    -->
+    <Styles.Resources>
+        <ControlTheme x:Key="{x:Type ToolTip}" TargetType="ToolTip">
+            <Setter Property="Foreground" Value="{DynamicResource EcTextPrimary}" />
+            <Setter Property="Background" Value="{DynamicResource EcBgElevated}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="8,5" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="FontFamily" Value="{DynamicResource EcFontFamily}" />
+            <Setter Property="FontSize" Value="{DynamicResource EcFontSizeSm}" />
+            <Setter Property="MaxWidth" Value="280" />
+            <Setter Property="Placement" Value="Bottom" />
+            <Setter Property="HorizontalOffset" Value="0" />
+            <Setter Property="VerticalOffset" Value="6" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{DynamicResource EcRadiusSm}"
+                            BoxShadow="{DynamicResource EcShadowTooltip}"
+                            Padding="{TemplateBinding Padding}"
+                            MaxWidth="{TemplateBinding MaxWidth}">
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          TextElement.Foreground="{TemplateBinding Foreground}"
+                                          TextElement.FontFamily="{TemplateBinding FontFamily}"
+                                          TextElement.FontSize="{TemplateBinding FontSize}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+
+        <!--
+          Ec dialog shell — replaces Suki's glass card + 55px badge offset + floating orange circle.
+          ViewModel-only content (all EasyChat dialogs) fills a solid Ec surface with float shadow.
+        -->
+        <ControlTheme x:Key="{x:Type suki:SukiDialog}" TargetType="suki:SukiDialog">
+            <Setter Property="ClipToBounds" Value="False" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Panel>
+                        <!-- No BoxShadow: host scrim already lifts the card; extra halo looked like a second “built-in” shadow. -->
+                        <Border Background="{DynamicResource EcBgElevated}"
+                                BorderBrush="{DynamicResource EcBorder}"
+                                BorderThickness="1"
+                                CornerRadius="{DynamicResource EcRadiusXl}"
+                                ClipToBounds="True"
+                                MinWidth="360"
+                                MaxWidth="560"
+                                Margin="24">
+                            <Panel>
+                                <!-- Legacy title/content/actions path (unused by EasyChat hosts) -->
+                                <Grid RowDefinitions="Auto,*,Auto"
+                                      Margin="22,18"
+                                      IsVisible="{Binding !IsViewModelOnly, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <TextBlock Margin="0,0,0,12"
+                                               IsVisible="{TemplateBinding Title, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                               FontSize="18"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource EcTextPrimary}"
+                                               Text="{TemplateBinding Title}"
+                                               TextWrapping="Wrap" />
+                                    <ContentControl Grid.Row="1"
+                                                    Content="{TemplateBinding Content}" />
+                                    <ItemsControl Grid.Row="2"
+                                                  Margin="0,18,0,0"
+                                                  ItemsSource="{TemplateBinding ActionButtons}"
+                                                  HorizontalAlignment="Right">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="10" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </Grid>
+
+                                <!-- All EasyChat dialogs: ViewModel body owns chrome -->
+                                <ContentControl Content="{TemplateBinding ViewModel}"
+                                                IsVisible="{TemplateBinding IsViewModelOnly}" />
+                            </Panel>
+                        </Border>
+                    </Panel>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+
+        <!--
+          Side menu: collapse control at bottom-center of the pane
+          (Linear / VS Code / Discord rail) instead of Suki's top chevron.
+        -->
+        <!--
+          Compact nav rows. Icon+label when open; icon-only tile centered when collapsed
+          (left-docked icon + leftover text column caused the misaligned rail).
+        -->
+        <ControlTheme x:Key="{x:Type suki:SukiSideMenuItem}" TargetType="suki:SukiSideMenuItem">
+            <Setter Property="FontSize" Value="13.5" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="PART_Border"
+                            Margin="8,2"
+                            Padding="10,9"
+                            Background="Transparent"
+                            CornerRadius="12"
+                            HorizontalAlignment="Stretch"
+                            MinHeight="40">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <ContentControl Name="PART_Icon"
+                                            Grid.Column="0"
+                                            Width="22"
+                                            Height="22"
+                                            Content="{TemplateBinding Icon}"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center" />
+                            <TextBlock Name="PART_Header"
+                                       Grid.Column="1"
+                                       Margin="12,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="{TemplateBinding FontSize}"
+                                       IsVisible="{Binding IsMenuExpanded, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type suki:SukiSideMenu}}}"
+                                       Text="{TemplateBinding Header}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+            <Style Selector="^:pointerover /template/ Border#PART_Border">
+                <Setter Property="Background" Value="{DynamicResource EcBgHover}" />
+                <Setter Property="Cursor" Value="Hand" />
+            </Style>
+            <Style Selector="^[IsSelected=True] /template/ Border#PART_Border">
+                <Setter Property="Background" Value="{DynamicResource EcAccentSoft}" />
+            </Style>
+            <Style Selector="^[IsSelected=True] /template/ TextBlock#PART_Header">
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="{DynamicResource EcAccent}" />
+            </Style>
+        </ControlTheme>
+
+        <ControlTheme x:Key="{x:Type suki:SukiSideMenu}" TargetType="suki:SukiSideMenu">
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+            <Setter Property="OpenPaneLength" Value="232" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <SplitView DisplayMode="CompactInline"
+                               IsPaneOpen="{TemplateBinding IsMenuExpanded}"
+                               OpenPaneLength="{TemplateBinding OpenPaneLength}">
+                        <SplitView.Pane>
+                            <Border Margin="{Binding ShowTitlebarBackground, Converter={x:Static suki:WindowBackgroundToMarginConverter.Instance}, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type suki:SukiWindow}}}">
+                                <Grid Background="Transparent">
+                                    <Grid.Styles>
+                                        <Style Selector="suki|GlassCard">
+                                            <Setter Property="CornerRadius" Value="0" />
+                                        </Style>
+                                    </Grid.Styles>
+                                    <suki:GlassCard Name="Glass"
+                                                    BorderThickness="0,0,1,0"
+                                                    CornerRadius="{Binding ShowTitlebarBackground, Converter={x:Static suki:WindowBackgroundToCornerRadiusConverter.Instance}, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type suki:SukiWindow}}}"
+                                                    IsAnimated="False" />
+                                    <DockPanel>
+                                        <Grid MinHeight="{TemplateBinding HeaderMinHeight}"
+                                              DockPanel.Dock="Top"
+                                              IsVisible="{TemplateBinding IsMenuExpanded}">
+                                            <ContentPresenter Content="{TemplateBinding HeaderContent}" />
+                                        </Grid>
+
+                                        <!--
+                                          Bottom control matches nav icon wells: soft 36px tile, centered.
+                                          Not a full-width bar (that fought the pill-nav language above).
+                                        -->
+                                        <Border DockPanel.Dock="Bottom"
+                                                Padding="0,6,0,14"
+                                                Background="Transparent">
+                                            <DockPanel>
+                                                <ContentControl Content="{TemplateBinding FooterContent}"
+                                                                DockPanel.Dock="Top"
+                                                                Margin="0,0,0,6"
+                                                                IsVisible="{TemplateBinding IsMenuExpanded}"
+                                                                HorizontalAlignment="Stretch" />
+                                                <Button Name="PART_SidebarToggleButton"
+                                                        Width="36" Height="36"
+                                                        MinWidth="36"
+                                                        Padding="0"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        Cursor="Hand"
+                                                        Background="{DynamicResource EcAccentSoft}"
+                                                        BorderThickness="0"
+                                                        CornerRadius="10"
+                                                        IsVisible="{TemplateBinding SidebarToggleEnabled}">
+                                                    <Button.Template>
+                                                        <ControlTemplate>
+                                                            <Border Name="ToggleRoot"
+                                                                    Background="{TemplateBinding Background}"
+                                                                    CornerRadius="{TemplateBinding CornerRadius}"
+                                                                    Width="{TemplateBinding Width}"
+                                                                    Height="{TemplateBinding Height}">
+                                                                <ContentPresenter Content="{TemplateBinding Content}"
+                                                                                  HorizontalAlignment="Center"
+                                                                                  VerticalAlignment="Center" />
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                    <!-- Same family as nav row icons; chevron = clear collapse affordance -->
+                                                    <icons:MaterialIcon Name="PART_ExpandIcon"
+                                                                        Kind="ChevronLeft"
+                                                                        Width="18" Height="18"
+                                                                        Foreground="{DynamicResource EcTextSecondary}">
+                                                        <icons:MaterialIcon.Transitions>
+                                                            <Transitions>
+                                                                <TransformOperationsTransition Property="RenderTransform"
+                                                                                               Duration="0:0:0.18" />
+                                                            </Transitions>
+                                                        </icons:MaterialIcon.Transitions>
+                                                    </icons:MaterialIcon>
+                                                </Button>
+                                            </DockPanel>
+                                        </Border>
+
+                                        <Grid Name="PART_Spacer"
+                                              Height="8"
+                                              DockPanel.Dock="Top" />
+
+                                        <DockPanel>
+                                            <StackPanel DockPanel.Dock="Top"
+                                                        IsVisible="{TemplateBinding IsSearchEnabled}">
+                                                <suki:GlassCard Width="42"
+                                                                Height="42"
+                                                                Margin="15,10,15,15"
+                                                                HorizontalAlignment="Right"
+                                                                Classes="Search"
+                                                                CornerRadius="22"
+                                                                IsAnimated="False"
+                                                                IsVisible="{TemplateBinding IsMenuExpanded}">
+                                                    <DockPanel Margin="-1,-1,0,0">
+                                                        <PathIcon Width="13"
+                                                                  Height="13"
+                                                                  VerticalAlignment="Center"
+                                                                  Data="{x:Static content:Icons.Search}"
+                                                                  DockPanel.Dock="Left"
+                                                                  Foreground="{DynamicResource SukiLowText}" />
+                                                        <TextBox BorderThickness="0"
+                                                                 Classes="NoShadow"
+                                                                 Text="{TemplateBinding SearchText, Mode=TwoWay}"
+                                                                 PlaceholderText="Search" />
+                                                    </DockPanel>
+                                                </suki:GlassCard>
+                                            </StackPanel>
+                                            <ScrollViewer Name="PART_ScrollViewer"
+                                                          AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}"
+                                                          Background="{TemplateBinding Background}"
+                                                          BringIntoViewOnFocusChange="{TemplateBinding (ScrollViewer.BringIntoViewOnFocusChange)}"
+                                                          Classes="Stack"
+                                                          HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                                                          HorizontalSnapPointsType="{TemplateBinding (ScrollViewer.HorizontalSnapPointsType)}"
+                                                          IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
+                                                          VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                                                          VerticalSnapPointsType="{TemplateBinding (ScrollViewer.VerticalSnapPointsType)}">
+                                                <StackPanel>
+                                                    <ItemsPresenter Name="PART_ItemsPresenter"
+                                                                    Margin="{TemplateBinding Padding}"
+                                                                    ItemsPanel="{TemplateBinding ItemsPanel}" />
+                                                </StackPanel>
+                                            </ScrollViewer>
+                                        </DockPanel>
+                                    </DockPanel>
+                                </Grid>
+                            </Border>
+                        </SplitView.Pane>
+                        <Border Name="ContentBorder"
+                                Background="{DynamicResource SukiBackground}"
+                                IsVisible="{TemplateBinding IsContentVisible}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch">
+                            <!--
+                              Suki buffers default to content-sized presenters; without Stretch the
+                              page never receives the pane height and * rows stay empty white.
+                            -->
+                            <suki:SukiTransitioningContentControl Name="PART_TransitioningContentControl"
+                                                                  HorizontalAlignment="Stretch"
+                                                                  VerticalAlignment="Stretch">
+                                <suki:SukiTransitioningContentControl.Styles>
+                                    <Style Selector="ContentPresenter">
+                                        <Setter Property="HorizontalAlignment" Value="Stretch" />
+                                        <Setter Property="VerticalAlignment" Value="Stretch" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                                    </Style>
+                                </suki:SukiTransitioningContentControl.Styles>
+                            </suki:SukiTransitioningContentControl>
+                        </Border>
+                    </SplitView>
+                </ControlTemplate>
+            </Setter>
+            <!-- Single /template/ only — Avalonia rejects nested template selectors in ControlTheme. -->
+            <Style Selector="^ /template/ Button#PART_SidebarToggleButton:pointerover">
+                <Setter Property="Background" Value="{DynamicResource EcAccentMuted}" />
+            </Style>
+            <Style Selector="^ /template/ Button#PART_SidebarToggleButton:pointerover icons|MaterialIcon#PART_ExpandIcon">
+                <Setter Property="Foreground" Value="{DynamicResource EcAccent}" />
+            </Style>
+            <Style Selector="^ /template/ Button#PART_SidebarToggleButton:pressed">
+                <Setter Property="Background" Value="{DynamicResource EcBgHover}" />
+            </Style>
+            <Style Selector="^[IsToggleButtonVisible=False]">
+                <Style Selector="^[IsMenuExpanded=False]">
+                    <Style Selector="^ /template/ Button#PART_SidebarToggleButton">
+                        <Setter Property="Opacity" Value="0" />
+                        <Setter Property="IsVisible" Value="False" />
+                    </Style>
+                </Style>
+                <Style Selector="^[IsMenuExpanded=True]">
+                    <Style Selector="^ /template/ Button#PART_SidebarToggleButton">
+                        <Setter Property="Opacity" Value="0" />
+                        <Setter Property="IsHitTestVisible" Value="False" />
+                    </Style>
+                </Style>
+            </Style>
+            <Style Selector="^[IsMenuExpanded=False]">
+                <Style Selector="^ /template/ icons|MaterialIcon#PART_ExpandIcon">
+                    <Setter Property="RenderTransform" Value="rotate(180deg)" />
+                </Style>
+                <Style Selector="^ /template/ Grid#PART_Spacer">
+                    <Setter Property="Height" Value="0" />
+                </Style>
+            </Style>
+        </ControlTheme>
+    </Styles.Resources>
+
+    <!-- Collapsed rail: square icon tiles, icon dead-center (no left-biased dock layout). -->
+    <Style Selector="suki|SukiSideMenu[IsMenuExpanded=False] suki|SukiSideMenuItem">
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="suki|SukiSideMenu[IsMenuExpanded=False] suki|SukiSideMenuItem /template/ Border#PART_Border">
+        <Setter Property="Width" Value="40" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="MinHeight" Value="40" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0,3" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="suki|SukiSideMenu[IsMenuExpanded=False] suki|SukiSideMenuItem /template/ ContentControl#PART_Icon">
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Margin" Value="0" />
+        <!-- Span both columns so Auto|* does not pin the glyph to the left. -->
+        <Setter Property="Grid.ColumnSpan" Value="2" />
+    </Style>
+    <Style Selector="suki|SukiSideMenu[IsMenuExpanded=False] suki|SukiSideMenuItem /template/ TextBlock#PART_Header">
+        <Setter Property="IsVisible" Value="False" />
+        <Setter Property="Width" Value="0" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+    <Style Selector="suki|SukiSideMenu[IsMenuExpanded=True] suki|SukiSideMenuItem /template/ Border#PART_Border">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
+    <!-- App-wide typeface -->
+    <Style Selector="TextBlock">
+        <Setter Property="FontFamily" Value="{DynamicResource EcFontFamily}" />
+    </Style>
+    <Style Selector="SelectableTextBlock">
+        <Setter Property="FontFamily" Value="{DynamicResource EcFontFamily}" />
+    </Style>
+    <Style Selector="Button">
+        <Setter Property="FontFamily" Value="{DynamicResource EcFontFamily}" />
+    </Style>
+    <Style Selector="TextBlock.EcMono">
+        <Setter Property="FontFamily" Value="{DynamicResource EcFontFamilyMono}" />
+    </Style>
+
+    <!--
+      Form TextBox: keep Suki's native template (caret geometry is correct there).
+      Only restyle chrome — custom TextPresenter hosts kept clipping the caret under the last glyph.
+    -->
+    <Style Selector="TextBox">
+        <Setter Property="FontFamily" Value="{DynamicResource EcFontFamily}" />
+        <Setter Property="FontSize" Value="{DynamicResource EcFontSizeMd}" />
+        <Setter Property="MinHeight" Value="{DynamicResource EcFieldHeight}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusSm}" />
+        <Setter Property="Padding" Value="{DynamicResource EcFieldPadding}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Background" Value="{DynamicResource EcFieldBg}" />
+        <Setter Property="Foreground" Value="{DynamicResource EcTextPrimary}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource EcTextPrimary}" />
+        <Setter Property="SelectionBrush" Value="{DynamicResource EcAccentMuted}" />
+        <Setter Property="SelectionForegroundBrush" Value="{DynamicResource EcTextPrimary}" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TextBox:pointerover">
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorderStrong}" />
+    </Style>
+    <Style Selector="TextBox:focus, TextBox:focus-within">
+        <Setter Property="BorderBrush" Value="{DynamicResource EcAccent}" />
+    </Style>
+    <!-- Suki paints caret via template TextPresenter; force readable brush there too. -->
+    <Style Selector="TextBox /template/ TextPresenter#PART_TextPresenter">
+        <Setter Property="CaretBrush" Value="{DynamicResource EcTextPrimary}" />
+    </Style>
+
+    <Style Selector="NumericUpDown">
+        <Setter Property="FontFamily" Value="{DynamicResource EcFontFamily}" />
+        <Setter Property="FontSize" Value="{DynamicResource EcFontSizeMd}" />
+        <Setter Property="MinHeight" Value="{DynamicResource EcFieldHeight}" />
+        <Setter Property="Height" Value="{DynamicResource EcFieldHeight}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusSm}" />
+        <Setter Property="Padding" Value="{DynamicResource EcFieldPaddingWithSpinner}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Background" Value="{DynamicResource EcFieldBg}" />
+        <Setter Property="Foreground" Value="{DynamicResource EcTextPrimary}" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="ButtonSpinnerLocation" Value="Right" />
+        <Setter Property="ShowButtonSpinner" Value="True" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        MinHeight="{TemplateBinding MinHeight}"
+                        ClipToBounds="False">
+                    <!-- PART_Spinner required so Avalonia wires spin / buttons -->
+                    <ButtonSpinner Name="PART_Spinner"
+                                   Margin="0"
+                                   Padding="0"
+                                   Background="Transparent"
+                                   BorderThickness="0"
+                                   HorizontalContentAlignment="Stretch"
+                                   VerticalContentAlignment="Center"
+                                   AllowSpin="{TemplateBinding AllowSpin}"
+                                   ShowButtonSpinner="{TemplateBinding ShowButtonSpinner}"
+                                   ButtonSpinnerLocation="{TemplateBinding ButtonSpinnerLocation}">
+                        <ButtonSpinner.Styles>
+                            <Style Selector="ButtonSpinner /template/ Border#border">
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="Margin" Value="0" />
+                                <Setter Property="Padding" Value="0" />
+                            </Style>
+                            <Style Selector="ButtonSpinner /template/ UniformGrid#PART_SpinnerPanel">
+                                <Setter Property="Width" Value="{DynamicResource EcFieldSpinnerWidth}" />
+                                <Setter Property="Margin" Value="0,0,4,0" />
+                            </Style>
+                            <Style Selector="ButtonSpinner /template/ RepeatButton">
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Cursor" Value="Hand" />
+                                <Setter Property="Template">
+                                    <ControlTemplate>
+                                        <Border Background="Transparent"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch">
+                                            <ContentPresenter HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"
+                                                              Content="{TemplateBinding Content}" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter>
+                            </Style>
+                            <Style Selector="ButtonSpinner /template/ RepeatButton#PART_IncreaseButton">
+                                <Setter Property="Content">
+                                    <Template>
+                                        <icons:MaterialIcon Kind="ChevronUp" Width="14" Height="14"
+                                                             Foreground="{DynamicResource EcTextSecondary}" />
+                                    </Template>
+                                </Setter>
+                            </Style>
+                            <Style Selector="ButtonSpinner /template/ RepeatButton#PART_DecreaseButton">
+                                <Setter Property="Content">
+                                    <Template>
+                                        <icons:MaterialIcon Kind="ChevronDown" Width="14" Height="14"
+                                                             Foreground="{DynamicResource EcTextSecondary}" />
+                                    </Template>
+                                </Setter>
+                            </Style>
+                            <Style Selector="ButtonSpinner /template/ ContentPresenter#PART_ContentPresenter">
+                                <Setter Property="Padding" Value="0" />
+                            </Style>
+                        </ButtonSpinner.Styles>
+                        <TextBox Name="PART_TextBox"
+                                 MinWidth="20"
+                                 MinHeight="{DynamicResource EcFieldHeight}"
+                                 Height="{DynamicResource EcFieldHeight}"
+                                 Padding="{DynamicResource EcFieldPaddingWithSpinner}"
+                                 Margin="0"
+                                 HorizontalContentAlignment="Left"
+                                 VerticalContentAlignment="Center"
+                                 AcceptsReturn="False"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 CornerRadius="0"
+                                 CaretBrush="{DynamicResource EcTextPrimary}"
+                                 SelectionBrush="{DynamicResource EcAccentMuted}"
+                                 FontFamily="{TemplateBinding FontFamily}"
+                                 FontSize="{TemplateBinding FontSize}"
+                                 FontWeight="{TemplateBinding FontWeight}"
+                                 Foreground="{TemplateBinding Foreground}"
+                                 IsReadOnly="{TemplateBinding IsReadOnly}"
+                                 Text="{TemplateBinding Text}"
+                                 TextWrapping="NoWrap"
+                                 PlaceholderText="{TemplateBinding Watermark}" />
+                    </ButtonSpinner>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="NumericUpDown:pointerover">
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorderStrong}" />
+    </Style>
+    <Style Selector="NumericUpDown:focus, NumericUpDown:focus-within">
+        <Setter Property="BorderBrush" Value="{DynamicResource EcAccent}" />
+    </Style>
+    <Style Selector="NumericUpDown /template/ TextBox#PART_TextBox">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="{DynamicResource EcFieldPaddingWithSpinner}" />
+        <Setter Property="MinHeight" Value="{DynamicResource EcFieldHeight}" />
+        <Setter Property="Height" Value="{DynamicResource EcFieldHeight}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource EcTextPrimary}" />
+    </Style>
+
+    <Style Selector="ComboBox">
+        <Setter Property="FontFamily" Value="{DynamicResource EcFontFamily}" />
+        <Setter Property="FontSize" Value="{DynamicResource EcFontSizeMd}" />
+        <Setter Property="MinHeight" Value="{DynamicResource EcFieldHeight}" />
+        <Setter Property="Height" Value="{DynamicResource EcFieldHeight}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusSm}" />
+        <Setter Property="Padding" Value="{DynamicResource EcFieldPaddingWithSpinner}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Background" Value="{DynamicResource EcFieldBg}" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="PlaceholderForeground" Value="{DynamicResource EcTextMuted}" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Padding="{TemplateBinding Padding}"
+                            MinHeight="{TemplateBinding MinHeight}"
+                            ClipToBounds="True">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Name="PlaceholderTextBlock"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       Foreground="{TemplateBinding PlaceholderForeground}"
+                                       IsVisible="{TemplateBinding SelectionBoxItem, Converter={x:Static ObjectConverters.IsNull}}"
+                                       Text="{TemplateBinding PlaceholderText}"
+                                       TextTrimming="CharacterEllipsis" />
+                            <ContentControl HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            HorizontalContentAlignment="Left"
+                                            VerticalContentAlignment="Center"
+                                            Content="{TemplateBinding SelectionBoxItem}"
+                                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                            Foreground="{DynamicResource EcTextPrimary}" />
+                            <ToggleButton Name="toggle"
+                                          Grid.Column="1"
+                                          Width="{DynamicResource EcFieldSpinnerWidth}"
+                                          Height="{DynamicResource EcFieldHeight}"
+                                          Margin="0,0,4,0"
+                                          Padding="0"
+                                          BorderThickness="0"
+                                          Background="Transparent"
+                                          ClickMode="Press"
+                                          Focusable="False"
+                                          IsChecked="{TemplateBinding IsDropDownOpen, Mode=TwoWay}"
+                                          VerticalAlignment="Center"
+                                          Cursor="Hand">
+                                <ToggleButton.Template>
+                                    <ControlTemplate>
+                                        <Border Background="Transparent"
+                                                Width="{TemplateBinding Width}"
+                                                Height="{TemplateBinding Height}">
+                                            <icons:MaterialIcon Kind="ChevronDown"
+                                                                 Width="16" Height="16"
+                                                                 Foreground="{DynamicResource EcTextSecondary}"
+                                                                 HorizontalAlignment="Center"
+                                                                 VerticalAlignment="Center" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                        </Grid>
+                    </Border>
+                    <Popup Name="PART_Popup"
+                           MinWidth="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
+                           MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                           IsLightDismissEnabled="True"
+                           IsOpen="{TemplateBinding IsDropDownOpen, Mode=TwoWay}"
+                           PlacementTarget="{TemplateBinding}"
+                           Placement="Bottom">
+                        <Border Margin="0,4,0,0"
+                                Padding="4"
+                                Background="{DynamicResource EcBgElevated}"
+                                BorderBrush="{DynamicResource EcBorder}"
+                                BorderThickness="1"
+                                CornerRadius="{DynamicResource EcRadiusSm}"
+                                BoxShadow="{DynamicResource EcShadowFloat}">
+                            <ScrollViewer HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+                                <ItemsPresenter Name="PART_ItemsPresenter"
+                                                ItemsPanel="{TemplateBinding ItemsPanel}" />
+                            </ScrollViewer>
+                        </Border>
+                    </Popup>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="ComboBox:pointerover">
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorderStrong}" />
+    </Style>
+    <Style Selector="ComboBox:focus, ComboBox:focus-within">
+        <Setter Property="BorderBrush" Value="{DynamicResource EcAccent}" />
+    </Style>
+    <!-- Dropdown rows: soft Ec fill, never system/Suki solid blue SelectionBrush -->
+    <Style Selector="ComboBoxItem">
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="Margin" Value="0,1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusSm}" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource EcTextPrimary}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="ItemRoot"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}"
+                        MinHeight="{TemplateBinding MinHeight}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalContentAlignment="Center"
+                                      RecognizesAccessKey="True" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="ComboBoxItem:pointerover /template/ Border#ItemRoot">
+        <Setter Property="Background" Value="{DynamicResource EcBgHover}" />
+    </Style>
+    <Style Selector="ComboBoxItem:selected /template/ Border#ItemRoot">
+        <Setter Property="Background" Value="{DynamicResource EcAccentSoft}" />
+    </Style>
+    <Style Selector="ComboBoxItem:selected:pointerover /template/ Border#ItemRoot">
+        <Setter Property="Background" Value="{DynamicResource EcAccentMuted}" />
+    </Style>
+    <Style Selector="ComboBoxItem:selected">
+        <Setter Property="Foreground" Value="{DynamicResource EcTextPrimary}" />
+    </Style>
+
+    <!-- Hit target only — focus ring is painted on each button's own template root. -->
+    <Style Selector="Button.EcPrimary, Button.EcMenuItem, Button.EcGhost">
+        <Setter Property="MinWidth" Value="{DynamicResource EcHitTargetMin}" />
+        <Setter Property="MinHeight" Value="{DynamicResource EcHitTargetMin}" />
+    </Style>
+
+    <!-- Page canvas -->
+    <Style Selector="ScrollViewer.EcPage">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="StackPanel.EcPageBody">
+        <Setter Property="Margin" Value="32,28,32,28" />
+        <Setter Property="Spacing" Value="18" />
+        <Setter Property="MaxWidth" Value="980" />
+    </Style>
+
+    <!-- Legacy GlassCard.EcCard → solid product surface (residual usages only) -->
+    <Style Selector="suki|GlassCard.EcCard">
+        <Setter Property="Padding" Value="22" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusLg}" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+        <Setter Property="Background" Value="{DynamicResource EcBgElevated}" />
+    </Style>
+
+    <Style Selector="Border.EcSurface">
+        <Setter Property="Background" Value="{DynamicResource EcBgElevated}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusLg}" />
+        <Setter Property="BoxShadow" Value="{DynamicResource EcShadowCard}" />
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="Padding" Value="22" />
+    </Style>
+
+    <!-- Page canvas (UserControl/Border/Grid only — Panel has no Background) -->
+    <Style Selector="UserControl.EcCanvas">
+        <Setter Property="Background" Value="{DynamicResource EcBgCanvas}" />
+    </Style>
+    <Style Selector="Border.EcCanvas">
+        <Setter Property="Background" Value="{DynamicResource EcBgCanvas}" />
+    </Style>
+    <Style Selector="Grid.EcCanvas">
+        <Setter Property="Background" Value="{DynamicResource EcBgCanvas}" />
+    </Style>
+
+    <!-- Model / list tile card -->
+    <Style Selector="Border.EcTile">
+        <Setter Property="Background" Value="{DynamicResource EcBgElevated}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusLg}" />
+        <Setter Property="BoxShadow" Value="{DynamicResource EcShadowCard}" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+    <Style Selector="Border.EcTile StackPanel.ActionButtons">
+        <Setter Property="Opacity" Value="0" />
+    </Style>
+    <Style Selector="Border.EcTile:pointerover StackPanel.ActionButtons">
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+
+    <Style Selector="Border.EcSurfaceMuted">
+        <Setter Property="Background" Value="{DynamicResource EcBgMuted}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusMd}" />
+    </Style>
+
+    <!-- Hero strip with accent sheen -->
+    <Style Selector="Border.EcHero">
+        <Setter Property="Background" Value="{DynamicResource EcBgElevated}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusXl}" />
+        <Setter Property="Padding" Value="22,20" />
+        <Setter Property="BoxShadow" Value="{DynamicResource EcShadowCard}" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+    <Style Selector="Border.EcAccentBar">
+        <Setter Property="Width" Value="4" />
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Background" Value="{DynamicResource EcAccent}" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="Margin" Value="0,2,14,2" />
+    </Style>
+
+    <!-- Typography -->
+    <Style Selector="TextBlock.EcLabel">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="{DynamicResource EcFontSizeMd}" />
+        <Setter Property="Foreground" Value="{DynamicResource EcTextPrimary}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <!-- No global MinWidth — dual-column forms clip CJK when label column is narrow. -->
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="TextTrimming" Value="None" />
+    </Style>
+
+    <Style Selector="TextBlock.EcHelper">
+        <Setter Property="FontSize" Value="{DynamicResource EcFontSizeSm}" />
+        <Setter Property="Foreground" Value="{DynamicResource EcTextSecondary}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="LineHeight" Value="18" />
+        <Setter Property="Opacity" Value="0.95" />
+    </Style>
+
+    <Style Selector="TextBlock.EcMuted">
+        <Setter Property="Foreground" Value="{DynamicResource EcTextMuted}" />
+        <Setter Property="FontSize" Value="{DynamicResource EcFontSizeSm}" />
+    </Style>
+
+    <Style Selector="TextBlock.EcTitle">
+        <Setter Property="FontSize" Value="{DynamicResource EcFontSizeXl}" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="LetterSpacing" Value="-0.3" />
+        <Setter Property="Foreground" Value="{DynamicResource EcTextPrimary}" />
+    </Style>
+
+    <Style Selector="TextBlock.EcDisplay">
+        <Setter Property="FontSize" Value="{DynamicResource EcFontSizeDisplay}" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="LetterSpacing" Value="-0.6" />
+        <Setter Property="Foreground" Value="{DynamicResource EcTextPrimary}" />
+    </Style>
+
+    <Style Selector="TextBlock.EcSubtitle">
+        <Setter Property="FontSize" Value="{DynamicResource EcFontSizeMd}" />
+        <Setter Property="Foreground" Value="{DynamicResource EcTextSecondary}" />
+        <Setter Property="Margin" Value="0,6,0,0" />
+        <Setter Property="LineHeight" Value="20" />
+    </Style>
+
+    <Style Selector="TextBlock.EcSectionTitle">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="LetterSpacing" Value="0.8" />
+        <Setter Property="Foreground" Value="{DynamicResource EcTextMuted}" />
+        <Setter Property="Margin" Value="2,4,0,2" />
+    </Style>
+
+    <!--
+      Icon toolbar — own template + ClipToBounds so Suki hover/focus chrome cannot bleed
+      outside the 36×36 hit box (was painting over dialog footers / neighbor fields).
+    -->
+    <Style Selector="Button.EcToolbarBtn">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="MinWidth" Value="36" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusMd}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="ToolbarRoot"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Width="{TemplateBinding Width}"
+                        Height="{TemplateBinding Height}"
+                        ClipToBounds="True">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      RecognizesAccessKey="True" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.EcToolbarBtn:pointerover /template/ Border#ToolbarRoot">
+        <Setter Property="Background" Value="{DynamicResource EcAccentMuted}" />
+    </Style>
+    <Style Selector="Button.EcToolbarBtn:pressed /template/ Border#ToolbarRoot">
+        <Setter Property="Background" Value="{DynamicResource EcBgHover}" />
+    </Style>
+    <Style Selector="Button.EcToolbarBtn:focus-visible /template/ Border#ToolbarRoot">
+        <Setter Property="BorderBrush" Value="{DynamicResource EcAccent}" />
+    </Style>
+
+    <!-- Compact float toolbar (subtitle / selection chips) -->
+    <Style Selector="Button.EcToolbarBtnSm">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Width" Value="28" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusSm}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="MinWidth" Value="28" />
+        <Setter Property="MinHeight" Value="28" />
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="ToolbarSmRoot"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Width="{TemplateBinding Width}"
+                        Height="{TemplateBinding Height}"
+                        ClipToBounds="True">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.EcToolbarBtnSm:pointerover /template/ Border#ToolbarSmRoot">
+        <Setter Property="Background" Value="{DynamicResource EcAccentMuted}" />
+    </Style>
+    <Style Selector="Button.EcToolbarBtnSm:pressed /template/ Border#ToolbarSmRoot">
+        <Setter Property="Background" Value="{DynamicResource EcBgHover}" />
+    </Style>
+    <Style Selector="Button.EcToolbarBtnSm:focus-visible /template/ Border#ToolbarSmRoot">
+        <Setter Property="BorderBrush" Value="{DynamicResource EcAccent}" />
+    </Style>
+
+    <!--
+      Full-width list rows inside vertical ItemsControls.
+      Without this, item ContentPresenters shrink-wrap and hover paints a text-sized chip.
+    -->
+    <Style Selector="ItemsControl.EcStackList ContentPresenter">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
+    <!--
+      Full-width “add item” CTA (e.g. Add Model).
+      Own template so Suki’s default Button chrome cannot shrink or recolor the row.
+    -->
+    <Style Selector="Button.EcAddRow">
+        <Setter Property="Background" Value="{DynamicResource EcAccentSoft}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorderStrong}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusMd}" />
+        <Setter Property="Padding" Value="14,12" />
+        <Setter Property="Margin" Value="0,0,0,10" />
+        <Setter Property="MinHeight" Value="72" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="AddRoot"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}"
+                        MinHeight="{TemplateBinding MinHeight}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Center"
+                                      RecognizesAccessKey="True" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.EcAddRow:pointerover /template/ Border#AddRoot">
+        <Setter Property="Background" Value="{DynamicResource EcAccentMuted}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcAccent}" />
+    </Style>
+    <Style Selector="Button.EcAddRow:pressed /template/ Border#AddRoot">
+        <Setter Property="Background" Value="{DynamicResource EcBgMuted}" />
+    </Style>
+    <Style Selector="Button.EcAddRow:focus-visible /template/ Border#AddRoot">
+        <Setter Property="BorderBrush" Value="{DynamicResource EcAccent}" />
+        <Setter Property="BorderThickness" Value="2" />
+    </Style>
+
+    <!-- Menu / list row button: own template, hover fills the whole row -->
+    <Style Selector="Button.EcMenuItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusMd}" />
+        <Setter Property="Foreground" Value="{DynamicResource EcTextPrimary}" />
+        <Setter Property="Padding" Value="12,10" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="MenuRoot"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}"
+                        BorderThickness="0"
+                        MinHeight="{TemplateBinding MinHeight}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Center"
+                                      RecognizesAccessKey="True" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.EcMenuItem:pointerover /template/ Border#MenuRoot">
+        <Setter Property="Background" Value="{DynamicResource EcBgHover}" />
+    </Style>
+    <Style Selector="Button.EcMenuItem:pressed /template/ Border#MenuRoot">
+        <Setter Property="Background" Value="{DynamicResource EcBgMuted}" />
+    </Style>
+
+    <!--
+      Primary / Ghost / Danger: flat fill only.
+      Own template kills Suki Standard Button BoxShadow + raised dual-border chrome
+      that read as a floating “halo” around dialog actions (取消 / 最小化到托盘).
+    -->
+    <Style Selector="Button.EcPrimary">
+        <Setter Property="Background" Value="{DynamicResource EcAccent}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusMd}" />
+        <Setter Property="Padding" Value="16,10" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PrimaryRoot"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}"
+                        MinWidth="{TemplateBinding MinWidth}"
+                        MinHeight="{TemplateBinding MinHeight}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      RecognizesAccessKey="True" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.EcPrimary:pointerover /template/ Border#PrimaryRoot">
+        <Setter Property="Opacity" Value="0.92" />
+    </Style>
+    <Style Selector="Button.EcPrimary:pressed /template/ Border#PrimaryRoot">
+        <Setter Property="Opacity" Value="0.85" />
+    </Style>
+    <Style Selector="Button.EcPrimary:focus-visible /template/ Border#PrimaryRoot">
+        <Setter Property="BorderBrush" Value="{DynamicResource EcAccent}" />
+        <Setter Property="BorderThickness" Value="2" />
+    </Style>
+
+    <!-- Ghost / secondary — muted fill, no border, no shadow -->
+    <Style Selector="Button.EcGhost">
+        <Setter Property="Background" Value="{DynamicResource EcBgMuted}" />
+        <Setter Property="Foreground" Value="{DynamicResource EcTextPrimary}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusMd}" />
+        <Setter Property="Padding" Value="14,9" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="GhostRoot"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}"
+                        MinWidth="{TemplateBinding MinWidth}"
+                        MinHeight="{TemplateBinding MinHeight}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      RecognizesAccessKey="True" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.EcGhost:pointerover /template/ Border#GhostRoot">
+        <Setter Property="Background" Value="{DynamicResource EcBgHover}" />
+    </Style>
+    <Style Selector="Button.EcGhost:pressed /template/ Border#GhostRoot">
+        <Setter Property="Background" Value="{DynamicResource EcBgMuted}" />
+        <Setter Property="Opacity" Value="0.9" />
+    </Style>
+    <Style Selector="Button.EcGhost:focus-visible /template/ Border#GhostRoot">
+        <Setter Property="BorderBrush" Value="{DynamicResource EcAccent}" />
+        <Setter Property="BorderThickness" Value="2" />
+    </Style>
+
+    <!-- Destructive secondary / row action (text-only) -->
+    <Style Selector="Button.EcDanger">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource EcDanger}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusMd}" />
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="MinWidth" Value="{DynamicResource EcHitTargetMin}" />
+        <Setter Property="MinHeight" Value="{DynamicResource EcHitTargetMin}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="DangerRoot"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}"
+                        MinWidth="{TemplateBinding MinWidth}"
+                        MinHeight="{TemplateBinding MinHeight}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      RecognizesAccessKey="True" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.EcDanger:pointerover /template/ Border#DangerRoot">
+        <Setter Property="Background" Value="{DynamicResource EcBgHover}" />
+    </Style>
+    <Style Selector="Button.EcDanger:focus-visible /template/ Border#DangerRoot">
+        <Setter Property="BorderBrush" Value="{DynamicResource EcDanger}" />
+        <Setter Property="BorderThickness" Value="2" />
+    </Style>
+
+    <!-- Destructive primary CTA (confirm-delete dialogs) -->
+    <Style Selector="Button.EcDangerSolid">
+        <Setter Property="Background" Value="{DynamicResource EcDanger}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusMd}" />
+        <Setter Property="Padding" Value="16,11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="MinWidth" Value="{DynamicResource EcHitTargetMin}" />
+        <Setter Property="MinHeight" Value="40" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="DangerSolidRoot"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}"
+                        MinWidth="{TemplateBinding MinWidth}"
+                        MinHeight="{TemplateBinding MinHeight}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      RecognizesAccessKey="True" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.EcDangerSolid:pointerover /template/ Border#DangerSolidRoot">
+        <Setter Property="Opacity" Value="0.9" />
+    </Style>
+    <Style Selector="Button.EcDangerSolid:focus-visible /template/ Border#DangerSolidRoot">
+        <Setter Property="BorderBrush" Value="{DynamicResource EcDanger}" />
+        <Setter Property="BorderThickness" Value="2" />
+    </Style>
+
+    <!--
+      Circular icon action (language swap etc.).
+      Own template — Suki Standard Button paints BoxShadow that reads as a floating halo.
+    -->
+    <Style Selector="Button.EcIconRound">
+        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="MinWidth" Value="36" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Background" Value="{DynamicResource EcBgMuted}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="IconRoundRoot"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Width="{TemplateBinding Width}"
+                        Height="{TemplateBinding Height}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.EcIconRound:pointerover /template/ Border#IconRoundRoot">
+        <Setter Property="Background" Value="{DynamicResource EcAccentSoft}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorderStrong}" />
+    </Style>
+    <Style Selector="Button.EcIconRound:pressed /template/ Border#IconRoundRoot">
+        <Setter Property="Background" Value="{DynamicResource EcAccentMuted}" />
+    </Style>
+
+    <!-- Segmented control: pill buttons, no radio glyph (glyph caused uneven widths). -->
+    <Style Selector="Border.EcSegmented">
+        <Setter Property="Background" Value="{DynamicResource EcBgMuted}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusMd}" />
+        <Setter Property="Padding" Value="4" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style Selector="RadioButton.EcSegment">
+        <Setter Property="Padding" Value="18,8" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="MinWidth" Value="112" />
+        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusSm}" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource EcTextSecondary}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}"
+                        MinWidth="{TemplateBinding MinWidth}"
+                        MinHeight="{TemplateBinding MinHeight}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      RecognizesAccessKey="True" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="RadioButton.EcSegment:checked">
+        <Setter Property="Background" Value="{DynamicResource EcBgElevated}" />
+        <Setter Property="Foreground" Value="{DynamicResource EcTextPrimary}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="RadioButton.EcSegment:pointerover">
+        <Setter Property="Foreground" Value="{DynamicResource EcTextPrimary}" />
+    </Style>
+
+    <!-- Stretch page body to the window while capping readable width -->
+    <Style Selector="Grid.EcPageFrame">
+        <Setter Property="Margin" Value="32,28,32,28" />
+        <Setter Property="MaxWidth" Value="1120" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
+    <!-- Status pill shell (code-behind still tints by kind) -->
+    <Style Selector="Border.EcPill">
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusPill}" />
+        <Setter Property="Padding" Value="10,5" />
+        <Setter Property="Background" Value="{DynamicResource EcBgMuted}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <!-- Float chrome -->
+    <!--
+      Float chrome: Lg radius (16), flat card — background + 1px border only.
+      No BoxShadow: soft drop halo read as a second “outer ring” on dictionary/result floats.
+      EcFloatClip still clips header/footer fills to the rounded shell.
+    -->
+    <Style Selector="Border.EcFloatShell">
+        <Setter Property="Background" Value="{DynamicResource EcFloatBg}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcFloatBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusLg}" />
+        <!-- No BoxShadow — flat card only (bg + border). -->
+        <Setter Property="ClipToBounds" Value="False" />
+    </Style>
+    <!-- Inner clip layer: same radius, clips header/footer fills to the rounded shell. -->
+    <Style Selector="Border.EcFloatClip">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusLg}" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+    <Style Selector="Border.EcScrim">
+        <Setter Property="Background" Value="{DynamicResource EcOverlayScrim}" />
+    </Style>
+
+    <Style Selector="Border.EcKeyChip">
+        <Setter Property="Background" Value="{DynamicResource EcBgMuted}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorderStrong}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusSm}" />
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="Margin" Value="2" />
+    </Style>
+
+    <Style Selector="StackPanel.EcSettingsList">
+        <Setter Property="Spacing" Value="0" />
+    </Style>
+
+    <!--
+      Selection-toolbar capability tiles (settings).
+      Mirrors float toolbar icons: Translate / Spellcheck / FormatPaint / TextShort.
+    -->
+    <Style Selector="ToggleButton.EcFeatureChip">
+        <Setter Property="Background" Value="{DynamicResource EcBgElevated}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusMd}" />
+        <Setter Property="Padding" Value="12,10" />
+        <Setter Property="Margin" Value="4" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="MinHeight" Value="52" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="FeatureRoot"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}"
+                        MinHeight="{TemplateBinding MinHeight}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Center"
+                                      RecognizesAccessKey="True" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="ToggleButton.EcFeatureChip:pointerover /template/ Border#FeatureRoot">
+        <Setter Property="Background" Value="{DynamicResource EcBgHover}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorderStrong}" />
+    </Style>
+    <Style Selector="ToggleButton.EcFeatureChip:checked /template/ Border#FeatureRoot">
+        <Setter Property="Background" Value="{DynamicResource EcAccentSoft}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcAccent}" />
+    </Style>
+    <Style Selector="ToggleButton.EcFeatureChip:checked:pointerover /template/ Border#FeatureRoot">
+        <Setter Property="Background" Value="{DynamicResource EcAccentMuted}" />
+    </Style>
+
+    <!--
+      Controls hosted in EcSettingRow share one column width (EcSettingControlWidth).
+      Stretch like subtitle float form fields — no shrink-wrap MinWidth chips.
+    -->
+    <Style Selector="ec|EcSettingRow ComboBox, ec|EcSettingRow NumericUpDown, ec|EcSettingRow TextBox">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="MinWidth" Value="0" />
+    </Style>
+    <Style Selector="ec|EcSettingRow ToggleSwitch">
+        <Setter Property="HorizontalAlignment" Value="Right" />
+    </Style>
+
+    <Style Selector="Separator.EcDivider">
+        <Setter Property="Margin" Value="0,6" />
+        <Setter Property="Background" Value="{DynamicResource EcBorder}" />
+        <Setter Property="Height" Value="1" />
+        <Setter Property="Opacity" Value="0.85" />
+    </Style>
+
+    <Style Selector="Button.EcColorSwatch">
+        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="BorderThickness" Value="2" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorderStrong}" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <!-- Search field chrome (standalone page search bars) -->
+    <Style Selector="Border.EcSearchBar">
+        <Setter Property="Background" Value="{DynamicResource EcBgElevated}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusPill}" />
+        <Setter Property="Padding" Value="14,10" />
+        <Setter Property="BoxShadow" Value="{DynamicResource EcShadowCard}" />
+    </Style>
+
+    <!-- Title-row collapsible search: soft pill, accent ring while focused -->
+    <Style Selector="Border.EcSearchInline">
+        <Setter Property="Background" Value="{DynamicResource EcBgMuted}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusPill}" />
+        <Setter Property="Padding" Value="12,0,6,0" />
+        <Setter Property="Height" Value="{DynamicResource EcFieldHeight}" />
+        <Setter Property="MinHeight" Value="{DynamicResource EcFieldHeight}" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+    <Style Selector="Border.EcSearchInline:pointerover">
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorderStrong}" />
+    </Style>
+    <Style Selector="Border.EcSearchInline:focus-within">
+        <Setter Property="BorderBrush" Value="{DynamicResource EcAccent}" />
+        <Setter Property="Background" Value="{DynamicResource EcFieldBg}" />
+    </Style>
+
+    <!-- Naked input hosted inside EcSearchInline / EcSearchBar -->
+    <Style Selector="TextBox.EcSearchInput">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="FontSize" Value="{DynamicResource EcFontSizeMd}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="TextBox.EcSearchInput:pointerover">
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="TextBox.EcSearchInput:focus, TextBox.EcSearchInput:focus-within">
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!--
+      Collapsed magnify trigger — own template kills Suki Standard button BoxShadow / raised chrome
+      that read as a floating “built-in” halo around the search chip.
+    -->
+    <Style Selector="Button.EcSearchTrigger">
+        <Setter Property="Background" Value="{DynamicResource EcBgMuted}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="MinWidth" Value="36" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusPill}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="SearchTriggerRoot"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Width="{TemplateBinding Width}"
+                        Height="{TemplateBinding Height}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      RecognizesAccessKey="True" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.EcSearchTrigger:pointerover /template/ Border#SearchTriggerRoot">
+        <Setter Property="Background" Value="{DynamicResource EcAccentMuted}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorderStrong}" />
+    </Style>
+    <Style Selector="Button.EcSearchTrigger:pressed /template/ Border#SearchTriggerRoot">
+        <Setter Property="Background" Value="{DynamicResource EcBgHover}" />
+    </Style>
+    <Style Selector="Button.EcSearchTrigger:focus-visible /template/ Border#SearchTriggerRoot">
+        <Setter Property="BorderBrush" Value="{DynamicResource EcAccent}" />
+        <Setter Property="BorderThickness" Value="1.5" />
+    </Style>
+
+    <!-- Quiet circular clear inside search pill (no Suki raised shadow) -->
+    <Style Selector="Button.EcSearchClear">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Width" Value="26" />
+        <Setter Property="Height" Value="26" />
+        <Setter Property="MinWidth" Value="26" />
+        <Setter Property="MinHeight" Value="26" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="SearchClearRoot"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Width="{TemplateBinding Width}"
+                        Height="{TemplateBinding Height}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.EcSearchClear:pointerover /template/ Border#SearchClearRoot">
+        <Setter Property="Background" Value="{DynamicResource EcBgHover}" />
+    </Style>
+
+    <!--
+      Content-dialog chrome (ViewModel-only Suki shell is a bare Ec card).
+      Header + scroll body + footer — same rhythm as EcMessageDialog / close-behavior.
+    -->
+    <Style Selector="Border.EcDialogHeader">
+        <Setter Property="Padding" Value="22,18,22,0" />
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="ScrollViewer.EcDialogScroll">
+        <Setter Property="Margin" Value="0,14,0,0" />
+        <Setter Property="Padding" Value="22,0" />
+        <Setter Property="MaxHeight" Value="480" />
+        <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+    </Style>
+    <Style Selector="StackPanel.EcDialogBody">
+        <Setter Property="Spacing" Value="14" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+    <Style Selector="Border.EcDialogFooter">
+        <Setter Property="Margin" Value="0,12,0,0" />
+        <Setter Property="Padding" Value="22,14,22,18" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+        <Setter Property="Background" Value="{DynamicResource EcBgElevated}" />
+    </Style>
+    <Style Selector="TextBlock.EcDialogTitle">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource EcTextPrimary}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style Selector="TextBlock.EcFieldLabel">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{DynamicResource EcTextPrimary}" />
+        <Setter Property="Margin" Value="0,0,0,6" />
+    </Style>
+
+    <!-- Metric chip -->
+    <Style Selector="Border.EcMetric">
+        <Setter Property="Background" Value="{DynamicResource EcBgMuted}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EcBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusMd}" />
+        <Setter Property="Padding" Value="14,12" />
+    </Style>
+
+    <!--
+      Settings side nav: full-width row hit target.
+      Own template so Suki ContentPresenter never shrink-wraps a blue chip around the label.
+      Selected = accent text/icon only, never a fill.
+    -->
+    <Style Selector="Button.EcNavItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="MinHeight" Value="{DynamicResource EcHitTargetMin}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource EcRadiusMd}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Foreground" Value="{DynamicResource EcTextPrimary}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="NavRoot"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}"
+                        BorderThickness="0"
+                        MinHeight="{TemplateBinding MinHeight}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Center"
+                                      RecognizesAccessKey="True" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.EcNavItem:pointerover /template/ Border#NavRoot">
+        <Setter Property="Background" Value="{DynamicResource EcBgHover}" />
+    </Style>
+    <Style Selector="Button.EcNavItem:pressed /template/ Border#NavRoot">
+        <Setter Property="Background" Value="{DynamicResource EcBgMuted}" />
+    </Style>
+    <Style Selector="Button.EcNavItem.selected">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.EcNavItem.selected /template/ Border#NavRoot">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.EcNavItem.selected:pointerover /template/ Border#NavRoot">
+        <Setter Property="Background" Value="{DynamicResource EcBgHover}" />
+    </Style>
+    <Style Selector="Button.EcNavItem.selected TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource EcAccent}" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.EcNavItem.selected icons|MaterialIcon">
+        <Setter Property="Foreground" Value="{DynamicResource EcAccent}" />
+    </Style>
+
+</Styles>

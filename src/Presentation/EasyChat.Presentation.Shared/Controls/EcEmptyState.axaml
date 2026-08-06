@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="EasyChat.Presentation.Shared.Controls.EcEmptyState"
+             x:Name="Root">
+    <Border Background="{DynamicResource EcBgMuted}"
+            BorderBrush="{DynamicResource EcBorder}"
+            BorderThickness="1"
+            CornerRadius="12"
+            Padding="28,32"
+            MinHeight="140"
+            Opacity="0.95">
+        <StackPanel Spacing="12"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    MaxWidth="380">
+            <Border Width="48"
+                    Height="48"
+                    CornerRadius="12"
+                    HorizontalAlignment="Center"
+                    Background="{DynamicResource EcAccentSoft}">
+                <avalonia:MaterialIcon Width="24"
+                                       Height="24"
+                                       Kind="{Binding Icon, ElementName=Root}"
+                                       Foreground="{DynamicResource EcAccent}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+            </Border>
+            <TextBlock Text="{Binding Title, ElementName=Root}"
+                       FontWeight="SemiBold"
+                       FontSize="15"
+                       HorizontalAlignment="Center"
+                       TextAlignment="Center"
+                       Foreground="{DynamicResource EcTextPrimary}" />
+            <TextBlock Text="{Binding Description, ElementName=Root}"
+                       FontSize="13"
+                       Opacity="0.7"
+                       HorizontalAlignment="Center"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"
+                       IsVisible="{Binding Description, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+            <ContentPresenter Content="{Binding Action, ElementName=Root}"
+                              HorizontalAlignment="Center"
+                              Margin="0,4,0,0" />
+        </StackPanel>
+    </Border>
+</UserControl>

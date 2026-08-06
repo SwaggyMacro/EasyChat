@@ -9,29 +9,57 @@
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
              x:DataType="viewModels:TtsPreviewInputDialogViewModel"
+             MinWidth="360"
+             MaxWidth="420"
              Width="400">
-    <suki:GlassCard>
-        <StackPanel Spacing="15">
-            <TextBlock Text="{x:Static lang:Resources.Tts_PreviewVoice}" FontWeight="SemiBold" FontSize="18"/>
-            
-            <TextBlock Text="{x:Static lang:Resources.Tts_PreviewInputPrompt}" Opacity="0.8"/>
-            
-            <TextBox Text="{Binding InputText}" 
-                     AcceptsReturn="True" 
-                     Height="100" 
-                     VerticalContentAlignment="Top"
-                     TextWrapping="Wrap"/>
-                     
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Border Classes="EcDialogHeader">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                <Border Width="40" Height="40" CornerRadius="11"
+                        Background="{DynamicResource EcAccentSoft}">
+                    <avalonia:MaterialIcon Kind="PlayCircleOutline"
+                                           Width="20" Height="20"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource EcAccent}" />
+                </Border>
+                <TextBlock Grid.Column="1"
+                           Classes="EcDialogTitle"
+                           Text="{x:Static lang:Resources.Tts_PreviewVoice}"
+                           VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" Classes="EcDialogScroll">
+            <StackPanel Classes="EcDialogBody">
+                <TextBlock Text="{x:Static lang:Resources.Tts_PreviewInputPrompt}"
+                           Classes="EcHelper" />
+                <TextBox Text="{Binding InputText}"
+                         AcceptsReturn="True"
+                         Height="100"
+                         VerticalContentAlignment="Top"
+                         TextWrapping="Wrap" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Classes="EcDialogFooter">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
-                <Button Classes="Success" Command="{Binding PlayCommand}" IsEnabled="{Binding !IsPlaying}">
-                    <StackPanel Orientation="Horizontal" Spacing="5">
-                        <avalonia:MaterialIcon Kind="Play" IsVisible="{Binding !IsPlaying}"/>
-                        <suki:Loading IsVisible="{Binding IsPlaying}" Width="16" Height="16"/>
-                        <TextBlock Text="{x:Static lang:Resources.Tts_Play}"/>
+                <Button Command="{Binding CloseCommand}"
+                        Classes="EcGhost"
+                        MinWidth="88"
+                        Content="{x:Static lang:Resources.Close}" />
+                <Button Classes="EcPrimary"
+                        MinWidth="96"
+                        Command="{Binding PlayCommand}"
+                        IsEnabled="{Binding !IsPlaying}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <avalonia:MaterialIcon Kind="Play" Width="16" Height="16"
+                                               IsVisible="{Binding !IsPlaying}" />
+                        <suki:Loading IsVisible="{Binding IsPlaying}" Width="16" Height="16" />
+                        <TextBlock Text="{x:Static lang:Resources.Tts_Play}" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
-                <Button Command="{Binding CloseCommand}" Content="{x:Static lang:Resources.Close}"/>
-                </StackPanel>
-        </StackPanel>
-    </suki:GlassCard>
+            </StackPanel>
+        </Border>
+    </Grid>
 </UserControl>

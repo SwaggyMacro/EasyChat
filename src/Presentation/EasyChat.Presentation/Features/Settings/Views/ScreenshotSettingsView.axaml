@@ -7,32 +7,34 @@
              xmlns:viewModels="clr-namespace:EasyChat.Presentation.Features.Settings"
              xmlns:lang="clr-namespace:EasyChat.Presentation.Lang;assembly=EasyChat.Presentation"
              xmlns:converts="clr-namespace:EasyChat.Presentation.Features.Settings;assembly=EasyChat.Presentation"
+             xmlns:ec="clr-namespace:EasyChat.Presentation.Shared.Controls;assembly=EasyChat.Presentation.Shared"
              x:DataType="viewModels:SettingViewModel"
              mc:Ignorable="d">
     <UserControl.Resources>
         <converts:ScreenshotModeConverter x:Key="ScreenshotModeConverter" />
     </UserControl.Resources>
-    
-    <suki:GlassCard>
-        <StackPanel>
-            <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
-                <TextBlock FontWeight="Bold" VerticalAlignment="Center"
-                           Text="{x:Static lang:Resources.ScreenshotMode}" />
+
+    <StackPanel Classes="EcSettingsList"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Stretch">
+            <ec:EcSettingRow Label="{x:Static lang:Resources.ScreenshotMode}"
+                             IsVisible="{Binding SearchText, Converter={x:Static viewModels:SettingsFieldVisibleConverter.Instance}, ConverterParameter='screenshot mode precise 截图 模式'}">
                 <ComboBox ItemsSource="{Binding ScreenshotModes}"
                           SelectedItem="{Binding SelectedScreenshotMode}"
-                          MinWidth="150">
+                          HorizontalAlignment="Stretch">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Converter={StaticResource ScreenshotModeConverter}}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
-            </StackPanel>
-            <Button Content="{x:Static lang:Resources.FixedAreaSettings}" 
-                    Command="{Binding ManageFixedAreasCommand}" 
-                    HorizontalAlignment="Left"
-                    Classes="Flat"
-                    Margin="0,5,0,0"/>
-        </StackPanel>
-    </suki:GlassCard>
+            </ec:EcSettingRow>
+
+            <Button Content="{x:Static lang:Resources.FixedAreaSettings}"
+                    Command="{Binding ManageFixedAreasCommand}"
+                    HorizontalAlignment="Stretch"
+                    Classes="EcGhost"
+                    Margin="8,8,8,0"
+                    IsVisible="{Binding SearchText, Converter={x:Static viewModels:SettingsFieldVisibleConverter.Instance}, ConverterParameter='fixed area capture 固定区域'}" />
+    </StackPanel>
 </UserControl>

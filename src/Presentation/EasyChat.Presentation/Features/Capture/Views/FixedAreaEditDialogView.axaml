@@ -4,72 +4,109 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:EasyChat.Presentation.Features.Capture"
-             xmlns:suki="https://github.com/kikipoulet/SukiUI"
              xmlns:lang="clr-namespace:EasyChat.Presentation.Lang;assembly=EasyChat.Presentation"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="500"
              x:DataType="viewModels:FixedAreaEditDialogViewModel"
-             Width="400" MaxHeight="600"
+             MinWidth="380"
+             MaxWidth="440"
+             Width="400"
              x:Name="Root">
-    <StackPanel Spacing="15">
-        <TextBlock Text="{x:Static lang:Resources.FixedAreas}" FontWeight="SemiBold" FontSize="18" />
-        
-        <ScrollViewer MaxHeight="400" IsVisible="{Binding HasAreas}">
-             <ItemsControl ItemsSource="{Binding FixedAreas}">
-                 <ItemsControl.ItemTemplate>
-                     <DataTemplate x:CompileBindings="False">
-                         <suki:GlassCard Margin="0,0,0,10" Padding="10">
-                             <Grid ColumnDefinitions="*, Auto, Auto">
-                                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="2">
-                                     <TextBlock Text="{Binding Name}" FontWeight="Bold" />
-                                     <TextBlock Text="{Binding DisplayInfo}" 
-                                                FontSize="12" Opacity="0.7" />
-                                 </StackPanel>
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Border Classes="EcDialogHeader">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                <Border Width="40" Height="40" CornerRadius="11"
+                        Background="{DynamicResource EcAccentSoft}">
+                    <avalonia:MaterialIcon Kind="Fullscreen"
+                                           Width="20" Height="20"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource EcAccent}" />
+                </Border>
+                <TextBlock Grid.Column="1"
+                           Classes="EcDialogTitle"
+                           Text="{x:Static lang:Resources.FixedAreas}"
+                           VerticalAlignment="Center" />
+            </Grid>
+        </Border>
 
-                                 <ToggleSwitch Grid.Column="1"
-                                               IsChecked="{Binding IsEnabled}"
-                                               Margin="10,0"
-                                               OnContent="{x:Null}"
-                                               OffContent="{x:Null}" />
-                                 
-                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="0">
-                                     <Button Classes="Flat" 
-                                             CornerRadius="8,0,0,8"
-                                             Click="EditButton_Click"
-                                             DataContext="{Binding}"
-                                             ToolTip.Tip="{x:Static lang:Resources.Edit}">
-                                         <avalonia:MaterialIcon Kind="Pencil" Width="16" Height="16" />
-                                     </Button>
-                                     
-                                     <Button Classes="Flat Danger"
-                                             CornerRadius="0,8,8,0"
-                                             Click="DeleteButton_Click"
-                                             DataContext="{Binding}"
-                                             ToolTip.Tip="{x:Static lang:Resources.Delete}">
-                                         <avalonia:MaterialIcon Kind="TrashCan" Width="16" Height="16" />
-                                     </Button>
-                                 </StackPanel>
-                             </Grid>
-                         </suki:GlassCard>
-                     </DataTemplate>
-                 </ItemsControl.ItemTemplate>
-             </ItemsControl>
-        </ScrollViewer>
-        
-        <TextBlock Text="{x:Static lang:Resources.NoFixedAreas}" 
-                   IsVisible="{Binding !HasAreas}" 
-                   Opacity="0.6" HorizontalAlignment="Center" Margin="0,20" />
+        <ScrollViewer Grid.Row="1" Classes="EcDialogScroll" MaxHeight="400">
+            <StackPanel Classes="EcDialogBody">
+                <ItemsControl ItemsSource="{Binding FixedAreas}" IsVisible="{Binding HasAreas}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:CompileBindings="False">
+                            <Border Margin="0,0,0,10"
+                                    Padding="12"
+                                    Background="{DynamicResource EcBgMuted}"
+                                    BorderBrush="{DynamicResource EcBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="{DynamicResource EcRadiusMd}">
+                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                    <StackPanel VerticalAlignment="Center" Spacing="2">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource EcTextPrimary}" />
+                                        <TextBlock Text="{Binding DisplayInfo}"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource EcTextSecondary}" />
+                                    </StackPanel>
 
-        <Button Classes="Flat Primary" HorizontalAlignment="Stretch"
-                Command="{Binding AddAreaCommand}">
-            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                <avalonia:MaterialIcon Kind="Plus" />
-                <TextBlock Text="{x:Static lang:Resources.AddFixedArea}" VerticalAlignment="Center" />
+                                    <ToggleSwitch Grid.Column="1"
+                                                  IsChecked="{Binding IsEnabled}"
+                                                  OnContent="{x:Null}"
+                                                  OffContent="{x:Null}"
+                                                  VerticalAlignment="Center" />
+
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2"
+                                                VerticalAlignment="Center">
+                                        <Button Classes="EcToolbarBtnSm"
+                                                Click="EditButton_Click"
+                                                DataContext="{Binding}"
+                                                ToolTip.Tip="{x:Static lang:Resources.Edit}">
+                                            <avalonia:MaterialIcon Kind="Pencil" Width="16" Height="16"
+                                                                   Foreground="{DynamicResource EcTextSecondary}" />
+                                        </Button>
+                                        <Button Classes="EcToolbarBtnSm"
+                                                Click="DeleteButton_Click"
+                                                DataContext="{Binding}"
+                                                ToolTip.Tip="{x:Static lang:Resources.Delete}">
+                                            <avalonia:MaterialIcon Kind="TrashCan" Width="16" Height="16"
+                                                                   Foreground="{DynamicResource EcDanger}" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock Text="{x:Static lang:Resources.NoFixedAreas}"
+                           IsVisible="{Binding !HasAreas}"
+                           Classes="EcMuted"
+                           HorizontalAlignment="Center"
+                           Margin="0,12" />
+
+                <Button Classes="EcAddRow"
+                        Margin="0"
+                        Command="{Binding AddAreaCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                        <avalonia:MaterialIcon Kind="Plus" Width="18" Height="18"
+                                               Foreground="{DynamicResource EcAccent}" />
+                        <TextBlock Text="{x:Static lang:Resources.AddFixedArea}"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource EcTextPrimary}" />
+                    </StackPanel>
+                </Button>
             </StackPanel>
-        </Button>
-        
-        <Button Content="{x:Static lang:Resources.Close}"
-                Command="{Binding CloseCommand}"
-                HorizontalAlignment="Right" Margin="0,10,0,0"/>
-    </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Classes="EcDialogFooter">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="{x:Static lang:Resources.Close}"
+                        Classes="EcGhost"
+                        MinWidth="88"
+                        Command="{Binding CloseCommand}" />
+            </StackPanel>
+        </Border>
+    </Grid>
 </UserControl>

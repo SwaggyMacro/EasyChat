@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="EasyChat.Presentation.Shared.Controls.EcStatusPill"
+             x:Name="Root">
+    <!-- Soft well + high-contrast label; colors come from theme tokens via code-behind. -->
+    <Border x:Name="PillBorder"
+            CornerRadius="999"
+            Padding="9,4"
+            BorderThickness="1"
+            VerticalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Spacing="6">
+            <Ellipse Width="6"
+                     Height="6"
+                     VerticalAlignment="Center"
+                     Fill="{Binding DotBrush, ElementName=Root}" />
+            <TextBlock Text="{Binding Text, ElementName=Root}"
+                       FontSize="12"
+                       FontWeight="SemiBold"
+                       LetterSpacing="0.2"
+                       VerticalAlignment="Center"
+                       Foreground="{Binding Foreground, ElementName=Root}" />
+        </StackPanel>
+    </Border>
+</UserControl>

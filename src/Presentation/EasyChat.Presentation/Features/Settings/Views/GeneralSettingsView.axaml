@@ -3,225 +3,270 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:suki="https://github.com/kikipoulet/SukiUI"
              xmlns:viewModels="clr-namespace:EasyChat.Presentation.Features.Settings"
              xmlns:lang="clr-namespace:EasyChat.Presentation.Lang;assembly=EasyChat.Presentation"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:converts="clr-namespace:EasyChat.Presentation.Foundation.Formatting;assembly=EasyChat.Presentation"
              xmlns:speech="clr-namespace:EasyChat.Contracts.Speech;assembly=EasyChat.Contracts"
              xmlns:dataConverters="clr-namespace:Avalonia.Data.Converters;assembly=Avalonia.Base"
+             xmlns:ec="clr-namespace:EasyChat.Presentation.Shared.Controls;assembly=EasyChat.Presentation.Shared"
              x:DataType="viewModels:SettingViewModel"
              mc:Ignorable="d">
-    <StackPanel Spacing="12">
-        <suki:GlassCard>
-            <StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
-                    <TextBlock FontWeight="Bold" VerticalAlignment="Center"
-                               Text="{x:Static lang:Resources.DisplayLanguage}" />
-                    <ComboBox ItemsSource="{Binding DisplayLanguages}"
-                              SelectedItem="{Binding SelectedDisplayLanguage}"
-                              MinWidth="150">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Border ClipToBounds="True" CornerRadius="2" Width="20" Height="14"
-                                            IsVisible="{Binding Icon, Converter={x:Static dataConverters:StringConverters.IsNotNullOrEmpty}}">
-                                        <Image Source="{Binding Icon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
-                                               Stretch="UniformToFill" />
-                                    </Border>
-                                    <TextBlock Text="{Binding Converter={x:Static converts:LanguageSettingsConverters.ToDisplayName}}" VerticalAlignment="Center"
-                                               Foreground="{DynamicResource SukiText}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
-                    <TextBlock FontWeight="Bold" VerticalAlignment="Center"
-                               Text="{x:Static lang:Resources.NativeLanguage}" />
-                    <ComboBox ItemsSource="{Binding NativeLanguages}"
-                              SelectedItem="{Binding SelectedNativeLanguage}"
-                              MinWidth="150">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Border ClipToBounds="True" CornerRadius="2" Width="20" Height="14"
-                                            IsVisible="{Binding Icon, Converter={x:Static dataConverters:StringConverters.IsNotNullOrEmpty}}">
-                                        <Image Source="{Binding Icon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
-                                               Stretch="UniformToFill" />
-                                    </Border>
-                                    <TextBlock Text="{Binding Converter={x:Static converts:LanguageSettingsConverters.ToDisplayName}}" VerticalAlignment="Center"
-                                               Foreground="{DynamicResource SukiText}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="30" Margin="0 5 0 5">
-                    <TextBlock FontWeight="Bold" VerticalAlignment="Center"
-                               Text="{x:Static lang:Resources.ClosingBehavior}" />
-                    <ComboBox ItemsSource="{Binding ClosingBehaviors}"
-                              SelectedItem="{Binding SelectedClosingBehavior}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Converter={x:Static converts:EnumToDescriptionConverter.Instance}}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                </StackPanel>
-            </StackPanel>
-        </suki:GlassCard>
+    <!--
+      No nested EcSurface — SettingView detail card already wraps this page.
+      Rows use EcSettingRow so controls stretch with free window resize.
+    -->
+    <StackPanel Classes="EcSettingsList"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Stretch"
+                Spacing="4">
 
-        <suki:GlassCard>
-            <StackPanel Spacing="10">
-                <TextBlock FontSize="16" FontWeight="Bold"
-                           Text="{x:Static lang:Resources.OcrModels}" />
-                <StackPanel Orientation="Horizontal" Spacing="16">
-                    <TextBlock VerticalAlignment="Center" Text="{x:Static lang:Resources.ProxyUrl}" />
-                    <TextBox MinWidth="300"
-                             Text="{Binding ProxyConf.ProxyUrl}"
-                             PlaceholderText="{x:Static lang:Resources.ProxyAddrQuestion}" />
-                    <CheckBox Content="{x:Static lang:Resources.OcrUseProxy}"
-                              IsChecked="{Binding OcrConf.UseProxy}"
-                              VerticalAlignment="Center" />
-                </StackPanel>
-
-                <ItemsControl ItemsSource="{Binding VisibleOcrModelItems}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="viewModels:OcrModelDownloadItemViewModel">
-                            <Border Background="{DynamicResource SukiCardBackground}"
-                                    BorderBrush="{DynamicResource SukiControlBorderBrush}"
-                                    BorderThickness="1"
-                                    CornerRadius="8"
-                                    Padding="12"
-                                    Margin="0 3">
-                                <Grid ColumnDefinitions="2*,Auto" RowDefinitions="Auto,Auto,Auto">
-                                    <StackPanel Grid.Column="0" Spacing="4">
-                                        <TextBlock FontWeight="SemiBold" Text="{Binding DisplayName}" />
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Foreground="{DynamicResource SukiLowText}"
-                                                       Text="{Binding StatusText}" />
-                                            <TextBlock Foreground="{DynamicResource SukiLowText}"
-                                                       Text="{Binding ProgressText}" />
-                                        </StackPanel>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                        <Button Width="32" Height="32" Padding="6"
-                                                Command="{Binding $parent[ItemsControl].((viewModels:SettingViewModel)DataContext).DownloadOcrModelCommand}"
-                                                CommandParameter="{Binding}"
-                                                ToolTip.Tip="{Binding ActionText}"
-                                                IsVisible="{Binding IsActionVisible}">
-                                            <avalonia:MaterialIcon Kind="Download" />
-                                        </Button>
-                                        <Button Width="32" Height="32" Padding="6"
-                                                Command="{Binding $parent[ItemsControl].((viewModels:SettingViewModel)DataContext).CancelOcrModelCommand}"
-                                                CommandParameter="{Binding}"
-                                                ToolTip.Tip="{x:Static lang:Resources.Cancel}"
-                                                IsVisible="{Binding IsCancelVisible}">
-                                            <avalonia:MaterialIcon Kind="Cancel" />
-                                        </Button>
-                                        <Button Width="32" Height="32" Padding="6"
-                                                Command="{Binding $parent[ItemsControl].((viewModels:SettingViewModel)DataContext).DeleteOcrModelCommand}"
-                                                CommandParameter="{Binding}"
-                                                ToolTip.Tip="{x:Static lang:Resources.Delete}"
-                                                IsVisible="{Binding IsDeleteVisible}">
-                                            <avalonia:MaterialIcon Kind="Delete" />
-                                        </Button>
-                                    </StackPanel>
-                                    <ProgressBar Grid.Row="1" Grid.ColumnSpan="2"
-                                                 Minimum="0" Maximum="1"
-                                                 Value="{Binding Progress}"
-                                                 Height="6"
-                                                 IsVisible="{Binding IsProgressVisible}"
-                                                 IsIndeterminate="{Binding IsProgressIndeterminate}"
-                                                 Margin="0 8 0 0" />
-                                    <TextBlock Grid.Row="2" Grid.ColumnSpan="2"
-                                               Foreground="{DynamicResource SukiLowText}"
-                                               Text="{Binding ErrorMessage}"
-                                               IsVisible="{Binding IsFailed}"
-                                               TextWrapping="Wrap"
-                                               Margin="0 6 0 0" />
-                                </Grid>
+        <ec:EcSettingRow Label="{x:Static lang:Resources.DisplayLanguage}">
+            <ComboBox ItemsSource="{Binding DisplayLanguages}"
+                      SelectedItem="{Binding SelectedDisplayLanguage}"
+                      HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border ClipToBounds="True" CornerRadius="2" Width="20" Height="14"
+                                    IsVisible="{Binding Icon, Converter={x:Static dataConverters:StringConverters.IsNotNullOrEmpty}}">
+                                <Image Source="{Binding Icon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
+                                       Stretch="UniformToFill" />
                             </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                <Button HorizontalAlignment="Center"
-                        Width="32" Height="32" Padding="6"
-                        Command="{Binding ToggleOcrModelListCommand}"
-                        ToolTip.Tip="{Binding OcrModelListToggleText}"
-                        IsVisible="{Binding IsOcrModelListToggleVisible}">
-                    <avalonia:MaterialIcon Kind="{Binding OcrModelListToggleIcon}" />
-                </Button>
-            </StackPanel>
-        </suki:GlassCard>
-
-        <suki:GlassCard>
-            <StackPanel Spacing="10">
-                <StackPanel Spacing="3">
-                    <TextBlock FontSize="16" FontWeight="Bold"
-                               Text="{x:Static lang:Resources.AsrModels}" />
-                    <TextBlock Foreground="{DynamicResource SukiLowText}"
-                               Text="{x:Static lang:Resources.AsrModelsDescription}"
-                               TextWrapping="Wrap" />
-                </StackPanel>
-                <WrapPanel HorizontalAlignment="Right">
-                    <Button Command="{Binding OpenAsrModelDownloadsCommand}"
-                            Margin="4" IsEnabled="{Binding CanImportAsrModel}">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <avalonia:MaterialIcon Kind="Download" />
-                            <TextBlock Text="{x:Static lang:Resources.DownloadAsrModels}" />
+                            <TextBlock Text="{Binding Converter={x:Static converts:LanguageSettingsConverters.ToDisplayName}}"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource EcTextPrimary}" />
                         </StackPanel>
-                    </Button>
-                    <Button Click="ImportAsrModelFolder_OnClick"
-                            Margin="4" IsEnabled="{Binding CanImportAsrModel}">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <avalonia:MaterialIcon Kind="FolderOpen" />
-                            <TextBlock Text="{x:Static lang:Resources.ImportAsrModelFolder}" />
-                        </StackPanel>
-                    </Button>
-                    <Button Click="ImportAsrModelArchive_OnClick"
-                            Margin="4" IsEnabled="{Binding CanImportAsrModel}">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <avalonia:MaterialIcon Kind="ArchiveArrowUp" />
-                            <TextBlock Text="{x:Static lang:Resources.ImportAsrModelArchive}" />
-                        </StackPanel>
-                    </Button>
-                </WrapPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </ec:EcSettingRow>
 
-                <ProgressBar Height="4" IsIndeterminate="True"
-                             IsVisible="{Binding IsImportingAsrModel}" />
+        <ec:EcSettingRow Label="{x:Static lang:Resources.NativeLanguage}">
+            <ComboBox ItemsSource="{Binding NativeLanguages}"
+                      SelectedItem="{Binding SelectedNativeLanguage}"
+                      HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border ClipToBounds="True" CornerRadius="2" Width="20" Height="14"
+                                    IsVisible="{Binding Icon, Converter={x:Static dataConverters:StringConverters.IsNotNullOrEmpty}}">
+                                <Image Source="{Binding Icon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
+                                       Stretch="UniformToFill" />
+                            </Border>
+                            <TextBlock Text="{Binding Converter={x:Static converts:LanguageSettingsConverters.ToDisplayName}}"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource EcTextPrimary}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </ec:EcSettingRow>
 
-                <TextBlock Foreground="{DynamicResource SukiLowText}"
-                           Text="{x:Static lang:Resources.NoAsrModels}"
-                           IsVisible="{Binding HasNoAsrModels}" />
-                <ItemsControl ItemsSource="{Binding AsrModels}"
-                              IsVisible="{Binding HasAsrModels}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="speech:SpeechRecognitionModel">
-                            <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,3" MinHeight="36">
-                                <Border Width="24" Height="16" CornerRadius="2" ClipToBounds="True"
-                                        VerticalAlignment="Center">
-                                    <Image Source="{Binding Icon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
-                                           Stretch="UniformToFill" />
-                                </Border>
-                                <StackPanel Grid.Column="1" Margin="10,0" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Converter={x:Static converts:SpeechRecognitionModelConverters.ToDisplayName}}" />
-                                    <TextBlock Text="{Binding Id}" FontSize="11"
-                                               Foreground="{DynamicResource SukiLowText}" />
+        <ec:EcSettingRow Label="{x:Static lang:Resources.ClosingBehavior}">
+            <ComboBox ItemsSource="{Binding ClosingBehaviors}"
+                      SelectedItem="{Binding SelectedClosingBehavior}"
+                      HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={x:Static converts:EnumToDescriptionConverter.Instance}}"
+                                   Foreground="{DynamicResource EcTextPrimary}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </ec:EcSettingRow>
+
+        <Separator Classes="EcDivider" Margin="8,12" />
+
+        <TextBlock Classes="EcSectionTitle"
+                   Text="{x:Static lang:Resources.OcrModels}"
+                   Margin="12,4,12,8" />
+
+        <ec:EcSettingRow Label="{x:Static lang:Resources.ProxyUrl}">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <TextBox Text="{Binding ProxyConf.ProxyUrl}"
+                         PlaceholderText="{x:Static lang:Resources.ProxyAddrQuestion}"
+                         HorizontalAlignment="Stretch" />
+                <CheckBox Grid.Column="1"
+                          Content="{x:Static lang:Resources.OcrUseProxy}"
+                          IsChecked="{Binding OcrConf.UseProxy}"
+                          VerticalAlignment="Center" />
+            </Grid>
+        </ec:EcSettingRow>
+
+        <ItemsControl Classes="EcStackList"
+                      ItemsSource="{Binding VisibleOcrModelItems}"
+                      Margin="4,4,4,0">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="viewModels:OcrModelDownloadItemViewModel">
+                    <Border Background="{DynamicResource EcBgMuted}"
+                            BorderBrush="{DynamicResource EcBorder}"
+                            BorderThickness="1"
+                            CornerRadius="{DynamicResource EcRadiusMd}"
+                            Padding="12"
+                            Margin="0,0,0,8"
+                            HorizontalAlignment="Stretch">
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
+                            <StackPanel Spacing="4">
+                                <TextBlock FontWeight="SemiBold"
+                                           Foreground="{DynamicResource EcTextPrimary}"
+                                           Text="{Binding DisplayName}" />
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock FontSize="12"
+                                               Foreground="{DynamicResource EcTextSecondary}"
+                                               Text="{Binding StatusText}" />
+                                    <TextBlock FontSize="12"
+                                               Foreground="{DynamicResource EcTextMuted}"
+                                               Text="{Binding ProgressText}" />
                                 </StackPanel>
-                                <Button Grid.Column="2" Classes="Basic Danger" Width="32" Height="32" Padding="4"
-                                        Command="{Binding $parent[ItemsControl].((viewModels:SettingViewModel)DataContext).DeleteAsrModelCommand}"
+                            </StackPanel>
+                            <StackPanel Grid.Column="1"
+                                        Orientation="Horizontal"
+                                        Spacing="4"
+                                        VerticalAlignment="Center">
+                                <Button Classes="EcToolbarBtnSm"
+                                        Command="{Binding $parent[ItemsControl].((viewModels:SettingViewModel)DataContext).DownloadOcrModelCommand}"
                                         CommandParameter="{Binding}"
-                                        IsEnabled="{Binding $parent[ItemsControl].((viewModels:SettingViewModel)DataContext).CanImportAsrModel}"
-                                        ToolTip.Tip="{x:Static lang:Resources.Delete}">
-                                    <avalonia:MaterialIcon Kind="Delete" Width="18" Height="18" />
+                                        ToolTip.Tip="{Binding ActionText}"
+                                        IsVisible="{Binding IsActionVisible}">
+                                    <avalonia:MaterialIcon Kind="Download" Width="16" Height="16" />
                                 </Button>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
-        </suki:GlassCard>
+                                <Button Classes="EcToolbarBtnSm"
+                                        Command="{Binding $parent[ItemsControl].((viewModels:SettingViewModel)DataContext).CancelOcrModelCommand}"
+                                        CommandParameter="{Binding}"
+                                        ToolTip.Tip="{x:Static lang:Resources.Cancel}"
+                                        IsVisible="{Binding IsCancelVisible}">
+                                    <avalonia:MaterialIcon Kind="Cancel" Width="16" Height="16" />
+                                </Button>
+                                <Button Classes="EcToolbarBtnSm"
+                                        Command="{Binding $parent[ItemsControl].((viewModels:SettingViewModel)DataContext).DeleteOcrModelCommand}"
+                                        CommandParameter="{Binding}"
+                                        ToolTip.Tip="{x:Static lang:Resources.Delete}"
+                                        IsVisible="{Binding IsDeleteVisible}">
+                                    <avalonia:MaterialIcon Kind="Delete" Width="16" Height="16"
+                                                           Foreground="{DynamicResource EcDanger}" />
+                                </Button>
+                            </StackPanel>
+                            <ProgressBar Grid.Row="1" Grid.ColumnSpan="2"
+                                         Minimum="0" Maximum="1"
+                                         Value="{Binding Progress}"
+                                         Height="6"
+                                         IsVisible="{Binding IsProgressVisible}"
+                                         IsIndeterminate="{Binding IsProgressIndeterminate}" />
+                            <TextBlock Grid.Row="2" Grid.ColumnSpan="2"
+                                       Foreground="{DynamicResource EcTextMuted}"
+                                       Text="{Binding ErrorMessage}"
+                                       IsVisible="{Binding IsFailed}"
+                                       TextWrapping="Wrap" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Button HorizontalAlignment="Center"
+                Classes="EcToolbarBtn"
+                Command="{Binding ToggleOcrModelListCommand}"
+                ToolTip.Tip="{Binding OcrModelListToggleText}"
+                IsVisible="{Binding IsOcrModelListToggleVisible}">
+            <avalonia:MaterialIcon Kind="{Binding OcrModelListToggleIcon}" />
+        </Button>
+
+        <Separator Classes="EcDivider" Margin="8,12" />
+
+        <StackPanel Spacing="4" Margin="12,4,12,8">
+            <TextBlock Classes="EcSectionTitle"
+                       Text="{x:Static lang:Resources.AsrModels}" />
+            <TextBlock Classes="EcHelper"
+                       Text="{x:Static lang:Resources.AsrModelsDescription}" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal"
+                    Spacing="8"
+                    HorizontalAlignment="Stretch"
+                    Margin="8,0,8,8">
+            <Button Classes="EcGhost"
+                    Command="{Binding OpenAsrModelDownloadsCommand}"
+                    IsEnabled="{Binding CanImportAsrModel}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <avalonia:MaterialIcon Kind="Download" Width="16" Height="16" />
+                    <TextBlock Text="{x:Static lang:Resources.DownloadAsrModels}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Classes="EcGhost"
+                    Click="ImportAsrModelFolder_OnClick"
+                    IsEnabled="{Binding CanImportAsrModel}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <avalonia:MaterialIcon Kind="FolderOpen" Width="16" Height="16" />
+                    <TextBlock Text="{x:Static lang:Resources.ImportAsrModelFolder}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Classes="EcGhost"
+                    Click="ImportAsrModelArchive_OnClick"
+                    IsEnabled="{Binding CanImportAsrModel}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <avalonia:MaterialIcon Kind="ArchiveArrowUp" Width="16" Height="16" />
+                    <TextBlock Text="{x:Static lang:Resources.ImportAsrModelArchive}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+
+        <ProgressBar Height="4"
+                     IsIndeterminate="True"
+                     Margin="8,0"
+                     IsVisible="{Binding IsImportingAsrModel}" />
+
+        <TextBlock Foreground="{DynamicResource EcTextMuted}"
+                   Text="{x:Static lang:Resources.NoAsrModels}"
+                   IsVisible="{Binding HasNoAsrModels}"
+                   HorizontalAlignment="Center"
+                   Margin="0,8" />
+
+        <ItemsControl Classes="EcStackList"
+                      ItemsSource="{Binding AsrModels}"
+                      IsVisible="{Binding HasAsrModels}"
+                      Margin="4,0,4,0">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="speech:SpeechRecognitionModel">
+                    <Border Background="{DynamicResource EcBgMuted}"
+                            BorderBrush="{DynamicResource EcBorder}"
+                            BorderThickness="1"
+                            CornerRadius="{DynamicResource EcRadiusMd}"
+                            Padding="12,10"
+                            Margin="0,0,0,8"
+                            HorizontalAlignment="Stretch">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" MinHeight="36">
+                            <Border Width="24" Height="16" CornerRadius="2" ClipToBounds="True"
+                                    VerticalAlignment="Center">
+                                <Image Source="{Binding Icon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
+                                       Stretch="UniformToFill" />
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                <TextBlock Text="{Binding Converter={x:Static converts:SpeechRecognitionModelConverters.ToDisplayName}}"
+                                           Foreground="{DynamicResource EcTextPrimary}" />
+                                <TextBlock Text="{Binding Id}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource EcTextMuted}" />
+                            </StackPanel>
+                            <Button Grid.Column="2"
+                                    Classes="EcToolbarBtnSm"
+                                    Command="{Binding $parent[ItemsControl].((viewModels:SettingViewModel)DataContext).DeleteAsrModelCommand}"
+                                    CommandParameter="{Binding}"
+                                    IsEnabled="{Binding $parent[ItemsControl].((viewModels:SettingViewModel)DataContext).CanImportAsrModel}"
+                                    ToolTip.Tip="{x:Static lang:Resources.Delete}">
+                                <avalonia:MaterialIcon Kind="Delete" Width="16" Height="16"
+                                                       Foreground="{DynamicResource EcDanger}" />
+                            </Button>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </StackPanel>
 </UserControl>

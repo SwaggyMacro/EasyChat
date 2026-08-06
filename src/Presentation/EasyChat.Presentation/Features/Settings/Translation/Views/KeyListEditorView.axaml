@@ -4,80 +4,111 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:EasyChat.Presentation.Features.Settings.Translation"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-             xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
              xmlns:theme="https://github.com/kikipoulet/SukiUI"
              xmlns:lang="clr-namespace:EasyChat.Presentation.Lang"
              mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="400"
              x:Class="EasyChat.Presentation.Features.Settings.Translation.Views.KeyListEditorView"
-             x:DataType="vm:KeyListEditorViewModel">
+             x:DataType="vm:KeyListEditorViewModel"
+             MinWidth="440"
+             MaxWidth="520"
+             Width="480">
 
-    <StackPanel Spacing="20" MinWidth="450">
-        <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="SemiBold" />
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Border Classes="EcDialogHeader">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                <Border Width="40" Height="40" CornerRadius="11"
+                        Background="{DynamicResource EcAccentSoft}">
+                    <avalonia:MaterialIcon Kind="KeyVariant"
+                                           Width="20" Height="20"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource EcAccent}" />
+                </Border>
+                <TextBlock Grid.Column="1"
+                           Classes="EcDialogTitle"
+                           Text="{Binding Title}"
+                           VerticalAlignment="Center" />
+            </Grid>
+        </Border>
 
-        <ScrollViewer MaxHeight="300" HorizontalScrollBarVisibility="Disabled">
-            <ItemsControl ItemsSource="{Binding Items}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <suki:GlassCard Margin="0,0,0,10" Padding="10">
-                            <Grid ColumnDefinitions="*, Auto">
-                                <ContentControl Content="{Binding}">
-                                    <ContentControl.DataTemplates>
-                                        <!-- String Key Template -->
-                                        <DataTemplate DataType="vm:StringKeyItemViewModel">
-                                            <TextBox Text="{Binding Value}" PlaceholderText="API Key" />
-                                        </DataTemplate>
+        <ScrollViewer Grid.Row="1" Classes="EcDialogScroll" MaxHeight="320">
+            <StackPanel Classes="EcDialogBody">
+                <ItemsControl ItemsSource="{Binding Items}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="0,0,0,10"
+                                    Padding="12"
+                                    Background="{DynamicResource EcBgMuted}"
+                                    BorderBrush="{DynamicResource EcBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="{DynamicResource EcRadiusMd}">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                    <ContentControl Content="{Binding}">
+                                        <ContentControl.DataTemplates>
+                                            <DataTemplate DataType="vm:StringKeyItemViewModel">
+                                                <TextBox Text="{Binding Value}" PlaceholderText="API Key" />
+                                            </DataTemplate>
+                                            <DataTemplate DataType="vm:BaiduKeyItemViewModel">
+                                                <StackPanel Spacing="8">
+                                                    <TextBox Text="{Binding AppId}" PlaceholderText="App ID"
+                                                             theme:TextBoxExtensions.AddDeleteButton="True" />
+                                                    <TextBox Text="{Binding AppKey}" PlaceholderText="App Key"
+                                                             theme:TextBoxExtensions.AddDeleteButton="True"
+                                                             PasswordChar="*" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                            <DataTemplate DataType="vm:TencentKeyItemViewModel">
+                                                <StackPanel Spacing="8">
+                                                    <TextBox Text="{Binding SecretId}" PlaceholderText="Secret ID"
+                                                             theme:TextBoxExtensions.AddDeleteButton="True" />
+                                                    <TextBox Text="{Binding SecretKey}" PlaceholderText="Secret Key"
+                                                             theme:TextBoxExtensions.AddDeleteButton="True"
+                                                             PasswordChar="*" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ContentControl.DataTemplates>
+                                    </ContentControl>
 
-                                        <!-- Baidu Key Template -->
-                                        <DataTemplate DataType="vm:BaiduKeyItemViewModel">
-                                            <StackPanel Spacing="5">
-                                                <TextBox Text="{Binding AppId}" PlaceholderText="App ID"
-                                                         theme:TextBoxExtensions.AddDeleteButton="True" />
-                                                <TextBox Text="{Binding AppKey}" PlaceholderText="App Key"
-                                                         theme:TextBoxExtensions.AddDeleteButton="True"
-                                                         PasswordChar="*" />
-                                            </StackPanel>
-                                        </DataTemplate>
+                                    <Button Grid.Column="1"
+                                            Classes="EcDanger"
+                                            VerticalAlignment="Top"
+                                            Command="{Binding $parent[UserControl].((vm:KeyListEditorViewModel)DataContext).RemoveCommand}"
+                                            CommandParameter="{Binding}">
+                                        <avalonia:MaterialIcon Kind="TrashCan" Width="16" Height="16" />
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
-                                        <!-- Tencent Key Template -->
-                                        <DataTemplate DataType="vm:TencentKeyItemViewModel">
-                                            <StackPanel Spacing="5">
-                                                <TextBox Text="{Binding SecretId}" PlaceholderText="Secret ID"
-                                                         theme:TextBoxExtensions.AddDeleteButton="True" />
-                                                <TextBox Text="{Binding SecretKey}" PlaceholderText="Secret Key"
-                                                         theme:TextBoxExtensions.AddDeleteButton="True"
-                                                         PasswordChar="*" />
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ContentControl.DataTemplates>
-                                </ContentControl>
-
-                                <Button Grid.Column="1"
-                                        Classes="Flat Danger"
-                                        Margin="10,0,0,0"
-                                        VerticalAlignment="Top"
-                                        Command="{Binding $parent[UserControl].((vm:KeyListEditorViewModel)DataContext).RemoveCommand}"
-                                        CommandParameter="{Binding}">
-                                    <avalonia:MaterialIcon Kind="TrashCan" />
-                                </Button>
-                            </Grid>
-                        </suki:GlassCard>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                <Button Command="{Binding AddCommand}"
+                        HorizontalAlignment="Stretch"
+                        Classes="EcAddRow"
+                        Margin="0">
+                    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                        <avalonia:MaterialIcon Kind="Plus" Width="18" Height="18"
+                                               Foreground="{DynamicResource EcAccent}" />
+                        <TextBlock Text="{x:Static lang:Resources.AddKey}"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource EcTextPrimary}" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
         </ScrollViewer>
 
-        <Button Command="{Binding AddCommand}"
-                HorizontalAlignment="Stretch"
-                Classes="Flat">
-            <StackPanel Orientation="Horizontal" Spacing="10">
-                <avalonia:MaterialIcon Kind="Plus" />
-                <TextBlock Text="{x:Static lang:Resources.AddKey}" />
+        <Border Grid.Row="2" Classes="EcDialogFooter">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                <Button Content="{x:Static lang:Resources.Cancel}"
+                        Command="{Binding CancelCommand}"
+                        Classes="EcGhost"
+                        MinWidth="88" />
+                <Button Content="{x:Static lang:Resources.Save}"
+                        Command="{Binding SaveCommand}"
+                        Classes="EcPrimary"
+                        MinWidth="96" />
             </StackPanel>
-        </Button>
-
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
-            <Button Content="{x:Static lang:Resources.Save}" Command="{Binding SaveCommand}" Classes="Flat" />
-            <Button Content="{x:Static lang:Resources.Cancel}" Command="{Binding CancelCommand}" />
-        </StackPanel>
-    </StackPanel>
+        </Border>
+    </Grid>
 </UserControl>

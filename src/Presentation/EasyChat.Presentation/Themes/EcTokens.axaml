@@ -1,0 +1,180 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+
+    <!-- Density: slightly tighter than generic desktop chrome -->
+    <sys:Double x:Key="EcSpace1">4</sys:Double>
+    <sys:Double x:Key="EcSpace2">8</sys:Double>
+    <sys:Double x:Key="EcSpace3">12</sys:Double>
+    <sys:Double x:Key="EcSpace4">16</sys:Double>
+    <sys:Double x:Key="EcSpace5">24</sys:Double>
+    <sys:Double x:Key="EcSpace6">32</sys:Double>
+
+    <!-- Softer, more product-like radii -->
+    <CornerRadius x:Key="EcRadiusSm">8</CornerRadius>
+    <CornerRadius x:Key="EcRadiusMd">12</CornerRadius>
+    <CornerRadius x:Key="EcRadiusLg">16</CornerRadius>
+    <CornerRadius x:Key="EcRadiusXl">22</CornerRadius>
+    <CornerRadius x:Key="EcRadiusPill">999</CornerRadius>
+
+    <sys:Double x:Key="EcFontSizeSm">12</sys:Double>
+    <sys:Double x:Key="EcFontSizeMd">13.5</sys:Double>
+    <sys:Double x:Key="EcFontSizeLg">15</sys:Double>
+    <sys:Double x:Key="EcFontSizeXl">20</sys:Double>
+    <sys:Double x:Key="EcFontSizeDisplay">30</sys:Double>
+
+    <FontFamily x:Key="EcFontFamily">Inter, Microsoft YaHei UI, Microsoft YaHei, PingFang SC, Hiragino Sans GB, Noto Sans CJK SC, Noto Sans SC, Segoe UI, sans-serif</FontFamily>
+    <FontFamily x:Key="EcFontFamilyMono">Cascadia Mono, Cascadia Code, Consolas, Menlo, Monaco, Liberation Mono, monospace</FontFamily>
+
+    <sys:Double x:Key="EcHitTargetMin">36</sys:Double>
+    <!-- Single-line form fields share one chrome: height, left inset, spinner column -->
+    <sys:Double x:Key="EcFieldHeight">36</sys:Double>
+    <!-- Left 12; right 14 leaves room so the caret is not drawn under the last glyph -->
+    <Thickness x:Key="EcFieldPadding">12,0,14,0</Thickness>
+    <Thickness x:Key="EcFieldPaddingWithSpinner">12,0,4,0</Thickness>
+    <sys:Double x:Key="EcFieldSpinnerWidth">28</sys:Double>
+    <!-- Settings row right-hand control column — same width for Combo/Text/Numeric/color stacks -->
+    <sys:Double x:Key="EcSettingControlWidth">280</sys:Double>
+    <!-- EcFieldBg lives in ThemeDictionaries (same as EcBgElevated) so light/dark swap cleanly. -->
+
+    <!-- Accent still tracks Suki primary so user themes work -->
+    <!-- Solid accent still tracks user theme; soft fills live per theme dictionary (Opacity+DynamicResource paints solid). -->
+    <SolidColorBrush x:Key="EcAccent" Color="{DynamicResource SukiPrimaryColor}" />
+
+    <SolidColorBrush x:Key="EcSuccess" Color="#34D399" />
+    <SolidColorBrush x:Key="EcWarning" Color="#FBBF24" />
+    <SolidColorBrush x:Key="EcDanger" Color="#EF4444" />
+    <!-- Confirm dialog icon wells (soft tint, works on light + dark elevated cards) -->
+    <SolidColorBrush x:Key="EcSuccessSoft" Color="#1A34D399" />
+    <SolidColorBrush x:Key="EcWarningSoft" Color="#24F59E0B" />
+    <SolidColorBrush x:Key="EcDangerSoft" Color="#18EF4444" />
+    <!-- High-contrast chrome for capture handles (must read on any screenshot) -->
+    <SolidColorBrush x:Key="EcHandleFill" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="EcOnAccent" Color="#FFFFFFFF" />
+
+    <!--
+      Distinct product surface: ink/slate dark + paper light.
+      Avoid pure Suki grey so EasyChat reads as its own skin.
+    -->
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="EcBgCanvas" Color="#0A0E14" />
+            <SolidColorBrush x:Key="EcBgElevated" Color="#121820" />
+            <SolidColorBrush x:Key="EcFieldBg" Color="#121820" />
+            <SolidColorBrush x:Key="EcBgMuted" Color="#1A222D" />
+            <SolidColorBrush x:Key="EcBgHover" Color="#222C3A" />
+            <SolidColorBrush x:Key="EcBorder" Color="#2A3545" />
+            <SolidColorBrush x:Key="EcBorderStrong" Color="#3D4D63" />
+            <SolidColorBrush x:Key="EcTextPrimary" Color="#F4F7FB" />
+            <SolidColorBrush x:Key="EcTextSecondary" Color="#9AA8BC" />
+            <SolidColorBrush x:Key="EcTextMuted" Color="#6B7A90" />
+            <SolidColorBrush x:Key="EcFloatBg" Color="#E60E1420" />
+            <SolidColorBrush x:Key="EcFloatBorder" Color="#28FFFFFF" />
+            <SolidColorBrush x:Key="EcOverlayScrim" Color="#B3000000" />
+            <SolidColorBrush x:Key="EcHeroSheen" Color="#1A3B82F6" />
+            <SolidColorBrush x:Key="EcAccentMuted" Color="#243B82F6" />
+            <SolidColorBrush x:Key="EcAccentSoft" Color="#143B82F6" />
+            <SolidColorBrush x:Key="EcNavSelected" Color="#2434475C" />
+            <!-- Status pills: bright label on tinted well (dark UI) -->
+            <SolidColorBrush x:Key="EcStatusSuccessBg" Color="#1A34D399" />
+            <SolidColorBrush x:Key="EcStatusSuccessBorder" Color="#4034D399" />
+            <SolidColorBrush x:Key="EcStatusSuccessFg" Color="#6EE7B7" />
+            <SolidColorBrush x:Key="EcStatusSuccessDot" Color="#34D399" />
+            <SolidColorBrush x:Key="EcStatusWarningBg" Color="#24FBBF24" />
+            <SolidColorBrush x:Key="EcStatusWarningBorder" Color="#40FBBF24" />
+            <SolidColorBrush x:Key="EcStatusWarningFg" Color="#FCD34D" />
+            <SolidColorBrush x:Key="EcStatusWarningDot" Color="#FBBF24" />
+            <SolidColorBrush x:Key="EcStatusDangerBg" Color="#26EF4444" />
+            <SolidColorBrush x:Key="EcStatusDangerBorder" Color="#40EF4444" />
+            <SolidColorBrush x:Key="EcStatusDangerFg" Color="#FCA5A5" />
+            <SolidColorBrush x:Key="EcStatusDangerDot" Color="#F87171" />
+            <SolidColorBrush x:Key="EcStatusNeutralBg" Color="#1A94A3B8" />
+            <SolidColorBrush x:Key="EcStatusNeutralBorder" Color="#3394A3B8" />
+            <SolidColorBrush x:Key="EcStatusNeutralFg" Color="#CBD5E1" />
+            <SolidColorBrush x:Key="EcStatusNeutralDot" Color="#94A3B8" />
+            <BoxShadows x:Key="EcShadowFloat">0 18 48 0 #80000000</BoxShadows>
+            <BoxShadows x:Key="EcShadowCard">0 1 0 0 #14FFFFFF, 0 8 24 0 #40000000</BoxShadows>
+            <BoxShadows x:Key="EcShadowTooltip">0 4 14 0 #66000000</BoxShadows>
+            <BoxShadows x:Key="EcShadowInset">inset 0 1 0 0 #14FFFFFF</BoxShadows>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="EcBgCanvas" Color="#F3F5F9" />
+            <SolidColorBrush x:Key="EcBgElevated" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="EcFieldBg" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="EcBgMuted" Color="#EBEFF5" />
+            <SolidColorBrush x:Key="EcBgHover" Color="#E2E8F0" />
+            <SolidColorBrush x:Key="EcBorder" Color="#D8DEE8" />
+            <SolidColorBrush x:Key="EcBorderStrong" Color="#B8C2D1" />
+            <SolidColorBrush x:Key="EcTextPrimary" Color="#0B1220" />
+            <SolidColorBrush x:Key="EcTextSecondary" Color="#4B5A70" />
+            <SolidColorBrush x:Key="EcTextMuted" Color="#8490A3" />
+            <SolidColorBrush x:Key="EcFloatBg" Color="#F7FFFFFF" />
+            <SolidColorBrush x:Key="EcFloatBorder" Color="#1A0F172A" />
+            <SolidColorBrush x:Key="EcOverlayScrim" Color="#59000000" />
+            <SolidColorBrush x:Key="EcHeroSheen" Color="#143B82F6" />
+            <SolidColorBrush x:Key="EcAccentMuted" Color="#DAE6FA" />
+            <SolidColorBrush x:Key="EcAccentSoft" Color="#EEF3FB" />
+            <SolidColorBrush x:Key="EcNavSelected" Color="#E8EEF8" />
+            <!-- Status pills: dark ink on soft fill (readable on paper light) -->
+            <SolidColorBrush x:Key="EcStatusSuccessBg" Color="#D1FAE5" />
+            <SolidColorBrush x:Key="EcStatusSuccessBorder" Color="#6EE7B7" />
+            <SolidColorBrush x:Key="EcStatusSuccessFg" Color="#047857" />
+            <SolidColorBrush x:Key="EcStatusSuccessDot" Color="#059669" />
+            <SolidColorBrush x:Key="EcStatusWarningBg" Color="#FEF3C7" />
+            <SolidColorBrush x:Key="EcStatusWarningBorder" Color="#FCD34D" />
+            <SolidColorBrush x:Key="EcStatusWarningFg" Color="#B45309" />
+            <SolidColorBrush x:Key="EcStatusWarningDot" Color="#D97706" />
+            <SolidColorBrush x:Key="EcStatusDangerBg" Color="#FEE2E2" />
+            <SolidColorBrush x:Key="EcStatusDangerBorder" Color="#FCA5A5" />
+            <SolidColorBrush x:Key="EcStatusDangerFg" Color="#B91C1C" />
+            <SolidColorBrush x:Key="EcStatusDangerDot" Color="#DC2626" />
+            <SolidColorBrush x:Key="EcStatusNeutralBg" Color="#E8EEF5" />
+            <SolidColorBrush x:Key="EcStatusNeutralBorder" Color="#CBD5E1" />
+            <SolidColorBrush x:Key="EcStatusNeutralFg" Color="#475569" />
+            <SolidColorBrush x:Key="EcStatusNeutralDot" Color="#64748B" />
+            <BoxShadows x:Key="EcShadowFloat">0 18 48 0 #24000000</BoxShadows>
+            <BoxShadows x:Key="EcShadowCard">0 1 2 0 #0A000000, 0 8 20 0 #0F000000</BoxShadows>
+            <BoxShadows x:Key="EcShadowTooltip">0 2 10 0 #1A000000</BoxShadows>
+            <BoxShadows x:Key="EcShadowInset">inset 0 1 0 0 #FFFFFFFF</BoxShadows>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Default">
+            <SolidColorBrush x:Key="EcBgCanvas" Color="#0A0E14" />
+            <SolidColorBrush x:Key="EcBgElevated" Color="#121820" />
+            <SolidColorBrush x:Key="EcFieldBg" Color="#121820" />
+            <SolidColorBrush x:Key="EcBgMuted" Color="#1A222D" />
+            <SolidColorBrush x:Key="EcBgHover" Color="#222C3A" />
+            <SolidColorBrush x:Key="EcBorder" Color="#2A3545" />
+            <SolidColorBrush x:Key="EcBorderStrong" Color="#3D4D63" />
+            <SolidColorBrush x:Key="EcTextPrimary" Color="#F4F7FB" />
+            <SolidColorBrush x:Key="EcTextSecondary" Color="#9AA8BC" />
+            <SolidColorBrush x:Key="EcTextMuted" Color="#6B7A90" />
+            <SolidColorBrush x:Key="EcFloatBg" Color="#E60E1420" />
+            <SolidColorBrush x:Key="EcFloatBorder" Color="#28FFFFFF" />
+            <SolidColorBrush x:Key="EcOverlayScrim" Color="#B3000000" />
+            <SolidColorBrush x:Key="EcHeroSheen" Color="#1A3B82F6" />
+            <SolidColorBrush x:Key="EcAccentMuted" Color="#243B82F6" />
+            <SolidColorBrush x:Key="EcAccentSoft" Color="#143B82F6" />
+            <SolidColorBrush x:Key="EcNavSelected" Color="#2434475C" />
+            <SolidColorBrush x:Key="EcStatusSuccessBg" Color="#1A34D399" />
+            <SolidColorBrush x:Key="EcStatusSuccessBorder" Color="#4034D399" />
+            <SolidColorBrush x:Key="EcStatusSuccessFg" Color="#6EE7B7" />
+            <SolidColorBrush x:Key="EcStatusSuccessDot" Color="#34D399" />
+            <SolidColorBrush x:Key="EcStatusWarningBg" Color="#24FBBF24" />
+            <SolidColorBrush x:Key="EcStatusWarningBorder" Color="#40FBBF24" />
+            <SolidColorBrush x:Key="EcStatusWarningFg" Color="#FCD34D" />
+            <SolidColorBrush x:Key="EcStatusWarningDot" Color="#FBBF24" />
+            <SolidColorBrush x:Key="EcStatusDangerBg" Color="#26EF4444" />
+            <SolidColorBrush x:Key="EcStatusDangerBorder" Color="#40EF4444" />
+            <SolidColorBrush x:Key="EcStatusDangerFg" Color="#FCA5A5" />
+            <SolidColorBrush x:Key="EcStatusDangerDot" Color="#F87171" />
+            <SolidColorBrush x:Key="EcStatusNeutralBg" Color="#1A94A3B8" />
+            <SolidColorBrush x:Key="EcStatusNeutralBorder" Color="#3394A3B8" />
+            <SolidColorBrush x:Key="EcStatusNeutralFg" Color="#CBD5E1" />
+            <SolidColorBrush x:Key="EcStatusNeutralDot" Color="#94A3B8" />
+            <BoxShadows x:Key="EcShadowFloat">0 18 48 0 #80000000</BoxShadows>
+            <BoxShadows x:Key="EcShadowCard">0 1 0 0 #14FFFFFF, 0 8 24 0 #40000000</BoxShadows>
+            <BoxShadows x:Key="EcShadowTooltip">0 4 14 0 #66000000</BoxShadows>
+            <BoxShadows x:Key="EcShadowInset">inset 0 1 0 0 #14FFFFFF</BoxShadows>
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

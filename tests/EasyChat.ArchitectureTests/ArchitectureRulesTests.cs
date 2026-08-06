@@ -291,7 +291,7 @@ public sealed class ArchitectureRulesTests
 
         Assert.AreEqual("EasyChat", properties["AssemblyName"]);
         Assert.AreEqual("WinExe", properties["OutputType"]);
-        Assert.AreEqual("1.0.6", properties["Version"]);
+        Assert.AreEqual("1.0.7", properties["Version"]);
     }
 
     [TestMethod]

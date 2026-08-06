@@ -107,9 +107,8 @@ namespace EasyChat.Presentation.Features.Translation.Views
             if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
                 return;
 
+            // Height is already Manual; scroll viewer fills the star row — no MaxHeight lock.
             SizeToContent = SizeToContent.Manual;
-            if (_contentScrollViewer is not null)
-                _contentScrollViewer.MaxHeight = double.PositiveInfinity;
             BeginResizeDrag(WindowEdge.SouthEast, e);
             e.Handled = true;
         }

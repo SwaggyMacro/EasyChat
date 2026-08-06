@@ -2,40 +2,233 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d"
              xmlns:viewModels="clr-namespace:EasyChat.Presentation.Features.Shell"
              xmlns:lang="clr-namespace:EasyChat.Presentation.Lang"
+             xmlns:ec="clr-namespace:EasyChat.Presentation.Shared.Controls;assembly=EasyChat.Presentation.Shared"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              x:DataType="viewModels:AboutViewModel"
-             x:Class="EasyChat.Presentation.Features.Shell.Views.AboutView">
-    <StackPanel Margin="0 30 0 30">
-        <Image Source="avares://EasyChat.Desktop/Assets/easychat-logo.png" MaxWidth="150" MaxHeight="150" />
-        <ScrollViewer>
-            <StackPanel>
-                <TextBlock HorizontalAlignment="Center" Margin="0 5" FontSize="18" FontWeight="Bold"
-                           Text="{x:Static lang:Resources.AppName}" />
-                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Center" FontFamily="Bold"
-                           Text="{x:Static lang:Resources.AboutLine1}" />
-                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Center" FontFamily="Bold"
-                           Text="{x:Static lang:Resources.AboutLine2}" />
-                <TextBlock HorizontalAlignment="Center" FontFamily="Bold" FontSize="18"
-                           Margin="0 20 0 5">
-                    ThirdParty Library
-                </TextBlock>
-                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Center" FontFamily="Bold">
-                    AvaloniaUI/Avalonia
-                </TextBlock>
-                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Center" FontFamily="Bold">
-                    kikipoulet/SukiUI
-                </TextBlock>
-                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Center" FontFamily="Bold">
-                    sdcb/PaddleSharp
-                </TextBlock>
+             x:Class="EasyChat.Presentation.Features.Shell.Views.AboutView"
+             mc:Ignorable="d"
+             d:DesignWidth="1100"
+             d:DesignHeight="740"
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch"
+             Background="{DynamicResource EcBgCanvas}">
+    <!--
+      Full-width Ec rhythm, natural Auto heights only — no * stretch on library tiles
+      (that made hollow towers). Comfortable padding without filling the pane.
+    -->
+    <Grid Classes="EcPageFrame"
+          RowDefinitions="*,Auto"
+          HorizontalAlignment="Stretch"
+          VerticalAlignment="Stretch">
+
+        <ScrollViewer Grid.Row="0"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="18" HorizontalAlignment="Stretch">
+
+                <ec:EcPageHeader Title="{x:Static lang:Resources.About}"
+                                 Subtitle="{x:Static lang:Resources.AboutLine1}" />
+
+                <!-- Identity -->
+                <Border Background="{DynamicResource EcBgElevated}"
+                        BorderBrush="{DynamicResource EcBorder}"
+                        BorderThickness="1"
+                        CornerRadius="16"
+                        Padding="22,20">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="18">
+                        <Border Width="56" Height="56"
+                                CornerRadius="14"
+                                Background="{DynamicResource EcAccentSoft}"
+                                VerticalAlignment="Center">
+                            <Image Source="avares://EasyChat.Desktop/Assets/easychat-logo.png"
+                                   MaxWidth="36" MaxHeight="36"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                        </Border>
+
+                        <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <TextBlock Text="{x:Static lang:Resources.AppName}"
+                                           FontSize="18"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource EcTextPrimary}" />
+                                <Border Classes="EcPill"
+                                        Background="{DynamicResource EcAccentSoft}"
+                                        Padding="12,5"
+                                        VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock Text="{x:Static lang:Resources.CurrentVersion}"
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource EcTextMuted}" />
+                                        <TextBlock Text="{Binding Version}"
+                                                   FontSize="12"
+                                                   FontWeight="SemiBold"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource EcAccent}" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Text="{x:Static lang:Resources.AboutLine2}"
+                                       TextWrapping="Wrap"
+                                       FontSize="13.5"
+                                       LineHeight="22"
+                                       MaxWidth="640"
+                                       Foreground="{DynamicResource EcTextSecondary}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    Spacing="10"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Right">
+                            <Button Classes="EcPrimary"
+                                    Command="{Binding OpenUrlCommand}"
+                                    CommandParameter="https://github.com/SwaggyMacro/EasyChat"
+                                    Padding="14,9">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <avalonia:MaterialIcon Kind="Github" Width="16" Height="16" />
+                                    <TextBlock Text="{x:Static lang:Resources.OpenOnGithub}"
+                                               FontSize="13"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button Classes="EcGhost"
+                                    Command="{Binding OpenUrlCommand}"
+                                    CommandParameter="https://github.com/SwaggyMacro/EasyChat/releases"
+                                    Padding="14,9">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <avalonia:MaterialIcon Kind="Download" Width="16" Height="16" />
+                                    <TextBlock Text="{x:Static lang:Resources.OpenReleases}"
+                                               FontSize="13"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Third-party: fixed content height, not stretched -->
+                <Border Background="{DynamicResource EcBgElevated}"
+                        BorderBrush="{DynamicResource EcBorder}"
+                        BorderThickness="1"
+                        CornerRadius="16"
+                        Padding="22,20"
+                        VerticalAlignment="Top">
+                    <StackPanel Spacing="14">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <avalonia:MaterialIcon Kind="PackageVariant"
+                                                   Width="16" Height="16"
+                                                   Foreground="{DynamicResource EcTextMuted}"
+                                                   VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Static lang:Resources.ThirdPartyLibraries}"
+                                       FontSize="12.5"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource EcTextMuted}" />
+                        </StackPanel>
+
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                            <Border Background="{DynamicResource EcBgMuted}"
+                                    CornerRadius="12"
+                                    Padding="16,14">
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <Border Width="36" Height="36"
+                                            CornerRadius="10"
+                                            Background="{DynamicResource EcBgElevated}"
+                                            BorderBrush="{DynamicResource EcBorder}"
+                                            BorderThickness="1"
+                                            VerticalAlignment="Center">
+                                        <avalonia:MaterialIcon Kind="Application"
+                                                               Width="16" Height="16"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource EcAccent}" />
+                                    </Border>
+                                    <StackPanel Spacing="2" VerticalAlignment="Center">
+                                        <TextBlock Text="AvaloniaUI"
+                                                   FontSize="13.5"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource EcTextPrimary}" />
+                                        <TextBlock Text="Avalonia"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource EcTextMuted}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="1"
+                                    Background="{DynamicResource EcBgMuted}"
+                                    CornerRadius="12"
+                                    Padding="16,14">
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <Border Width="36" Height="36"
+                                            CornerRadius="10"
+                                            Background="{DynamicResource EcBgElevated}"
+                                            BorderBrush="{DynamicResource EcBorder}"
+                                            BorderThickness="1"
+                                            VerticalAlignment="Center">
+                                        <avalonia:MaterialIcon Kind="Palette"
+                                                               Width="16" Height="16"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource EcAccent}" />
+                                    </Border>
+                                    <StackPanel Spacing="2" VerticalAlignment="Center">
+                                        <TextBlock Text="SukiUI"
+                                                   FontSize="13.5"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource EcTextPrimary}" />
+                                        <TextBlock Text="kikipoulet"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource EcTextMuted}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="2"
+                                    Background="{DynamicResource EcBgMuted}"
+                                    CornerRadius="12"
+                                    Padding="16,14">
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <Border Width="36" Height="36"
+                                            CornerRadius="10"
+                                            Background="{DynamicResource EcBgElevated}"
+                                            BorderBrush="{DynamicResource EcBorder}"
+                                            BorderThickness="1"
+                                            VerticalAlignment="Center">
+                                        <avalonia:MaterialIcon Kind="TextRecognition"
+                                                               Width="16" Height="16"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource EcAccent}" />
+                                    </Border>
+                                    <StackPanel Spacing="2" VerticalAlignment="Center">
+                                        <TextBlock Text="PaddleSharp"
+                                                   FontSize="13.5"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource EcTextPrimary}" />
+                                        <TextBlock Text="sdcb"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource EcTextMuted}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </ScrollViewer>
 
-        <TextBlock Margin="0 100 0 0" HorizontalAlignment="Center"
-                   VerticalAlignment="Bottom" FontFamily="Bold">
-            @ Copyright 2024
-        </TextBlock>
-    </StackPanel>
+        <TextBlock Grid.Row="1"
+                   Text="{x:Static lang:Resources.Copyright}"
+                   FontSize="12"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Bottom"
+                   Foreground="{DynamicResource EcTextMuted}"
+                   Margin="2,16,0,0" />
+    </Grid>
 </UserControl>

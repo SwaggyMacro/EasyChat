@@ -168,7 +168,10 @@ public sealed class TranslationWindowCoordinator(
         }
 
         var logicalWidth = window.Bounds.Width > 0 ? window.Bounds.Width : window.Width;
-        var logicalHeight = window.Bounds.Height > 0 ? window.Bounds.Height : 350;
+        // Prefer explicit Height (manual sizing) so placement does not jump as content streams.
+        var logicalHeight = window.Bounds.Height > 1
+            ? window.Bounds.Height
+            : (double.IsNaN(window.Height) || window.Height <= 0 ? 480 : window.Height);
         window.Position = TranslationWindowPlacement.Near(
             screen.WorkingArea,
             screen.Scaling,

@@ -9,86 +9,96 @@
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="500"
              x:DataType="viewModels:TtsVoiceSettingsDialogViewModel"
-             Width="700" Height="500">
-    <suki:GlassCard>
-        <Grid RowDefinitions="Auto, *, Auto">
-            <!-- Header -->
-            <StackPanel Grid.Row="0" Margin="0,0,0,15" Orientation="Horizontal" Spacing="20">
-                <TextBlock Text="{x:Static lang:Resources.Tts_Configuration}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center"/>
-                
-                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                    <TextBlock Text="{x:Static lang:Resources.Tts_Provider}" VerticalAlignment="Center" Opacity="0.7"/>
-                    <ComboBox ItemsSource="{Binding AvailableProviders}" 
+             MinWidth="560"
+             MaxWidth="720"
+             Width="640"
+             Height="500">
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Border Classes="EcDialogHeader">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                <Border Width="40" Height="40" CornerRadius="11"
+                        Background="{DynamicResource EcAccentSoft}">
+                    <avalonia:MaterialIcon Kind="VolumeHigh"
+                                           Width="20" Height="20"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource EcAccent}" />
+                </Border>
+                <TextBlock Grid.Column="1"
+                           Classes="EcDialogTitle"
+                           Text="{x:Static lang:Resources.Tts_Configuration}"
+                           VerticalAlignment="Center" />
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Static lang:Resources.Tts_Provider}"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource EcTextSecondary}" />
+                    <ComboBox ItemsSource="{Binding AvailableProviders}"
                               SelectedItem="{Binding SelectedProvider}"
-                              MinWidth="120"/>
+                              MinWidth="140" />
                 </StackPanel>
-            </StackPanel>
-
-            <!-- Content -->
-            <suki:GlassCard Grid.Row="1" Margin="0,0,0,15" Padding="0">
-                <Grid>
-                    <TextBlock Text="{x:Static lang:Resources.Tts_NoVoicesConfigured}"
-                               IsVisible="{Binding !ConfiguredVoices.Count}"
-                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                               Opacity="0.5"/>
-                    
-                    <ListBox ItemsSource="{Binding ConfiguredVoices}" 
-                             SelectedItem="{Binding SelectedConfiguredVoice}"
-                             Background="Transparent">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid ColumnDefinitions="*, 2*, *">
-                                    <StackPanel Orientation="Horizontal" Spacing="8" Grid.Column="0">
-                                        <TextBlock Text="{Binding Language.EnglishName}" FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding Language.ChineseName}" Opacity="0.6" FontSize="12" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    
-                                    <StackPanel Orientation="Horizontal" Spacing="8" Grid.Column="1">
-                                        <avalonia:MaterialIcon Kind="AccountVoice" Width="16" Height="16" Opacity="0.7"/>
-                                        <TextBlock Text="{Binding VoiceName}"/>
-                                    </StackPanel>
-
-                                    <TextBlock Text="{Binding VoiceLocale}" Grid.Column="2" 
-                                               HorizontalAlignment="Right" Opacity="0.5" FontSize="12"/>
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Grid>
-            </suki:GlassCard>
-
-            <!-- Footer -->
-            <Grid Grid.Row="2">
-                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Left">
-                    <Button Classes="Flat" Command="{Binding AddCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="5">
-                            <avalonia:MaterialIcon Kind="Plus"/>
-                            <TextBlock Text="{x:Static lang:Resources.Add}"/>
-                        </StackPanel>
-                    </Button>
-                    <Button Classes="Flat Accent" Command="{Binding EditCommand}" 
-                            CommandParameter="{Binding SelectedConfiguredVoice}"
-                            IsEnabled="{Binding SelectedConfiguredVoice, Converter={x:Static ObjectConverters.IsNotNull}}">
-                        <StackPanel Orientation="Horizontal" Spacing="5">
-                            <avalonia:MaterialIcon Kind="Pencil"/>
-                            <TextBlock Text="{x:Static lang:Resources.Edit}"/>
-                        </StackPanel>
-                    </Button>
-                    <Button Classes="Flat Danger" Command="{Binding DeleteCommand}"
-                            CommandParameter="{Binding SelectedConfiguredVoice}"
-                            IsEnabled="{Binding SelectedConfiguredVoice, Converter={x:Static ObjectConverters.IsNotNull}}">
-                        <StackPanel Orientation="Horizontal" Spacing="5">
-                            <avalonia:MaterialIcon Kind="Delete"/>
-                            <TextBlock Text="{x:Static lang:Resources.Delete}"/>
-                        </StackPanel>
-                    </Button>
-
-                </StackPanel>
-                
-                <Button Content="{x:Static lang:Resources.Close}" 
-                        Command="{Binding CloseCommand}" 
-                        HorizontalAlignment="Right" />
             </Grid>
-        </Grid>
-    </suki:GlassCard>
+        </Border>
+
+        <Border Grid.Row="1"
+                Margin="22,14,22,0"
+                Padding="8"
+                Background="{DynamicResource EcBgMuted}"
+                BorderBrush="{DynamicResource EcBorder}"
+                BorderThickness="1"
+                CornerRadius="{DynamicResource EcRadiusMd}">
+            <Grid>
+                <TextBlock Text="{x:Static lang:Resources.Tts_NoVoicesConfigured}"
+                           IsVisible="{Binding !ConfiguredVoices.Count}"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Classes="EcMuted" />
+                <ListBox ItemsSource="{Binding ConfiguredVoices}"
+                         SelectedItem="{Binding SelectedConfiguredVoice}"
+                         Background="Transparent">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="*,2*,*" MinHeight="36">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{Binding Language.EnglishName}" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource EcTextPrimary}" />
+                                    <TextBlock Text="{Binding Language.ChineseName}" FontSize="12"
+                                               VerticalAlignment="Center"
+                                               Foreground="{DynamicResource EcTextMuted}" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8" Grid.Column="1">
+                                    <avalonia:MaterialIcon Kind="AccountVoice" Width="16" Height="16"
+                                                           Foreground="{DynamicResource EcTextSecondary}" />
+                                    <TextBlock Text="{Binding VoiceName}"
+                                               Foreground="{DynamicResource EcTextPrimary}" />
+                                </StackPanel>
+                                <TextBlock Text="{Binding VoiceLocale}" Grid.Column="2"
+                                           HorizontalAlignment="Right" FontSize="12"
+                                           Foreground="{DynamicResource EcTextMuted}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Classes="EcDialogFooter">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Classes="EcPrimary" Command="{Binding AddCommand}" Content="{x:Static lang:Resources.Add}" />
+                    <Button Classes="EcGhost" Command="{Binding EditCommand}"
+                            CommandParameter="{Binding SelectedConfiguredVoice}"
+                            IsEnabled="{Binding SelectedConfiguredVoice, Converter={x:Static ObjectConverters.IsNotNull}}"
+                            Content="{x:Static lang:Resources.Edit}" />
+                    <Button Classes="EcDanger" Command="{Binding DeleteCommand}"
+                            CommandParameter="{Binding SelectedConfiguredVoice}"
+                            IsEnabled="{Binding SelectedConfiguredVoice, Converter={x:Static ObjectConverters.IsNotNull}}"
+                            Content="{x:Static lang:Resources.Delete}" />
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Content="{x:Static lang:Resources.Close}"
+                        Classes="EcGhost"
+                        MinWidth="88"
+                        Command="{Binding CloseCommand}" />
+            </Grid>
+        </Border>
+    </Grid>
 </UserControl>

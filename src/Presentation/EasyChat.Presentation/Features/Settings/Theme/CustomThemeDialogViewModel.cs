@@ -2,9 +2,9 @@ using System.Reactive;
 using Avalonia.Media;
 using EasyChat.Presentation.Features.Settings.State;
 using EasyChat.Presentation.Foundation.Navigation;
+using EasyChat.Presentation.Foundation.UiHost;
 using ReactiveUI;
 using SukiUI;
-using SukiUI.Dialogs;
 using SukiUI.Models;
 
 namespace EasyChat.Presentation.Features.Settings.Theme;
@@ -12,13 +12,13 @@ namespace EasyChat.Presentation.Features.Settings.Theme;
 public sealed class CustomThemeDialogViewModel : ConventionViewModelBase
 {
     private readonly SukiTheme _theme;
-    private readonly ISukiDialog _dialog;
+    private readonly IUiDialogSession _dialog;
     private readonly LiveGeneralSettings _settings;
     private string _displayName = "Pink";
     private Color _primaryColor = Colors.DeepPink;
     private Color _accentColor = Colors.Pink;
 
-    public CustomThemeDialogViewModel(SukiTheme theme, ISukiDialog dialog, LiveGeneralSettings settings)
+    public CustomThemeDialogViewModel(SukiTheme theme, IUiDialogSession dialog, LiveGeneralSettings settings)
     {
         _theme = theme;
         _dialog = dialog;

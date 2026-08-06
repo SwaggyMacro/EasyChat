@@ -1,0 +1,97 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ec="clr-namespace:EasyChat.Presentation.Shared.Controls;assembly=EasyChat.Presentation.Shared"
+                    xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia">
+    <!--
+      Help: 28px icon hit only.
+      Tip: same chrome as app ToolTip (elevated + 1px border + soft shadow) — no accent rail / gray slab.
+    -->
+    <ControlTheme x:Key="{x:Type ec:EcSettingRow}" TargetType="ec:EcSettingRow">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate TargetType="ec:EcSettingRow">
+                <Border x:Name="Root"
+                        Background="{TemplateBinding Background}"
+                        Padding="4,12"
+                        CornerRadius="{DynamicResource EcRadiusMd}"
+                        MinHeight="48">
+                    <Grid ColumnDefinitions="*,*"
+                          MinHeight="40"
+                          Margin="8,0"
+                          ColumnSpacing="16">
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="4"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left">
+                            <TextBlock Text="{TemplateBinding Label}"
+                                       FontWeight="SemiBold"
+                                       FontSize="13.5"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource EcTextPrimary}"
+                                       TextWrapping="Wrap" />
+
+                            <Border x:Name="PART_HelpHit"
+                                    Width="28" Height="28"
+                                    CornerRadius="8"
+                                    VerticalAlignment="Center"
+                                    Background="Transparent"
+                                    Cursor="Help"
+                                    IsVisible="{TemplateBinding Helper, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                <Panel>
+                                    <icons:MaterialIcon Kind="HelpCircleOutline"
+                                                        Width="15" Height="15"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        Foreground="{DynamicResource EcTextMuted}" />
+                                    <Popup x:Name="PART_HelperPopup"
+                                           Placement="Bottom"
+                                           HorizontalOffset="-6"
+                                           VerticalOffset="8"
+                                           IsLightDismissEnabled="False"
+                                           IsHitTestVisible="False">
+                                        <Border Background="{DynamicResource EcBgElevated}"
+                                                BorderBrush="{DynamicResource EcBorder}"
+                                                BorderThickness="1"
+                                                CornerRadius="{DynamicResource EcRadiusSm}"
+                                                BoxShadow="{DynamicResource EcShadowTooltip}"
+                                                Padding="10,8"
+                                                MaxWidth="260"
+                                                IsHitTestVisible="False">
+                                            <TextBlock x:Name="PART_HelperText"
+                                                       TextWrapping="Wrap"
+                                                       FontSize="12.5"
+                                                       LineHeight="18"
+                                                       Foreground="{DynamicResource EcTextSecondary}"
+                                                       IsHitTestVisible="False" />
+                                        </Border>
+                                    </Popup>
+                                </Panel>
+                            </Border>
+                        </StackPanel>
+
+                        <ContentPresenter Grid.Column="1"
+                                          Name="PART_ContentPresenter"
+                                          MinWidth="{DynamicResource EcSettingControlWidth}"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          HorizontalContentAlignment="Stretch"
+                                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          VerticalAlignment="Center"
+                                          HorizontalAlignment="Stretch" />
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover /template/ Border#Root">
+            <Setter Property="Background" Value="{DynamicResource EcBgHover}" />
+        </Style>
+        <Style Selector="^ /template/ Border#PART_HelpHit:pointerover">
+            <Setter Property="Background" Value="{DynamicResource EcBgMuted}" />
+        </Style>
+        <Style Selector="^ /template/ Border#PART_HelpHit:pointerover icons|MaterialIcon">
+            <Setter Property="Foreground" Value="{DynamicResource EcTextSecondary}" />
+        </Style>
+    </ControlTheme>
+</ResourceDictionary>

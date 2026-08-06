@@ -841,8 +841,8 @@
         <value>语音合成 (TTS)</value>
     </data>
     <data name="TranslationEngineInfo" xml:space="preserve">
-        <value>大模型翻译速度略慢，但是翻译质量更好，并且支持音标、例句、提示等功能。
-机器翻译不支持音标、例句、提示等，并且翻译质量略差，优点是翻译速度很快。</value>
+        <value>大模型：质量更好，支持音标 / 例句 / 提示，速度略慢。
+机器翻译：速度更快，质量一般，不支持音标、例句、提示。</value>
     </data>
     <data name="Speech_ClearHistory" xml:space="preserve">
         <value>清空历史</value>
@@ -950,4 +950,150 @@
     <data name="AsrModelDeleted" xml:space="preserve"><value>已删除：{0}</value></data>
     <data name="AsrModelDeleteFailed" xml:space="preserve"><value>ASR 模型删除失败</value></data>
     <data name="DownloadAsrModels" xml:space="preserve"><value>下载模型</value></data>
+
+  <data name="HomeWorkspace" xml:space="preserve">
+    <value>工作台</value>
+  </data>
+  <data name="HomeWorkspaceSubtitle" xml:space="preserve">
+    <value>引擎、语言与当前状态</value>
+  </data>
+  <data name="HomeStatusReady" xml:space="preserve">
+    <value>就绪</value>
+  </data>
+  <data name="HomeStatusNeedsSetup" xml:space="preserve">
+    <value>待配置</value>
+  </data>
+  <data name="HomeCapabilitySummary" xml:space="preserve">
+    <value>{0} 个模型 · {1} 个热键</value>
+  </data>
+  <data name="HomeConfigureCta" xml:space="preserve">
+    <value>去配置翻译源</value>
+  </data>
+  <data name="HomeSwapLanguages" xml:space="preserve">
+    <value>交换</value>
+  </data>
+  <data name="HomeLanguagePair" xml:space="preserve">
+    <value>翻译方向</value>
+  </data>
+  <data name="ThirdPartyLibraries" xml:space="preserve">
+    <value>第三方库</value>
+  </data>
+
+  <data name="HomeHealthTitle" xml:space="preserve">
+    <value>能力检查清单</value>
+  </data>
+  <data name="HomeHealthEngineTitle" xml:space="preserve">
+    <value>翻译引擎</value>
+  </data>
+  <data name="HomeHealthEngineDone" xml:space="preserve">
+    <value>引擎已就绪，可以开始翻译。</value>
+  </data>
+  <data name="HomeHealthEngineTodo" xml:space="preserve">
+    <value>请添加 AI 模型或机器翻译密钥。</value>
+  </data>
+  <data name="HomeHealthShortcutTitle" xml:space="preserve">
+    <value>全局热键</value>
+  </data>
+  <data name="HomeHealthShortcutDone" xml:space="preserve">
+    <value>已配置 {0} 个热键。</value>
+  </data>
+  <data name="HomeHealthShortcutTodo" xml:space="preserve">
+    <value>请添加截图翻译或输入翻译热键。</value>
+  </data>
+  <data name="HomeHealthActionOpenSettings" xml:space="preserve">
+    <value>打开设置</value>
+  </data>
+  <data name="HomeHealthActionOpenShortcuts" xml:space="preserve">
+    <value>打开热键</value>
+  </data>
+  <data name="HomeOnboardingTitle" xml:space="preserve">
+    <value>三步开始使用</value>
+  </data>
+  <data name="HomeOnboardingStep1" xml:space="preserve">
+    <value>1. 配置翻译源</value>
+  </data>
+  <data name="HomeOnboardingStep2" xml:space="preserve">
+    <value>2. 绑定全局热键</value>
+  </data>
+  <data name="HomeOnboardingStep3" xml:space="preserve">
+    <value>3. 按下热键开始翻译</value>
+  </data>
+  <data name="HomeOnboardingDismiss" xml:space="preserve">
+    <value>知道了</value>
+  </data>
+  <data name="SettingsSearchPlaceholder" xml:space="preserve">
+    <value>搜索设置...</value>
+  </data>
+  <data name="SettingsNoSearchResults" xml:space="preserve">
+    <value>没有匹配的设置项。</value>
+  </data>
+  <data name="SelectionToolbarSettings" xml:space="preserve">
+    <value>划词工具栏</value>
+  </data>
+  <data name="SubtitlePreset_Title" xml:space="preserve">
+    <value>外观预设</value>
+  </data>
+  <data name="SubtitlePreset_Hint" xml:space="preserve">
+    <value>一键套用主/副字幕颜色、字号与背景。</value>
+  </data>
+  <data name="SubtitlePreset_ClassicDark" xml:space="preserve">
+    <value>经典暗色</value>
+  </data>
+  <data name="SubtitlePreset_ClassicDarkDesc" xml:space="preserve">
+    <value>白字主字幕 + 浅灰副字幕，柔和深色遮罩。</value>
+  </data>
+  <data name="SubtitlePreset_HighContrast" xml:space="preserve">
+    <value>高对比</value>
+  </data>
+  <data name="SubtitlePreset_HighContrastDesc" xml:space="preserve">
+    <value>黄字主字幕 + 白字副字幕，近黑底，最易读。</value>
+  </data>
+  <data name="SubtitlePreset_SoftLight" xml:space="preserve">
+    <value>柔和亮色</value>
+  </data>
+  <data name="SubtitlePreset_SoftLightDesc" xml:space="preserve">
+    <value>深灰字 + 浅色半透明面板，适合明亮环境。</value>
+  </data>
+  <data name="SubtitlePreset_Cinema" xml:space="preserve">
+    <value>影院</value>
+  </data>
+  <data name="SubtitlePreset_CinemaDesc" xml:space="preserve">
+    <value>暖色奶油字 + 深黑舞台背景。</value>
+  </data>
+  <data name="SubtitlePreset_Neon" xml:space="preserve">
+    <value>霓虹</value>
+  </data>
+  <data name="SubtitlePreset_NeonDesc" xml:space="preserve">
+    <value>青色主字 + 粉色副字，深蓝玻璃底。</value>
+  </data>
+  <data name="HomeQuickActions" xml:space="preserve">
+    <value>快捷入口</value>
+  </data>
+  <data name="HomeQuickSpeechHint" xml:space="preserve">
+    <value>实时识别与浮窗字幕</value>
+  </data>
+  <data name="HomeQuickTextAssistHint" xml:space="preserve">
+    <value>划词翻译与纠错</value>
+  </data>
+  <data name="HomeQuickShortcutHint" xml:space="preserve">
+    <value>配置全局热键</value>
+  </data>
+  <data name="HomeQuickPromptHint" xml:space="preserve">
+    <value>管理翻译提示词</value>
+  </data>
+  <data name="ResultCopyHint" xml:space="preserve">
+    <value>已复制到剪贴板</value>
+  </data>
+  <data name="TypingEnterHint" xml:space="preserve">
+    <value>回车发送</value>
+  </data>
+  <data name="FloatingWindow_IncreaseFont" xml:space="preserve">
+    <value>放大字号</value>
+  </data>
+  <data name="FloatingWindow_DecreaseFont" xml:space="preserve">
+    <value>缩小字号</value>
+  </data>
+  <data name="OpenReleases" xml:space="preserve">
+    <value>打开发布页</value>
+  </data>
 </root>

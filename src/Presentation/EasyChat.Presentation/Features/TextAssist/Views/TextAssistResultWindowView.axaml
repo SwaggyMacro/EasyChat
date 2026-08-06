@@ -10,96 +10,70 @@
         x:DataType="vm:TextAssistResultWindowViewModel"
         Width="500" Height="420" MinWidth="380" MinHeight="180"
         WindowDecorations="None" TransparencyLevelHint="Transparent" Background="Transparent"
-        Foreground="{DynamicResource SukiText}"
+        Foreground="{DynamicResource EcTextPrimary}"
         Topmost="True" ShowInTaskbar="False" CanResize="True" Focusable="False" ShowActivated="False"
         WindowStartupLocation="Manual">
-    <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.ThemeDictionaries>
-                <ResourceDictionary x:Key="Light">
-                    <SolidColorBrush x:Key="TextAssistSurfaceBrush" Color="#FFFCFCFD" />
-                    <SolidColorBrush x:Key="TextAssistRaisedSurfaceBrush" Color="#FFF1F4F6" />
-                </ResourceDictionary>
-                <ResourceDictionary x:Key="Dark">
-                    <SolidColorBrush x:Key="TextAssistSurfaceBrush" Color="#FF202124" />
-                    <SolidColorBrush x:Key="TextAssistRaisedSurfaceBrush" Color="#FF2A2D31" />
-                </ResourceDictionary>
-            </ResourceDictionary.ThemeDictionaries>
-        </ResourceDictionary>
-    </Window.Resources>
-    <Window.Styles>
-        <Style Selector="Button.DangerClose">
-            <Setter Property="Width" Value="32" />
-            <Setter Property="Height" Value="32" />
-            <Setter Property="Padding" Value="5" />
-            <Setter Property="CornerRadius" Value="6" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Background" Value="#D92D20" />
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="RenderTransform" Value="scale(1)" />
-            <Setter Property="RenderTransformOrigin" Value="50%,50%" />
-            <Setter Property="Transitions">
-                <Transitions>
-                    <BrushTransition Property="Background" Duration="0:0:0.16" />
-                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12" />
-                </Transitions>
-            </Setter>
-            <Style Selector="^:pointerover">
-                <Setter Property="Background" Value="#F04438" />
-                <Setter Property="RenderTransform" Value="scale(1.06)" />
-            </Style>
-            <Style Selector="^:pressed">
-                <Setter Property="Background" Value="#B42318" />
-                <Setter Property="RenderTransform" Value="scale(0.94)" />
-            </Style>
-        </Style>
-    </Window.Styles>
     <Grid>
-    <Border Padding="14" CornerRadius="8" ClipToBounds="True" Background="{DynamicResource TextAssistSurfaceBrush}"
-            BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1">
+    <Border Classes="EcFloatShell" Padding="0">
+        <Border Classes="EcFloatClip" Padding="14">
         <Grid RowDefinitions="Auto,*,Auto" RowSpacing="10">
-            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="6">
-                <Border Grid.Column="0" Background="{DynamicResource TextAssistSurfaceBrush}">
-                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                        <icons:MaterialIcon Kind="{Binding WindowIcon}" Width="19" Height="19"
-                                            Foreground="{DynamicResource SukiPrimaryColor}" />
-                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Border>
-                <ComboBox Grid.Column="1" Width="160" ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedSourceLanguage}"
-                          IsVisible="{Binding ShowLanguageSelector}">
-                    <ComboBox.ItemTemplate><DataTemplate><StackPanel Orientation="Horizontal" Spacing="7">
-                        <Panel Width="22" Height="16">
-                            <icons:MaterialIcon Kind="FlagOutline" Width="18" Height="18" Opacity="0.65"
-                                                IsVisible="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.HasNoIcon}}" />
-                            <Image Width="22" Height="16"
-                                   IsVisible="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.HasIcon}}"
-                                   Source="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.ToIcon}}" />
-                        </Panel>
-                        <TextBlock Text="{Binding Converter={x:Static converters:LanguageSettingsConverters.ToDisplayName}}" VerticalAlignment="Center" />
-                    </StackPanel></DataTemplate></ComboBox.ItemTemplate>
-                </ComboBox>
-                <Button Grid.Column="2" Classes="Basic" Command="{Binding RetryCommand}" ToolTip.Tip="{x:Static lang:Resources.Retry}">
-                    <icons:MaterialIcon Kind="Refresh" />
-                </Button>
-                <Button Grid.Column="3" Classes="Basic" Click="OnCopyClick" ToolTip.Tip="{x:Static lang:Resources.Copy}">
-                    <icons:MaterialIcon Kind="ContentCopy" />
-                </Button>
-                <Button Grid.Column="4" Classes="DangerClose" Click="OnCloseClick" ToolTip.Tip="{x:Static lang:Resources.Close}">
-                    <icons:MaterialIcon Kind="Close" Foreground="White" />
-                </Button>
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <icons:MaterialIcon Kind="{Binding WindowIcon}" Width="19" Height="19"
+                                        Foreground="{DynamicResource EcAccent}" />
+                    <TextBlock Text="{Binding Title}"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource EcTextPrimary}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                    <ComboBox Width="150" ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedSourceLanguage}"
+                              IsVisible="{Binding ShowLanguageSelector}">
+                        <ComboBox.ItemTemplate><DataTemplate><StackPanel Orientation="Horizontal" Spacing="7">
+                            <Panel Width="22" Height="16">
+                                <icons:MaterialIcon Kind="FlagOutline" Width="18" Height="18" Opacity="0.65"
+                                                    IsVisible="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.HasNoIcon}}" />
+                                <Image Width="22" Height="16"
+                                       IsVisible="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.HasIcon}}"
+                                       Source="{Binding Icon, Converter={x:Static converters:LanguageFlagConverters.ToIcon}}" />
+                            </Panel>
+                            <TextBlock Text="{Binding Converter={x:Static converters:LanguageSettingsConverters.ToDisplayName}}" VerticalAlignment="Center" />
+                        </StackPanel></DataTemplate></ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Classes="EcGhost" Padding="8,6" Command="{Binding RetryCommand}"
+                            ToolTip.Tip="{x:Static lang:Resources.Retry}" IsEnabled="{Binding !IsBusy}">
+                        <icons:MaterialIcon Kind="Refresh" Width="16" Height="16" />
+                    </Button>
+                    <Button Classes="EcPrimary"
+                            Width="34" Height="34"
+                            Padding="0"
+                            Click="OnCopyClick"
+                            ToolTip.Tip="{x:Static lang:Resources.Copy}"
+                            IsEnabled="{Binding !IsBusy}"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            AutomationProperties.Name="{x:Static lang:Resources.Copy}">
+                        <icons:MaterialIcon Kind="ContentCopy" Width="16" Height="16" />
+                    </Button>
+                    <Button Classes="EcToolbarBtn" Click="OnCloseClick"
+                            ToolTip.Tip="{x:Static lang:Resources.Close}"
+                            AutomationProperties.Name="{x:Static lang:Resources.Close}">
+                        <icons:MaterialIcon Kind="Close" Width="16" Height="16"
+                                            Foreground="{DynamicResource EcTextPrimary}" />
+                    </Button>
+                </StackPanel>
             </Grid>
             <Grid Grid.Row="1" MinHeight="100">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding !IsBusy}">
                     <StackPanel Spacing="12">
                         <StackPanel Spacing="12" IsVisible="{Binding ShowCorrectionResult}">
-                            <Border Padding="12" CornerRadius="8" Background="{DynamicResource TextAssistRaisedSurfaceBrush}"
-                                    BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1">
+                            <Border Padding="12" CornerRadius="8" Background="{DynamicResource EcBgMuted}"
+                                    BorderBrush="{DynamicResource EcBorder}" BorderThickness="1">
                             <StackPanel Spacing="7">
                                 <TextBlock Text="{x:Static lang:Resources.TextAssistAnnotatedOriginal}" FontWeight="SemiBold" />
                                 <Grid MinHeight="110">
-                                    <Border Background="{DynamicResource TextAssistSurfaceBrush}"
-                                            BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1" />
+                                    <Border Background="{DynamicResource EcBgElevated}"
+                                            BorderBrush="{DynamicResource EcBorder}" BorderThickness="1" />
                                     <TextBlock x:Name="AnnotatedTextBlock" Text="{Binding SourceText}"
                                                TextWrapping="Wrap" Padding="10,8"
                                                FontFamily="{DynamicResource ContentControlThemeFontFamily}"
@@ -111,14 +85,20 @@
                                              FontSize="16" FontWeight="Normal" LineHeight="23" Padding="10,8"
                                              HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
                                     <Border x:Name="CorrectionHint" IsVisible="False" HorizontalAlignment="Left" VerticalAlignment="Top"
-                                            MaxWidth="390" Padding="9,6" Background="#293038" CornerRadius="6" IsHitTestVisible="False">
-                                        <TextBlock x:Name="CorrectionHintText" Foreground="White" TextWrapping="Wrap" />
+                                            MaxWidth="390" Padding="9,6"
+                                            Background="{DynamicResource EcFloatBg}"
+                                            BorderBrush="{DynamicResource EcFloatBorder}"
+                                            BorderThickness="1"
+                                            CornerRadius="8" IsHitTestVisible="False">
+                                        <TextBlock x:Name="CorrectionHintText"
+                                                   Foreground="{DynamicResource EcTextPrimary}"
+                                                   TextWrapping="Wrap" />
                                     </Border>
                                 </Grid>
                             </StackPanel>
                             </Border>
-                            <Border Padding="12" CornerRadius="8" Background="{DynamicResource TextAssistRaisedSurfaceBrush}"
-                                    BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1">
+                            <Border Padding="12" CornerRadius="8" Background="{DynamicResource EcBgMuted}"
+                                    BorderBrush="{DynamicResource EcBorder}" BorderThickness="1">
                             <StackPanel Spacing="7">
                                 <TextBlock Text="{x:Static lang:Resources.TextAssistCorrectedResult}" FontWeight="SemiBold" />
                                 <TextBlock Text="{Binding CorrectedResult}" FontSize="17" TextWrapping="Wrap" />
@@ -128,17 +108,17 @@
                             <StackPanel Spacing="8" IsVisible="{Binding HasCorrectionIssues}">
                                 <StackPanel Orientation="Horizontal" Spacing="7">
                                     <icons:MaterialIcon Kind="LightbulbOnOutline" Width="18" Height="18"
-                                                        Foreground="{DynamicResource SukiPrimaryColor}" />
+                                                        Foreground="{DynamicResource EcAccent}" />
                                     <TextBlock Text="{x:Static lang:Resources.TextAssistIssues}" FontWeight="SemiBold" />
                                 </StackPanel>
                                 <ItemsControl ItemsSource="{Binding Issues}">
                                     <ItemsControl.ItemTemplate><DataTemplate>
                                         <Border Padding="11" Margin="0,0,0,6" CornerRadius="7"
-                                                Background="{DynamicResource TextAssistRaisedSurfaceBrush}"
-                                                BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1">
+                                                Background="{DynamicResource EcBgMuted}"
+                                                BorderBrush="{DynamicResource EcBorder}" BorderThickness="1">
                                             <StackPanel Spacing="4">
                                                 <TextBlock Text="{Binding DisplayCategory}" FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource SukiPrimaryColor}" />
+                                                           Foreground="{DynamicResource EcAccent}" />
                                                 <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
                                                 <TextBlock Text="{Binding Suggestion}" TextWrapping="Wrap" Opacity="0.72" />
                                             </StackPanel>
@@ -147,11 +127,14 @@
                                 </ItemsControl>
                             </StackPanel>
                         </StackPanel>
-                        <Border Padding="18" CornerRadius="8" Background="{DynamicResource TextAssistRaisedSurfaceBrush}"
-                                BorderBrush="SeaGreen" BorderThickness="1" IsVisible="{Binding IsCorrectionCorrect}">
+                        <Border Padding="18" CornerRadius="12" Background="{DynamicResource EcBgMuted}"
+                                BorderBrush="{DynamicResource EcSuccess}" BorderThickness="1"
+                                IsVisible="{Binding IsCorrectionCorrect}">
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
-                                <Border Width="44" Height="44" CornerRadius="22" Background="SeaGreen" VerticalAlignment="Center">
-                                    <icons:MaterialIcon Kind="Check" Width="26" Height="26" Foreground="White"
+                                <Border Width="44" Height="44" CornerRadius="22"
+                                        Background="{DynamicResource EcSuccess}" VerticalAlignment="Center">
+                                    <icons:MaterialIcon Kind="Check" Width="26" Height="26"
+                                                        Foreground="{DynamicResource EcOnAccent}"
                                                         HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 </Border>
                                 <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
@@ -161,24 +144,24 @@
                             </Grid>
                         </Border>
                         <StackPanel Spacing="12" IsVisible="{Binding IsPolish}">
-                            <Border Padding="12" CornerRadius="8" Background="{DynamicResource TextAssistRaisedSurfaceBrush}"
-                                    BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1">
+                            <Border Padding="12" CornerRadius="8" Background="{DynamicResource EcBgMuted}"
+                                    BorderBrush="{DynamicResource EcBorder}" BorderThickness="1">
                                 <TextBlock Text="{Binding Result}" FontSize="17" TextWrapping="Wrap" />
                             </Border>
                             <StackPanel Spacing="8" IsVisible="{Binding HasPolishExplanations}">
                                 <StackPanel Orientation="Horizontal" Spacing="7">
                                     <icons:MaterialIcon Kind="BookOpenVariant" Width="18" Height="18"
-                                                        Foreground="{DynamicResource SukiPrimaryColor}" />
+                                                        Foreground="{DynamicResource EcAccent}" />
                                     <TextBlock Text="{Binding PolishExplanationTitle}" FontWeight="SemiBold" />
                                 </StackPanel>
                                 <ItemsControl ItemsSource="{Binding PolishExplanations}">
                                     <ItemsControl.ItemTemplate><DataTemplate>
                                         <Border Padding="11" Margin="0,0,0,6" CornerRadius="7"
-                                                Background="{DynamicResource TextAssistRaisedSurfaceBrush}"
-                                                BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1">
+                                                Background="{DynamicResource EcBgMuted}"
+                                                BorderBrush="{DynamicResource EcBorder}" BorderThickness="1">
                                             <StackPanel Spacing="5">
                                                 <TextBlock Text="{Binding Category}" FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource SukiPrimaryColor}" />
+                                                           Foreground="{DynamicResource EcAccent}" />
                                                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="7" IsVisible="{Binding HasOriginal}">
                                                     <TextBlock Text="{Binding $parent[Window].((vm:TextAssistResultWindowViewModel)DataContext).PolishOriginalLabel}" Opacity="0.62" />
                                                     <TextBlock Grid.Column="1" Text="{Binding Original}" TextWrapping="Wrap" />
@@ -197,8 +180,8 @@
                     </StackPanel>
                 </ScrollViewer>
                 <Border Padding="14" CornerRadius="8" IsVisible="{Binding IsSummary}"
-                        Background="{DynamicResource TextAssistRaisedSurfaceBrush}"
-                        BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1"
+                        Background="{DynamicResource EcBgMuted}"
+                        BorderBrush="{DynamicResource EcBorder}" BorderThickness="1"
                         HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                         <TextBlock Text="{Binding Result}" FontSize="17" TextWrapping="Wrap"
@@ -207,8 +190,13 @@
                 </Border>
                 <suki:Loading Width="24" Height="24" IsVisible="{Binding IsBusy}" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Grid>
-            <TextBlock Grid.Row="2" Text="{Binding ErrorMessage}" Foreground="IndianRed" TextWrapping="Wrap" />
+            <!-- Header already owns Retry/Copy/Close; footer only surfaces errors. -->
+            <TextBlock Grid.Row="2"
+                       Text="{Binding ErrorMessage}"
+                       Foreground="{DynamicResource EcDanger}"
+                       TextWrapping="Wrap" />
         </Grid>
+        </Border>
     </Border>
         <Border Width="5" HorizontalAlignment="Left" Background="Transparent"
                 Cursor="LeftSide" Tag="West" PointerPressed="OnResizePointerPressed" />

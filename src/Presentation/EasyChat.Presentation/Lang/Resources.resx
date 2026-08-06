@@ -852,7 +852,8 @@
         <value>TTS</value>
     </data>
     <data name="TranslationEngineInfo" xml:space="preserve">
-        <value>AI models provide higher quality translations with support for phonetics, examples, and hints, but may be slower. Machine translation is faster but offers lower quality and lacks these features.</value>
+        <value>AI model: higher quality; phonetics / examples / tips; slower.
+Machine translation: faster; lower quality; no phonetics, examples, or tips.</value>
     </data>
     <data name="Speech_ClearHistory" xml:space="preserve">
         <value>Clear History</value>
@@ -960,4 +961,150 @@
   <data name="AsrModelDeleted" xml:space="preserve"><value>Deleted: {0}</value></data>
   <data name="AsrModelDeleteFailed" xml:space="preserve"><value>ASR model deletion failed</value></data>
   <data name="DownloadAsrModels" xml:space="preserve"><value>Download models</value></data>
+
+  <data name="HomeWorkspace" xml:space="preserve">
+    <value>Workspace</value>
+  </data>
+  <data name="HomeWorkspaceSubtitle" xml:space="preserve">
+    <value>Engine, languages, and status</value>
+  </data>
+  <data name="HomeStatusReady" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="HomeStatusNeedsSetup" xml:space="preserve">
+    <value>Needs setup</value>
+  </data>
+  <data name="HomeCapabilitySummary" xml:space="preserve">
+    <value>{0} models · {1} shortcuts</value>
+  </data>
+  <data name="HomeConfigureCta" xml:space="preserve">
+    <value>Configure translation source</value>
+  </data>
+  <data name="HomeSwapLanguages" xml:space="preserve">
+    <value>Swap</value>
+  </data>
+  <data name="HomeLanguagePair" xml:space="preserve">
+    <value>Language direction</value>
+  </data>
+  <data name="ThirdPartyLibraries" xml:space="preserve">
+    <value>Third-party libraries</value>
+  </data>
+
+  <data name="HomeHealthTitle" xml:space="preserve">
+    <value>Setup checklist</value>
+  </data>
+  <data name="HomeHealthEngineTitle" xml:space="preserve">
+    <value>Translation engine</value>
+  </data>
+  <data name="HomeHealthEngineDone" xml:space="preserve">
+    <value>Engine is ready to translate.</value>
+  </data>
+  <data name="HomeHealthEngineTodo" xml:space="preserve">
+    <value>Add an AI model or machine-translation key.</value>
+  </data>
+  <data name="HomeHealthShortcutTitle" xml:space="preserve">
+    <value>Global shortcuts</value>
+  </data>
+  <data name="HomeHealthShortcutDone" xml:space="preserve">
+    <value>{0} shortcut(s) configured.</value>
+  </data>
+  <data name="HomeHealthShortcutTodo" xml:space="preserve">
+    <value>Add screenshot or input-translate hotkeys.</value>
+  </data>
+  <data name="HomeHealthActionOpenSettings" xml:space="preserve">
+    <value>Open settings</value>
+  </data>
+  <data name="HomeHealthActionOpenShortcuts" xml:space="preserve">
+    <value>Open shortcuts</value>
+  </data>
+  <data name="HomeOnboardingTitle" xml:space="preserve">
+    <value>Get started in 3 steps</value>
+  </data>
+  <data name="HomeOnboardingStep1" xml:space="preserve">
+    <value>1. Configure a translation source</value>
+  </data>
+  <data name="HomeOnboardingStep2" xml:space="preserve">
+    <value>2. Bind a global shortcut</value>
+  </data>
+  <data name="HomeOnboardingStep3" xml:space="preserve">
+    <value>3. Press the hotkey to translate</value>
+  </data>
+  <data name="HomeOnboardingDismiss" xml:space="preserve">
+    <value>Dismiss</value>
+  </data>
+  <data name="SettingsSearchPlaceholder" xml:space="preserve">
+    <value>Search settings...</value>
+  </data>
+  <data name="SettingsNoSearchResults" xml:space="preserve">
+    <value>No matching settings.</value>
+  </data>
+  <data name="SelectionToolbarSettings" xml:space="preserve">
+    <value>Selection toolbar</value>
+  </data>
+  <data name="SubtitlePreset_Title" xml:space="preserve">
+    <value>Appearance presets</value>
+  </data>
+  <data name="SubtitlePreset_Hint" xml:space="preserve">
+    <value>Apply a ready-made look to primary/secondary colors, sizes, and backgrounds.</value>
+  </data>
+  <data name="SubtitlePreset_ClassicDark" xml:space="preserve">
+    <value>Classic Dark</value>
+  </data>
+  <data name="SubtitlePreset_ClassicDarkDesc" xml:space="preserve">
+    <value>White primary text on a soft dark scrim — default subtitle look.</value>
+  </data>
+  <data name="SubtitlePreset_HighContrast" xml:space="preserve">
+    <value>High Contrast</value>
+  </data>
+  <data name="SubtitlePreset_HighContrastDesc" xml:space="preserve">
+    <value>Yellow primary + white secondary on near-black for maximum legibility.</value>
+  </data>
+  <data name="SubtitlePreset_SoftLight" xml:space="preserve">
+    <value>Soft Light</value>
+  </data>
+  <data name="SubtitlePreset_SoftLightDesc" xml:space="preserve">
+    <value>Dark slate text on a light translucent panel for bright rooms.</value>
+  </data>
+  <data name="SubtitlePreset_Cinema" xml:space="preserve">
+    <value>Cinema</value>
+  </data>
+  <data name="SubtitlePreset_CinemaDesc" xml:space="preserve">
+    <value>Warm cream titles with a deep black stage backdrop.</value>
+  </data>
+  <data name="SubtitlePreset_Neon" xml:space="preserve">
+    <value>Neon</value>
+  </data>
+  <data name="SubtitlePreset_NeonDesc" xml:space="preserve">
+    <value>Cyan primary and pink secondary on a deep navy glass.</value>
+  </data>
+  <data name="HomeQuickActions" xml:space="preserve">
+    <value>Quick actions</value>
+  </data>
+  <data name="HomeQuickSpeechHint" xml:space="preserve">
+    <value>Live recognition and floating subtitles</value>
+  </data>
+  <data name="HomeQuickTextAssistHint" xml:space="preserve">
+    <value>Translate or correct selected text</value>
+  </data>
+  <data name="HomeQuickShortcutHint" xml:space="preserve">
+    <value>Bind global hotkeys</value>
+  </data>
+  <data name="HomeQuickPromptHint" xml:space="preserve">
+    <value>Manage translation prompts</value>
+  </data>
+  <data name="ResultCopyHint" xml:space="preserve">
+    <value>Copied to clipboard</value>
+  </data>
+  <data name="TypingEnterHint" xml:space="preserve">
+    <value>Enter to send</value>
+  </data>
+  <data name="FloatingWindow_IncreaseFont" xml:space="preserve">
+    <value>Increase font size</value>
+  </data>
+  <data name="FloatingWindow_DecreaseFont" xml:space="preserve">
+    <value>Decrease font size</value>
+  </data>
+  <data name="OpenReleases" xml:space="preserve">
+    <value>Open releases</value>
+  </data>
 </root>

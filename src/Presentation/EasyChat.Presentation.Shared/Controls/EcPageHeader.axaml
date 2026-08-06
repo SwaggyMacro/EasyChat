@@ -1,0 +1,42 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:EasyChat.Presentation.Shared.Controls"
+             x:Class="EasyChat.Presentation.Shared.Controls.EcPageHeader"
+             x:Name="Root">
+    <!-- Title + actions share the first row; subtitle/accent sit under the title only. -->
+    <Grid RowDefinitions="Auto,Auto,Auto"
+          ColumnDefinitions="*,Auto"
+          Margin="0,0,0,8"
+          ColumnSpacing="16">
+        <TextBlock Grid.Row="0" Grid.Column="0"
+                   Text="{Binding Title, ElementName=Root}"
+                   Classes="EcDisplay"
+                   VerticalAlignment="Center"
+                   TextWrapping="NoWrap"
+                   TextTrimming="CharacterEllipsis"
+                   AutomationProperties.Name="{Binding Title, ElementName=Root}" />
+
+        <ContentPresenter Grid.Row="0" Grid.Column="1"
+                          Content="{Binding Actions, ElementName=Root}"
+                          VerticalAlignment="Center"
+                          HorizontalAlignment="Right" />
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                   Text="{Binding Subtitle, ElementName=Root}"
+                   Classes="EcSubtitle"
+                   TextWrapping="Wrap"
+                   Margin="0,6,0,0"
+                   MaxWidth="720"
+                   HorizontalAlignment="Left"
+                   IsVisible="{Binding Subtitle, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+        <Border Grid.Row="2" Grid.Column="0"
+                Height="3"
+                Width="36"
+                HorizontalAlignment="Left"
+                CornerRadius="999"
+                Background="{DynamicResource EcAccent}"
+                Margin="0,10,0,0"
+                Opacity="0.9" />
+    </Grid>
+</UserControl>

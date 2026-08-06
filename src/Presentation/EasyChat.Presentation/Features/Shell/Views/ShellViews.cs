@@ -1,10 +1,8 @@
-using Avalonia.Controls.Notifications;
 using Avalonia.Controls;
-using EasyChat.Contracts.Settings;
-using EasyChat.Presentation.Lang;
+using Avalonia.Threading;
 using EasyChat.Presentation.Features.Settings.State;
 using EasyChat.Presentation.Features.Shell;
-using SukiUI.Dialogs;
+using EasyChat.Presentation.Foundation.UiHost;
 using SukiUI.Controls;
 
 namespace EasyChat.Presentation.Features.Shell.Views
@@ -18,7 +16,7 @@ namespace EasyChat.Presentation.Features.Shell.Views
         public MainWindow(
             MainWindowViewModel viewModel,
             SettingsSession settings,
-            ISukiDialogManager dialogs,
+            IUiDialogHost dialogs,
             Action ensureTrayVisible)
             : this()
         {
@@ -26,8 +24,11 @@ namespace EasyChat.Presentation.Features.Shell.Views
                 ?? throw new ArgumentNullException(nameof(ensureTrayVisible));
             DataContext = viewModel;
             Closing += (_, args) => HandleClosing(args, settings, dialogs);
+            // Queue WindowState after the current input/layout pass to avoid chrome thrash.
             viewModel.FullScreenChanged += (_, fullScreen) =>
-                WindowState = fullScreen ? WindowState.FullScreen : WindowState.Normal;
+                Dispatcher.UIThread.Post(
+                    () => WindowState = fullScreen ? WindowState.FullScreen : WindowState.Normal,
+                    DispatcherPriority.Render);
             if (viewModel.IsFullScreen)
                 WindowState = WindowState.FullScreen;
         }
@@ -37,7 +38,7 @@ namespace EasyChat.Presentation.Features.Shell.Views
         private void HandleClosing(
             WindowClosingEventArgs args,
             SettingsSession settings,
-            ISukiDialogManager dialogs)
+            IUiDialogHost dialogs)
         {
             if (IsExiting) return;
             switch (settings.General.ClosingBehavior)
@@ -52,11 +53,13 @@ namespace EasyChat.Presentation.Features.Shell.Views
                     return;
                 default:
                     args.Cancel = true;
-                    dialogs.CreateDialog()
-                        .WithTitle(EasyChat.Presentation.Lang.Resources.CloseToTrayPromptTitle)
-                        .OfType(NotificationType.Information)
-                        .WithViewModel(dialog => new CloseBehaviorDialogViewModel(
-                            dialog,
+                    // Title is painted inside CloseBehaviorDialogView (ViewModel-only shell).
+                    // Window close is already cancelled; Cancel / background click keeps the app open.
+                    dialogs.ShowContent(new UiContentDialogOptions
+                    {
+                        DismissOnBackgroundClick = true,
+                        CreateContent = session => new CloseBehaviorDialogViewModel(
+                            session,
                             settings.General,
                             _ensureTrayVisible,
                             Hide,
@@ -64,8 +67,8 @@ namespace EasyChat.Presentation.Features.Shell.Views
                             {
                                 IsExiting = true;
                                 Close();
-                            }))
-                        .TryShow();
+                            })
+                    });
                     return;
             }
         }

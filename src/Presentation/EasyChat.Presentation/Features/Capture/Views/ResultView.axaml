@@ -3,6 +3,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:suki="https://github.com/kikipoulet/SukiUI"
+        xmlns:lang="clr-namespace:EasyChat.Presentation.Lang"
+        xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="EasyChat.Presentation.Features.Capture.Views.ResultView"
         WindowStartupLocation="CenterScreen"
@@ -12,18 +14,74 @@
         ExtendClientAreaToDecorationsHint="True"
         Topmost="True"
         TransparencyLevelHint="Blur"
-        CornerRadius="5"
+        CornerRadius="16"
         Background="Transparent"
         Title="ResultView"
-        SizeToContent="WidthAndHeight">
+        SizeToContent="WidthAndHeight"
+        KeyDown="OnKeyDown">
 
-    <Panel Margin="5">
-        <suki:GlassCard x:Name="MainCard" Padding="10" Background="Transparent" CornerRadius="5">
-            <Panel>
-                <suki:Loading x:Name="LoadingIndicator" Width="20" Height="20" IsVisible="True" />
-                <TextBlock TextWrapping="Wrap" x:Name="TextBlockResult" IsVisible="False"
-                           Foreground="{DynamicResource SukiText}" />
-            </Panel>
-        </suki:GlassCard>
+    <Panel>
+        <Border x:Name="MainCard"
+                Classes="EcFloatShell"
+                Padding="0">
+            <Border Classes="EcFloatClip">
+            <Grid RowDefinitions="*,Auto" MinWidth="160" MinHeight="44">
+                <Panel Margin="16,14,16,10">
+                    <suki:Loading x:Name="LoadingIndicator"
+                                  Width="22" Height="22"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  IsVisible="True" />
+                    <TextBlock TextWrapping="Wrap"
+                               x:Name="TextBlockResult"
+                               IsVisible="False"
+                               FontSize="14"
+                               LineHeight="22"
+                               MaxWidth="480"
+                               Foreground="{DynamicResource EcTextPrimary}" />
+                </Panel>
+
+                <!-- Action bar: Copy is primary, Close secondary. Esc closes. -->
+                <Border Grid.Row="1"
+                        x:Name="ResultToolbar"
+                        IsVisible="False"
+                        Background="{DynamicResource EcBgElevated}"
+                        BorderBrush="{DynamicResource EcBorder}"
+                        BorderThickness="0,1,0,0"
+                        Padding="10,8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock x:Name="CopyHint"
+                                   Classes="EcMuted"
+                                   VerticalAlignment="Center"
+                                   FontSize="11"
+                                   Text="{x:Static lang:Resources.ResultCopyHint}"
+                                   IsVisible="False" />
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    Spacing="8"
+                                    HorizontalAlignment="Right">
+                            <Button x:Name="CopyButton"
+                                    Classes="EcPrimary"
+                                    Width="34" Height="34"
+                                    Padding="0"
+                                    ToolTip.Tip="{x:Static lang:Resources.Copy}"
+                                    Click="OnCopyClick"
+                                    HorizontalContentAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    AutomationProperties.Name="{x:Static lang:Resources.Copy}">
+                                <icons:MaterialIcon Kind="ContentCopy" Width="16" Height="16" />
+                            </Button>
+                            <Button Classes="EcToolbarBtn"
+                                    ToolTip.Tip="{x:Static lang:Resources.Close}"
+                                    Click="OnCloseClick"
+                                    AutomationProperties.Name="{x:Static lang:Resources.Close}">
+                                <icons:MaterialIcon Kind="Close" Width="16" Height="16" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+            </Border>
+        </Border>
     </Panel>
 </Window>

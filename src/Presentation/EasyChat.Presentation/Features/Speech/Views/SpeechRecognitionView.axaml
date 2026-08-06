@@ -8,36 +8,75 @@
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
              xmlns:converts="clr-namespace:EasyChat.Presentation.Foundation.Formatting;assembly=EasyChat.Presentation"
              xmlns:lang="clr-namespace:EasyChat.Presentation.Lang;assembly=EasyChat.Presentation"
+             xmlns:ec="clr-namespace:EasyChat.Presentation.Shared.Controls;assembly=EasyChat.Presentation.Shared"
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
-             x:DataType="vm:SpeechRecognitionViewModel">
+             x:DataType="vm:SpeechRecognitionViewModel" Background="{DynamicResource EcBgCanvas}">
 
     <Panel>
         <!-- Loading overlay - shown initially -->
         <Grid x:Name="LoadingOverlay" IsVisible="True">
-            <!-- Dark semi-transparent background -->
-            <Border Background="{DynamicResource SukiBackground}" Opacity="0.9" />
-            <StackPanel Spacing="15" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <suki:Loading Width="50" Height="50" />
-                <TextBlock Text="{x:Static lang:Resources.Loading}" 
-                           HorizontalAlignment="Center" 
-                           Opacity="0.7" />
-            </StackPanel>
+            <Border Classes="EcScrim" />
+            <Border Classes="EcSurface"
+                    Padding="28,24"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel Spacing="14" HorizontalAlignment="Center">
+                    <suki:Loading Width="42" Height="42" HorizontalAlignment="Center" />
+                    <TextBlock Text="{x:Static lang:Resources.Loading}"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource EcTextSecondary}" />
+                </StackPanel>
+            </Border>
         </Grid>
 
         <!-- Main Content - hidden initially -->
-        <Grid x:Name="MainContent" IsVisible="False">
-            <TabControl IsVisible="{Binding IsSupported}" Margin="0,10,0,0">
-                <TabItem Header="{x:Static lang:Resources.Tab_Recognition}">
-                    <Grid RowDefinitions="Auto, *">
-                        <!-- Configuration Header -->
-                        <suki:GlassCard Grid.Row="0" Margin="15">
-                            <WrapPanel Orientation="Horizontal" >
-                                
-                                <!-- Recognition Language -->
-                                <StackPanel Orientation="Horizontal" Margin="0,0,20,0" VerticalAlignment="Center">
-                                    <TextBlock Text="{x:Static lang:Resources.Language}" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
-                                    <ComboBox ItemsSource="{Binding RecognitionLanguages}" SelectedItem="{Binding SelectedRecognitionModel}"
-                                              MinWidth="210" Foreground="{DynamicResource SukiText}">
+        <Grid x:Name="MainContent" IsVisible="False" Classes="EcPageFrame" RowDefinitions="Auto,Auto,*">
+            <ec:EcPageHeader Title="{x:Static lang:Resources.Page_SpeechRecognition}"
+                             Subtitle="{x:Static lang:Resources.HomeQuickSpeechHint}"
+                             IsVisible="{Binding IsSupported}">
+                <ec:EcPageHeader.Actions>
+                    <Button Command="{Binding ToggleRecordingCommand}"
+                            Classes="EcPrimary">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <avalonia:MaterialIcon Kind="{Binding RecordingIcon}" Width="18" Height="18"/>
+                            <TextBlock Text="{Binding RecordingText}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </ec:EcPageHeader.Actions>
+            </ec:EcPageHeader>
+
+            <!-- Workspace mode: Live / Overlay -->
+            <Border Classes="EcSegmented"
+                    Grid.Row="1"
+                    HorizontalAlignment="Left"
+                    Margin="0,0,0,12"
+                    IsVisible="{Binding IsSupported}">
+                <StackPanel Orientation="Horizontal" Spacing="2">
+                    <RadioButton Classes="EcSegment"
+                                 GroupName="SpeechWorkspace"
+                                 Content="{x:Static lang:Resources.Tab_Recognition}"
+                                 IsChecked="{Binding IsLiveWorkspace}" />
+                    <RadioButton Classes="EcSegment"
+                                 GroupName="SpeechWorkspace"
+                                 Content="{x:Static lang:Resources.FloatingWindow}"
+                                 IsChecked="{Binding IsOverlayWorkspace}" />
+                </StackPanel>
+            </Border>
+
+            <Grid Grid.Row="2" IsVisible="{Binding IsSupported}">
+            <!-- Live recognition workspace -->
+            <Grid IsVisible="{Binding IsLiveWorkspace}" RowDefinitions="Auto,*">
+                        <!-- Live session toolbar -->
+                        <Border Classes="EcSurface" Grid.Row="0" Margin="0,0,0,10" Padding="14,12">
+                            <WrapPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" Margin="0,4,18,4" VerticalAlignment="Center" Spacing="8">
+                                    <TextBlock Text="{x:Static lang:Resources.Language}"
+                                               Classes="EcFieldLabel"
+                                               Margin="0"
+                                               VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding RecognitionLanguages}"
+                                              SelectedItem="{Binding SelectedRecognitionModel}"
+                                              MinWidth="210">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal" Spacing="8">
@@ -46,81 +85,128 @@
                                                                Stretch="UniformToFill" />
                                                     </Border>
                                                     <TextBlock Text="{Binding Converter={x:Static converts:SpeechRecognitionModelConverters.ToDisplayName}}"
-                                                               VerticalAlignment="Center" Foreground="{DynamicResource SukiText}" />
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource EcTextPrimary}" />
                                                 </StackPanel>
                                             </DataTemplate>
                                         </ComboBox.ItemTemplate>
                                     </ComboBox>
                                 </StackPanel>
-                
-                                <!-- Translation Toggle -->
-                                <StackPanel Orientation="Horizontal" Margin="0,0,20,0" VerticalAlignment="Center">
-                                    <CheckBox Content="{x:Static lang:Resources.Speech_EnableTranslation}" IsChecked="{Binding IsTranslationEnabled}" Margin="0,0,10,0"/>
-                                    <CheckBox Content="{x:Static lang:Resources.Speech_RealTimePreview}" IsChecked="{Binding IsRealTimePreviewEnabled}" IsVisible="{Binding IsRealTimePreviewVisible}" ToolTip.Tip="{x:Static lang:Resources.Speech_RealTimePreviewTip}"/>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,4,18,4" VerticalAlignment="Center" Spacing="12">
+                                    <CheckBox Content="{x:Static lang:Resources.Speech_EnableTranslation}"
+                                              IsChecked="{Binding IsTranslationEnabled}" />
+                                    <CheckBox Content="{x:Static lang:Resources.Speech_RealTimePreview}"
+                                              IsChecked="{Binding IsRealTimePreviewEnabled}"
+                                              IsVisible="{Binding IsRealTimePreviewVisible}"
+                                              ToolTip.Tip="{x:Static lang:Resources.Speech_RealTimePreviewTip}"/>
                                 </StackPanel>
-                                
-                                <!-- Engine Selector -->
-                                <StackPanel Orientation="Horizontal" Margin="0,0,20,0" VerticalAlignment="Center" IsVisible="{Binding IsTranslationEnabled}">
-                                     <TextBlock Text="{x:Static lang:Resources.TransEngine}" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
-                                     <ComboBox ItemsSource="{Binding EngineOptions}" SelectedItem="{Binding SelectedEngineOption}" MinWidth="160">
+
+                                <StackPanel Orientation="Horizontal"
+                                            Margin="0,4,18,4"
+                                            VerticalAlignment="Center"
+                                            Spacing="8"
+                                            IsVisible="{Binding IsTranslationEnabled}">
+                                    <TextBlock Text="{x:Static lang:Resources.TransEngine}"
+                                               Classes="EcFieldLabel"
+                                               Margin="0"
+                                               VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding EngineOptions}"
+                                              SelectedItem="{Binding SelectedEngineOption}"
+                                              MinWidth="160">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                                     <Panel Width="20" Height="20">
-                                                        <Border ClipToBounds="True" CornerRadius="4" IsVisible="{Binding Name, Converter={x:Static converts:EngineConverters.HasIcon}}">
-                                                            <Image Source="{Binding Name, Converter={x:Static converts:EngineConverters.ToIcon}}" Stretch="UniformToFill" />
+                                                        <Border ClipToBounds="True" CornerRadius="4"
+                                                                IsVisible="{Binding Name, Converter={x:Static converts:EngineConverters.HasIcon}}">
+                                                            <Image Source="{Binding Name, Converter={x:Static converts:EngineConverters.ToIcon}}"
+                                                                   Stretch="UniformToFill" />
                                                         </Border>
-                                                        <avalonia:MaterialIcon Kind="Robot" Width="20" Height="20" Foreground="{DynamicResource SukiText}" IsVisible="{Binding Name, Converter={x:Static converts:EngineConverters.HasNoIcon}}" />
+                                                        <avalonia:MaterialIcon Kind="Robot" Width="20" Height="20"
+                                                                               Foreground="{DynamicResource EcTextSecondary}"
+                                                                               IsVisible="{Binding Name, Converter={x:Static converts:EngineConverters.HasNoIcon}}" />
                                                     </Panel>
-                                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Foreground="{DynamicResource SukiText}" />
+                                                    <TextBlock Text="{Binding Name}"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource EcTextPrimary}" />
                                                 </StackPanel>
                                             </DataTemplate>
                                         </ComboBox.ItemTemplate>
-                                     </ComboBox>
+                                    </ComboBox>
                                 </StackPanel>
-                
-                                <!-- Target Language Selector -->
-                                <StackPanel Orientation="Horizontal" Margin="0,0,20,0" VerticalAlignment="Center" IsVisible="{Binding IsTranslationEnabled}">
-                                     <TextBlock Text="{x:Static lang:Resources.TargetLang}" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
-                                     <ComboBox ItemsSource="{Binding TargetLanguages}" SelectedItem="{Binding SelectedTargetLanguage}" MinWidth="160">
-                                         <ComboBox.ItemTemplate>
-                                             <DataTemplate>
-                                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                                     <Border ClipToBounds="True" CornerRadius="2" Width="20" Height="14">
-                                                         <Image Source="{Binding Icon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}" Stretch="UniformToFill" />
-                                                     </Border>
-                                                     <TextBlock Text="{Binding Converter={x:Static converts:LanguageSettingsConverters.ToDisplayName}}" VerticalAlignment="Center" Foreground="{DynamicResource SukiText}" />
-                                                 </StackPanel>
-                                             </DataTemplate>
-                                         </ComboBox.ItemTemplate>
-                                     </ComboBox>
+
+                                <StackPanel Orientation="Horizontal"
+                                            Margin="0,4,18,4"
+                                            VerticalAlignment="Center"
+                                            Spacing="8"
+                                            IsVisible="{Binding IsTranslationEnabled}">
+                                    <TextBlock Text="{x:Static lang:Resources.TargetLang}"
+                                               Classes="EcFieldLabel"
+                                               Margin="0"
+                                               VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding TargetLanguages}"
+                                              SelectedItem="{Binding SelectedTargetLanguage}"
+                                              MinWidth="160">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <Border ClipToBounds="True" CornerRadius="2" Width="20" Height="14">
+                                                        <Image Source="{Binding Icon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
+                                                               Stretch="UniformToFill" />
+                                                    </Border>
+                                                    <TextBlock Text="{Binding Converter={x:Static converts:LanguageSettingsConverters.ToDisplayName}}"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource EcTextPrimary}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                 </StackPanel>
-                
-                                <!-- Audio Source Selector -->
-                                <StackPanel Orientation="Horizontal" Margin="0,0,20,0" VerticalAlignment="Center">
-                                    <TextBlock Text="{x:Static lang:Resources.Speech_AudioSource}" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
-                                    <Button Classes="Outlined" Padding="0" CornerRadius="5" Background="Transparent" MinHeight="32">
+
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,4" VerticalAlignment="Center" Spacing="8">
+                                    <TextBlock Text="{x:Static lang:Resources.Speech_AudioSource}"
+                                               Classes="EcFieldLabel"
+                                               Margin="0"
+                                               VerticalAlignment="Center"/>
+                                    <Button Classes="EcGhost" Padding="10,6">
                                         <Button.Flyout>
                                             <Flyout Placement="Bottom" ShowMode="Standard">
-                                                <Border MinWidth="280" MaxHeight="500" Padding="0" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1" CornerRadius="8">
-                                                    <Grid RowDefinitions="Auto, *">
-                                                        <!-- Header -->
-                                                        <Grid ColumnDefinitions="*, Auto" Margin="12,10" Background="Transparent">
-                                                            <TextBlock Text="{x:Static lang:Resources.Speech_SelectSourceTitle}" FontWeight="SemiBold" VerticalAlignment="Center" Opacity="0.8"/>
-                                                            <Button Grid.Column="1" Command="{Binding RefreshSourcesCommand}" Classes="Basic" Padding="4" Height="28" Width="28" ToolTip.Tip="{x:Static lang:Resources.Speech_Refresh}">
+                                                <Border Classes="EcFloatShell" MinWidth="280" MaxHeight="500" Padding="0">
+                                                    <Grid RowDefinitions="Auto,*">
+                                                        <Grid ColumnDefinitions="*,Auto" Margin="12,10">
+                                                            <TextBlock Text="{x:Static lang:Resources.Speech_SelectSourceTitle}"
+                                                                       Classes="EcFieldLabel"
+                                                                       Margin="0"
+                                                                       VerticalAlignment="Center"/>
+                                                            <Button Grid.Column="1"
+                                                                    Command="{Binding RefreshSourcesCommand}"
+                                                                    Classes="EcToolbarBtn"
+                                                                    Padding="4"
+                                                                    Height="28" Width="28"
+                                                                    ToolTip.Tip="{x:Static lang:Resources.Speech_Refresh}">
                                                                 <avalonia:MaterialIcon Kind="Refresh" Width="16" Height="16"/>
                                                             </Button>
                                                         </Grid>
-                                                        
-                                                        <!-- Audio sources -->
                                                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MaxHeight="400">
-                                                            <ItemsControl ItemsSource="{Binding AudioSources}" Margin="5">
+                                                            <ItemsControl ItemsSource="{Binding AudioSources}" Margin="6,0,6,8">
                                                                 <ItemsControl.ItemTemplate>
                                                                     <DataTemplate>
-                                                                        <CheckBox IsChecked="{Binding IsSelected}" HorizontalAlignment="Stretch" Margin="0,2" Padding="8,6" Background="Transparent" CornerRadius="4">
+                                                                        <CheckBox IsChecked="{Binding IsSelected}"
+                                                                                  HorizontalAlignment="Stretch"
+                                                                                  Margin="0,2"
+                                                                                  Padding="8,6"
+                                                                                  Background="Transparent"
+                                                                                  CornerRadius="4">
                                                                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                                                                <Image Source="{Binding AppIcon}" Width="20" Height="20" RenderOptions.BitmapInterpolationMode="HighQuality" VerticalAlignment="Center" />
-                                                                                <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                                                                <Image Source="{Binding AppIcon}"
+                                                                                       Width="20" Height="20"
+                                                                                       RenderOptions.BitmapInterpolationMode="HighQuality"
+                                                                                       VerticalAlignment="Center" />
+                                                                                <TextBlock Text="{Binding DisplayName}"
+                                                                                           TextTrimming="CharacterEllipsis"
+                                                                                           VerticalAlignment="Center"
+                                                                                           Foreground="{DynamicResource EcTextPrimary}"/>
                                                                             </StackPanel>
                                                                         </CheckBox>
                                                                     </DataTemplate>
@@ -131,51 +217,60 @@
                                                 </Border>
                                             </Flyout>
                                         </Button.Flyout>
-                                        <!-- Button Content mimicking ComboBox -->
-                                        <Grid ColumnDefinitions="*, Auto" Width="160" Margin="10,0">
-                                            <TextBlock Text="{Binding SelectedSourcesSummary}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" FontSize="13" Foreground="{DynamicResource SukiText}"/>
-                                            <avalonia:MaterialIcon Grid.Column="1" Kind="ChevronDown" Width="16" Height="16" Opacity="0.6" Margin="5,0,0,0" Foreground="{DynamicResource SukiText}"/>
+                                        <Grid ColumnDefinitions="*,Auto" MinWidth="140">
+                                            <TextBlock Text="{Binding SelectedSourcesSummary}"
+                                                       VerticalAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       FontSize="13"
+                                                       Foreground="{DynamicResource EcTextPrimary}"/>
+                                            <avalonia:MaterialIcon Grid.Column="1"
+                                                                   Kind="ChevronDown"
+                                                                   Width="16" Height="16"
+                                                                   Opacity="0.55"
+                                                                   Margin="8,0,0,0"
+                                                                   Foreground="{DynamicResource EcTextMuted}"/>
                                         </Grid>
                                     </Button>
                                 </StackPanel>
-                
-                                <!-- Recording Button -->
-                                <Button Command="{Binding ToggleRecordingCommand}" 
-                                        Classes="Flat"
-                                        Margin="10,0,0,0"
-                                        VerticalAlignment="Center">
-                                     <StackPanel Orientation="Horizontal">
-                                        <avalonia:MaterialIcon Kind="{Binding RecordingIcon}" Margin="0,0,5,0"/>
-                                        <TextBlock Text="{Binding RecordingText}" />
-                                     </StackPanel>
-                                </Button>
                             </WrapPanel>
-                        </suki:GlassCard>
-                
+                        </Border>
+
                         <!-- Subtitles Display -->
-                        <Grid Grid.Row="1" Margin="15,0,15,15">
+                        <Grid Grid.Row="1">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="{Binding IsTranslationEnabled, Converter={x:Static converts:BoolToGridLengthConverter.Instance}}" />
                             </Grid.ColumnDefinitions>
-                            
-                            <!-- Left: Source -->
-                            <suki:GlassCard Grid.Column="0" Margin="0,0,5,0">
+
+                            <Border Classes="EcSurface" Grid.Column="0" Margin="0,0,6,0">
                                 <DockPanel>
                                     <Grid DockPanel.Dock="Top" ColumnDefinitions="*, Auto" Margin="0,0,0,10">
-                                        <TextBlock Text="{x:Static lang:Resources.Speech_Recognized}" FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
-                                        <Button Grid.Column="1" Command="{Binding ClearHistoryCommand}" Classes="Flat" Padding="5" ToolTip.Tip="{x:Static lang:Resources.Speech_ClearHistory}">
-                                            <avalonia:MaterialIcon Kind="DeleteSweep" Width="20" Height="20" Opacity="0.7"/>
+                                        <TextBlock Text="{x:Static lang:Resources.Speech_Recognized}"
+                                                   FontWeight="SemiBold" FontSize="15"
+                                                   Foreground="{DynamicResource EcTextPrimary}"
+                                                   VerticalAlignment="Center"/>
+                                        <Button Grid.Column="1" Command="{Binding ClearHistoryCommand}"
+                                                Classes="EcToolbarBtn"
+                                                ToolTip.Tip="{x:Static lang:Resources.Speech_ClearHistory}">
+                                            <avalonia:MaterialIcon Kind="DeleteSweep" Width="18" Height="18" Opacity="0.7"/>
                                         </Button>
                                     </Grid>
                                     <ScrollViewer>
                                         <ItemsControl ItemsSource="{Binding SubtitleItems}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Border BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,0,0,1" Padding="10">
-                                                        <StackPanel>
-                                                            <TextBlock Text="{Binding Timestamp, StringFormat=\{0:hh\\:mm\\:ss\}}" FontSize="12" Opacity="0.6"/>
-                                                            <TextBlock Text="{Binding OriginalText}" TextWrapping="Wrap" Margin="0,5,0,0" FontSize="14"/>
+                                                    <Border BorderBrush="{DynamicResource EcBorder}"
+                                                            BorderThickness="0,0,0,1"
+                                                            Padding="10,12">
+                                                        <StackPanel Spacing="4">
+                                                            <TextBlock Text="{Binding Timestamp, StringFormat=\{0:hh\\:mm\\:ss\}}"
+                                                                       FontSize="11"
+                                                                       Foreground="{DynamicResource EcTextMuted}"/>
+                                                            <TextBlock Text="{Binding OriginalText}"
+                                                                       TextWrapping="Wrap"
+                                                                       FontSize="14"
+                                                                       LineHeight="22"
+                                                                       Foreground="{DynamicResource EcTextPrimary}"/>
                                                         </StackPanel>
                                                     </Border>
                                                 </DataTemplate>
@@ -183,23 +278,35 @@
                                         </ItemsControl>
                                     </ScrollViewer>
                                 </DockPanel>
-                            </suki:GlassCard>
-                
-                            <!-- Right: Translation -->
-                            <suki:GlassCard Grid.Column="1" Margin="5,0,0,0" IsVisible="{Binding IsTranslationEnabled}">
+                            </Border>
+
+                            <Border Classes="EcSurface" Grid.Column="1" Margin="6,0,0,0" IsVisible="{Binding IsTranslationEnabled}">
                                 <DockPanel>
-                                    <TextBlock DockPanel.Dock="Top" Text="{x:Static lang:Resources.Speech_Translated}" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                                    <TextBlock DockPanel.Dock="Top"
+                                               Text="{x:Static lang:Resources.Speech_Translated}"
+                                               FontWeight="SemiBold" FontSize="15"
+                                               Foreground="{DynamicResource EcTextPrimary}"
+                                               Margin="0,0,0,10"/>
                                     <ScrollViewer>
                                          <ItemsControl ItemsSource="{Binding SubtitleItems}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Border BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,0,0,1" Padding="10">
-                                                        <StackPanel>
+                                                    <Border BorderBrush="{DynamicResource EcBorder}"
+                                                            BorderThickness="0,0,0,1"
+                                                            Padding="10,12">
+                                                        <StackPanel Spacing="4">
                                                             <Grid>
-                                                                <TextBlock Text="{Binding Timestamp, StringFormat=\{0:hh\\:mm\\:ss\}}" FontSize="12" Opacity="0.6" HorizontalAlignment="Left"/>
+                                                                <TextBlock Text="{Binding Timestamp, StringFormat=\{0:hh\\:mm\\:ss\}}"
+                                                                           FontSize="11"
+                                                                           Foreground="{DynamicResource EcTextMuted}"
+                                                                           HorizontalAlignment="Left"/>
                                                                 <suki:Loading IsVisible="{Binding IsTranslating}" HorizontalAlignment="Right" Width="16" Height="16"/>
                                                             </Grid>
-                                                            <TextBlock Text="{Binding TranslatedText}" TextWrapping="Wrap" Margin="0,5,0,0" FontSize="14" Foreground="{DynamicResource SukiPrimaryColor}"/>
+                                                            <TextBlock Text="{Binding TranslatedText}"
+                                                                       TextWrapping="Wrap"
+                                                                       FontSize="14"
+                                                                       LineHeight="22"
+                                                                       Foreground="{DynamicResource EcAccent}"/>
                                                         </StackPanel>
                                                     </Border>
                                                 </DataTemplate>
@@ -207,189 +314,334 @@
                                         </ItemsControl>
                                     </ScrollViewer>
                                 </DockPanel>
-                            </suki:GlassCard>
+                            </Border>
                         </Grid>
-                    </Grid>
-                </TabItem>
-                
-                <TabItem Header="{x:Static lang:Resources.FloatingWindow}">
-                    <suki:GlassCard Margin="15">
-                        <ScrollViewer>
-                            <StackPanel Spacing="20">
-                                <TextBlock Text="{x:Static lang:Resources.FloatingWindow_Config}" FontSize="20" FontWeight="Bold"/>
+            </Grid>
 
-                                <!-- Control Buttons -->
-                                <StackPanel Orientation="Horizontal" Spacing="20">
-                                    <Button Command="{Binding ToggleFloatingWindowCommand}" Classes="Flat" Padding="15,10">
-                                        <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <avalonia:MaterialIcon Kind="PictureInPictureBottomRight"/>
-                                            <TextBlock Text="{Binding IsFloatingWindowOpen, Converter={x:Static converts:BoolToTextConverter.Instance}, ConverterParameter='FloatingWindow_Open|FloatingWindow_Close'}"/>
-                                        </StackPanel>
-                                    </Button>
-                                    
-                                    <Button Command="{Binding ToggleLockCommand}" Classes="Outlined" Padding="15,10" IsVisible="{Binding IsFloatingWindowOpen}">
-                                        <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <avalonia:MaterialIcon Kind="{Binding IsFloatingWindowLocked, Converter={x:Static converts:BoolToIconConverter.Instance}, ConverterParameter='Lock;LockOpen'}"/>
-                                            <TextBlock Text="{Binding IsFloatingWindowLocked, Converter={x:Static converts:BoolToTextConverter.Instance}, ConverterParameter='FloatingWindow_Lock|FloatingWindow_Unlock'}"/>
-                                        </StackPanel>
-                                    </Button>
-                                </StackPanel>
-                                
-                                <Separator Background="{DynamicResource SukiBorderBrush}" Height="1"/>
+            <!-- Overlay configuration workspace -->
+            <ScrollViewer IsVisible="{Binding IsOverlayWorkspace}"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Spacing="14" Margin="0,0,0,8">
 
-                                <!-- Dual Subtitle Config -->
-                                <Grid ColumnDefinitions="*, 20, *" RowDefinitions="Auto, Auto">
-                                    <!-- Col 0: Primary -->
-                                    <StackPanel Grid.Column="0" Spacing="15">
-                                        <TextBlock Text="{x:Static lang:Resources.Subtitle_Primary}" Classes="h4" FontWeight="SemiBold" Foreground="{DynamicResource SukiPrimaryColor}"/>
-                                        
-                                        <Grid ColumnDefinitions="100, *" RowDefinitions="Auto, Auto, Auto, Auto" RowSpacing="10">
-                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Static lang:Resources.PromptContent}" VerticalAlignment="Center"/>
-                                            <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding MainSourceOptions}" SelectedValue="{Binding MainSubtitleSource}" SelectedValueBinding="{Binding Key}" DisplayMemberBinding="{Binding Value}" HorizontalAlignment="Stretch"/>
-
-                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="{x:Static lang:Resources.FontFamily}" VerticalAlignment="Center"/>
-                                            <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding AvailableFonts}" SelectedItem="{Binding PrimaryFontFamily}" HorizontalAlignment="Stretch">
-                                                <ComboBox.SelectionBoxItemTemplate>
-                                                    <DataTemplate>
-                                                        <TextBlock Text="{Binding}" VerticalAlignment="Center" />
-                                                    </DataTemplate>
-                                                </ComboBox.SelectionBoxItemTemplate>
-                                                <ComboBox.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <TextBlock Text="{Binding .}" FontFamily="{Binding ., Converter={x:Static converts:StringToFontFamilyConverter.Instance}}" VerticalAlignment="Center" />
-                                                    </DataTemplate>
-                                                </ComboBox.ItemTemplate>
-                                            </ComboBox>
-                                            
-                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="{x:Static lang:Resources.FontSize}" VerticalAlignment="Center"/>
-                                            <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding PrimaryFontSize}" FormatString="F0" Minimum="10" Maximum="100"/>
-                                            
-                                            <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static lang:Resources.FontColor}" VerticalAlignment="Center"/>
-                                            <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Spacing="10">
-                                                <TextBox Text="{Binding PrimaryFontColor}" Width="100"/>
-                                                <Button Width="35" Height="35" CornerRadius="20" BorderThickness="1" BorderBrush="#33000000" Background="{Binding PrimaryFontColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
-                                                    <Button.Flyout>
-                                                        <Flyout Placement="Bottom">
-                                                            <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
-                                                                <ColorView Color="{Binding PrimaryFontColor, Converter={x:Static converts:ColorToHexConverter.Instance}}" IsAlphaEnabled="True" ColorSpectrumShape="Ring"/>
-                                                            </Border>
-                                                        </Flyout>
-                                                    </Button.Flyout>
-                                                </Button>
-                                            </StackPanel>
-                                        </Grid>
-                                    </StackPanel>
-
-                                    <!-- Divider -->
-                                    <Rectangle Grid.Column="1" Width="1" Fill="{DynamicResource SukiBorderBrush}" VerticalAlignment="Stretch"/>
-
-                                    <!-- Col 2: Secondary -->
-                                    <StackPanel Grid.Column="2" Spacing="15">
-                                        <TextBlock Text="{x:Static lang:Resources.Subtitle_Secondary}" Classes="h4" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}"/>
-                                        
-                                        <Grid ColumnDefinitions="100, *" RowDefinitions="Auto, Auto, Auto, Auto" RowSpacing="10">
-                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Static lang:Resources.PromptContent}" VerticalAlignment="Center"/>
-                                            <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding SecondarySourceOptions}" SelectedValue="{Binding SecondarySubtitleSource}" SelectedValueBinding="{Binding Key}" DisplayMemberBinding="{Binding Value}" HorizontalAlignment="Stretch"/>
-
-                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="{x:Static lang:Resources.FontFamily}" VerticalAlignment="Center"/>
-                                            <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding AvailableFonts}" SelectedItem="{Binding SecondaryFontFamily}" HorizontalAlignment="Stretch">
-                                                <ComboBox.SelectionBoxItemTemplate>
-                                                    <DataTemplate>
-                                                        <TextBlock Text="{Binding}" VerticalAlignment="Center" />
-                                                    </DataTemplate>
-                                                </ComboBox.SelectionBoxItemTemplate>
-                                                <ComboBox.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <TextBlock Text="{Binding .}" FontFamily="{Binding ., Converter={x:Static converts:StringToFontFamilyConverter.Instance}}" VerticalAlignment="Center" />
-                                                    </DataTemplate>
-                                                </ComboBox.ItemTemplate>
-                                            </ComboBox>
-                                            
-                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="{x:Static lang:Resources.FontSize}" VerticalAlignment="Center"/>
-                                            <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding SecondaryFontSize}" FormatString="F0" Minimum="10" Maximum="100"/>
-                                            
-                                            <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static lang:Resources.FontColor}" VerticalAlignment="Center"/>
-                                            <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Spacing="10">
-                                                <TextBox Text="{Binding SecondaryFontColor}" Width="100"/>
-                                                <Button Width="35" Height="35" CornerRadius="20" BorderThickness="1" BorderBrush="#33000000" Background="{Binding SecondaryFontColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
-                                                    <Button.Flyout>
-                                                        <Flyout Placement="Bottom">
-                                                            <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
-                                                                <ColorView Color="{Binding SecondaryFontColor, Converter={x:Static converts:ColorToHexConverter.Instance}}" IsAlphaEnabled="True" ColorSpectrumShape="Ring"/>
-                                                            </Border>
-                                                        </Flyout>
-                                                    </Button.Flyout>
-                                                </Button>
-                                            </StackPanel>
-                                        </Grid>
-                                    </StackPanel>
-                                </Grid>
-
-                                <Separator Background="{DynamicResource SukiBorderBrush}" Height="1"/>
-
-                                <!-- Window Appearance -->
-                                <TextBlock Text="{x:Static lang:Resources.Window_Appearance}" Classes="h4" FontWeight="SemiBold"/>
-                                <Grid ColumnDefinitions="Auto, *, 20, Auto, *" RowDefinitions="Auto, Auto, Auto, Auto" RowSpacing="15">
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Static lang:Resources.Window_Background}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="10">
-                                        <TextBox Text="{Binding BackgroundColor}" Width="100"/>
-                                        <Button Width="35" Height="35" CornerRadius="20" BorderThickness="1" BorderBrush="#33000000" Background="{Binding BackgroundColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
-                                            <Button.Flyout>
-                                                <Flyout Placement="Bottom">
-                                                    <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
-                                                        <ColorView Color="{Binding BackgroundColor, Converter={x:Static converts:ColorToHexConverter.Instance}}" IsAlphaEnabled="True" ColorSpectrumShape="Ring"/>
-                                                    </Border>
-                                                </Flyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </StackPanel>
-
-                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="{x:Static lang:Resources.Subtitle_Background}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                    <StackPanel Grid.Row="0" Grid.Column="4" Orientation="Horizontal" Spacing="10">
-                                        <TextBox Text="{Binding SubtitleBackgroundColor}" Width="100"/>
-                                        <Button Width="35" Height="35" CornerRadius="20" BorderThickness="1" BorderBrush="#33000000" Background="{Binding SubtitleBackgroundColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
-                                            <Button.Flyout>
-                                                <Flyout Placement="Bottom">
-                                                    <Border CornerRadius="10" Padding="10" Background="{DynamicResource SukiCardBackground}">
-                                                        <ColorView Color="{Binding SubtitleBackgroundColor, Converter={x:Static converts:ColorToHexConverter.Instance}}" IsAlphaEnabled="True" ColorSpectrumShape="Ring"/>
-                                                    </Border>
-                                                </Flyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </StackPanel>
-
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{x:Static lang:Resources.Window_Opacity}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                    <Grid Grid.Row="1" Grid.Column="1" ColumnDefinitions="*, Auto">
-                                        <Slider Value="{Binding WindowOpacity}" Minimum="0.1" Maximum="1.0" TickFrequency="0.05" IsSnapToTickEnabled="True" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding WindowOpacity, StringFormat='P0'}" Width="40" TextAlignment="Right" VerticalAlignment="Center"/>
-                                    </Grid>
-
-                                    <TextBlock Grid.Row="1" Grid.Column="3" Text="{x:Static lang:Resources.Speech_DisplayMode}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                    <ComboBox Grid.Row="1" Grid.Column="4" ItemsSource="{Binding DisplayModeOptions}" SelectedValue="{Binding FloatingDisplayMode}" SelectedValueBinding="{Binding Key}" DisplayMemberBinding="{Binding Value}" HorizontalAlignment="Stretch"/>
-
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{x:Static lang:Resources.Window_Orientation}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                    <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding OrientationOptions}" SelectedItem="{Binding FloatingWindowOrientation}" HorizontalAlignment="Stretch"/>
-                                    
-                                    <!-- Auto Clear -->
-                                    <TextBlock Grid.Row="2" Grid.Column="3" Text="{x:Static lang:Resources.Speech_AutoClear}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                    <NumericUpDown Grid.Row="2" Grid.Column="4" Value="{Binding AutoClearInterval}" FormatString="F0" Minimum="0" Maximum="3600" Increment="5"/>
-                                    
-                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static lang:Resources.Speech_MaxSentencesPerLine}" VerticalAlignment="Center" Margin="0,0,10,0" IsVisible="{Binding IsMaxSentencesPerLineVisible}"/>
-                                    <NumericUpDown Grid.Row="3" Grid.Column="1" Value="{Binding MaxSentencesPerLine}" FormatString="F0" Minimum="1" Maximum="100" IsVisible="{Binding IsMaxSentencesPerLineVisible}"/>
-
-                                    <TextBlock Grid.Row="3" Grid.Column="3" Text="{x:Static lang:Resources.Speech_MaxHistory}" VerticalAlignment="Center" Margin="0,0,10,0" IsVisible="{Binding IsSegmentedMode}"/>
-                                    <NumericUpDown Grid.Row="3" Grid.Column="4" Value="{Binding MaxFloatingHistory}" FormatString="F0" Minimum="1" Maximum="20" IsVisible="{Binding IsSegmentedMode}"/>
-                                </Grid>
-
+                    <!-- Actions -->
+                    <Border Classes="EcSurface" Padding="16,14">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <StackPanel Spacing="4" VerticalAlignment="Center">
+                                <TextBlock Text="{x:Static lang:Resources.FloatingWindow_Config}"
+                                           FontSize="16" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource EcTextPrimary}"/>
+                                <TextBlock Text="{x:Static lang:Resources.HomeQuickSpeechHint}"
+                                           Classes="EcHelper"/>
                             </StackPanel>
-                        </ScrollViewer>
-                    </suki:GlassCard>
-                </TabItem>
-            </TabControl>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                                        VerticalAlignment="Center">
+                                <Button Command="{Binding ToggleFloatingWindowCommand}"
+                                        Classes="EcPrimary" Padding="14,10">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <avalonia:MaterialIcon Kind="PictureInPictureBottomRight" Width="18" Height="18"/>
+                                        <TextBlock VerticalAlignment="Center"
+                                                   Text="{Binding IsFloatingWindowOpen, Converter={x:Static converts:BoolToTextConverter.Instance}, ConverterParameter='FloatingWindow_Open|FloatingWindow_Close'}"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Command="{Binding ToggleLockCommand}"
+                                        Classes="EcGhost" Padding="14,10"
+                                        IsVisible="{Binding IsFloatingWindowOpen}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <avalonia:MaterialIcon Width="18" Height="18"
+                                                               Kind="{Binding IsFloatingWindowLocked, Converter={x:Static converts:BoolToIconConverter.Instance}, ConverterParameter='Lock;LockOpen'}"/>
+                                        <TextBlock VerticalAlignment="Center"
+                                                   Text="{Binding IsFloatingWindowLocked, Converter={x:Static converts:BoolToTextConverter.Instance}, ConverterParameter='FloatingWindow_Lock|FloatingWindow_Unlock'}"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Presets -->
+                    <Border Classes="EcSurface" Padding="16,14">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="{x:Static lang:Resources.SubtitlePreset_Title}"
+                                       FontSize="15" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource EcTextPrimary}" />
+                            <TextBlock Text="{x:Static lang:Resources.SubtitlePreset_Hint}"
+                                       Classes="EcHelper" />
+                            <ItemsControl ItemsSource="{Binding AppearancePresets}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:SubtitleAppearancePreset">
+                                        <Button Classes="EcGhost"
+                                                Margin="0,0,8,8"
+                                                Padding="12,8" 
+                                                Command="{Binding $parent[UserControl].((vm:SpeechRecognitionViewModel)DataContext).ApplyAppearancePresetCommand}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip.Tip="{Binding Description}">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Border Width="14" Height="14" CornerRadius="4"
+                                                        BorderThickness="1"
+                                                        BorderBrush="{DynamicResource EcBorder}"
+                                                        Background="{Binding PrimaryFontColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}" />
+                                                <Border Width="14" Height="14" CornerRadius="4"
+                                                        BorderThickness="1"
+                                                        BorderBrush="{DynamicResource EcBorder}"
+                                                        Margin="-10,0,0,0"
+                                                        Background="{Binding SecondaryFontColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}" />
+                                                <TextBlock Text="{Binding DisplayName}"
+                                                           VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource EcTextPrimary}" />
+                                            </StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Primary / Secondary: label column Auto so CJK is never clipped -->
+                    <Grid ColumnDefinitions="*,14,*">
+                        <Border Classes="EcSurface" Padding="18,16">
+                            <StackPanel Spacing="14">
+                                <TextBlock Text="{x:Static lang:Resources.Subtitle_Primary}"
+                                           FontSize="15" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource EcAccent}"/>
+                                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto"
+                                      RowSpacing="14" ColumnSpacing="16">
+                                    <TextBlock Classes="EcLabel" Text="{x:Static lang:Resources.PromptContent}"
+                                               VerticalAlignment="Center" MinWidth="72"/>
+                                    <ComboBox Grid.Column="1"
+                                              ItemsSource="{Binding MainSourceOptions}"
+                                              SelectedValue="{Binding MainSubtitleSource}"
+                                              SelectedValueBinding="{Binding Key}"
+                                              DisplayMemberBinding="{Binding Value}"  HorizontalAlignment="Stretch"/>
+                                    <TextBlock Grid.Row="1" Classes="EcLabel" Text="{x:Static lang:Resources.FontFamily}"
+                                               VerticalAlignment="Center" MinWidth="72"/>
+                                    <ComboBox Grid.Row="1" Grid.Column="1"
+                                              ItemsSource="{Binding AvailableFonts}"
+                                              SelectedItem="{Binding PrimaryFontFamily}"  HorizontalAlignment="Stretch">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding .}"
+                                                           FontFamily="{Binding ., Converter={x:Static converts:StringToFontFamilyConverter.Instance}}"
+                                                           VerticalAlignment="Center" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                    <TextBlock Grid.Row="2" Classes="EcLabel" Text="{x:Static lang:Resources.FontSize}"
+                                               VerticalAlignment="Center" MinWidth="72"/>
+                                    <NumericUpDown Grid.Row="2" Grid.Column="1"
+                                                   Value="{Binding PrimaryFontSize}" FormatString="F0"
+                                                   Minimum="10" Maximum="100" 
+                                                   HorizontalAlignment="Stretch"/>
+                                    <TextBlock Grid.Row="3" Classes="EcLabel" Text="{x:Static lang:Resources.FontColor}"
+                                               VerticalAlignment="Center" MinWidth="72"/>
+                                    <!-- Same column width as Combo/Numeric above; swatch docks right -->
+                                    <Grid Grid.Row="3" Grid.Column="1" ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                        <TextBox Text="{Binding PrimaryFontColor}"
+                                                 HorizontalAlignment="Stretch"
+                                                 VerticalAlignment="Center" />
+                                        <Button Grid.Column="1"
+                                                Classes="EcColorSwatch"
+                                                VerticalAlignment="Center"
+                                                Background="{Binding PrimaryFontColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
+                                            <Button.Flyout>
+                                                <Flyout Placement="Bottom" ShowMode="Standard">
+                                                    <Border CornerRadius="12" Padding="12"
+                                                            Background="{DynamicResource EcBgElevated}"
+                                                            BorderBrush="{DynamicResource EcBorder}"
+                                                            BorderThickness="1">
+                                                        <ColorView Color="{Binding PrimaryFontColor, Converter={x:Static converts:ColorToHexConverter.Instance}}"
+                                                                   IsAlphaEnabled="True" ColorSpectrumShape="Ring"/>
+                                                    </Border>
+                                                </Flyout>
+                                            </Button.Flyout>
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="2" Classes="EcSurface" Padding="18,16">
+                            <StackPanel Spacing="14">
+                                <TextBlock Text="{x:Static lang:Resources.Subtitle_Secondary}"
+                                           FontSize="15" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource EcTextPrimary}"/>
+                                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto"
+                                      RowSpacing="14" ColumnSpacing="16">
+                                    <TextBlock Classes="EcLabel" Text="{x:Static lang:Resources.PromptContent}"
+                                               VerticalAlignment="Center" MinWidth="72"/>
+                                    <ComboBox Grid.Column="1"
+                                              ItemsSource="{Binding SecondarySourceOptions}"
+                                              SelectedValue="{Binding SecondarySubtitleSource}"
+                                              SelectedValueBinding="{Binding Key}"
+                                              DisplayMemberBinding="{Binding Value}"  HorizontalAlignment="Stretch"/>
+                                    <TextBlock Grid.Row="1" Classes="EcLabel" Text="{x:Static lang:Resources.FontFamily}"
+                                               VerticalAlignment="Center" MinWidth="72"/>
+                                    <ComboBox Grid.Row="1" Grid.Column="1"
+                                              ItemsSource="{Binding AvailableFonts}"
+                                              SelectedItem="{Binding SecondaryFontFamily}"  HorizontalAlignment="Stretch">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding .}"
+                                                           FontFamily="{Binding ., Converter={x:Static converts:StringToFontFamilyConverter.Instance}}"
+                                                           VerticalAlignment="Center" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                    <TextBlock Grid.Row="2" Classes="EcLabel" Text="{x:Static lang:Resources.FontSize}"
+                                               VerticalAlignment="Center" MinWidth="72"/>
+                                    <NumericUpDown Grid.Row="2" Grid.Column="1"
+                                                   Value="{Binding SecondaryFontSize}" FormatString="F0"
+                                                   Minimum="10" Maximum="100" 
+                                                   HorizontalAlignment="Stretch"/>
+                                    <TextBlock Grid.Row="3" Classes="EcLabel" Text="{x:Static lang:Resources.FontColor}"
+                                               VerticalAlignment="Center" MinWidth="72"/>
+                                    <Grid Grid.Row="3" Grid.Column="1" ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                        <TextBox Text="{Binding SecondaryFontColor}"
+                                                 HorizontalAlignment="Stretch"
+                                                 VerticalAlignment="Center" />
+                                        <Button Grid.Column="1"
+                                                Classes="EcColorSwatch"
+                                                VerticalAlignment="Center"
+                                                Background="{Binding SecondaryFontColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
+                                            <Button.Flyout>
+                                                <Flyout Placement="Bottom" ShowMode="Standard">
+                                                    <Border CornerRadius="12" Padding="12"
+                                                            Background="{DynamicResource EcBgElevated}"
+                                                            BorderBrush="{DynamicResource EcBorder}"
+                                                            BorderThickness="1">
+                                                        <ColorView Color="{Binding SecondaryFontColor, Converter={x:Static converts:ColorToHexConverter.Instance}}"
+                                                                   IsAlphaEnabled="True" ColorSpectrumShape="Ring"/>
+                                                    </Border>
+                                                </Flyout>
+                                            </Button.Flyout>
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Window appearance: one field per cell, no jammed labels -->
+                    <Border Classes="EcSurface" Padding="18,16">
+                        <StackPanel Spacing="16">
+                            <TextBlock Text="{x:Static lang:Resources.Window_Appearance}"
+                                       FontSize="15" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource EcTextPrimary}"/>
+                            <UniformGrid Columns="2" Rows="4">
+                                <StackPanel Margin="0,0,20,14" Spacing="6">
+                                    <TextBlock Classes="EcLabel" Text="{x:Static lang:Resources.Window_Background}"/>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                        <TextBox Text="{Binding BackgroundColor}"
+                                                 HorizontalAlignment="Stretch" />
+                                        <Button Grid.Column="1"
+                                                Classes="EcColorSwatch"
+                                                VerticalAlignment="Center"
+                                                Background="{Binding BackgroundColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
+                                            <Button.Flyout>
+                                                <Flyout Placement="Bottom" ShowMode="Standard">
+                                                    <Border CornerRadius="12" Padding="12"
+                                                            Background="{DynamicResource EcBgElevated}"
+                                                            BorderBrush="{DynamicResource EcBorder}" BorderThickness="1">
+                                                        <ColorView Color="{Binding BackgroundColor, Converter={x:Static converts:ColorToHexConverter.Instance}}"
+                                                                   IsAlphaEnabled="True" ColorSpectrumShape="Ring"/>
+                                                    </Border>
+                                                </Flyout>
+                                            </Button.Flyout>
+                                        </Button>
+                                    </Grid>
+                                </StackPanel>
+                                <StackPanel Margin="0,0,0,14" Spacing="6">
+                                    <TextBlock Classes="EcLabel" Text="{x:Static lang:Resources.Subtitle_Background}"/>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                        <TextBox Text="{Binding SubtitleBackgroundColor}"
+                                                 HorizontalAlignment="Stretch" />
+                                        <Button Grid.Column="1"
+                                                Classes="EcColorSwatch"
+                                                VerticalAlignment="Center"
+                                                Background="{Binding SubtitleBackgroundColor, Converter={x:Static converts:ColorToBrushConverter.Instance}}">
+                                            <Button.Flyout>
+                                                <Flyout Placement="Bottom" ShowMode="Standard">
+                                                    <Border CornerRadius="12" Padding="12"
+                                                            Background="{DynamicResource EcBgElevated}"
+                                                            BorderBrush="{DynamicResource EcBorder}" BorderThickness="1">
+                                                        <ColorView Color="{Binding SubtitleBackgroundColor, Converter={x:Static converts:ColorToHexConverter.Instance}}"
+                                                                   IsAlphaEnabled="True" ColorSpectrumShape="Ring"/>
+                                                    </Border>
+                                                </Flyout>
+                                            </Button.Flyout>
+                                        </Button>
+                                    </Grid>
+                                </StackPanel>
+
+                                <StackPanel Margin="0,0,20,14" Spacing="6">
+                                    <TextBlock Classes="EcLabel" Text="{x:Static lang:Resources.Window_Opacity}"/>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                        <Slider Value="{Binding WindowOpacity}" Minimum="0.1" Maximum="1.0"
+                                                TickFrequency="0.01" IsSnapToTickEnabled="True"
+                                                SmallChange="0.01" LargeChange="0.05"
+                                                VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding WindowOpacity, StringFormat=P0}"
+                                                   MinWidth="44" VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource EcTextSecondary}"/>
+                                    </Grid>
+                                </StackPanel>
+                                <StackPanel Margin="0,0,0,14" Spacing="6">
+                                    <TextBlock Classes="EcLabel" Text="{x:Static lang:Resources.Speech_DisplayMode}"/>
+                                    <ComboBox ItemsSource="{Binding DisplayModeOptions}"
+                                              SelectedValue="{Binding FloatingDisplayMode}"
+                                              SelectedValueBinding="{Binding Key}"
+                                              DisplayMemberBinding="{Binding Value}"  HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+
+                                <StackPanel Margin="0,0,20,14" Spacing="6">
+                                    <TextBlock Classes="EcLabel" Text="{x:Static lang:Resources.Window_Orientation}"/>
+                                    <ComboBox ItemsSource="{Binding OrientationOptions}"
+                                              SelectedItem="{Binding FloatingWindowOrientation}"  HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+                                <StackPanel Margin="0,0,0,14" Spacing="6">
+                                    <TextBlock Classes="EcLabel" Text="{x:Static lang:Resources.Speech_AutoClear}"/>
+                                    <NumericUpDown Value="{Binding AutoClearInterval}" FormatString="F0"
+                                                   Minimum="0" Maximum="3600" Increment="5"  HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+
+                                <StackPanel Margin="0,0,20,0" Spacing="6"
+                                            IsVisible="{Binding IsMaxSentencesPerLineVisible}">
+                                    <TextBlock Classes="EcLabel" Text="{x:Static lang:Resources.Speech_MaxSentencesPerLine}"/>
+                                    <NumericUpDown Value="{Binding MaxSentencesPerLine}" FormatString="F0"
+                                                   Minimum="1" Maximum="100"  HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+                                <StackPanel Spacing="6" IsVisible="{Binding IsSegmentedMode}">
+                                    <TextBlock Classes="EcLabel" Text="{x:Static lang:Resources.Speech_MaxHistory}"/>
+                                    <NumericUpDown Value="{Binding MaxFloatingHistory}" FormatString="F0"
+                                                   Minimum="1" Maximum="20"  HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+                            </UniformGrid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+            </Grid>
             
-            <StackPanel IsVisible="{Binding IsNotSupported}" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="20">
-                 <avalonia:MaterialIcon Kind="AlertCircleOutline" Width="60" Height="60" Opacity="0.5"/>
-                 <TextBlock Text="{x:Static lang:Resources.Speech_NotSupported}" FontSize="18" HorizontalAlignment="Center" Opacity="0.8"/>
+            <StackPanel Grid.Row="0"
+                        Grid.RowSpan="3"
+                        IsVisible="{Binding IsNotSupported}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Spacing="16">
+                 <avalonia:MaterialIcon Kind="AlertCircleOutline"
+                                        Width="48" Height="48"
+                                        Opacity="0.45"
+                                        HorizontalAlignment="Center"/>
+                 <TextBlock Text="{x:Static lang:Resources.Speech_NotSupported}"
+                            FontSize="16"
+                            Classes="EcHelper"
+                            TextAlignment="Center"
+                            HorizontalAlignment="Center"
+                            MaxWidth="420"/>
             </StackPanel>
         </Grid>
     </Panel>

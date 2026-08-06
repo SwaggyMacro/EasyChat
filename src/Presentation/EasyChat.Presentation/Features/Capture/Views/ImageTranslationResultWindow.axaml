@@ -11,8 +11,8 @@
                  MinWidth="560"
                  MinHeight="420"
                  WindowStartupLocation="CenterScreen"
-                 Background="{DynamicResource SukiBackground}"
-                 Foreground="{DynamicResource SukiText}"
+                 Background="{DynamicResource EcBgCanvas}"
+                 Foreground="{DynamicResource EcTextPrimary}"
                  IsTitleBarVisible="True">
 
     <suki:SukiWindow.LogoContent>
@@ -20,17 +20,17 @@
                            Width="20"
                            Height="20"
                            VerticalAlignment="Center"
-                           Foreground="{DynamicResource SukiPrimaryColor}" />
+                           Foreground="{DynamicResource EcAccent}" />
     </suki:SukiWindow.LogoContent>
 
     <Grid RowDefinitions="*,Auto,Auto"
-          Background="{DynamicResource SukiBackground}">
+          Background="{DynamicResource EcBgCanvas}">
         <Border Grid.Row="0"
                 Margin="16,12,16,0"
-                Background="#181A1B"
-                BorderBrush="{DynamicResource SukiBorderBrush}"
+                Background="{DynamicResource EcBgMuted}"
+                BorderBrush="{DynamicResource EcBorder}"
                 BorderThickness="1"
-                CornerRadius="6"
+                CornerRadius="12"
                 ClipToBounds="True">
             <Image x:Name="TranslatedImage"
                    Margin="16"
@@ -43,40 +43,40 @@
                 Grid.Row="1"
                 Margin="16,10,16,0"
                 Padding="12,9"
-                Background="{DynamicResource SukiCardBackground}"
-                BorderBrush="{DynamicResource SukiControlBorderBrush}"
+                Background="{DynamicResource EcBgElevated}"
+                BorderBrush="{DynamicResource EcBorder}"
                 BorderThickness="1"
-                CornerRadius="6"
+                CornerRadius="10"
                 IsVisible="False">
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                 <icon:MaterialIcon Kind="AlertCircleOutline"
                                    Width="18"
                                    Height="18"
                                    VerticalAlignment="Top"
-                                   Foreground="{DynamicResource SukiPrimaryColor}" />
+                                   Foreground="{DynamicResource EcWarning}" />
                 <TextBlock x:Name="WarningText"
                            Grid.Column="1"
                            MaxLines="3"
                            TextTrimming="CharacterEllipsis"
                            TextWrapping="Wrap"
-                           Foreground="{DynamicResource SukiLowText}" />
+                           Foreground="{DynamicResource EcTextSecondary}" />
             </Grid>
         </Border>
 
         <Border Grid.Row="2"
                 Margin="0,12,0,0"
                 Padding="16,10"
-                Background="{DynamicResource SukiCardBackground}"
-                BorderBrush="{DynamicResource SukiBorderBrush}"
+                Background="{DynamicResource EcBgElevated}"
+                BorderBrush="{DynamicResource EcBorder}"
                 BorderThickness="0,1,0,0">
             <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8">
                 <TextBlock Grid.Column="0"
                            VerticalAlignment="Center"
-                           Foreground="{DynamicResource SukiLowText}"
+                           Foreground="{DynamicResource EcTextMuted}"
                            Text="PNG" />
 
                 <Button Grid.Column="1"
-                        Classes="Flat"
+                        Classes="EcGhost"
                         MinWidth="104"
                         Height="36"
                         Padding="12,0"
@@ -89,7 +89,7 @@
                 </Button>
 
                 <Button Grid.Column="2"
-                        Classes="Flat Primary"
+                        Classes="EcPrimary"
                         MinWidth="104"
                         Height="36"
                         Padding="12,0"
@@ -102,7 +102,7 @@
                 </Button>
 
                 <Button Grid.Column="3"
-                        Classes="Flat"
+                        Classes="EcToolbarBtn"
                         Width="36"
                         Height="36"
                         Padding="0"

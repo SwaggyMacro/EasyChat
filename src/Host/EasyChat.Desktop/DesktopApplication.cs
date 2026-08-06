@@ -12,8 +12,7 @@ using EasyChat.Presentation.Features.Shell;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using SukiUI.Dialogs;
-using SukiUI.Toasts;
+
 
 namespace EasyChat.Desktop;
 
@@ -90,10 +89,10 @@ public static class DesktopApplication
     private static DesktopUiContext CreateUiContext(IServiceProvider services) => new(
         services.GetRequiredService<SettingsSession>(),
         services.GetRequiredService<MainWindowViewModel>(),
-        services.GetRequiredService<ISukiDialogManager>(),
+        services.GetRequiredService<EasyChat.Presentation.Foundation.UiHost.IUiDialogHost>(),
         services.GetRequiredService<DesktopInteractionLifecycle>(),
         services.GetRequiredService<IApplicationUpdateService>(),
-        services.GetRequiredService<ISukiToastManager>());
+        services.GetRequiredService<EasyChat.Presentation.Foundation.UiHost.IUiToastHost>());
 
     private static IShellLifecycle StartShell(IServiceProvider services)
     {

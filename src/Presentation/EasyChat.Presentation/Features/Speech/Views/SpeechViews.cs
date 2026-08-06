@@ -120,10 +120,40 @@ namespace EasyChat.Presentation.Features.Speech.Views
 
         private void OnPointerPressed(object? sender, PointerPressedEventArgs eventArgs)
         {
+            // Locked: body is click-through; only LockedDragHandle starts a move.
             if (_viewModel?.IsFloatingWindowLocked == true)
                 return;
             if (eventArgs.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
                 BeginMoveDrag(eventArgs);
+        }
+
+        private void OnLockedDragPointerPressed(object? sender, PointerPressedEventArgs eventArgs)
+        {
+            if (_viewModel?.IsFloatingWindowLocked != true)
+                return;
+            if (!eventArgs.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+                return;
+            // Ensure we own the pointer before starting a system move drag.
+            eventArgs.Handled = true;
+            _ = EnsureInteractiveThenMoveAsync(eventArgs);
+        }
+
+        private async Task EnsureInteractiveThenMoveAsync(PointerPressedEventArgs eventArgs)
+        {
+            await SetClickThroughAsync(false);
+            // Yield so the platform applies WS_EX_TRANSPARENT clear before drag.
+            await Task.Yield();
+            Dispatcher.UIThread.Post(() =>
+            {
+                try
+                {
+                    BeginMoveDrag(eventArgs);
+                }
+                catch (Exception exception)
+                {
+                    _logger?.LogDebug(exception, "Locked subtitle drag failed.");
+                }
+            }, DispatcherPriority.Input);
         }
 
         private void CloseButton_Click(object? sender, RoutedEventArgs eventArgs) => Close();
@@ -142,7 +172,8 @@ namespace EasyChat.Presentation.Features.Speech.Views
         {
             Background = isLocked ? null : Brushes.Transparent;
             RootGrid.Background = null;
-            UnlockBtn.Opacity = isLocked ? 0 : 1;
+            if (LockedChrome is not null)
+                LockedChrome.Opacity = isLocked ? 0 : 1;
             if (isLocked)
             {
                 _ = SetClickThroughAsync(true);
@@ -152,6 +183,8 @@ namespace EasyChat.Presentation.Features.Speech.Views
             {
                 StopHitTestTimer();
                 _ = SetClickThroughAsync(false);
+                if (LockedChrome is not null)
+                    LockedChrome.Opacity = 0;
             }
         }
 
@@ -244,23 +277,30 @@ namespace EasyChat.Presentation.Features.Speech.Views
 
         private void OnHitTestTick(object? sender, EventArgs eventArgs)
         {
-            if (_pointer is null || !UnlockBtn.IsVisible)
+            if (_pointer is null || LockedChrome is null || !LockedChrome.IsVisible)
                 return;
+
             var position = _pointer.GetCurrent();
             var point = new PixelPoint(position.X, position.Y);
             var windowTopLeft = Position;
             var windowRect = new PixelRect(
                 windowTopLeft,
                 PixelSize.FromSize(Bounds.Size, RenderScaling));
-            var buttonTopLeft = UnlockBtn.PointToScreen(default);
-            var buttonRect = new PixelRect(
-                buttonTopLeft,
-                PixelSize.FromSize(UnlockBtn.Bounds.Size, RenderScaling));
-            UnlockBtn.Opacity = windowRect.Contains(point) ? 1 : 0;
 
-            if (buttonRect.Contains(point) && _isClickThrough)
+            // Grow hit target slightly so the chrome is easy to catch while locked.
+            var chromeTopLeft = LockedChrome.PointToScreen(new Point(-6, -6));
+            var chromeSize = PixelSize.FromSize(
+                new Size(LockedChrome.Bounds.Width + 12, LockedChrome.Bounds.Height + 12),
+                RenderScaling);
+            var chromeRect = new PixelRect(chromeTopLeft, chromeSize);
+
+            var nearWindow = windowRect.Contains(point);
+            LockedChrome.Opacity = nearWindow || chromeRect.Contains(point) ? 1 : 0;
+
+            // Only the locked chrome (drag + unlock) captures input; rest stays click-through.
+            if (chromeRect.Contains(point) && _isClickThrough)
                 _ = SetClickThroughAsync(false);
-            else if (!buttonRect.Contains(point) && !_isClickThrough)
+            else if (!chromeRect.Contains(point) && !_isClickThrough)
                 _ = SetClickThroughAsync(true);
         }
 

@@ -4,22 +4,87 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:EasyChat.Presentation.Features.Shell"
              xmlns:lang="clr-namespace:EasyChat.Presentation.Lang"
-             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d"
+             d:DesignWidth="440" d:DesignHeight="300"
              x:Class="EasyChat.Presentation.Features.Shell.Views.CloseBehaviorDialogView"
-             x:DataType="vm:CloseBehaviorDialogViewModel">
-    <StackPanel Spacing="20" Margin="10 40 0 0">
-        <TextBlock Text="{x:Static lang:Resources.CloseToTrayPromptMessage}" TextWrapping="Wrap" />
-        
-        <CheckBox Content="{x:Static lang:Resources.RememberMyChoice}" 
-                  IsChecked="{Binding IsRemember}" />
-        
-        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
-            <Button Command="{Binding MinimizeCommand}" 
-                    Content="{x:Static lang:Resources.MinimizeToTray}" 
-                    Classes="Flat"/>
-            <Button Command="{Binding ExitAppCommand}" 
-                    Content="{x:Static lang:Resources.ExitApp}" 
-                    Classes="Default"/>
+             x:DataType="vm:CloseBehaviorDialogViewModel"
+             MinWidth="400"
+             MaxWidth="460"
+             Width="440">
+    <!--
+      Close-behavior confirm: icon → copy → remember → equal action row.
+      Local Height/Padding beat EcGhost vs EcPrimary chrome differences (border + pad).
+      UniformGrid + 440 width keeps 最小化到托盘 from clipping in a 3-up row.
+    -->
+    <StackPanel>
+        <StackPanel Margin="28,28,28,0" Spacing="16">
+            <Border Width="48" Height="48"
+                    CornerRadius="14"
+                    HorizontalAlignment="Left"
+                    Background="{DynamicResource EcAccentSoft}">
+                <icons:MaterialIcon Kind="LogoutVariant"
+                                    Width="24" Height="24"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource EcAccent}" />
+            </Border>
+
+            <StackPanel Spacing="6">
+                <TextBlock Text="{x:Static lang:Resources.CloseToTrayPromptTitle}"
+                           FontSize="17"
+                           FontWeight="SemiBold"
+                           LetterSpacing="-0.2"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource EcTextPrimary}" />
+                <TextBlock Text="{x:Static lang:Resources.CloseToTrayPromptMessage}"
+                           FontSize="13.5"
+                           LineHeight="21"
+                           TextWrapping="Wrap"
+                           Opacity="0.88"
+                           Foreground="{DynamicResource EcTextSecondary}" />
+            </StackPanel>
+
+            <CheckBox Content="{x:Static lang:Resources.RememberMyChoice}"
+                      IsChecked="{Binding IsRemember}"
+                      Margin="0,2,0,0"
+                      HorizontalAlignment="Left"
+                      VerticalContentAlignment="Center" />
         </StackPanel>
+
+        <UniformGrid Margin="28,22,28,24"
+                     Columns="3"
+                     Rows="1">
+            <Button Command="{Binding CancelCommand}"
+                    Content="{x:Static lang:Resources.Cancel}"
+                    Classes="EcGhost"
+                    Height="40"
+                    Margin="0,0,4,0"
+                    Padding="8,0"
+                    FontSize="13"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center" />
+            <Button Command="{Binding MinimizeCommand}"
+                    Content="{x:Static lang:Resources.MinimizeToTray}"
+                    Classes="EcGhost"
+                    Height="40"
+                    Margin="4,0"
+                    Padding="8,0"
+                    FontSize="13"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center" />
+            <Button Command="{Binding ExitAppCommand}"
+                    Content="{x:Static lang:Resources.ExitApp}"
+                    Classes="EcPrimary"
+                    Height="40"
+                    Margin="4,0,0,0"
+                    Padding="8,0"
+                    FontSize="13"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center" />
+        </UniformGrid>
     </StackPanel>
 </UserControl>

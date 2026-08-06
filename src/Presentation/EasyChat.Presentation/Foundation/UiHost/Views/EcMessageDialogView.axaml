@@ -1,0 +1,88 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:EasyChat.Presentation.Foundation.UiHost"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d"
+             d:DesignWidth="400" d:DesignHeight="240"
+             x:Class="EasyChat.Presentation.Foundation.UiHost.Views.EcMessageDialogView"
+             x:DataType="vm:EcMessageDialogViewModel"
+             MinWidth="340"
+             MaxWidth="400"
+             Width="380">
+    <!--
+      Modern product confirm (Linear / desktop app language):
+      severity disc + title stack, relaxed body, equal-width action row.
+      No nested gray message chip, no floating Suki badge.
+    -->
+    <StackPanel Spacing="0">
+        <StackPanel Margin="28,28,28,0" Spacing="16">
+            <!-- Icon + title as one vertical beat -->
+            <StackPanel Spacing="14">
+                <Border Width="48" Height="48"
+                        CornerRadius="14"
+                        HorizontalAlignment="Left"
+                        Background="{Binding IconWellBrushKey, Converter={x:Static vm:EcDynamicBrushConverter.Instance}}">
+                    <icons:MaterialIcon Kind="{Binding IconKind}"
+                                        Width="24" Height="24"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Foreground="{Binding IconBrushKey, Converter={x:Static vm:EcDynamicBrushConverter.Instance}}" />
+                </Border>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Text="{Binding Title}"
+                               FontSize="17"
+                               FontWeight="SemiBold"
+                               LetterSpacing="-0.2"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource EcTextPrimary}" />
+                    <TextBlock Text="{Binding Message}"
+                               FontSize="13.5"
+                               LineHeight="21"
+                               TextWrapping="Wrap"
+                               Opacity="0.88"
+                               Foreground="{DynamicResource EcTextSecondary}" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Equal-width actions, no chrome strip -->
+        <Grid Margin="28,24,28,24"
+              ColumnDefinitions="*,*"
+              ColumnSpacing="10"
+              IsVisible="{Binding HasActions}">
+            <Button Grid.Column="0"
+                    Content="{Binding SecondaryText}"
+                    Command="{Binding SecondaryCommand}"
+                    Classes="EcGhost"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    IsVisible="{Binding HasSecondary}" />
+            <Button Grid.Column="1"
+                    Content="{Binding PrimaryText}"
+                    Command="{Binding PrimaryCommand}"
+                    Classes="EcPrimary"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    IsVisible="{Binding ShowSafePrimary}" />
+            <Button Grid.Column="1"
+                    Content="{Binding PrimaryText}"
+                    Command="{Binding PrimaryCommand}"
+                    Classes="EcDangerSolid"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    IsVisible="{Binding ShowDangerPrimary}" />
+        </Grid>
+
+        <!-- Info-only: single dismiss -->
+        <Border Margin="28,24,28,24" IsVisible="{Binding !HasActions}">
+            <Button Content="{Binding DismissText}"
+                    Command="{Binding DismissCommand}"
+                    Classes="EcPrimary"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center" />
+        </Border>
+    </StackPanel>
+</UserControl>

@@ -5,21 +5,21 @@ using EasyChat.Presentation.Lang;
 using EasyChat.Presentation.Features.Capture;
 using EasyChat.Presentation.Features.Settings.State;
 using EasyChat.Presentation.Foundation.Navigation;
+using EasyChat.Presentation.Foundation.UiHost;
 using ReactiveUI;
-using SukiUI.Dialogs;
 
 namespace EasyChat.Presentation.Features.Capture;
 
 public sealed class FixedAreaEditDialogViewModel : ConventionViewModelBase
 {
-    private readonly ISukiDialogManager _dialogs;
-    private readonly ISukiDialog _dialog;
+    private readonly IUiDialogHost _dialogs;
+    private readonly IUiDialogSession _dialog;
     private readonly SettingsSession _settings;
     private readonly IScreenRegionPicker _regionPicker;
 
     public FixedAreaEditDialogViewModel(
-        ISukiDialogManager dialogs,
-        ISukiDialog dialog,
+        IUiDialogHost dialogs,
+        IUiDialogSession dialog,
         SettingsSession settings,
         IScreenRegionPicker regionPicker)
     {
@@ -46,15 +46,16 @@ public sealed class FixedAreaEditDialogViewModel : ConventionViewModelBase
     public void EditArea(FixedAreaState area)
     {
         _dialog.Dismiss();
-        _dialogs.CreateDialog()
-            .WithTitle(Resources.Edit)
-            .WithViewModel(dialog => new FixedAreaFormDialogViewModel(
-                dialog,
+        _dialogs.ShowContent(new UiContentDialogOptions
+        {
+            Title = Resources.Edit,
+            CreateContent = session => new FixedAreaFormDialogViewModel(
+                session,
                 _dialogs,
                 _regionPicker,
                 area,
-                Reopen))
-            .TryShow();
+                Reopen)
+        });
     }
 
     private async Task AddAreaAsync()
@@ -74,17 +75,18 @@ public sealed class FixedAreaEditDialogViewModel : ConventionViewModelBase
             _settings.FlushSection));
     }
 
-    private void Reopen() => _dialogs.CreateDialog()
-        .WithTitle(Resources.FixedAreas)
-        .WithViewModel(dialog => new FixedAreaEditDialogViewModel(
-            _dialogs, dialog, _settings, _regionPicker))
-        .TryShow();
+    private void Reopen() => _dialogs.ShowContent(new UiContentDialogOptions
+    {
+        Title = Resources.FixedAreas,
+        CreateContent = session => new FixedAreaEditDialogViewModel(
+            _dialogs, session, _settings, _regionPicker)
+    });
 }
 
 public sealed class FixedAreaFormDialogViewModel : ConventionViewModelBase
 {
-    private readonly ISukiDialog _dialog;
-    private readonly ISukiDialogManager _dialogs;
+    private readonly IUiDialogSession _dialog;
+    private readonly IUiDialogHost _dialogs;
     private readonly IScreenRegionPicker _regionPicker;
     private readonly FixedAreaState _area;
     private readonly Action _onFinished;
@@ -95,8 +97,8 @@ public sealed class FixedAreaFormDialogViewModel : ConventionViewModelBase
     private int _height;
 
     public FixedAreaFormDialogViewModel(
-        ISukiDialog dialog,
-        ISukiDialogManager dialogs,
+        IUiDialogSession dialog,
+        IUiDialogHost dialogs,
         IScreenRegionPicker regionPicker,
         FixedAreaState area,
         Action onFinished)
@@ -148,18 +150,19 @@ public sealed class FixedAreaFormDialogViewModel : ConventionViewModelBase
         Reopen();
     }
 
-    private void Reopen() => _dialogs.CreateDialog()
-        .WithTitle(Resources.Edit)
-        .WithViewModel(dialog => new FixedAreaFormDialogViewModel(
-            dialog, _dialogs, _regionPicker, _area, _onFinished)
+    private void Reopen() => _dialogs.ShowContent(new UiContentDialogOptions
+    {
+        Title = Resources.Edit,
+        CreateContent = session => new FixedAreaFormDialogViewModel(
+            session, _dialogs, _regionPicker, _area, _onFinished)
         {
             Name = Name,
             X = X,
             Y = Y,
             Width = Width,
             Height = Height
-        })
-        .TryShow();
+        }
+    });
 
     private void Confirm()
     {

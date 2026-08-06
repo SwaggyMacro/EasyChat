@@ -1,10 +1,16 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Input.Platform;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using EasyChat.Contracts.Platform;
 using EasyChat.Presentation.Features.Settings.State;
+using EasyChat.Presentation.Foundation.Platform;
+using EasyChat.Presentation.Shared.Feedback;
+using Key = Avalonia.Input.Key;
 
 namespace EasyChat.Presentation.Features.Capture.Views;
 
@@ -53,14 +59,58 @@ public partial class ResultView : Window
     {
         LoadingIndicator.IsVisible = true;
         TextBlockResult.IsVisible = false;
+        if (ResultToolbar is not null)
+            ResultToolbar.IsVisible = false;
     });
 
     public void ShowResult() => Dispatcher.UIThread.Post(() =>
     {
         LoadingIndicator.IsVisible = false;
         TextBlockResult.IsVisible = true;
+        if (ResultToolbar is not null)
+            ResultToolbar.IsVisible = true;
         ReCenterPosition();
     });
+
+    private async void OnCopyClick(object? sender, RoutedEventArgs e) =>
+        await CopyResultAsync(sender as Control);
+
+    private void OnCloseClick(object? sender, RoutedEventArgs e) => Close();
+
+    private async void OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            Close();
+            return;
+        }
+
+        // Ctrl/Cmd+C copies result when the float is focused.
+        if (e.Key == Key.C
+            && e.KeyModifiers.HasFlag(KeyModifiers.Control)
+            && ResultToolbar is { IsVisible: true })
+        {
+            e.Handled = true;
+            await CopyResultAsync(CopyButton);
+        }
+    }
+
+    private async Task CopyResultAsync(Control? anchor)
+    {
+        var text = TextBlockResult.Text;
+        if (string.IsNullOrWhiteSpace(text))
+            return;
+
+        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+        if (clipboard is null)
+            return;
+
+        await clipboard.SetTextAsync(text);
+        CopyFeedback.Show(anchor, EasyChat.Presentation.Lang.Resources.Copied);
+        if (CopyHint is not null)
+            CopyHint.IsVisible = true;
+    }
 
     public void CloseAfterDelay(int milliseconds) => Dispatcher.UIThread.Post(async void () =>
     {
@@ -70,26 +120,12 @@ public partial class ResultView : Window
 
     private void ApplyConfiguration(LiveResultSettings settings)
     {
-        TransparencyLevelHint = settings.TransparencyLevel switch
-        {
-            "AcrylicBlur" => [WindowTransparencyLevel.AcrylicBlur],
-            "Blur" => [WindowTransparencyLevel.Blur],
-            _ => [WindowTransparencyLevel.Transparent]
-        };
+        TransparencyLevelHint = WindowTransparencyLevels.ForPreference(settings.TransparencyLevel);
         TrySetBrush(settings.BackgroundColor, brush => MainCard.Background = brush);
         TrySetBrush(settings.WindowBackgroundColor, brush => Background = brush);
         TrySetBrush(settings.FontColor, brush => TextBlockResult.Foreground = brush);
         TextBlockResult.FontSize = settings.FontSize;
-        if (!string.IsNullOrWhiteSpace(settings.FontFamily))
-        {
-            try
-            {
-                TextBlockResult.FontFamily = new FontFamily(settings.FontFamily);
-            }
-            catch
-            {
-            }
-        }
+        TextBlockResult.FontFamily = EcFontFamilies.Resolve(settings.FontFamily);
     }
 
     private static void TrySetBrush(string? value, Action<IBrush> apply)

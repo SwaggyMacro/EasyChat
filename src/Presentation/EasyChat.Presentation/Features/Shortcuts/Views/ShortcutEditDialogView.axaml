@@ -10,13 +10,38 @@
              xmlns:dialogs="clr-namespace:EasyChat.Presentation.Features.Shortcuts"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
              x:DataType="dialogs:ShortcutEditDialogViewModel"
-             Width="400">
-    <StackPanel Spacing="20">
+             MinWidth="400"
+             MaxWidth="440"
+             Width="420">
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Border Classes="EcDialogHeader">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                <Border Width="40" Height="40" CornerRadius="11"
+                        Background="{DynamicResource EcAccentSoft}">
+                    <avalonia:MaterialIcon Kind="{Binding Icon}"
+                                           Width="20" Height="20"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource EcAccent}" />
+                </Border>
+                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                    <TextBlock Classes="EcDialogTitle" Text="{Binding DialogTitle}" />
+                    <TextBlock Text="{Binding SelectedAction.DisplayName}"
+                               FontSize="12"
+                               Foreground="{DynamicResource EcTextMuted}"
+                               TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" Classes="EcDialogScroll">
+        <StackPanel Classes="EcDialogBody">
         <!-- Action Type Selection -->
-        <StackPanel Spacing="10">
-            <TextBlock Text="{x:Static lang:Resources.ActionType}" FontWeight="SemiBold" />
+        <StackPanel>
+            <TextBlock Classes="EcFieldLabel" Text="{x:Static lang:Resources.ActionType}" />
             <ComboBox ItemsSource="{Binding AvailableActions}"
                       SelectedItem="{Binding SelectedAction}"
+                      Classes="Outline"
                       HorizontalAlignment="Stretch">
                 <ComboBox.ItemTemplate>
                     <DataTemplate x:DataType="dialogs:ShortcutActionOption">
@@ -26,23 +51,23 @@
             </ComboBox>
         </StackPanel>
 
-        <StackPanel Spacing="8">
-            <TextBlock Text="{x:Static lang:Resources.ShortcutRemark}" FontWeight="SemiBold" />
+        <StackPanel>
+            <TextBlock Classes="EcFieldLabel" Text="{x:Static lang:Resources.ShortcutRemark}" />
             <TextBox Text="{Binding Remark, Mode=TwoWay}"
                      MaxLength="100"
                      PlaceholderText="{x:Static lang:Resources.ShortcutRemarkPlaceholder}" />
         </StackPanel>
 
         <!-- Parameter Input (Standard) -->
-        <StackPanel Spacing="10" IsVisible="{Binding SelectedAction.RequiresParameter}">
-            
+        <StackPanel Spacing="12" IsVisible="{Binding SelectedAction.RequiresParameter}">
+
             <!-- Standard Parameter UI -->
             <StackPanel Spacing="10" IsVisible="{Binding !IsComplexSwitchAction}">
-                <StackPanel Orientation="Horizontal" Spacing="5">
-                    <TextBlock Text="{x:Static lang:Resources.Parameter}" FontWeight="SemiBold" />
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Classes="EcFieldLabel" Text="{x:Static lang:Resources.Parameter}" Margin="0" />
                     <TextBlock Text="{Binding SelectedAction.ParameterHint, StringFormat='({0})'}"
                                FontSize="12"
-                               Opacity="0.7"
+                               Foreground="{DynamicResource EcTextSecondary}"
                                VerticalAlignment="Center" />
                 </StackPanel>
 
@@ -75,11 +100,11 @@
                                                    Stretch="UniformToFill" />
                                         </Border>
                                         <avalonia:MaterialIcon Kind="Robot" Width="20" Height="20"
-                                                               Foreground="{DynamicResource SukiText}"
+                                                               Foreground="{DynamicResource EcTextPrimary}"
                                                                IsVisible="{Binding Name, Converter={x:Static converts:EngineConverters.HasNoIcon}}" />
                                     </Panel>
                                     <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
-                                               Foreground="{DynamicResource SukiText}" />
+                                               Foreground="{DynamicResource EcTextPrimary}" />
                                 </StackPanel>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
@@ -101,7 +126,7 @@
                                                    Stretch="UniformToFill" />
                                         </Border>
                                         <TextBlock Text="{Binding Converter={x:Static converts:LanguageSettingsConverters.ToDisplayName}}" VerticalAlignment="Center"
-                                                   Foreground="{DynamicResource SukiText}" />
+                                                   Foreground="{DynamicResource EcTextPrimary}" />
                                     </StackPanel>
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
@@ -122,7 +147,7 @@
                                                    Stretch="UniformToFill" />
                                         </Border>
                                         <TextBlock Text="{Binding Converter={x:Static converts:LanguageSettingsConverters.ToDisplayName}}" VerticalAlignment="Center"
-                                                   Foreground="{DynamicResource SukiText}" />
+                                                   Foreground="{DynamicResource EcTextPrimary}" />
                                     </StackPanel>
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
@@ -195,8 +220,8 @@
                 <Button Grid.Column="1"
                         Command="{Binding ToggleBeforeInputKeyRecordingCommand}"
                         HorizontalAlignment="Stretch"
-                        Background="{DynamicResource SukiCardBackground}"
-                        BorderBrush="{DynamicResource SukiLowContrastBorderBrush}"
+                        Background="{DynamicResource EcBgMuted}"
+                        BorderBrush="{DynamicResource EcBorderStrong}"
                         BorderThickness="1"
                         ToolTip.Tip="{x:Static lang:Resources.RecordShortcut}">
                     <Grid ColumnDefinitions="*,Auto">
@@ -206,13 +231,13 @@
                         <TextBlock Grid.Column="0"
                                    Text="{x:Static lang:Resources.RecordingShortcut}"
                                    IsVisible="{Binding IsBeforeInputRecordingPromptVisible}"
-                                   Foreground="{DynamicResource SukiPrimaryColor}"
+                                   Foreground="{DynamicResource EcAccent}"
                                    HorizontalAlignment="Center" />
                         <avalonia:MaterialIcon Grid.Column="1" Kind="Keyboard" Opacity="0.5" />
                     </Grid>
                 </Button>
                 <Button Grid.Column="2"
-                        Classes="Flat Danger"
+                        Classes="EcDanger"
                         Width="26"
                         Height="26"
                         Padding="0"
@@ -232,8 +257,8 @@
                 <Button Grid.Column="1"
                         Command="{Binding ToggleAfterInputKeyRecordingCommand}"
                         HorizontalAlignment="Stretch"
-                        Background="{DynamicResource SukiCardBackground}"
-                        BorderBrush="{DynamicResource SukiLowContrastBorderBrush}"
+                        Background="{DynamicResource EcBgMuted}"
+                        BorderBrush="{DynamicResource EcBorderStrong}"
                         BorderThickness="1"
                         ToolTip.Tip="{x:Static lang:Resources.RecordShortcut}">
                     <Grid ColumnDefinitions="*,Auto">
@@ -243,13 +268,13 @@
                         <TextBlock Grid.Column="0"
                                    Text="{x:Static lang:Resources.RecordingShortcut}"
                                    IsVisible="{Binding IsAfterInputRecordingPromptVisible}"
-                                   Foreground="{DynamicResource SukiPrimaryColor}"
+                                   Foreground="{DynamicResource EcAccent}"
                                    HorizontalAlignment="Center" />
                         <avalonia:MaterialIcon Grid.Column="1" Kind="Keyboard" Opacity="0.5" />
                     </Grid>
                 </Button>
                 <Button Grid.Column="2"
-                        Classes="Flat Danger"
+                        Classes="EcDanger"
                         Width="26"
                         Height="26"
                         Padding="0"
@@ -263,45 +288,49 @@
             </Grid>
         </StackPanel>
 
-        <!-- Hotkey Recording -->
+        <!-- Hotkey Recording: focusable Border (not Button) so keys are not eaten by button chrome. -->
         <StackPanel Spacing="10">
             <TextBlock Text="{x:Static lang:Resources.KeyCombination}" FontWeight="SemiBold" />
-            <Button Command="{Binding ToggleRecordingCommand}"
-                    HorizontalAlignment="Stretch" Background="{DynamicResource SukiCardBackground}" BorderThickness="0">
-                <Button.Styles>
-                    <Style Selector="Border.RecordBorder">
-                        <Setter Property="BorderBrush" Value="{DynamicResource SukiLowContrastBorderBrush}" />
-                        <Setter Property="BorderThickness" Value="1" />
-                    </Style>
-                    <Style Selector="Border.RecordBorder.Recording">
-                        <Setter Property="BorderBrush" Value="{DynamicResource SukiPrimaryColor}" />
+            <Border x:Name="HotkeyCapturePad"
+                    Focusable="True"
+                    IsTabStop="True"
+                    Cursor="Hand"
+                    Background="{DynamicResource EcBgMuted}"
+                    CornerRadius="{DynamicResource EcRadiusMd}"
+                    Padding="16,14"
+                    MinHeight="56"
+                    HorizontalAlignment="Stretch"
+                    PointerPressed="OnCapturePadPointerPressed"
+                    KeyDown="OnCapturePadKeyDown"
+                    BorderBrush="{DynamicResource EcBorderStrong}"
+                    BorderThickness="1"
+                    Classes.Recording="{Binding IsRecording}">
+                <Border.Styles>
+                    <Style Selector="Border#HotkeyCapturePad.Recording">
+                        <Setter Property="BorderBrush" Value="{DynamicResource EcAccent}" />
                         <Setter Property="BorderThickness" Value="2" />
+                        <Setter Property="Background" Value="{DynamicResource EcAccentSoft}" />
                     </Style>
-                </Button.Styles>
-                <Border Classes="RecordBorder"
-                        Classes.Recording="{Binding IsRecording}"
-                        Background="{DynamicResource SukiCardBackground}"
-                        CornerRadius="8"
-                        Padding="15">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <!-- Show the in-progress chord immediately as each key is pressed. -->
-                            <controls:KeySequenceDisplay KeyCombination="{Binding DisplayedKeyCombination}"
-                                                         IsVisible="{Binding DisplayedKeyCombination, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-                                                         HorizontalAlignment="Center" />
-                            <TextBlock Text="{x:Static lang:Resources.RecordingShortcut}"
-                                       IsVisible="{Binding DisplayedKeyCombination, Converter={x:Static StringConverters.IsNullOrEmpty}}"
-                                       Foreground="{DynamicResource SukiPrimaryColor}"
-                                       FontSize="16"
-                                       HorizontalAlignment="Center" />
-                        </StackPanel>
-
-                        <avalonia:MaterialIcon Grid.Column="1"
-                                               Kind="Keyboard"
-                                               Opacity="0.5" />
-                    </Grid>
-                </Border>
-            </Button>
+                </Border.Styles>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <StackPanel VerticalAlignment="Center">
+                        <controls:KeySequenceDisplay KeyCombination="{Binding DisplayedKeyCombination}"
+                                                     IsVisible="{Binding DisplayedKeyCombination, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                                     HorizontalAlignment="Center" />
+                        <TextBlock Text="{x:Static lang:Resources.RecordingShortcut}"
+                                   IsVisible="{Binding DisplayedKeyCombination, Converter={x:Static StringConverters.IsNullOrEmpty}}"
+                                   Foreground="{DynamicResource EcAccent}"
+                                   FontSize="15"
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Center" />
+                    </StackPanel>
+                    <avalonia:MaterialIcon Grid.Column="1"
+                                           Kind="Keyboard"
+                                           Width="20" Height="20"
+                                           Opacity="0.45"
+                                           VerticalAlignment="Center" />
+                </Grid>
+            </Border>
             <TextBlock Text="{x:Static lang:Resources.ClickToRecord}"
                        IsVisible="{Binding IsNotRecording}"
                        FontSize="12"
@@ -309,13 +338,20 @@
                        HorizontalAlignment="Center" />
         </StackPanel>
 
-        <!-- Dialog Buttons -->
-        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0 10 0 0">
-            <Button Content="{Binding ButtonText}"
-                    Command="{Binding SaveCommand}"
-                    Classes="Flat" />
-            <Button Content="{x:Static lang:Resources.Cancel}"
-                    Command="{Binding CancelCommand}" />
         </StackPanel>
-    </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Classes="EcDialogFooter">
+            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+                <Button Content="{x:Static lang:Resources.Cancel}"
+                        Classes="EcGhost"
+                        MinWidth="88"
+                        Command="{Binding CancelCommand}" />
+                <Button Content="{Binding ButtonText}"
+                        Command="{Binding SaveCommand}"
+                        Classes="EcPrimary"
+                        MinWidth="96" />
+            </StackPanel>
+        </Border>
+    </Grid>
 </UserControl>

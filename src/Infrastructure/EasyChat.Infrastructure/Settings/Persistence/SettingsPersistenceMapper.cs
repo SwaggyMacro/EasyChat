@@ -96,7 +96,8 @@ internal static class SettingsPersistenceMapper
         source.CustomThemePrimaryColor,
         source.CustomThemeAccentColor,
         source.TitleBarVisible,
-        source.FullScreen);
+        source.FullScreen,
+        source.HomeOnboardingDismissed);
 
     private static GeneralSettingsDto ToDto(GeneralSettings source) => new()
     {
@@ -115,7 +116,8 @@ internal static class SettingsPersistenceMapper
         CustomThemePrimaryColor = source.CustomThemePrimaryColor,
         CustomThemeAccentColor = source.CustomThemeAccentColor,
         TitleBarVisible = source.TitleBarVisible,
-        FullScreen = source.FullScreen
+        FullScreen = source.FullScreen,
+        HomeOnboardingDismissed = source.HomeOnboardingDismissed
     };
 
     private static ThemeMode ToThemeMode(string? value)

@@ -15,125 +15,132 @@
         <Canvas Name="MainCanvas">
         <!-- Main Selection Box -->
         <Rectangle x:Name="SelectionRectangle"
-                   Stroke="{DynamicResource SukiPrimaryColor}"
+                   Stroke="{DynamicResource EcAccent}"
                    StrokeThickness="2"
-                   Fill="#1A2196F3"
+                   Fill="{DynamicResource EcAccentSoft}"
                    IsVisible="False" />
         
-        <!-- Resize Handles -->
-        <Border x:Name="HandleTopLeft" Width="14" Height="14" Background="White" BorderBrush="{DynamicResource SukiPrimaryColor}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="TopLeftCorner" />
-        <Border x:Name="HandleTopCenter" Width="14" Height="14" Background="White" BorderBrush="{DynamicResource SukiPrimaryColor}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="SizeNorthSouth" />
-        <Border x:Name="HandleTopRight" Width="14" Height="14" Background="White" BorderBrush="{DynamicResource SukiPrimaryColor}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="TopRightCorner" />
-        <Border x:Name="HandleRightCenter" Width="14" Height="14" Background="White" BorderBrush="{DynamicResource SukiPrimaryColor}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="SizeWestEast" />
-        <Border x:Name="HandleBottomRight" Width="14" Height="14" Background="White" BorderBrush="{DynamicResource SukiPrimaryColor}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="BottomRightCorner" />
-        <Border x:Name="HandleBottomCenter" Width="14" Height="14" Background="White" BorderBrush="{DynamicResource SukiPrimaryColor}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="SizeNorthSouth" />
-        <Border x:Name="HandleBottomLeft" Width="14" Height="14" Background="White" BorderBrush="{DynamicResource SukiPrimaryColor}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="BottomLeftCorner" />
-        <Border x:Name="HandleLeftCenter" Width="14" Height="14" Background="White" BorderBrush="{DynamicResource SukiPrimaryColor}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="SizeWestEast" />
+        <!-- Resize Handles (EcHandleFill stays high-contrast on any screenshot) -->
+        <Border x:Name="HandleTopLeft" Width="14" Height="14" Background="{DynamicResource EcHandleFill}" BorderBrush="{DynamicResource EcAccent}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="TopLeftCorner" />
+        <Border x:Name="HandleTopCenter" Width="14" Height="14" Background="{DynamicResource EcHandleFill}" BorderBrush="{DynamicResource EcAccent}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="SizeNorthSouth" />
+        <Border x:Name="HandleTopRight" Width="14" Height="14" Background="{DynamicResource EcHandleFill}" BorderBrush="{DynamicResource EcAccent}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="TopRightCorner" />
+        <Border x:Name="HandleRightCenter" Width="14" Height="14" Background="{DynamicResource EcHandleFill}" BorderBrush="{DynamicResource EcAccent}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="SizeWestEast" />
+        <Border x:Name="HandleBottomRight" Width="14" Height="14" Background="{DynamicResource EcHandleFill}" BorderBrush="{DynamicResource EcAccent}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="BottomRightCorner" />
+        <Border x:Name="HandleBottomCenter" Width="14" Height="14" Background="{DynamicResource EcHandleFill}" BorderBrush="{DynamicResource EcAccent}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="SizeNorthSouth" />
+        <Border x:Name="HandleBottomLeft" Width="14" Height="14" Background="{DynamicResource EcHandleFill}" BorderBrush="{DynamicResource EcAccent}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="BottomLeftCorner" />
+        <Border x:Name="HandleLeftCenter" Width="14" Height="14" Background="{DynamicResource EcHandleFill}" BorderBrush="{DynamicResource EcAccent}" BorderThickness="1" CornerRadius="7" IsVisible="False" Cursor="SizeWestEast" />
 
         <Border x:Name="HintBorder"
-                Background="#CC000000"
+                Classes="EcFloatShell"
+                Background="{DynamicResource EcFloatBg}"
                 Padding="16,12"
-                CornerRadius="8"
+                CornerRadius="10"
                 IsVisible="False">
             <TextBlock x:Name="HintTextBlock"
-                       Foreground="White"
-                       FontSize="16" />
+                       Foreground="{DynamicResource EcTextPrimary}"
+                       FontSize="15" />
         </Border>
-        
+
         <Border x:Name="ToolbarBorder"
-                CornerRadius="15"
-                Padding="0"
+                CornerRadius="12"
+                Padding="2"
                 IsVisible="False"
-                Background="{DynamicResource SukiCardBackground}"
-                BoxShadow="{DynamicResource SukiLowShadow}"
-                BorderThickness="0">
+                Background="{DynamicResource EcFloatBg}"
+                BorderBrush="{DynamicResource EcFloatBorder}"
+                BorderThickness="1">
             <StackPanel Orientation="Horizontal" Spacing="0">
-                <Button x:Name="ConfirmButton" 
-                        Background="Transparent"
-                        Padding="12,8"
-                        CornerRadius="15,0,0,15"
+                <Button x:Name="ConfirmButton"
+                        Classes="EcToolbarBtn"
+                        Width="44" Height="40"
+                        Padding="10,8"
+                        CornerRadius="10,0,0,10"
                         Click="ConfirmButton_OnClick"
                         ToolTip.Tip="{x:Static lang:Resources.Confirm}">
-                     <icon:MaterialIcon Kind="Check" Width="24" Height="24" Foreground="#4CAF50" />
+                     <icon:MaterialIcon Kind="Check" Width="22" Height="22" Foreground="{DynamicResource EcSuccess}" />
                 </Button>
-                <Button x:Name="CopyButton" 
-                        Background="Transparent"
-                        Padding="12,8"
+                <Button x:Name="CopyButton"
+                        Classes="EcToolbarBtn"
+                        Width="44" Height="40"
+                        Padding="10,8"
                         CornerRadius="0"
                         PointerEntered="CopyButton_OnPointerEntered"
                         PointerExited="CopyButton_OnPointerExited"
                         ToolTip.Tip="{x:Static lang:Resources.Copy}">
-                    <icon:MaterialIcon Kind="ContentCopy" Width="24" Height="24" Foreground="{DynamicResource SukiPrimaryColor}" />
+                    <icon:MaterialIcon Kind="ContentCopy" Width="22" Height="22" Foreground="{DynamicResource EcAccent}" />
                 </Button>
-                <Button x:Name="ResetButton" 
-                        Background="Transparent"
-                        Padding="12,8"
+                <Button x:Name="ResetButton"
+                        Classes="EcToolbarBtn"
+                        Width="44" Height="40"
+                        Padding="10,8"
                         CornerRadius="0"
                         Click="ResetButton_OnClick"
                         ToolTip.Tip="{x:Static lang:Resources.Reset}">
-                    <icon:MaterialIcon Kind="Refresh" Width="24" Height="24" Foreground="{DynamicResource SukiInfoBrush}" />
+                    <icon:MaterialIcon Kind="Refresh" Width="22" Height="22" Foreground="{DynamicResource EcTextSecondary}" />
                 </Button>
-                <Button x:Name="CancelButton" 
-                        Background="Transparent"
-                        Padding="12,8"
-                        CornerRadius="0,15,15,0"
+                <Button x:Name="CancelButton"
+                        Classes="EcToolbarBtn"
+                        Width="44" Height="40"
+                        Padding="10,8"
+                        CornerRadius="0,10,10,0"
                         Click="CancelButton_OnClick"
                         ToolTip.Tip="{x:Static lang:Resources.Cancel}">
-                    <icon:MaterialIcon Kind="Close" Width="24" Height="24" Foreground="#F44336" />
+                    <icon:MaterialIcon Kind="Close" Width="22" Height="22" Foreground="{DynamicResource EcDanger}" />
                 </Button>
             </StackPanel>
         </Border>
-        
+
         <Border x:Name="CopyMenuBorder"
                 IsVisible="False"
-                Background="{DynamicResource SukiCardBackground}"
-                BoxShadow="{DynamicResource SukiLowShadow}"
-                CornerRadius="8"
-                Padding="5"
+                Background="{DynamicResource EcFloatBg}"
+                BorderBrush="{DynamicResource EcFloatBorder}"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="6"
                 PointerEntered="CopyMenu_OnPointerEntered"
                 PointerExited="CopyMenu_OnPointerExited">
             <StackPanel Spacing="2">
                 <StackPanel.Styles>
-                    <Style Selector="Button">
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="CornerRadius" Value="6" />
+                    <Style Selector="Button.EcMenuItem">
+                        <Setter Property="MinHeight" Value="36" />
                         <Setter Property="Padding" Value="10,8" />
-                        <Setter Property="HorizontalAlignment" Value="Stretch" />
-                        <Setter Property="HorizontalContentAlignment" Value="Left" />
-                        <Setter Property="Cursor" Value="Hand" />
-                    </Style>
-                    <Style Selector="TextBlock">
-                        <Setter Property="FontSize" Value="13" />
-                         <Setter Property="FontWeight" Value="SemiBold" />
                     </Style>
                     <Style Selector="icon|MaterialIcon">
                         <Setter Property="Width" Value="16" />
                         <Setter Property="Height" Value="16" />
+                        <Setter Property="Foreground" Value="{DynamicResource EcTextSecondary}" />
                     </Style>
                 </StackPanel.Styles>
 
-                <Button Click="CopyOriginal_OnClick">
+                <Button Classes="EcMenuItem" Click="CopyOriginal_OnClick">
                    <StackPanel Orientation="Horizontal" Spacing="10">
                        <icon:MaterialIcon Kind="ContentCopy" />
-                       <TextBlock Text="{x:Static lang:Resources.CopyOriginal}" VerticalAlignment="Center" />
+                       <TextBlock Text="{x:Static lang:Resources.CopyOriginal}"
+                                  VerticalAlignment="Center"
+                                  Foreground="{DynamicResource EcTextPrimary}" />
                    </StackPanel>
                 </Button>
-                <Button Click="CopyTranslated_OnClick">
+                <Button Classes="EcMenuItem" Click="CopyTranslated_OnClick">
                    <StackPanel Orientation="Horizontal" Spacing="10">
                        <icon:MaterialIcon Kind="Translate" />
-                       <TextBlock Text="{x:Static lang:Resources.CopyTranslated}" VerticalAlignment="Center" />
+                       <TextBlock Text="{x:Static lang:Resources.CopyTranslated}"
+                                  VerticalAlignment="Center"
+                                  Foreground="{DynamicResource EcTextPrimary}" />
                    </StackPanel>
                 </Button>
-                <Button Click="CopyBilingual_OnClick">
+                <Button Classes="EcMenuItem" Click="CopyBilingual_OnClick">
                    <StackPanel Orientation="Horizontal" Spacing="10">
                        <icon:MaterialIcon Kind="ViewAgenda" />
-                       <TextBlock Text="{x:Static lang:Resources.CopyBilingual}" VerticalAlignment="Center" />
+                       <TextBlock Text="{x:Static lang:Resources.CopyBilingual}"
+                                  VerticalAlignment="Center"
+                                  Foreground="{DynamicResource EcTextPrimary}" />
                    </StackPanel>
                 </Button>
-                <Button Click="CopyImageTranslated_OnClick">
+                <Button Classes="EcMenuItem" Click="CopyImageTranslated_OnClick">
                     <StackPanel Orientation="Horizontal" Spacing="10">
                         <icon:MaterialIcon Kind="ImageEdit" />
-                        <TextBlock Text="{x:Static lang:Resources.ImageTranslate}" VerticalAlignment="Center" />
+                        <TextBlock Text="{x:Static lang:Resources.ImageTranslate}"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource EcTextPrimary}" />
                     </StackPanel>
                 </Button>
             </StackPanel>

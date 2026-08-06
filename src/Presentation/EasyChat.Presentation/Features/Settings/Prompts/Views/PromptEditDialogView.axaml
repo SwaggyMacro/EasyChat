@@ -3,52 +3,69 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
              xmlns:lang="clr-namespace:EasyChat.Presentation.Lang;assembly=EasyChat.Presentation"
              xmlns:dialogs="clr-namespace:EasyChat.Presentation.Features.Settings.Prompts;assembly=EasyChat.Presentation"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              x:DataType="dialogs:PromptEditDialogViewModel"
              mc:Ignorable="d"
-             Width="600">
+             MinWidth="480"
+             MaxWidth="600"
+             Width="560">
 
-    <StackPanel Margin="20" Spacing="20">
-        <!-- Title -->
-        <TextBlock Text="{x:Static lang:Resources.EditPrompt}"
-                   FontSize="22"
-                   FontWeight="Bold" />
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Border Classes="EcDialogHeader">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                <Border Width="40" Height="40" CornerRadius="11"
+                        Background="{DynamicResource EcAccentSoft}">
+                    <icons:MaterialIcon Kind="TextBoxOutline"
+                                        Width="20" Height="20"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Foreground="{DynamicResource EcAccent}" />
+                </Border>
+                <TextBlock Grid.Column="1"
+                           Classes="EcDialogTitle"
+                           Text="{x:Static lang:Resources.EditPrompt}"
+                           VerticalAlignment="Center" />
+            </Grid>
+        </Border>
 
-        <!-- Name Input -->
-        <StackPanel Spacing="5">
-            <TextBlock Text="{x:Static lang:Resources.PromptName}"
-                       FontWeight="SemiBold" />
-            <TextBox Text="{Binding Name, Mode=TwoWay}"
-                     PlaceholderText="{x:Static lang:Resources.PromptName}" />
-        </StackPanel>
+        <ScrollViewer Grid.Row="1" Classes="EcDialogScroll">
+            <StackPanel Classes="EcDialogBody">
+                <StackPanel>
+                    <TextBlock Classes="EcFieldLabel" Text="{x:Static lang:Resources.PromptName}" />
+                    <TextBox Text="{Binding Name, Mode=TwoWay}"
+                             PlaceholderText="{x:Static lang:Resources.PromptName}" />
+                </StackPanel>
 
-        <!-- Content Input -->
-        <StackPanel Spacing="5">
-            <TextBlock Text="{x:Static lang:Resources.PromptContent}"
-                       FontWeight="SemiBold" />
-            <TextBox Text="{Binding Content, Mode=TwoWay}"
-                     TextWrapping="Wrap"
-                     VerticalContentAlignment="Top"
-                     AcceptsReturn="True"
-                     MinHeight="200"
-                     MaxHeight="300"
-                     PlaceholderText="{x:Static lang:Resources.PromptContent}" />
-        
-        <TextBlock Text="{x:Static lang:Resources.PromptParametersHint}" 
-                   Classes="Caption" 
-                   Opacity="0.7" 
-                   TextWrapping="Wrap" />
-        </StackPanel>
+                <StackPanel>
+                    <TextBlock Classes="EcFieldLabel" Text="{x:Static lang:Resources.PromptContent}" />
+                    <TextBox Text="{Binding Content, Mode=TwoWay}"
+                             TextWrapping="Wrap"
+                             VerticalContentAlignment="Top"
+                             AcceptsReturn="True"
+                             MinHeight="200"
+                             MaxHeight="300"
+                             PlaceholderText="{x:Static lang:Resources.PromptContent}" />
+                    <TextBlock Text="{x:Static lang:Resources.PromptParametersHint}"
+                               Classes="EcHelper"
+                               Margin="0,6,0,0"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
 
-        <!-- Buttons -->
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
-            <Button Content="{x:Static lang:Resources.Save}"
-                    Classes="Flat"
-                    Command="{Binding SaveCommand}" />
-            <Button Content="{x:Static lang:Resources.Cancel}"
-                    Command="{Binding CancelCommand}" />
-        </StackPanel>
-    </StackPanel>
+        <Border Grid.Row="2" Classes="EcDialogFooter">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                <Button Content="{x:Static lang:Resources.Cancel}"
+                        Classes="EcGhost"
+                        MinWidth="88"
+                        Command="{Binding CancelCommand}" />
+                <Button Content="{x:Static lang:Resources.Save}"
+                        Classes="EcPrimary"
+                        MinWidth="96"
+                        Command="{Binding SaveCommand}" />
+            </StackPanel>
+        </Border>
+    </Grid>
 </UserControl>

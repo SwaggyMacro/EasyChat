@@ -5,7 +5,7 @@ using Avalonia.VisualTree;
 using EasyChat.Contracts.Settings;
 using EasyChat.Presentation.Features.Settings.State;
 using EasyChat.Presentation.Features.Input;
-using SukiUI.Controls;
+using EasyChat.Presentation.Foundation.Platform;
 using Key = Avalonia.Input.Key;
 
 namespace EasyChat.Presentation.Features.Input.Views;
@@ -46,37 +46,48 @@ public partial class TypingView : Window
     {
         if (_settings is null)
             return;
-        TransparencyLevelHint = _settings.Input.TransparencyLevel switch
-        {
-            "AcrylicBlur" => [WindowTransparencyLevel.AcrylicBlur],
-            "Blur" => [WindowTransparencyLevel.Blur],
-            _ => [WindowTransparencyLevel.Transparent]
-        };
+        TransparencyLevelHint = WindowTransparencyLevels.ForPreference(_settings.Input.TransparencyLevel);
         var background = ParseBrush(_settings.Input.BackgroundColor);
-        if (background is not null)
-            this.FindControl<GlassCard>("MainCard")!.Background = background;
+        if (background is not null && this.FindControl<Border>("MainCard") is { } card)
+            card.Background = background;
         var foreground = ParseBrush(_settings.Input.FontColor);
-        if (foreground is not null)
-            this.FindControl<TextBox>("InputBox")!.Foreground = foreground;
+        if (foreground is not null && this.FindControl<TextBox>("InputBox") is { } input)
+            input.Foreground = foreground;
     }
 
     private async void InputBox_OnKeyDown(object? sender, KeyEventArgs e)
     {
-        if (sender is not TextBox input)
-            return;
         if (e.Key == Key.Escape)
         {
+            e.Handled = true;
             Close();
             return;
         }
+
         if (e.Key != Key.Enter)
             return;
+
         e.Handled = true;
+        await SubmitAsync();
+    }
+
+    private async void OnSubmitClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e) =>
+        await SubmitAsync();
+
+    private void OnCloseClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e) => Close();
+
+    private async Task SubmitAsync()
+    {
+        var input = this.FindControl<TextBox>("InputBox");
+        if (input is null)
+            return;
+
         if (string.IsNullOrWhiteSpace(input.Text))
         {
             Close();
             return;
         }
+
         input.IsEnabled = false;
         Hide();
         if (DataContext is TypingViewModel viewModel)

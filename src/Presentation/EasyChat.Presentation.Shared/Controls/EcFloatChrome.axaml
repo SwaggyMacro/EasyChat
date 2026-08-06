@@ -1,0 +1,13 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="EasyChat.Presentation.Shared.Controls.EcFloatChrome"
+             x:Name="Root">
+    <Border Background="{DynamicResource EcFloatBg}"
+            BorderBrush="{DynamicResource EcFloatBorder}"
+            BorderThickness="1"
+            CornerRadius="12"
+            ClipToBounds="True"
+            Padding="{Binding Padding, ElementName=Root}">
+        <ContentPresenter Content="{Binding Body, ElementName=Root}" />
+    </Border>
+</UserControl>
