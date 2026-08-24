@@ -24,6 +24,40 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Verify Visual Studio C++ toolchain
+        id: native-toolchain
+        shell: pwsh
+        run: |
+          $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+          if (-not (Test-Path -LiteralPath $vswhere)) {
+            throw 'vswhere.exe was not found on the Windows runner.'
+          }
+          $installation = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -requiresAny Microsoft.VisualStudio.Component.Windows10SDK.19041,Microsoft.VisualStudio.Component.Windows11SDK.26100 -property installationPath
+          if ([string]::IsNullOrWhiteSpace($installation)) {
+            throw 'The Visual Studio C++ x86/x64 toolchain is not installed.'
+          }
+          $msbuild = Join-Path $installation 'MSBuild\Current\Bin\MSBuild.exe'
+          if (-not (Test-Path -LiteralPath $msbuild)) {
+            throw "MSBuild was not found under the selected Visual Studio installation: $msbuild"
+          }
+          "path=$msbuild" >> $env:GITHUB_OUTPUT
+
+      - name: Build native TSF TIP
+        shell: pwsh
+        run: |
+          & '${{ steps.native-toolchain.outputs.path }}' `
+            '${{ github.workspace }}\src\Infrastructure\EasyChat.Infrastructure.Windows\Native\Tsf\EasyChat.Tsf.Native.vcxproj' `
+            /m /p:Configuration=Release /p:Platform=x64
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Verify native TSF DLL
+        shell: pwsh
+        run: |
+          $dll = Join-Path '${{ github.workspace }}' 'src\Infrastructure\EasyChat.Infrastructure.Windows\Native\Tsf\bin\Release\EasyChat.Tsf.Native.dll'
+          if (-not (Test-Path -LiteralPath $dll -PathType Leaf)) {
+            throw "Native TSF build did not produce the expected DLL: $dll"
+          }
+
       - name: Install Velopack CLI
         run: dotnet tool install -g vpk --version 1.2.0
 

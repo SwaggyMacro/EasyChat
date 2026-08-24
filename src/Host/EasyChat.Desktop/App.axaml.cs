@@ -82,6 +82,8 @@ public sealed partial class App(
             ui.Settings.Changed += OnSettingsChanged;
             UpdateTrayIcon(ui.Settings.General.ClosingBehavior);
             ui.Interactions.Start();
+            ui.TsfCandidates.Start();
+            _ = WarmUpScreenshotCaptureAsync(ui.ScreenshotCapture);
 #if !DEBUG
             _ = CheckForUpdatesAsync();
 #endif
@@ -371,6 +373,7 @@ public sealed partial class App(
         {
             ui.Settings.Changed -= OnSettingsChanged;
             ui.Interactions.Stop();
+            ui.TsfCandidates.Stop();
             _ui = null;
         }
     }

@@ -205,6 +205,45 @@ public sealed class SettingsPersistenceContractTests
     }
 
     [TestMethod]
+    public async Task InputTranslationMode_RoundTripsAndOldFilesDefaultToNormalWindow()
+    {
+        var directory = CreateTemporaryDirectory();
+        try
+        {
+            var gateway = new JsonSettingsPersistenceGateway(directory);
+            var initial = await gateway.ReadAllAsync();
+            Assert.IsTrue(initial.IsSuccess, initial.Error.Message);
+            Assert.AreEqual(InputTranslationMode.NormalWindow, initial.Value.Input.TranslationMode);
+
+            var changed = initial.Value with
+            {
+                Input = initial.Value.Input with { TranslationMode = InputTranslationMode.Tsf }
+            };
+            var write = await gateway.WriteAsync(SettingsSection.Input, changed);
+            var reread = await gateway.ReadAllAsync();
+
+            Assert.IsTrue(write.IsSuccess, write.Error.Message);
+            Assert.IsTrue(reread.IsSuccess, reread.Error.Message);
+            Assert.AreEqual(InputTranslationMode.Tsf, reread.Value.Input.TranslationMode);
+            StringAssert.Contains(
+                await File.ReadAllTextAsync(Path.Combine(directory, "Input.json")),
+                "\"TranslationMode\": 1");
+
+            await File.WriteAllTextAsync(
+                Path.Combine(directory, "Input.json"),
+                "{ \"DeliveryMode\": \"Paste\" }");
+            var previous = await gateway.ReadAllAsync();
+
+            Assert.IsTrue(previous.IsSuccess, previous.Error.Message);
+            Assert.AreEqual(InputTranslationMode.NormalWindow, previous.Value.Input.TranslationMode);
+        }
+        finally
+        {
+            DeleteTemporaryDirectory(directory);
+        }
+    }
+
+    [TestMethod]
     public async Task CustomColorThemes_RoundTripAndMigrateTheLegacyActiveTheme()
     {
         var directory = CreateTemporaryDirectory();

@@ -13,7 +13,8 @@ public enum PlatformCapability
     WindowActivation,
     AudioCaptureSources,
     SpeechRecognition,
-    AudioPlayback
+    AudioPlayback,
+    TextServicesFramework
 }
 
 public enum CapabilityState

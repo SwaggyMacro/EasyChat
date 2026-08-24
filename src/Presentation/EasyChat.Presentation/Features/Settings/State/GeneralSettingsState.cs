@@ -123,6 +123,7 @@ public sealed class LiveInputSettings : LiveSettingsSection
     private string _typingSourceLanguage;
     private string _typingTargetLanguage;
     private bool _followGlobalLanguage;
+    private InputTranslationMode _translationMode;
 
     public LiveInputSettings(InputSettings value, Func<SettingsSection, EasyChat.Shared.Results.Result> commit)
         : base(SettingsSection.Input, commit)
@@ -136,6 +137,7 @@ public sealed class LiveInputSettings : LiveSettingsSection
         _typingSourceLanguage = value.TypingSourceLanguage;
         _typingTargetLanguage = value.TypingTargetLanguage;
         _followGlobalLanguage = value.FollowGlobalLanguage;
+        _translationMode = value.TranslationMode;
     }
 
     public string TransparencyLevel { get => _transparencyLevel; set => Set(ref _transparencyLevel, value); }
@@ -147,10 +149,12 @@ public sealed class LiveInputSettings : LiveSettingsSection
     public string TypingSourceLanguage { get => _typingSourceLanguage; set => Set(ref _typingSourceLanguage, value); }
     public string TypingTargetLanguage { get => _typingTargetLanguage; set => Set(ref _typingTargetLanguage, value); }
     public bool FollowGlobalLanguage { get => _followGlobalLanguage; set => Set(ref _followGlobalLanguage, value); }
+    public InputTranslationMode TranslationMode { get => _translationMode; set => Set(ref _translationMode, value); }
 
     public InputSettings ToContract() => new(
         TransparencyLevel, BackgroundColor, FontColor, KeySendDelay, DeliveryMode,
-        ReverseTranslateLanguage, TypingSourceLanguage, TypingTargetLanguage, FollowGlobalLanguage);
+        ReverseTranslateLanguage, TypingSourceLanguage, TypingTargetLanguage, FollowGlobalLanguage,
+        TranslationMode);
 }
 
 public sealed class LiveResultSettings : LiveSettingsSection

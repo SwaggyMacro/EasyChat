@@ -7,6 +7,7 @@ using EasyChat.Contracts.ApplicationData;
 using EasyChat.Contracts.ImageTranslation;
 using EasyChat.Contracts.Ocr;
 using EasyChat.Contracts.Platform;
+using EasyChat.Contracts.Input;
 using EasyChat.Contracts.Shell;
 using EasyChat.Contracts.Settings;
 using EasyChat.Contracts.Speech;
@@ -45,6 +46,7 @@ public sealed class SettingViewModel : NavigationPageViewModel
     private readonly ToastManager _toasts;
     private readonly IApplicationRestartService? _restartService;
     private readonly IApplicationAutoStartService _autoStartService;
+    private readonly ITsfInputTranslationUseCases? _tsf;
     private readonly Dictionary<OcrModelDownloadItemViewModel, CancellationTokenSource> _downloads = [];
     private readonly Dictionary<ImageTranslationModelDownloadItemViewModel, CancellationTokenSource> _imageTranslationDownloads = [];
     private readonly Dictionary<SpeechRecognitionModelDownloadItemViewModel, CancellationTokenSource> _asrDownloads = [];
@@ -81,7 +83,8 @@ public sealed class SettingViewModel : NavigationPageViewModel
         ISettingsDialogCoordinator dialogs,
         ToastManager toasts,
         IApplicationAutoStartService autoStartService,
-        IApplicationRestartService? restartService = null)
+        IApplicationRestartService? restartService = null,
+        ITsfInputTranslationUseCases? tsf = null)
         : base(Resources.Settings, MaterialIconKind.Settings, 1)
     {
         _settings = settings;
@@ -98,6 +101,7 @@ public sealed class SettingViewModel : NavigationPageViewModel
         _dialogs = dialogs;
         _toasts = toasts;
         _restartService = restartService;
+        _tsf = tsf;
         _autoStartService = autoStartService ?? throw new ArgumentNullException(nameof(autoStartService));
         _isAutoStartEnabled = GetAutoStartEnabled();
 
@@ -145,6 +149,8 @@ public sealed class SettingViewModel : NavigationPageViewModel
         CancelAsrModelCommand = ReactiveCommand.Create<SpeechRecognitionModelDownloadItemViewModel>(CancelAsrModel);
         DeleteAsrModelCommand = ReactiveCommand.Create<SpeechRecognitionModel>(ConfirmDeleteAsrModel);
         ManageSelectionAppListCommand = ReactiveCommand.Create(_dialogs.ManageSelectionApps);
+        RetryTsfRegistrationCommand = ReactiveCommand.CreateFromTask(RetryTsfRegistrationAsync);
+        OpenWindowsInputSettingsCommand = ReactiveCommand.Create(OpenWindowsInputSettings);
 
         TestAiModelConnectionCommand = ReactiveCommand.CreateFromTask<CustomAiModelState>(TestAiModelConnectionAsync);
         TestBaiduConnectionCommand = ReactiveCommand.CreateFromTask(() => TestMachineConnectionAsync("Baidu"));
@@ -311,6 +317,10 @@ public sealed class SettingViewModel : NavigationPageViewModel
     public IReadOnlyList<string> TransparencyLevels { get; } =
         EasyChat.Presentation.Foundation.Platform.WindowTransparencyLevels.Preferences;
     public List<InputDeliveryMode> InputDeliveryModes { get; } = Enum.GetValues<InputDeliveryMode>().ToList();
+    public List<InputTranslationMode> InputTranslationModes { get; } = Enum.GetValues<InputTranslationMode>().ToList();
+    public string TsfStatusText => FormatTsfStatus(_tsf?.Status);
+    public string RetryTsfRegistrationText => IsChineseUi() ? "重试 TSF 注册" : "Retry TSF registration";
+    public string OpenWindowsInputSettingsText => IsChineseUi() ? "打开 Windows 输入法设置" : "Open Windows input settings";
     public List<ResultWindowMode> ResultWindowModes { get; } = Enum.GetValues<ResultWindowMode>().ToList();
     public List<ResultReadAloudMode> ResultReadAloudModes { get; } = Enum.GetValues<ResultReadAloudMode>().ToList();
     public List<string> TtsProviders { get; }
@@ -853,6 +863,8 @@ public sealed class SettingViewModel : NavigationPageViewModel
     public ReactiveCommand<SpeechRecognitionModelDownloadItemViewModel, Unit> CancelAsrModelCommand { get; }
     public ReactiveCommand<SpeechRecognitionModel, Unit> DeleteAsrModelCommand { get; }
     public ReactiveCommand<Unit, Unit> ManageSelectionAppListCommand { get; }
+    public ReactiveCommand<Unit, Unit> RetryTsfRegistrationCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenWindowsInputSettingsCommand { get; }
     public ReactiveCommand<OcrModelDownloadItemViewModel, Unit> DownloadOcrModelCommand { get; }
     public ReactiveCommand<OcrModelDownloadItemViewModel, Unit> CancelOcrModelCommand { get; }
     public ReactiveCommand<OcrModelDownloadItemViewModel, Unit> DeleteOcrModelCommand { get; }
@@ -1428,6 +1440,43 @@ public sealed class SettingViewModel : NavigationPageViewModel
                 toast.ShowInfo();
                 break;
         }
+    }
+
+    private async Task RetryTsfRegistrationAsync()
+    {
+        if (_tsf is null)
+            return;
+        var result = await _tsf.StartAsync().ConfigureAwait(true);
+        this.RaisePropertyChanged(nameof(TsfStatusText));
+        ShowToast(
+            IsChineseUi() ? "TSF 状态" : "TSF status",
+            result.IsSuccess ? TsfStatusText : result.Error.Message,
+            result.IsSuccess ? ToastNotification.Success : ToastNotification.Warning);
+    }
+
+    private void OpenWindowsInputSettings()
+    {
+        var result = _uriLauncher.Open(new Uri("ms-settings:regionlanguage"));
+        if (result.IsFailure)
+            ShowToast(OpenWindowsInputSettingsText, result.Error.Message, ToastNotification.Warning);
+    }
+
+    private static bool IsChineseUi() =>
+        string.Equals(Resources.Culture?.TwoLetterISOLanguageName, "zh", StringComparison.OrdinalIgnoreCase);
+
+    private static string FormatTsfStatus(TextServicesFrameworkStatus? status)
+    {
+        if (status is null)
+            return IsChineseUi() ? "TSF 不可用（非 Windows 主机）" : "TSF unavailable on this host";
+        var label = status.State switch
+        {
+            TextServicesFrameworkState.Available => IsChineseUi() ? "已连接" : "Connected",
+            TextServicesFrameworkState.RegistrationFailed => IsChineseUi() ? "注册失败" : "Registration failed",
+            TextServicesFrameworkState.PipeUnavailable => IsChineseUi() ? "Pipe 不可用" : "Pipe unavailable",
+            TextServicesFrameworkState.NotActive => IsChineseUi() ? "已注册，尚未激活" : "Registered, not active",
+            _ => IsChineseUi() ? "不支持" : "Unsupported"
+        };
+        return string.IsNullOrWhiteSpace(status.Message) ? label : $"{label}: {status.Message}";
     }
 
     private void RestartApplication()

@@ -547,6 +547,30 @@
     <data name="InputDeliveryMode" xml:space="preserve">
         <value>Text Delivery Mode</value>
     </data>
+    <data name="InputTranslationMode" xml:space="preserve">
+        <value>Translation Input Mode</value>
+    </data>
+    <data name="InputTranslationMode_NormalWindow" xml:space="preserve">
+        <value>Normal Window</value>
+    </data>
+    <data name="InputTranslationMode_Tsf" xml:space="preserve">
+        <value>TSF Seamless Input</value>
+    </data>
+    <data name="TsfCandidate_Translating" xml:space="preserve">
+        <value>Translating...</value>
+    </data>
+    <data name="TsfCandidate_Preview" xml:space="preserve">
+        <value>Preview</value>
+    </data>
+    <data name="TsfCandidate_Committed" xml:space="preserve">
+        <value>Committed</value>
+    </data>
+    <data name="TsfCandidate_Failed" xml:space="preserve">
+        <value>Translation failed; original text kept</value>
+    </data>
+    <data name="TsfCandidate_Unsupported" xml:space="preserve">
+        <value>TSF unavailable for this input</value>
+    </data>
     <data name="DeliveryMode_Type" xml:space="preserve">
         <value>Typing (Simulate)</value>
     </data>

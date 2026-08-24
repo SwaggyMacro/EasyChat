@@ -31,6 +31,12 @@ internal enum InputDeliveryModeDto
     Message = 2
 }
 
+internal enum InputTranslationModeDto
+{
+    NormalWindow = 0,
+    Tsf = 1
+}
+
 internal enum OcrRecognitionModeDto
 {
     Fast = 0,
@@ -226,6 +232,9 @@ internal sealed class InputSettingsDto
 
     [JsonProperty]
     public bool FollowGlobalLanguage { get; set; } = true;
+
+    [JsonProperty]
+    public InputTranslationModeDto TranslationMode { get; set; } = InputTranslationModeDto.NormalWindow;
 }
 
 [JsonObject(MemberSerialization.OptIn)]
@@ -462,7 +471,7 @@ internal sealed class TtsSettingsDto
 [JsonObject(MemberSerialization.OptIn)]
 internal sealed class TextAssistSettingsDto
 {
-    // Legacy aggregate flag; current defaults are represented by the option IDs below.
+    // Compatibility aggregate flag; current defaults are represented by the option IDs below.
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     public bool? FollowGlobal { get; set; }
 

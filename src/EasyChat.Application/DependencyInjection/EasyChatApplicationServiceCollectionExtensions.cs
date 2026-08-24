@@ -27,6 +27,7 @@ using EasyChat.Contracts.Speech;
 using EasyChat.Contracts.Translation;
 using EasyChat.Contracts.TextAssist;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace EasyChat.Application.DependencyInjection;
 
@@ -59,6 +60,8 @@ public static class EasyChatApplicationServiceCollectionExtensions
         services.AddSingleton<IImageTranslationEditSessionFactory, ImageTranslationEditSessionFactory>();
         services.AddSingleton<IInputDeliveryUseCases, InputDeliveryUseCases>();
         services.AddSingleton<IInputTranslationUseCases, InputTranslationUseCases>();
+        services.TryAddSingleton<ITextServicesFrameworkBridge, UnsupportedTextServicesFrameworkBridge>();
+        services.AddSingleton<ITsfInputTranslationUseCases, TsfInputTranslationCoordinator>();
         services.AddSingleton<ISelectedTextUseCases, SelectedTextUseCases>();
         services.AddSingleton<ISelectionInteractionUseCases, SelectionInteractionCoordinator>();
         services.AddSingleton<IShortcutUseCases, ShortcutCoordinator>();

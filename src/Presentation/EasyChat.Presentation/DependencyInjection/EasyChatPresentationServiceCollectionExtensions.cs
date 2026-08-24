@@ -64,6 +64,7 @@ public static class EasyChatPresentationServiceCollectionExtensions
         services.AddSingleton<SubtitleWindowCoordinator>();
         services.AddSingleton<SpeechInterpretationHotkeyController>();
         services.AddSingleton<ITypingWindowFactory, TypingWindowFactory>();
+        services.AddSingleton<TsfCandidateWindowCoordinator>();
         services.AddSingleton<ITranslationWindowCoordinator, TranslationWindowCoordinator>();
         services.AddSingleton<ITextAssistWindowCoordinator, TextAssistWindowCoordinator>();
         services.AddSingleton<ISelectionInteractionSink, SelectionInteractionSink>();

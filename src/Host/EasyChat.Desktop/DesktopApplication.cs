@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Avalonia;
 using EasyChat.Application.DependencyInjection;
 using EasyChat.Contracts.Shell;
+using EasyChat.Contracts.Input;
 using EasyChat.Contracts.Translation;
 using EasyChat.Contracts.Updates;
 using EasyChat.Infrastructure.DependencyInjection;
@@ -51,6 +52,7 @@ public static class DesktopApplication
         try
         {
             initializeDeployment?.Invoke();
+            StartTsf(services);
             shell = StartShell(services);
             InitializeSettings(services);
             var startInTray = DesktopStartupBehavior.ShouldStartInTray(
@@ -112,7 +114,8 @@ public static class DesktopApplication
             services.GetRequiredService<DesktopInteractionLifecycle>(),
             services.GetRequiredService<IApplicationUpdateService>(),
             mainWindowViewModel.UpdateToastManager,
-            services.GetRequiredService<EasyChat.Presentation.Features.Capture.IScreenshotCaptureSession>());
+            services.GetRequiredService<EasyChat.Presentation.Features.Capture.IScreenshotCaptureSession>(),
+            services.GetRequiredService<EasyChat.Presentation.Features.Input.TsfCandidateWindowCoordinator>());
     }
 
     private static IShellLifecycle StartShell(IServiceProvider services)
@@ -140,6 +143,14 @@ public static class DesktopApplication
         Resources.Culture = culture;
         CultureInfo.CurrentCulture = culture;
         CultureInfo.CurrentUICulture = culture;
+    }
+
+    private static void StartTsf(IServiceProvider services)
+    {
+        var tsf = services.GetRequiredService<ITsfInputTranslationUseCases>();
+        var started = tsf.StartAsync().AsTask().GetAwaiter().GetResult();
+        if (started.IsFailure)
+            Log.Warning("TSF input translation is unavailable: {Message}", started.Error.Message);
     }
 
     private static void Shutdown(

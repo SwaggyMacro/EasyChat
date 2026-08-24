@@ -520,6 +520,30 @@
     <data name="InputDeliveryMode" xml:space="preserve">
         <value>文本投递模式</value>
     </data>
+    <data name="InputTranslationMode" xml:space="preserve">
+        <value>翻译输入方式</value>
+    </data>
+    <data name="InputTranslationMode_NormalWindow" xml:space="preserve">
+        <value>普通窗口</value>
+    </data>
+    <data name="InputTranslationMode_Tsf" xml:space="preserve">
+        <value>TSF 无感输入</value>
+    </data>
+    <data name="TsfCandidate_Translating" xml:space="preserve">
+        <value>正在翻译...</value>
+    </data>
+    <data name="TsfCandidate_Preview" xml:space="preserve">
+        <value>实时预览</value>
+    </data>
+    <data name="TsfCandidate_Committed" xml:space="preserve">
+        <value>已提交</value>
+    </data>
+    <data name="TsfCandidate_Failed" xml:space="preserve">
+        <value>翻译失败，已保留原文</value>
+    </data>
+    <data name="TsfCandidate_Unsupported" xml:space="preserve">
+        <value>此输入不支持 TSF 翻译</value>
+    </data>
     <data name="DeliveryMode_Type" xml:space="preserve">
         <value>模拟按键 (Type)</value>
     </data>

@@ -25,4 +25,11 @@
     <ProjectReference Include="..\..\Infrastructure\EasyChat.Infrastructure.Windows\EasyChat.Infrastructure.Windows.csproj" />
     <ProjectReference Include="..\..\Presentation\EasyChat.Presentation\EasyChat.Presentation.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Infrastructure\EasyChat.Infrastructure.Windows\Native\Tsf\bin\$(Configuration)\EasyChat.Tsf.Native.dll"
+          Link="EasyChat.Tsf.Native.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest"
+          Condition="Exists('..\..\Infrastructure\EasyChat.Infrastructure.Windows\Native\Tsf\bin\$(Configuration)\EasyChat.Tsf.Native.dll')" />
+  </ItemGroup>
 </Project>

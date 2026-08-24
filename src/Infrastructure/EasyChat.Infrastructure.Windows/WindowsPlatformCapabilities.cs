@@ -16,7 +16,8 @@ public sealed class WindowsPlatformCapabilities : IPlatformCapabilities
             PlatformCapability.SelectedTextCapture,
             PlatformCapability.AudioCaptureSources,
             PlatformCapability.SpeechRecognition,
-            PlatformCapability.AudioPlayback
+            PlatformCapability.AudioPlayback,
+            PlatformCapability.TextServicesFramework
         };
 
     public ValueTask<CapabilityStatus> GetStatusAsync(

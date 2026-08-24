@@ -91,6 +91,12 @@ public enum InputDeliveryMode
     Message = 2
 }
 
+public enum InputTranslationMode
+{
+    NormalWindow = 0,
+    Tsf = 1
+}
+
 public enum FloatingDisplayMode
 {
     Segmented = 0,
@@ -287,7 +293,8 @@ public sealed record InputSettings(
     bool ReverseTranslateLanguage,
     string TypingSourceLanguage,
     string TypingTargetLanguage,
-    bool FollowGlobalLanguage);
+    bool FollowGlobalLanguage,
+    InputTranslationMode TranslationMode = InputTranslationMode.NormalWindow);
 
 public sealed record ScreenshotSettings(
     string? Mode,

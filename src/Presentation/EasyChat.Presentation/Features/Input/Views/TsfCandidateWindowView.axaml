@@ -1,0 +1,29 @@
+<Window x:Class="EasyChat.Presentation.Features.Input.Views.TsfCandidateWindowView"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:EasyChat.Presentation.Features.Input.Views"
+        x:DataType="views:TsfCandidateWindowState"
+        Width="360"
+        MinWidth="220"
+        MaxWidth="620"
+        WindowDecorations="None"
+        Padding="12,10"
+        Background="{DynamicResource DialogBackgroundColor}"
+        BorderBrush="{DynamicResource BorderColor}"
+        BorderThickness="1"
+        CornerRadius="8">
+    <StackPanel Spacing="5">
+        <TextBlock Text="{Binding SourceText}"
+                   FontSize="13"
+                   Opacity="0.68"
+                   TextWrapping="Wrap" />
+        <TextBlock Text="{Binding TranslationText}"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   TextWrapping="Wrap" />
+        <TextBlock Text="{Binding StatusText}"
+                   FontSize="11"
+                   Opacity="0.62"
+                   Foreground="{Binding StatusBrush}" />
+    </StackPanel>
+</Window>

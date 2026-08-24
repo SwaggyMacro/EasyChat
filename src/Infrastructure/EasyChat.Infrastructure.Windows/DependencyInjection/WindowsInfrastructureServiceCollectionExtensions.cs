@@ -45,6 +45,8 @@ public static class WindowsInfrastructureServiceCollectionExtensions
         services.AddSingleton<IClipboardImage, WindowsClipboardImage>();
         services.AddSingleton<ITextDelivery, WindowsTextDelivery>();
         services.AddSingleton<ISelectedTextCapture, WindowsSelectedTextCapture>();
+        services.AddSingleton<IWindowsTsfRegistration, WindowsTsfRegistration>();
+        services.AddSingleton<ITextServicesFrameworkBridge, WindowsTsfInputBridge>();
         services.AddSingleton<IAudioCaptureSourceCatalog, WindowsAudioCaptureSourceCatalog>();
         services.AddSingleton<WindowsPcmAudioCapture>();
         services.AddSingleton<IPcmAudioCapture>(provider =>
