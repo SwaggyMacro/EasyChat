@@ -25,4 +25,10 @@
     <ProjectReference Include="..\..\Infrastructure\EasyChat.Infrastructure.Windows\EasyChat.Infrastructure.Windows.csproj" />
     <ProjectReference Include="..\..\Presentation\EasyChat.Presentation\EasyChat.Presentation.csproj" />
   </ItemGroup>
+  <ItemGroup Condition="'$(OS)' == 'Windows_NT' and Exists('..\..\Infrastructure\EasyChat.Infrastructure.Windows\Native\ImeHook\bin\$(Configuration)\EasyChat.ImeHook.Native.dll')">
+    <Content Include="..\..\Infrastructure\EasyChat.Infrastructure.Windows\Native\ImeHook\bin\$(Configuration)\EasyChat.ImeHook.Native.dll"
+             Link="EasyChat.ImeHook.Native.dll"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

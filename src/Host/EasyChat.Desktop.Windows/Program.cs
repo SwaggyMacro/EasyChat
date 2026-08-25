@@ -56,7 +56,11 @@ internal static class Program
                 services.AddEasyChatWindowsInfrastructure();
                 services.AddEasyChatWindowsDesktop();
             },
-            () => Velopack.VelopackApp.Build().Run(),
+            () =>
+            {
+                Velopack.VelopackApp.Build().Run();
+                WindowsImeCompositionHook.Start();
+            },
             builder => builder
                 .With(new SkiaOptions
                 {
