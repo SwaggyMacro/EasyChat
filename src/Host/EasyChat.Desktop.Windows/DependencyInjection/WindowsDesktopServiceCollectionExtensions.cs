@@ -1,5 +1,7 @@
 using EasyChat.Desktop.Windows;
 using EasyChat.Desktop.Windows.Capture;
+using EasyChat.Desktop.Windows.ApplicationLifecycle;
+using EasyChat.Contracts.Shell;
 using EasyChat.Presentation.Features.Capture;
 using EasyChat.Presentation.Foundation.Platform;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +15,7 @@ public static class WindowsDesktopServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
         services.AddSingleton<IPlatformWindowBehavior, AvaloniaWindowsWindowBehavior>();
         services.AddSingleton<IScreenshotCaptureSession, WindowsScreenshotCaptureSession>();
+        services.AddSingleton<IApplicationRestartService, WindowsApplicationRestartService>();
         return services;
     }
 }

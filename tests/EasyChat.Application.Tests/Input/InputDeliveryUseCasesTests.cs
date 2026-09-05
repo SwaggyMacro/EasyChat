@@ -41,8 +41,8 @@ public sealed class InputDeliveryUseCasesTests
         CollectionAssert.AreEqual(
             new[]
             {
-                "focus", "delay:100", "select-all", "key:Ctrl + A",
-                "delay:50", "key:Delete", "delay:50", "deliver:Paste", "key:Enter"
+                "focus", "delay:100", "select-all", "command:SelectAll",
+                "delay:50", "command:Delete", "delay:50", "deliver:Paste", "key:Enter"
             },
             sequence);
     }
@@ -125,6 +125,14 @@ public sealed class InputDeliveryUseCasesTests
             CancellationToken cancellationToken = default)
         {
             sequence.Add($"key:{combination}");
+            return ValueTask.FromResult(Result.Success());
+        }
+
+        public ValueTask<Result> SendCommandAsync(
+            StandardTextCommand command,
+            CancellationToken cancellationToken = default)
+        {
+            sequence.Add($"command:{command}");
             return ValueTask.FromResult(Result.Success());
         }
     }

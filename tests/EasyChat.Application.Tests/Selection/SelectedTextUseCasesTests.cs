@@ -9,7 +9,7 @@ namespace EasyChat.Application.Tests.Selection;
 public sealed class SelectedTextUseCasesTests
 {
     [TestMethod]
-    public async Task CaptureAsync_AllFallsBackToCtrlAAndPreservesCopyCaptureRequest()
+    public async Task CaptureAsync_AllFallsBackToSelectAllCommandAndPreservesCopyCaptureRequest()
     {
         var sequence = new List<string>();
         var capture = new FakeCapture(sequence);
@@ -33,7 +33,7 @@ public sealed class SelectedTextUseCasesTests
         Assert.IsFalse(capture.Request.CaptureAll);
         Assert.AreEqual(new PhysicalScreenPoint(12, 34), capture.Request.PointerPosition);
         CollectionAssert.AreEqual(
-            new[] { "select-all", "key:Ctrl + A", "delay:50", "capture" },
+            new[] { "select-all", "command:SelectAll", "delay:50", "capture" },
             sequence);
     }
 
@@ -99,6 +99,14 @@ public sealed class SelectedTextUseCasesTests
             CancellationToken cancellationToken = default)
         {
             sequence.Add($"key:{combination}");
+            return ValueTask.FromResult(Result.Success());
+        }
+
+        public ValueTask<Result> SendCommandAsync(
+            StandardTextCommand command,
+            CancellationToken cancellationToken = default)
+        {
+            sequence.Add($"command:{command}");
             return ValueTask.FromResult(Result.Success());
         }
     }

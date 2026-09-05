@@ -31,6 +31,14 @@ public enum TextDeliveryMode
     Message
 }
 
+public enum StandardTextCommand
+{
+    SelectAll,
+    Delete,
+    Copy,
+    Paste
+}
+
 public sealed record TextDeliveryRequest(
     string Text,
     ExternalTargetToken Target,
@@ -41,6 +49,10 @@ public interface ITextDelivery
 {
     ValueTask<Result> DeliverAsync(
         TextDeliveryRequest request,
+        CancellationToken cancellationToken = default);
+
+    ValueTask<Result> SendCommandAsync(
+        StandardTextCommand command,
         CancellationToken cancellationToken = default);
 
     ValueTask<Result> SendKeyCombinationAsync(
