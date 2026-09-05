@@ -1,7 +1,7 @@
 using System.Globalization;
-using System.Diagnostics;
 using Avalonia;
 using EasyChat.Application.DependencyInjection;
+using EasyChat.Desktop.ApplicationLifecycle;
 using EasyChat.Contracts.Shell;
 using EasyChat.Contracts.Translation;
 using EasyChat.Contracts.Updates;
@@ -23,11 +23,13 @@ public static class DesktopApplication
 
     public static void Run(
         string[] args,
+        IDesktopInstanceCoordinator instanceCoordinator,
         Action<IServiceCollection> addPlatformServices,
         Action? initializeDeployment = null,
         Action<AppBuilder>? configureAppBuilder = null)
     {
         ArgumentNullException.ThrowIfNull(args);
+        ArgumentNullException.ThrowIfNull(instanceCoordinator);
         ArgumentNullException.ThrowIfNull(addPlatformServices);
 
         if (args.Length == 1 && string.Equals(
@@ -41,7 +43,7 @@ public static class DesktopApplication
 
         var isRestart = args.Any(argument =>
             string.Equals(argument, RestartArgument, StringComparison.Ordinal));
-        using var singleInstance = DesktopSingleInstance.AcquireOrSignal(isRestart);
+        using var singleInstance = instanceCoordinator.AcquireOrSignal(isRestart);
         if (singleInstance is null)
             return;
 
@@ -77,7 +79,11 @@ public static class DesktopApplication
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
             .WriteTo.File(
-                Path.Combine(AppContext.BaseDirectory, "Logs", "log_.txt"),
+                Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "EasyChat",
+                    "Logs",
+                    "log_.txt"),
                 rollingInterval: RollingInterval.Day,
                 retainedFileCountLimit: 7,
                 outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
@@ -94,7 +100,6 @@ public static class DesktopApplication
         addPlatformServices(services);
         services.AddEasyChatApplication(new TranslationMessages(Resources.RequestError));
         services.AddEasyChatPresentation();
-        services.AddSingleton<IApplicationRestartService, DesktopApplicationRestartService>();
         services.AddSingleton<DesktopInteractionLifecycle>();
         return services.BuildServiceProvider(new ServiceProviderOptions
         {
@@ -158,35 +163,6 @@ public static class DesktopApplication
         finally
         {
             services.DisposeAsync().AsTask().GetAwaiter().GetResult();
-        }
-    }
-}
-
-internal sealed class DesktopApplicationRestartService : IApplicationRestartService
-{
-    public void Restart()
-    {
-        var processPath = Environment.ProcessPath;
-        if (string.IsNullOrWhiteSpace(processPath))
-            return;
-
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = processPath,
-            UseShellExecute = true,
-            WorkingDirectory = AppContext.BaseDirectory
-        };
-        foreach (var argument in Environment.GetCommandLineArgs().Skip(1))
-            startInfo.ArgumentList.Add(argument);
-        startInfo.ArgumentList.Add("--restart");
-
-        if (Process.Start(startInfo) is null)
-            return;
-
-        if (Avalonia.Application.Current?.ApplicationLifetime
-            is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            desktop.Shutdown();
         }
     }
 }

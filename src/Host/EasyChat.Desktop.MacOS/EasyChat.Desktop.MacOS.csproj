@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>EasyChat</AssemblyName>
+    <RootNamespace>EasyChat.Desktop.MacOS</RootNamespace>
+    <Version>1.0.31</Version>
+    <RuntimeIdentifier>osx-arm64</RuntimeIdentifier>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EasyChat.Desktop\EasyChat.Desktop.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\EasyChat.Infrastructure.MacOS\EasyChat.Infrastructure.MacOS.csproj" />
+    <ProjectReference Include="..\..\Presentation\EasyChat.Presentation\EasyChat.Presentation.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Info.plist" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="EasyChat.entitlements" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

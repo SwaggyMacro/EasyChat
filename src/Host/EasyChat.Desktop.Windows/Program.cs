@@ -1,5 +1,6 @@
 using Avalonia;
 using EasyChat.Desktop.Windows.Capture;
+using EasyChat.Desktop.Windows.ApplicationLifecycle;
 using EasyChat.Desktop.Windows.DependencyInjection;
 using EasyChat.Infrastructure.Windows.DependencyInjection;
 using EasyChat.Infrastructure.Windows.ImageTranslation;
@@ -51,6 +52,7 @@ internal static class Program
 
         DesktopApplication.Run(
             args,
+            new WindowsDesktopInstanceCoordinator(),
             services =>
             {
                 services.AddEasyChatWindowsInfrastructure();

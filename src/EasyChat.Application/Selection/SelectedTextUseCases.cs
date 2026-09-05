@@ -72,8 +72,8 @@ public sealed class SelectedTextUseCases : ISelectedTextUseCases
             var selected = await _textSelection.SelectAllAsync(cancellationToken).ConfigureAwait(false);
             if (selected.IsFailure || !IsCompleteSelection(selected.Value))
             {
-                var fallback = await _textDelivery.SendKeyCombinationAsync(
-                    "Ctrl + A",
+                var fallback = await _textDelivery.SendCommandAsync(
+                    StandardTextCommand.SelectAll,
                     cancellationToken).ConfigureAwait(false);
                 if (fallback.IsFailure)
                     return Result<SelectedText>.Failure(fallback.Error);
