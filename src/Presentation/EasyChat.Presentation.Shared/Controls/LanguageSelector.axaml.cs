@@ -82,12 +82,6 @@ public sealed partial class LanguageSelector : UserControl
     private void OnLanguagesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
         RefreshSortedLanguages();
 
-    private void LanguageAutoCompleteBox_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        if (LanguageAutoCompleteBox.SelectedItem is { } language)
-            SetCurrentValue(SelectedLanguageProperty, language);
-    }
-
     private void DropDownButton_OnClick(object? sender, RoutedEventArgs e) =>
         LanguageAutoCompleteBox.ToggleDropDown();
 }

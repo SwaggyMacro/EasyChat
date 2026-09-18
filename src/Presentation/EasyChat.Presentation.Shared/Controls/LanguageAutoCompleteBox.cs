@@ -37,6 +37,7 @@ public sealed class LanguageAutoCompleteBox : AutoCompleteBox
     private string? _textBeforeOpening;
     private bool _showAllItems;
     private bool _restoreTextWhenClosing;
+    private bool _dismissalQueued;
     private bool _widthUpdateQueued;
     private bool _isUpdatingPopupWidth;
     private int _widthUpdateRetries;
@@ -119,6 +120,25 @@ public sealed class LanguageAutoCompleteBox : AutoCompleteBox
         // state correct - no all-selected frame is ever rendered. This override
         // guarantees ordering, unlike a plain GotFocus instance handler.
         RestoreCaretToEnd();
+    }
+
+    protected override void OnLostFocus(FocusChangedEventArgs e)
+    {
+        if (!IsDropDownOpen)
+        {
+            base.OnLostFocus(e);
+            return;
+        }
+
+        // AutoCompleteBox closes its popup synchronously on lost focus. A mouse
+        // click on a popup item loses focus before PointerReleased, which is the
+        // event that commits the item. Defer the base cleanup until that commit
+        // has had a chance to run.
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (IsDropDownOpen && !IsKeyboardFocusWithin)
+                base.OnLostFocus(e);
+        }, DispatcherPriority.Background);
     }
 
     private void RestoreCaretToEnd()
@@ -291,6 +311,10 @@ public sealed class LanguageAutoCompleteBox : AutoCompleteBox
     private void OnDropDownOpened(object? sender, EventArgs e)
     {
         _textBeforeOpening ??= Text;
+        // The text box already displays the current language. Keep the popup's
+        // list navigation independent so a stale adapter selection cannot make
+        // one or more items look selected when the list first opens.
+        SelectionAdapter?.SelectedItem = null;
         DropDownIcon = MaterialIconKind.ChevronUp;
         _widthUpdateRetries = 0;
         AttachDropDownPopup(_dropDownPopup);
@@ -300,6 +324,7 @@ public sealed class LanguageAutoCompleteBox : AutoCompleteBox
 
     private void OnDropDownClosed(object? sender, EventArgs e)
     {
+        _dismissalQueued = false;
         DetachDropDownScrollViewer();
         DetachTopLevelDismissal();
         _showAllItems = false;
@@ -396,7 +421,7 @@ public sealed class LanguageAutoCompleteBox : AutoCompleteBox
     }
 
     private void OnTopLevelDeactivated(object? sender, EventArgs e) =>
-        CloseDropDownAndRestoreText();
+        QueueDropDownDismissal();
 
     private void OnTopLevelPointerPressed(object? sender, PointerPressedEventArgs e)
     {
@@ -414,21 +439,51 @@ public sealed class LanguageAutoCompleteBox : AutoCompleteBox
             return;
         }
 
-        if (_dropDownPopup?.Child is { } popupChild
-            && popupChild.Bounds.Width > 0
-            && popupChild.Bounds.Height > 0)
+        if (IsPointerWithinPopup(e))
         {
-            var popupPosition = e.GetPosition(popupChild);
-            if (popupPosition.X >= 0
-                && popupPosition.Y >= 0
-                && popupPosition.X <= popupChild.Bounds.Width
-                && popupPosition.Y <= popupChild.Bounds.Height)
-            {
-                return;
-            }
+            return;
         }
 
-        CloseDropDownAndRestoreText();
+        // AutoCompleteBox commits a clicked item after PointerPressed. Queueing
+        // dismissal lets that commit close the popup first instead of restoring
+        // the text from before it was opened.
+        QueueDropDownDismissal();
+    }
+
+    private void QueueDropDownDismissal()
+    {
+        if (!IsDropDownOpen || _dismissalQueued)
+            return;
+
+        _dismissalQueued = true;
+        Dispatcher.UIThread.Post(() =>
+        {
+            _dismissalQueued = false;
+            if (IsDropDownOpen)
+                CloseDropDownAndRestoreText();
+        }, DispatcherPriority.Background);
+    }
+
+    private bool IsPointerWithinPopup(PointerPressedEventArgs e)
+    {
+        if (_dropDownPopup?.Child is not Visual popupChild)
+            return false;
+
+        if (e.Source is Visual source
+            && (ReferenceEquals(source, popupChild)
+                || source.GetVisualAncestors().Any(ancestor => ReferenceEquals(ancestor, popupChild))))
+        {
+            return true;
+        }
+
+        if (popupChild.Bounds.Width <= 0 || popupChild.Bounds.Height <= 0)
+            return false;
+
+        var popupPosition = e.GetPosition(popupChild);
+        return popupPosition.X >= 0
+               && popupPosition.Y >= 0
+               && popupPosition.X <= popupChild.Bounds.Width
+               && popupPosition.Y <= popupChild.Bounds.Height;
     }
 
     private void OnDropDownScrollChanged(object? sender, ScrollChangedEventArgs e)

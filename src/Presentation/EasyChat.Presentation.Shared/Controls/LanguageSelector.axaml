@@ -15,8 +15,7 @@
                 ClipToBounds="True">
             <sharedControls:LanguageAutoCompleteBox x:Name="LanguageAutoCompleteBox"
                                                 ItemsSource="{Binding SortedLanguages, ElementName=Root}"
-                                                SelectedItem="{Binding SelectedLanguage, ElementName=Root, Mode=OneWay}"
-                                                SelectionChanged="LanguageAutoCompleteBox_OnSelectionChanged"
+                                                SelectedItem="{Binding SelectedLanguage, ElementName=Root, Mode=TwoWay, Converter={x:Static converters:LanguageSelectionConverters.IgnoreNull}}"
                                                 ValueMemberBinding="{Binding Converter={x:Static converters:LanguageDisplayNameConverter.Instance}}"
                                                 FilterMode="ContainsOrdinal"
                                                 MinimumPrefixLength="0"

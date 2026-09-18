@@ -1,10 +1,24 @@
 using System.Globalization;
 using System.Reflection;
+using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 
 namespace EasyChat.Presentation.Shared.Controls;
+
+public static class LanguageSelectionConverters
+{
+    public static readonly IValueConverter IgnoreNull = new IgnoreNullSelectionConverter();
+}
+
+public sealed class IgnoreNullSelectionConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value;
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value ?? BindingOperations.DoNothing;
+}
 
 public static class LanguageFlagConverters
 {
