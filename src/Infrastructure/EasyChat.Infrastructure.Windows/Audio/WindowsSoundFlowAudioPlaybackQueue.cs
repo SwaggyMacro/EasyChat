@@ -35,18 +35,18 @@ public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, IA
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public ValueTask EnqueueAsync(
+    public ValueTask<Guid> EnqueueAsync(
         AudioTrack track,
         CancellationToken cancellationToken = default)
         => EnqueueAsync(track, AudioPlaybackTarget.Default, cancellationToken);
 
-    public ValueTask EnqueueAsync(
+    public ValueTask<Guid> EnqueueAsync(
         AudioTrack track,
         AudioPlaybackTarget target,
         CancellationToken cancellationToken = default)
         => EnqueueAsync(track, target, AudioPlaybackContext.None, cancellationToken);
 
-    public ValueTask EnqueueAsync(
+    public ValueTask<Guid> EnqueueAsync(
         AudioTrack track,
         AudioPlaybackTarget target,
         AudioPlaybackContext context,
@@ -54,14 +54,15 @@ public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, IA
     {
         ArgumentNullException.ThrowIfNull(track);
         cancellationToken.ThrowIfCancellationRequested();
+        var playbackId = Guid.NewGuid();
         lock (_sync)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
-            _queue.Enqueue(new QueuedPlayback(Guid.NewGuid(), track, target, context));
+            _queue.Enqueue(new QueuedPlayback(playbackId, track, target, context));
             if (_runner is null || _runner.IsCompleted)
                 _runner = Task.Run(RunAsync);
         }
-        return ValueTask.CompletedTask;
+        return ValueTask.FromResult(playbackId);
     }
 
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
@@ -140,40 +141,47 @@ public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, IA
         QueuedPlayback queued,
         CancellationToken cancellationToken)
     {
-        EnsureInitialized(queued.Target);
-        if (_engine is null || _device is null)
-            return;
-        using var stream = new MemoryStream(queued.Track.Content.ToArray(), writable: false);
-        using var provider = new StreamDataProvider(_engine, _device.Format, stream);
-        using var player = new SoundPlayer(_engine, _device.Format, provider);
-        _device.MasterMixer.AddComponent(player);
-        var started = false;
+        SoundPlayer? player = null;
+        var attached = false;
         try
         {
+            EnsureInitialized(queued.Target);
+            if (_engine is null || _device is null)
+                return;
+            using var stream = new MemoryStream(queued.Track.Content.ToArray(), writable: false);
+            using var provider = new StreamDataProvider(_engine, _device.Format, stream);
+            player = new SoundPlayer(_engine, _device.Format, provider);
+            _device.MasterMixer.AddComponent(player);
+            attached = true;
             player.Play();
-            started = true;
             Publish(PlaybackStarted, queued);
             while (player.State == PlaybackState.Playing)
                 await Task.Delay(50, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
-            try
-            {
-                player.Stop();
-            }
-            finally
+            if (player is not null)
             {
                 try
                 {
-                    _device.MasterMixer.RemoveComponent(player);
+                    player.Stop();
                 }
                 finally
                 {
-                    if (started)
-                        Publish(PlaybackCompleted, queued);
+                    if (attached)
+                    {
+                        try
+                        {
+                            _device?.MasterMixer.RemoveComponent(player);
+                        }
+                        catch
+                        {
+                        }
+                    }
                 }
             }
+            player?.Dispose();
+            Publish(PlaybackCompleted, queued);
         }
     }
 

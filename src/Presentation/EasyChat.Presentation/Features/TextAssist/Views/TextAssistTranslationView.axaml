@@ -119,10 +119,38 @@
                     <Grid Height="96" RowDefinitions="36,36,16" RowSpacing="4">
                         <Grid Classes="LanguageHeader" ColumnDefinitions="*,Auto">
                             <TextBlock Classes="Muted" Text="{x:Static lang:Resources.SourceLang}" VerticalAlignment="Center" />
-                            <Button Grid.Column="1" Classes="Icon" Command="{Binding SpeakSourceCommand}"
-                                    ToolTip.Tip="{x:Static lang:Resources.ReadAloudMode_Source}">
-                                <avalonia:MaterialIcon Kind="VolumeHigh" />
-                            </Button>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2">
+                                <StackPanel Orientation="Horizontal" Spacing="2" IsVisible="{Binding ShowEnglishSourceAudio}">
+                                    <Border Width="17" Height="10" CornerRadius="2" ClipToBounds="True" VerticalAlignment="Center">
+                                        <Image Source="{Binding BritishFlagIcon, Converter={x:Static converters:LanguageFlagConverters.ToIcon}}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                    </Border>
+                                    <Button Classes="Icon" Width="26" Height="26" Padding="3" Command="{Binding SpeakBritishSourceCommand}" ToolTip.Tip="British English">
+                                        <Panel IsHitTestVisible="False">
+                                            <avalonia:MaterialIcon Kind="VolumeHigh" Width="14" Height="14" IsVisible="{Binding ShowBritishSourceIcon}" />
+                                            <avalonia:MaterialIcon Kind="Stop" Width="14" Height="14" IsVisible="{Binding IsBritishSourceSpeaking}" />
+                                            <shad:Loading Width="14" Height="14" IsVisible="{Binding IsBritishSourceLoading}" />
+                                        </Panel>
+                                    </Button>
+                                    <Border Width="17" Height="10" CornerRadius="2" ClipToBounds="True" VerticalAlignment="Center">
+                                        <Image Source="{Binding AmericanFlagIcon, Converter={x:Static converters:LanguageFlagConverters.ToIcon}}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                    </Border>
+                                    <Button Classes="Icon" Width="26" Height="26" Padding="3" Command="{Binding SpeakAmericanSourceCommand}" ToolTip.Tip="American English">
+                                        <Panel IsHitTestVisible="False">
+                                            <avalonia:MaterialIcon Kind="VolumeHigh" Width="14" Height="14" IsVisible="{Binding ShowAmericanSourceIcon}" />
+                                            <avalonia:MaterialIcon Kind="Stop" Width="14" Height="14" IsVisible="{Binding IsAmericanSourceSpeaking}" />
+                                            <shad:Loading Width="14" Height="14" IsVisible="{Binding IsAmericanSourceLoading}" />
+                                        </Panel>
+                                    </Button>
+                                </StackPanel>
+                                <Button Classes="Icon" IsVisible="{Binding !ShowEnglishSourceAudio}" Command="{Binding SpeakSourceCommand}"
+                                        ToolTip.Tip="{x:Static lang:Resources.ReadAloudMode_Source}">
+                                    <Panel IsHitTestVisible="False">
+                                        <avalonia:MaterialIcon Kind="VolumeHigh" IsVisible="{Binding ShowSourcePlayIcon}" />
+                                        <avalonia:MaterialIcon Kind="Stop" IsVisible="{Binding IsSourceSpeaking}" />
+                                        <shad:Loading IsVisible="{Binding IsSourceLoading}" />
+                                    </Panel>
+                                </Button>
+                            </StackPanel>
                         </Grid>
                         <sharedControls:LanguageSelector Grid.Row="1" Height="36" MinHeight="36"
                                                          Languages="{Binding Languages}"
@@ -154,10 +182,38 @@
                             <Button Grid.Column="1" Classes="Icon" Click="OnCopyClick" ToolTip.Tip="{x:Static lang:Resources.Copy}">
                                 <avalonia:MaterialIcon Kind="ContentCopy" />
                             </Button>
-                            <Button Grid.Column="2" Classes="Icon" Command="{Binding SpeakResultCommand}"
-                                    ToolTip.Tip="{x:Static lang:Resources.ReadAloudMode_Target}">
-                                <avalonia:MaterialIcon Kind="VolumeHigh" />
-                            </Button>
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2">
+                                <StackPanel Orientation="Horizontal" Spacing="2" IsVisible="{Binding ShowEnglishResultAudio}">
+                                    <Border Width="17" Height="10" CornerRadius="2" ClipToBounds="True" VerticalAlignment="Center">
+                                        <Image Source="{Binding BritishFlagIcon, Converter={x:Static converters:LanguageFlagConverters.ToIcon}}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                    </Border>
+                                    <Button Classes="Icon" Width="26" Height="26" Padding="3" Command="{Binding SpeakBritishResultCommand}" ToolTip.Tip="British English">
+                                        <Panel IsHitTestVisible="False">
+                                            <avalonia:MaterialIcon Kind="VolumeHigh" Width="14" Height="14" IsVisible="{Binding ShowBritishResultIcon}" />
+                                            <avalonia:MaterialIcon Kind="Stop" Width="14" Height="14" IsVisible="{Binding IsBritishResultSpeaking}" />
+                                            <shad:Loading Width="14" Height="14" IsVisible="{Binding IsBritishResultLoading}" />
+                                        </Panel>
+                                    </Button>
+                                    <Border Width="17" Height="10" CornerRadius="2" ClipToBounds="True" VerticalAlignment="Center">
+                                        <Image Source="{Binding AmericanFlagIcon, Converter={x:Static converters:LanguageFlagConverters.ToIcon}}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                    </Border>
+                                    <Button Classes="Icon" Width="26" Height="26" Padding="3" Command="{Binding SpeakAmericanResultCommand}" ToolTip.Tip="American English">
+                                        <Panel IsHitTestVisible="False">
+                                            <avalonia:MaterialIcon Kind="VolumeHigh" Width="14" Height="14" IsVisible="{Binding ShowAmericanResultIcon}" />
+                                            <avalonia:MaterialIcon Kind="Stop" Width="14" Height="14" IsVisible="{Binding IsAmericanResultSpeaking}" />
+                                            <shad:Loading Width="14" Height="14" IsVisible="{Binding IsAmericanResultLoading}" />
+                                        </Panel>
+                                    </Button>
+                                </StackPanel>
+                                <Button Classes="Icon" IsVisible="{Binding !ShowEnglishResultAudio}" Command="{Binding SpeakResultCommand}"
+                                        ToolTip.Tip="{x:Static lang:Resources.ReadAloudMode_Target}">
+                                    <Panel IsHitTestVisible="False">
+                                        <avalonia:MaterialIcon Kind="VolumeHigh" IsVisible="{Binding ShowResultPlayIcon}" />
+                                        <avalonia:MaterialIcon Kind="Stop" IsVisible="{Binding IsResultSpeaking}" />
+                                        <shad:Loading IsVisible="{Binding IsResultLoading}" />
+                                    </Panel>
+                                </Button>
+                            </StackPanel>
                         </Grid>
                         <sharedControls:LanguageSelector Grid.Row="1" Height="36" MinHeight="36"
                                                          Languages="{Binding Languages}"

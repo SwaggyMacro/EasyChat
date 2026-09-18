@@ -74,6 +74,24 @@ public interface ITtsUseCases
         string? providerId = null,
         CancellationToken cancellationToken = default);
 
+    ValueTask<Result<ITtsPlaybackSession>> EnqueueWithSessionAsync(
+        TtsSynthesisRequest request,
+        bool interruptCurrent = false,
+        CancellationToken cancellationToken = default);
+
+    ValueTask<Result<ITtsPlaybackSession>> EnqueueWithSessionAsync(
+        TtsSynthesisRequest request,
+        bool interruptCurrent,
+        AudioPlaybackTarget target,
+        CancellationToken cancellationToken = default);
+
+    ValueTask<Result<ITtsPlaybackSession>> EnqueueWithSessionAsync(
+        TtsSynthesisRequest request,
+        bool interruptCurrent,
+        AudioPlaybackTarget target,
+        AudioPlaybackContext context,
+        CancellationToken cancellationToken = default);
+
     ValueTask<Result<AudioTrack>> SynthesizeAsync(
         TtsSynthesisRequest request,
         CancellationToken cancellationToken = default);
@@ -101,4 +119,13 @@ public interface ITtsUseCases
         AudioPlaybackContext context,
         CancellationToken cancellationToken = default) =>
         EnqueueAsync(request, interruptCurrent, target, cancellationToken);
+}
+
+public interface ITtsPlaybackSession
+{
+    Guid PlaybackId { get; }
+
+    Task Completion { get; }
+
+    ValueTask StopAsync(CancellationToken cancellationToken = default);
 }

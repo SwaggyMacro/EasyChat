@@ -242,7 +242,8 @@ public sealed class LiveTtsSettings : LiveSettingsSection
 
     public string? GetVoiceForLanguage(string provider, string languageId) =>
         ProviderVoicePreferences.TryGetValue(provider, out var voices)
-        && voices.TryGetValue(GetPrimaryLanguage(languageId), out var voice)
+        && (voices.TryGetValue(languageId, out var voice)
+            || voices.TryGetValue(GetPrimaryLanguage(languageId), out voice))
             ? voice
             : null;
 
@@ -250,14 +251,14 @@ public sealed class LiveTtsSettings : LiveSettingsSection
     {
         if (!ProviderVoicePreferences.TryGetValue(provider, out var voices))
             ProviderVoicePreferences[provider] = voices = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        voices[GetPrimaryLanguage(languageId)] = voiceId;
+        voices[NormalizeLanguageId(languageId)] = voiceId;
         Commit();
     }
 
     public void RemoveVoiceForLanguage(string provider, string languageId)
     {
         if (ProviderVoicePreferences.TryGetValue(provider, out var voices)
-            && voices.Remove(GetPrimaryLanguage(languageId)))
+            && (voices.Remove(languageId) || voices.Remove(GetPrimaryLanguage(languageId))))
             Commit();
     }
 
@@ -272,11 +273,14 @@ public sealed class LiveTtsSettings : LiveSettingsSection
         IReadOnlyDictionary<string, string> preferences) =>
         preferences
             .Where(preference => !string.IsNullOrWhiteSpace(preference.Value))
-            .GroupBy(preference => GetPrimaryLanguage(preference.Key), StringComparer.OrdinalIgnoreCase)
+            .GroupBy(preference => NormalizeLanguageId(preference.Key), StringComparer.OrdinalIgnoreCase)
             .ToDictionary(
                 group => group.Key,
                 group => group.Last().Value,
                 StringComparer.OrdinalIgnoreCase);
+
+    private static string NormalizeLanguageId(string languageId) =>
+        languageId.Trim();
 
     private static string GetPrimaryLanguage(string languageId) =>
         languageId.Split('-', StringSplitOptions.RemoveEmptyEntries)[0];

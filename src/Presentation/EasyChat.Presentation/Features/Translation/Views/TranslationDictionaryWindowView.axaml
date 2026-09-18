@@ -8,6 +8,7 @@
         xmlns:lang="using:EasyChat.Presentation.Lang"
         xmlns:vm="using:EasyChat.Presentation.Features.Translation"
         xmlns:controls="clr-namespace:EasyChat.Presentation.Shared.Controls;assembly=EasyChat.Presentation.Shared"
+        xmlns:converts="clr-namespace:EasyChat.Presentation.Foundation.Formatting;assembly=EasyChat.Presentation"
         mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="400"
         x:Class="EasyChat.Presentation.Features.Translation.Views.TranslationDictionaryWindowView"
         x:DataType="vm:TranslationDictionaryWindowViewModel"
@@ -194,7 +195,7 @@
                         IsVisible="{Binding IsWordMode}">
                     <Grid ColumnDefinitions="*,Auto">
                         <!-- Dynamic Title -->
-                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
                             <!-- Back Button (Word Mode) -->
                             <Button IsVisible="{Binding ShowBackButton}" 
                                     Command="{Binding SwitchToSentenceModeCommand}"
@@ -203,28 +204,65 @@
                                                     Foreground="{DynamicResource ForegroundColor}"/>
                             </Button>
 
-                            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                            <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding DictionaryResult.Word, FallbackValue='Translation'}" 
                                            IsVisible="{Binding IsWordMode}"
                                            FontWeight="Bold" FontSize="18" Foreground="{DynamicResource ForegroundColor}"/>
-                                <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsWordMode}">
-                                    <TextBlock Text="{Binding DictionaryResult.Phonetic}" Foreground="{DynamicResource MutedColor}" VerticalAlignment="Center"/>
-                                    <Button Classes="TtsButton"
-                                            Command="{Binding PlayTtsCommand}"
-                                            CommandParameter="{Binding DictionaryResult.Word}"
-                                            Tag="{Binding IsWordTtsLoading}"
-                                            IsVisible="{Binding DictionaryResult.Phonetic, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                                         <Panel>
-                                             <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource PrimaryColor}"
-                                                                 IsVisible="{Binding !$parent[Button].Tag}"/>
-                                             <shad:Loading Width="16" Height="16" IsVisible="{Binding $parent[Button].Tag}"
-                                                           Foreground="{DynamicResource PrimaryColor}"/>
-                                         </Panel>
-                                    </Button>
+                                <StackPanel IsVisible="{Binding IsWordMode}" Spacing="3">
+                                    <!-- Keep each pronunciation together and wrap the second one when space is tight. -->
+                                    <WrapPanel IsVisible="{Binding ShowEnglishPronunciation}" Orientation="Horizontal">
+                                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" Margin="0,0,10,3">
+                                            <Border Width="20" Height="11" CornerRadius="3" ClipToBounds="True" Background="{DynamicResource GhostColor}">
+                                                <Image Source="{Binding BritishFlagIcon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
+                                                       Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                            </Border>
+                                            <TextBlock Text="{Binding DictionaryResult.Phonetic}" Foreground="{DynamicResource MutedColor}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                            <Button Classes="TtsButton" Width="24" Height="24" Margin="2,0,0,0"
+                                                    Command="{Binding PlayBritishAudioCommand}"
+                                                    CommandParameter="{Binding DictionaryResult.Word}"
+                                                    ToolTip.Tip="British English">
+                                                <Panel IsHitTestVisible="False">
+                                                    <icons:MaterialIcon Kind="VolumeHigh" Width="15" Height="15" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding ShowBritishTtsIcon}"/>
+                                                    <icons:MaterialIcon Kind="Stop" Width="15" Height="15" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding IsBritishTtsPlaying}"/>
+                                                    <shad:Loading Width="15" Height="15" IsVisible="{Binding IsBritishTtsLoading}" Foreground="{DynamicResource PrimaryColor}"/>
+                                                </Panel>
+                                            </Button>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" Margin="0,0,10,3">
+                                            <Border Width="20" Height="11" CornerRadius="3" ClipToBounds="True" Background="{DynamicResource GhostColor}">
+                                                <Image Source="{Binding AmericanFlagIcon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
+                                                       Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                            </Border>
+                                            <TextBlock Text="{Binding DictionaryResult.Phonetic}" Foreground="{DynamicResource MutedColor}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                            <Button Classes="TtsButton" Width="24" Height="24" Margin="2,0,0,0"
+                                                    Command="{Binding PlayAmericanAudioCommand}"
+                                                    CommandParameter="{Binding DictionaryResult.Word}"
+                                                    ToolTip.Tip="American English">
+                                                <Panel IsHitTestVisible="False">
+                                                    <icons:MaterialIcon Kind="VolumeHigh" Width="15" Height="15" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding ShowAmericanTtsIcon}"/>
+                                                    <icons:MaterialIcon Kind="Stop" Width="15" Height="15" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding IsAmericanTtsPlaying}"/>
+                                                    <shad:Loading Width="15" Height="15" IsVisible="{Binding IsAmericanTtsLoading}" Foreground="{DynamicResource PrimaryColor}"/>
+                                                </Panel>
+                                            </Button>
+                                        </StackPanel>
+                                    </WrapPanel>
+                                    <Grid IsVisible="{Binding ShowGenericWordAudio}" ColumnDefinitions="*,Auto">
+                                        <TextBlock Text="{Binding DictionaryResult.Phonetic}" Foreground="{DynamicResource MutedColor}" VerticalAlignment="Center"/>
+                                        <Button Grid.Column="1" Classes="TtsButton" Margin="6,0,0,0"
+                                                Command="{Binding PlayTtsCommand}"
+                                                CommandParameter="{Binding DictionaryResult.Word}"
+                                                ToolTip.Tip="{x:Static lang:Resources.ReadAloudMode_Target}">
+                                            <Panel IsHitTestVisible="False">
+                                                <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding ShowWordTtsIcon}"/>
+                                                <icons:MaterialIcon Kind="Stop" Width="16" Height="16" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding IsWordTtsPlaying}"/>
+                                                <shad:Loading Width="16" Height="16" IsVisible="{Binding IsWordTtsLoading}" Foreground="{DynamicResource PrimaryColor}"/>
+                                            </Panel>
+                                        </Button>
+                                    </Grid>
                                 </StackPanel>
                                 
                             </StackPanel>
-                        </StackPanel>
+                        </Grid>
 
                         <!-- Streaming state is intentionally non-blocking so partial results remain usable. -->
                         <shad:Loading Grid.Column="1"
@@ -307,12 +345,13 @@
                                                  <!-- TTS for Form -->
                                                  <Button Classes="TtsButton" Width="24" Height="24"
                                                          Command="{Binding #TranslationWindow.((vm:TranslationDictionaryWindowViewModel)DataContext).PlaySourceAudioCommand}"
-                                                         CommandParameter="{Binding .}"
-                                                         Tag="{Binding IsLoading}">
-                                                     <Panel>
+                                                         CommandParameter="{Binding .}">
+                                                     <Panel IsHitTestVisible="False">
                                                          <icons:MaterialIcon Kind="VolumeHigh" Width="14" Height="14" Foreground="{DynamicResource PrimaryColor}"
-                                                                             IsVisible="{Binding !$parent[Button].Tag}"/>
-                                                         <shad:Loading Width="14" Height="14" IsVisible="{Binding $parent[Button].Tag}"
+                                                                             IsVisible="{Binding ShowPlayIcon}"/>
+                                                         <icons:MaterialIcon Kind="Stop" Width="14" Height="14" Foreground="{DynamicResource PrimaryColor}"
+                                                                             IsVisible="{Binding IsPlaying}"/>
+                                                         <shad:Loading Width="14" Height="14" IsVisible="{Binding IsLoading}"
                                                                        Foreground="{DynamicResource PrimaryColor}"/>
                                                      </Panel>
                                                  </Button>
@@ -354,34 +393,62 @@
                                      <ItemsControl.ItemTemplate>
                                          <DataTemplate DataType="vm:DictionaryExampleViewModel">
                                              <StackPanel Margin="0,0,0,12">
-                                                  <Grid ColumnDefinitions="*,Auto">
+                                                  <Grid ColumnDefinitions="*,Auto" >
                                                        <TextBlock Grid.Column="0" Text="{Binding Origin}" TextWrapping="Wrap" Foreground="{DynamicResource ForegroundColor}" VerticalAlignment="Center"/>
+                                                       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4"
+                                                                   IsVisible="{Binding #TranslationWindow.((vm:TranslationDictionaryWindowViewModel)DataContext).ShowEnglishPronunciation}">
+                                                           <Border Width="18" Height="10" CornerRadius="2" ClipToBounds="True" Background="{DynamicResource GhostColor}" VerticalAlignment="Top" Margin="6,7,0,0">
+                                                               <Image Source="{Binding BritishFlagIcon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
+                                                                      Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                                           </Border>
+                                                           <Button Classes="TtsButton" Width="24" Height="24" VerticalAlignment="Top"
+                                                                   Command="{Binding #TranslationWindow.((vm:TranslationDictionaryWindowViewModel)DataContext).PlayBritishAudioCommand}"
+                                                                   CommandParameter="{Binding .}" ToolTip.Tip="British English">
+                                                               <Panel IsHitTestVisible="False">
+                                                                   <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" IsVisible="{Binding ShowBritishIcon}" />
+                                                                   <icons:MaterialIcon Kind="Stop" Width="16" Height="16" IsVisible="{Binding IsBritishPlaying}" />
+                                                                   <shad:Loading Width="16" Height="16" IsVisible="{Binding IsBritishLoading}" />
+                                                               </Panel>
+                                                           </Button>
+                                                           <Border Width="18" Height="10" CornerRadius="2" ClipToBounds="True" Background="{DynamicResource GhostColor}" VerticalAlignment="Top" Margin="4,7,0,0">
+                                                               <Image Source="{Binding AmericanFlagIcon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
+                                                                      Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                                           </Border>
+                                                           <Button Classes="TtsButton" Width="24" Height="24" VerticalAlignment="Top"
+                                                                   Command="{Binding #TranslationWindow.((vm:TranslationDictionaryWindowViewModel)DataContext).PlayAmericanAudioCommand}"
+                                                                   CommandParameter="{Binding .}" ToolTip.Tip="American English">
+                                                               <Panel IsHitTestVisible="False">
+                                                                   <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" IsVisible="{Binding ShowAmericanIcon}" />
+                                                                   <icons:MaterialIcon Kind="Stop" Width="16" Height="16" IsVisible="{Binding IsAmericanPlaying}" />
+                                                                   <shad:Loading Width="16" Height="16" IsVisible="{Binding IsAmericanLoading}" />
+                                                               </Panel>
+                                                           </Button>
+                                                       </StackPanel>
                                                        <Button Grid.Column="1" Classes="TtsButton" Margin="6,0,0,0" VerticalAlignment="Top"
+                                                               IsVisible="{Binding #TranslationWindow.((vm:TranslationDictionaryWindowViewModel)DataContext).ShowEnglishPronunciation, Converter={x:Static BoolConverters.Not}}"
                                                                Command="{Binding #TranslationWindow.((vm:TranslationDictionaryWindowViewModel)DataContext).PlaySourceAudioCommand}"
-                                                               CommandParameter="{Binding .}"
-                                                               Tag="{Binding IsOriginLoading}">
-                                                           <Panel>
-                                                               <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource PrimaryColor}"
-                                                                                   IsVisible="{Binding !$parent[Button].Tag}"/>
-                                                               <shad:Loading Width="16" Height="16" IsVisible="{Binding $parent[Button].Tag}"
-                                                                             Foreground="{DynamicResource PrimaryColor}"/>
+                                                               CommandParameter="{Binding .}">
+                                                           <Panel IsHitTestVisible="False">
+                                                               <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" IsVisible="{Binding ShowOriginPlayIcon}" />
+                                                               <icons:MaterialIcon Kind="Stop" Width="16" Height="16" IsVisible="{Binding IsOriginPlaying}" />
+                                                               <shad:Loading Width="16" Height="16" IsVisible="{Binding IsOriginLoading}" />
                                                            </Panel>
                                                        </Button>
                                                   </Grid>
-                                                 
                                                   <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
                                                       <TextBlock Grid.Column="0" Text="{Binding Translation}" TextWrapping="Wrap" Foreground="{DynamicResource MutedColor}" VerticalAlignment="Center"/>
                                                       <Button Grid.Column="1" Classes="TtsButton" Margin="6,0,0,0" VerticalAlignment="Top"
-                                                               Command="{Binding #TranslationWindow.((vm:TranslationDictionaryWindowViewModel)DataContext).PlayTargetAudioCommand}"
-                                                               CommandParameter="{Binding .}"
-                                                               Tag="{Binding IsTranslationLoading}">
-                                                           <Panel>
-                                                               <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource PrimaryColor}"
-                                                                                   IsVisible="{Binding !$parent[Button].Tag}"/>
-                                                               <shad:Loading Width="16" Height="16" IsVisible="{Binding $parent[Button].Tag}"
-                                                                             Foreground="{DynamicResource PrimaryColor}"/>
-                                                           </Panel>
-                                                       </Button>
+                                                              Command="{Binding #TranslationWindow.((vm:TranslationDictionaryWindowViewModel)DataContext).PlayTargetAudioCommand}"
+                                                              CommandParameter="{Binding .}">
+                                                          <Panel IsHitTestVisible="False">
+                                                              <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16"
+                                                                                  IsVisible="{Binding ShowTranslationPlayIcon}" />
+                                                              <icons:MaterialIcon Kind="Stop" Width="16" Height="16"
+                                                                                  IsVisible="{Binding IsTranslationPlaying}" />
+                                                              <shad:Loading Width="16" Height="16"
+                                                                            IsVisible="{Binding IsTranslationLoading}" />
+                                                          </Panel>
+                                                      </Button>
                                                   </Grid>
                                              </StackPanel>
                                          </DataTemplate>
@@ -407,19 +474,48 @@
                                             </StackPanel>
                                         </Border>
 
-                                        <Button Grid.Column="1"
-                                                Classes="TtsButton"
-                                                VerticalAlignment="Center"
-                                                Command="{Binding PlayTargetAudioCommand}"
-                                                CommandParameter="{Binding TranslationResult}"
-                                                Tag="{Binding IsResultTtsLoading}">
-                                            <Panel>
-                                                <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource PrimaryColor}"
-                                                                    IsVisible="{Binding !$parent[Button].Tag}"/>
-                                                <shad:Loading Width="16" Height="16" IsVisible="{Binding $parent[Button].Tag}"
-                                                              Foreground="{DynamicResource PrimaryColor}"/>
-                                            </Panel>
-                                        </Button>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2">
+                                            <StackPanel Orientation="Horizontal" Spacing="2" IsVisible="{Binding ShowEnglishTargetAudio}">
+                                                <Border Width="17" Height="10" CornerRadius="2" ClipToBounds="True" VerticalAlignment="Center">
+                                                    <Image Source="{Binding BritishFlagIcon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
+                                                           Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                                </Border>
+                                                <Button Classes="TtsButton" Width="24" Height="24"
+                                                        Command="{Binding PlayBritishTargetAudioCommand}"
+                                                        CommandParameter="{Binding TranslationResult}"
+                                                        ToolTip.Tip="British English">
+                                                    <Panel IsHitTestVisible="False">
+                                                        <icons:MaterialIcon Kind="VolumeHigh" Width="14" Height="14" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding ShowBritishTargetTtsIcon}"/>
+                                                        <icons:MaterialIcon Kind="Stop" Width="14" Height="14" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding IsBritishTargetTtsPlaying}"/>
+                                                        <shad:Loading Width="14" Height="14" IsVisible="{Binding IsBritishTargetTtsLoading}" Foreground="{DynamicResource PrimaryColor}"/>
+                                                    </Panel>
+                                                </Button>
+                                                <Border Width="17" Height="10" CornerRadius="2" ClipToBounds="True" VerticalAlignment="Center">
+                                                    <Image Source="{Binding AmericanFlagIcon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
+                                                           Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                                </Border>
+                                                <Button Classes="TtsButton" Width="24" Height="24"
+                                                        Command="{Binding PlayAmericanTargetAudioCommand}"
+                                                        CommandParameter="{Binding TranslationResult}"
+                                                        ToolTip.Tip="American English">
+                                                    <Panel IsHitTestVisible="False">
+                                                        <icons:MaterialIcon Kind="VolumeHigh" Width="14" Height="14" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding ShowAmericanTargetTtsIcon}"/>
+                                                        <icons:MaterialIcon Kind="Stop" Width="14" Height="14" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding IsAmericanTargetTtsPlaying}"/>
+                                                        <shad:Loading Width="14" Height="14" IsVisible="{Binding IsAmericanTargetTtsLoading}" Foreground="{DynamicResource PrimaryColor}"/>
+                                                    </Panel>
+                                                </Button>
+                                            </StackPanel>
+                                            <Button Classes="TtsButton" VerticalAlignment="Center"
+                                                    IsVisible="{Binding !ShowEnglishTargetAudio}"
+                                                    Command="{Binding PlayTargetAudioCommand}"
+                                                    CommandParameter="{Binding TranslationResult}">
+                                                <Panel IsHitTestVisible="False">
+                                                    <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding ShowResultTtsIcon}"/>
+                                                    <icons:MaterialIcon Kind="Stop" Width="16" Height="16" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding IsResultTtsPlaying}"/>
+                                                    <shad:Loading Width="16" Height="16" IsVisible="{Binding IsResultTtsLoading}" Foreground="{DynamicResource PrimaryColor}"/>
+                                                </Panel>
+                                            </Button>
+                                        </StackPanel>
 
                                         <Border Grid.Column="2"
                                                 Background="Transparent"/>
@@ -461,15 +557,44 @@
                                     <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,0,8">
                                         <icons:MaterialIcon Kind="TextShort" Width="16" Height="16" Foreground="{DynamicResource PrimaryColor}"/>
                                         <TextBlock Text="{x:Static lang:Resources.SelectionTranslate_SourceLabel}" VerticalAlignment="Center" Classes="Small"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="2" IsVisible="{Binding ShowEnglishSourceAudio}">
+                                            <Border Width="17" Height="10" CornerRadius="2" ClipToBounds="True" VerticalAlignment="Center">
+                                                <Image Source="{Binding BritishFlagIcon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
+                                                       Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                            </Border>
+                                            <Button Classes="TtsButton" Width="24" Height="24"
+                                                    Command="{Binding PlayBritishSourceAudioCommand}"
+                                                    CommandParameter="{Binding SourceText}"
+                                                    ToolTip.Tip="British English">
+                                                <Panel IsHitTestVisible="False">
+                                                    <icons:MaterialIcon Kind="VolumeHigh" Width="14" Height="14" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding ShowBritishSourceTtsIcon}"/>
+                                                    <icons:MaterialIcon Kind="Stop" Width="14" Height="14" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding IsBritishSourceTtsPlaying}"/>
+                                                    <shad:Loading Width="14" Height="14" IsVisible="{Binding IsBritishSourceTtsLoading}" Foreground="{DynamicResource PrimaryColor}"/>
+                                                </Panel>
+                                            </Button>
+                                            <Border Width="17" Height="10" CornerRadius="2" ClipToBounds="True" VerticalAlignment="Center">
+                                                <Image Source="{Binding AmericanFlagIcon, Converter={x:Static converts:LanguageFlagConverters.ToIcon}}"
+                                                       Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                            </Border>
+                                            <Button Classes="TtsButton" Width="24" Height="24"
+                                                    Command="{Binding PlayAmericanSourceAudioCommand}"
+                                                    CommandParameter="{Binding SourceText}"
+                                                    ToolTip.Tip="American English">
+                                                <Panel IsHitTestVisible="False">
+                                                    <icons:MaterialIcon Kind="VolumeHigh" Width="14" Height="14" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding ShowAmericanSourceTtsIcon}"/>
+                                                    <icons:MaterialIcon Kind="Stop" Width="14" Height="14" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding IsAmericanSourceTtsPlaying}"/>
+                                                    <shad:Loading Width="14" Height="14" IsVisible="{Binding IsAmericanSourceTtsLoading}" Foreground="{DynamicResource PrimaryColor}"/>
+                                                </Panel>
+                                            </Button>
+                                        </StackPanel>
                                         <Button Classes="TtsButton" VerticalAlignment="Center"
+                                                IsVisible="{Binding !ShowEnglishSourceAudio}"
                                                 Command="{Binding PlaySourceAudioCommand}"
-                                                CommandParameter="{Binding SourceText}"
-                                                Tag="{Binding IsSourceTtsLoading}">
-                                            <Panel>
-                                                <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource PrimaryColor}"
-                                                                    IsVisible="{Binding !$parent[Button].Tag}"/>
-                                                <shad:Loading Width="16" Height="16" IsVisible="{Binding $parent[Button].Tag}"
-                                                              Foreground="{DynamicResource PrimaryColor}"/>
+                                                CommandParameter="{Binding SourceText}">
+                                            <Panel IsHitTestVisible="False">
+                                                <icons:MaterialIcon Kind="VolumeHigh" Width="16" Height="16" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding ShowSourceTtsIcon}"/>
+                                                <icons:MaterialIcon Kind="Stop" Width="16" Height="16" Foreground="{DynamicResource PrimaryColor}" IsVisible="{Binding IsSourceTtsPlaying}"/>
+                                                <shad:Loading Width="16" Height="16" IsVisible="{Binding IsSourceTtsLoading}" Foreground="{DynamicResource PrimaryColor}"/>
                                             </Panel>
                                         </Button>
                                     </StackPanel>

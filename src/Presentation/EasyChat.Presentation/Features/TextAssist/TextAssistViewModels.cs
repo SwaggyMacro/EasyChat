@@ -545,8 +545,30 @@ namespace EasyChat.Presentation.Features.TextAssist
         private readonly ITtsUseCases _tts;
         private string _inputText = string.Empty;
         private string _translationResult = string.Empty;
+        private bool _isSourceLoading;
+        private bool _isResultLoading;
         private bool _isSourceSpeaking;
         private bool _isResultSpeaking;
+        private ITtsPlaybackSession? _sourceSession;
+        private ITtsPlaybackSession? _resultSession;
+        private CancellationTokenSource? _sourcePlaybackCancellation;
+        private CancellationTokenSource? _resultPlaybackCancellation;
+        private bool _isBritishSourceLoading;
+        private bool _isBritishSourceSpeaking;
+        private bool _isAmericanSourceLoading;
+        private bool _isAmericanSourceSpeaking;
+        private bool _isBritishResultLoading;
+        private bool _isBritishResultSpeaking;
+        private bool _isAmericanResultLoading;
+        private bool _isAmericanResultSpeaking;
+        private ITtsPlaybackSession? _britishSourceSession;
+        private ITtsPlaybackSession? _americanSourceSession;
+        private ITtsPlaybackSession? _britishResultSession;
+        private ITtsPlaybackSession? _americanResultSession;
+        private CancellationTokenSource? _britishSourceCancellation;
+        private CancellationTokenSource? _americanSourceCancellation;
+        private CancellationTokenSource? _britishResultCancellation;
+        private CancellationTokenSource? _americanResultCancellation;
         private bool _detailedExplanation;
 
         public TextAssistTranslationViewModel(
@@ -561,17 +583,82 @@ namespace EasyChat.Presentation.Features.TextAssist
             _dictionary = dictionary;
             _tts = tts;
             _detailedExplanation = settings.TextAssist.DetailedExplanation;
-            SpeakSourceCommand = ReactiveCommand.CreateFromTask(() => SpeakAsync(InputText, SelectedSourceLanguage.Id, true));
-            SpeakResultCommand = ReactiveCommand.CreateFromTask(() => SpeakAsync(TranslationResult, SelectedTargetLanguage.Id, false));
+            // Keep the command enabled while playback is active so it can be clicked again to stop.
+            SpeakSourceCommand = ReactiveCommand.Create(() => { _ = SpeakAsync(InputText, SelectedSourceLanguage.Id, true); });
+            SpeakResultCommand = ReactiveCommand.Create(() => { _ = SpeakAsync(TranslationResult, SelectedTargetLanguage.Id, false); });
+            SpeakBritishSourceCommand = ReactiveCommand.Create(() => { _ = SpeakRegionalAsync(InputText, "en-GB", source: true, british: true); });
+            SpeakAmericanSourceCommand = ReactiveCommand.Create(() => { _ = SpeakRegionalAsync(InputText, "en-US", source: true, british: false); });
+            SpeakBritishResultCommand = ReactiveCommand.Create(() => { _ = SpeakRegionalAsync(TranslationResult, "en-GB", source: false, british: true); });
+            SpeakAmericanResultCommand = ReactiveCommand.Create(() => { _ = SpeakRegionalAsync(TranslationResult, "en-US", source: false, british: false); });
             SwapContentCommand = ReactiveCommand.Create(SwapContent);
             LookupAnnotationCommand = ReactiveCommand.CreateFromTask<string>(LookupAnnotationAsync);
+            PropertyChanged += (_, args) =>
+            {
+                if (args.PropertyName is nameof(SelectedSourceLanguage) or nameof(SelectedTargetLanguage))
+                {
+                    this.RaisePropertyChanged(nameof(ShowEnglishSourceAudio));
+                    this.RaisePropertyChanged(nameof(ShowEnglishResultAudio));
+                }
+            };
         }
 
         public string InputText { get => _inputText; set => this.RaiseAndSetIfChanged(ref _inputText, value); }
         public string TranslationResult { get => _translationResult; private set => this.RaiseAndSetIfChanged(ref _translationResult, value); }
         public ObservableStringBuilder ResultMarkdown { get; } = new();
-        public bool IsSourceSpeaking { get => _isSourceSpeaking; private set => this.RaiseAndSetIfChanged(ref _isSourceSpeaking, value); }
-        public bool IsResultSpeaking { get => _isResultSpeaking; private set => this.RaiseAndSetIfChanged(ref _isResultSpeaking, value); }
+        public bool IsSourceLoading
+        {
+            get => _isSourceLoading;
+            private set
+            {
+                this.RaiseAndSetIfChanged(ref _isSourceLoading, value);
+                this.RaisePropertyChanged(nameof(ShowSourcePlayIcon));
+            }
+        }
+        public bool IsResultLoading
+        {
+            get => _isResultLoading;
+            private set
+            {
+                this.RaiseAndSetIfChanged(ref _isResultLoading, value);
+                this.RaisePropertyChanged(nameof(ShowResultPlayIcon));
+            }
+        }
+        public bool IsSourceSpeaking
+        {
+            get => _isSourceSpeaking;
+            private set
+            {
+                this.RaiseAndSetIfChanged(ref _isSourceSpeaking, value);
+                this.RaisePropertyChanged(nameof(ShowSourcePlayIcon));
+            }
+        }
+        public bool IsResultSpeaking
+        {
+            get => _isResultSpeaking;
+            private set
+            {
+                this.RaiseAndSetIfChanged(ref _isResultSpeaking, value);
+                this.RaisePropertyChanged(nameof(ShowResultPlayIcon));
+            }
+        }
+        public bool ShowSourcePlayIcon => !IsSourceLoading && !IsSourceSpeaking;
+        public bool ShowResultPlayIcon => !IsResultLoading && !IsResultSpeaking;
+        public bool IsBritishSourceLoading { get => _isBritishSourceLoading; private set { this.RaiseAndSetIfChanged(ref _isBritishSourceLoading, value); this.RaisePropertyChanged(nameof(ShowBritishSourceIcon)); } }
+        public bool IsBritishSourceSpeaking { get => _isBritishSourceSpeaking; private set { this.RaiseAndSetIfChanged(ref _isBritishSourceSpeaking, value); this.RaisePropertyChanged(nameof(ShowBritishSourceIcon)); } }
+        public bool IsAmericanSourceLoading { get => _isAmericanSourceLoading; private set { this.RaiseAndSetIfChanged(ref _isAmericanSourceLoading, value); this.RaisePropertyChanged(nameof(ShowAmericanSourceIcon)); } }
+        public bool IsAmericanSourceSpeaking { get => _isAmericanSourceSpeaking; private set { this.RaiseAndSetIfChanged(ref _isAmericanSourceSpeaking, value); this.RaisePropertyChanged(nameof(ShowAmericanSourceIcon)); } }
+        public bool IsBritishResultLoading { get => _isBritishResultLoading; private set { this.RaiseAndSetIfChanged(ref _isBritishResultLoading, value); this.RaisePropertyChanged(nameof(ShowBritishResultIcon)); } }
+        public bool IsBritishResultSpeaking { get => _isBritishResultSpeaking; private set { this.RaiseAndSetIfChanged(ref _isBritishResultSpeaking, value); this.RaisePropertyChanged(nameof(ShowBritishResultIcon)); } }
+        public bool IsAmericanResultLoading { get => _isAmericanResultLoading; private set { this.RaiseAndSetIfChanged(ref _isAmericanResultLoading, value); this.RaisePropertyChanged(nameof(ShowAmericanResultIcon)); } }
+        public bool IsAmericanResultSpeaking { get => _isAmericanResultSpeaking; private set { this.RaiseAndSetIfChanged(ref _isAmericanResultSpeaking, value); this.RaisePropertyChanged(nameof(ShowAmericanResultIcon)); } }
+        public bool ShowBritishSourceIcon => !IsBritishSourceLoading && !IsBritishSourceSpeaking;
+        public bool ShowAmericanSourceIcon => !IsAmericanSourceLoading && !IsAmericanSourceSpeaking;
+        public bool ShowBritishResultIcon => !IsBritishResultLoading && !IsBritishResultSpeaking;
+        public bool ShowAmericanResultIcon => !IsAmericanResultLoading && !IsAmericanResultSpeaking;
+        public bool ShowEnglishSourceAudio => IsEnglish(SelectedSourceLanguage.Id);
+        public bool ShowEnglishResultAudio => IsEnglish(SelectedTargetLanguage.Id);
+        public string BritishFlagIcon => "gb.png";
+        public string AmericanFlagIcon => "us.png";
         public bool DetailedExplanation
         {
             get => _detailedExplanation;
@@ -588,6 +675,10 @@ namespace EasyChat.Presentation.Features.TextAssist
         public bool ShowAnnotations => DetailedExplanation && Annotations.Count > 0;
         public ReactiveCommand<Unit, Unit> SpeakSourceCommand { get; }
         public ReactiveCommand<Unit, Unit> SpeakResultCommand { get; }
+        public ReactiveCommand<Unit, Unit> SpeakBritishSourceCommand { get; }
+        public ReactiveCommand<Unit, Unit> SpeakAmericanSourceCommand { get; }
+        public ReactiveCommand<Unit, Unit> SpeakBritishResultCommand { get; }
+        public ReactiveCommand<Unit, Unit> SpeakAmericanResultCommand { get; }
         public ReactiveCommand<Unit, Unit> SwapContentCommand { get; }
         public ReactiveCommand<string, Unit> LookupAnnotationCommand { get; }
 
@@ -671,10 +762,27 @@ namespace EasyChat.Presentation.Features.TextAssist
         private async Task SpeakAsync(string text, string languageId, bool source)
         {
             if (string.IsNullOrWhiteSpace(text)) return;
+
+            var speaking = source ? IsSourceSpeaking : IsResultSpeaking;
+            var loading = source ? IsSourceLoading : IsResultLoading;
+            if (speaking)
+            {
+                await StopSpeechAsync(source).ConfigureAwait(false);
+                return;
+            }
+            if (loading)
+            {
+                (source ? _sourcePlaybackCancellation : _resultPlaybackCancellation)?.Cancel();
+                return;
+            }
+
+            using var cancellation = new CancellationTokenSource();
+            if (source) _sourcePlaybackCancellation = cancellation; else _resultPlaybackCancellation = cancellation;
+            if (source) IsSourceLoading = true; else IsResultLoading = true;
+            ITtsPlaybackSession? session = null;
             try
             {
-                if (source) IsSourceSpeaking = true; else IsResultSpeaking = true;
-                var voice = await _tts.ResolvePreferredVoiceAsync(languageId);
+                var voice = await _tts.ResolvePreferredVoiceAsync(languageId, cancellationToken: cancellation.Token);
                 if (voice.IsFailure)
                 {
                     ErrorMessage = voice.Error.Message;
@@ -685,8 +793,29 @@ namespace EasyChat.Presentation.Features.TextAssist
                     ErrorMessage = Resources.TextAssistNoVoice;
                     return;
                 }
-                var result = await _tts.EnqueueAsync(new TtsSynthesisRequest(text, voice.Value), interruptCurrent: true);
-                if (result.IsFailure) ErrorMessage = result.Error.Message;
+                var result = await _tts.EnqueueWithSessionAsync(
+                    new TtsSynthesisRequest(text, voice.Value),
+                    interruptCurrent: true,
+                    cancellationToken: cancellation.Token).ConfigureAwait(false);
+                if (result.IsFailure)
+                {
+                    ErrorMessage = result.Error.Message;
+                    return;
+                }
+
+                session = result.Value;
+                if (cancellation.IsCancellationRequested)
+                {
+                    await session.StopAsync().ConfigureAwait(false);
+                    return;
+                }
+                if (source) _sourceSession = session; else _resultSession = session;
+                if (source) IsSourceSpeaking = true; else IsResultSpeaking = true;
+                if (source) IsSourceLoading = false; else IsResultLoading = false;
+                await session.Completion.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+            {
             }
             catch (Exception exception)
             {
@@ -694,8 +823,170 @@ namespace EasyChat.Presentation.Features.TextAssist
             }
             finally
             {
-                if (source) IsSourceSpeaking = false; else IsResultSpeaking = false;
+                if (source)
+                {
+                    if (ReferenceEquals(_sourceSession, session))
+                    {
+                        _sourceSession = null;
+                        IsSourceSpeaking = false;
+                    }
+                    IsSourceLoading = false;
+                    if (ReferenceEquals(_sourcePlaybackCancellation, cancellation))
+                        _sourcePlaybackCancellation = null;
+                }
+                else
+                {
+                    if (ReferenceEquals(_resultSession, session))
+                    {
+                        _resultSession = null;
+                        IsResultSpeaking = false;
+                    }
+                    IsResultLoading = false;
+                    if (ReferenceEquals(_resultPlaybackCancellation, cancellation))
+                        _resultPlaybackCancellation = null;
+                }
             }
+        }
+
+        private async Task SpeakRegionalAsync(string text, string languageId, bool source, bool british)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return;
+
+            var loading = source
+                ? british ? IsBritishSourceLoading : IsAmericanSourceLoading
+                : british ? IsBritishResultLoading : IsAmericanResultLoading;
+            var speaking = source
+                ? british ? IsBritishSourceSpeaking : IsAmericanSourceSpeaking
+                : british ? IsBritishResultSpeaking : IsAmericanResultSpeaking;
+            Func<ITtsPlaybackSession?> getSession = () => source
+                ? british ? _britishSourceSession : _americanSourceSession
+                : british ? _britishResultSession : _americanResultSession;
+            Func<CancellationTokenSource?> getCancellation = () => source
+                ? british ? _britishSourceCancellation : _americanSourceCancellation
+                : british ? _britishResultCancellation : _americanResultCancellation;
+            if (speaking)
+            {
+                getCancellation()?.Cancel();
+                var current = getSession();
+                if (source)
+                {
+                    if (british) _britishSourceSession = null; else _americanSourceSession = null;
+                    if (british) IsBritishSourceSpeaking = false; else IsAmericanSourceSpeaking = false;
+                }
+                else
+                {
+                    if (british) _britishResultSession = null; else _americanResultSession = null;
+                    if (british) IsBritishResultSpeaking = false; else IsAmericanResultSpeaking = false;
+                }
+                if (current is not null)
+                    await current.StopAsync().ConfigureAwait(false);
+                return;
+            }
+            if (loading)
+            {
+                getCancellation()?.Cancel();
+                return;
+            }
+
+            using var cancellation = new CancellationTokenSource();
+            if (source)
+            {
+                if (british) _britishSourceCancellation = cancellation; else _americanSourceCancellation = cancellation;
+                if (british) IsBritishSourceLoading = true; else IsAmericanSourceLoading = true;
+            }
+            else
+            {
+                if (british) _britishResultCancellation = cancellation; else _americanResultCancellation = cancellation;
+                if (british) IsBritishResultLoading = true; else IsAmericanResultLoading = true;
+            }
+
+            ITtsPlaybackSession? session = null;
+            try
+            {
+                var voice = await _tts.ResolvePreferredVoiceAsync(languageId, cancellationToken: cancellation.Token);
+                if (voice.IsFailure || string.IsNullOrWhiteSpace(voice.Value))
+                    return;
+                var result = await _tts.EnqueueWithSessionAsync(
+                    new TtsSynthesisRequest(text, voice.Value),
+                    interruptCurrent: true,
+                    cancellationToken: cancellation.Token).ConfigureAwait(false);
+                if (result.IsFailure)
+                    return;
+                session = result.Value;
+                if (cancellation.IsCancellationRequested)
+                {
+                    await session.StopAsync().ConfigureAwait(false);
+                    return;
+                }
+                if (source)
+                {
+                    if (british) _britishSourceSession = session; else _americanSourceSession = session;
+                    if (british) IsBritishSourceLoading = false; else IsAmericanSourceLoading = false;
+                    if (british) IsBritishSourceSpeaking = true; else IsAmericanSourceSpeaking = true;
+                }
+                else
+                {
+                    if (british) _britishResultSession = session; else _americanResultSession = session;
+                    if (british) IsBritishResultLoading = false; else IsAmericanResultLoading = false;
+                    if (british) IsBritishResultSpeaking = true; else IsAmericanResultSpeaking = true;
+                }
+                await session.Completion.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+            {
+            }
+            catch (Exception exception)
+            {
+                ErrorMessage = exception.Message;
+            }
+            finally
+            {
+                if (source)
+                {
+                    if (ReferenceEquals(getSession(), session))
+                    {
+                        if (british) _britishSourceSession = null; else _americanSourceSession = null;
+                        if (british) IsBritishSourceSpeaking = false; else IsAmericanSourceSpeaking = false;
+                    }
+                    if (british) IsBritishSourceLoading = false; else IsAmericanSourceLoading = false;
+                }
+                else
+                {
+                    if (ReferenceEquals(getSession(), session))
+                    {
+                        if (british) _britishResultSession = null; else _americanResultSession = null;
+                        if (british) IsBritishResultSpeaking = false; else IsAmericanResultSpeaking = false;
+                    }
+                    if (british) IsBritishResultLoading = false; else IsAmericanResultLoading = false;
+                }
+                if (ReferenceEquals(getCancellation(), cancellation))
+                {
+                    if (source) { if (british) _britishSourceCancellation = null; else _americanSourceCancellation = null; }
+                    else { if (british) _britishResultCancellation = null; else _americanResultCancellation = null; }
+                }
+            }
+        }
+
+        private static bool IsEnglish(string languageId) =>
+            string.Equals(languageId.Split('-', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault(), "en", StringComparison.OrdinalIgnoreCase);
+
+        private async Task StopSpeechAsync(bool source)
+        {
+            (source ? _sourcePlaybackCancellation : _resultPlaybackCancellation)?.Cancel();
+            var session = source ? _sourceSession : _resultSession;
+            if (session is null)
+                return;
+            if (source)
+            {
+                _sourceSession = null;
+                IsSourceSpeaking = false;
+            }
+            else
+            {
+                _resultSession = null;
+                IsResultSpeaking = false;
+            }
+            await session.StopAsync().ConfigureAwait(false);
         }
     }
 

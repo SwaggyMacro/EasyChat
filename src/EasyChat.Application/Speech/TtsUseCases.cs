@@ -12,6 +12,10 @@ public sealed class TtsUseCases : ITtsUseCases
     private readonly ITtsOutputWriter _outputWriter;
     private readonly IAudioPlaybackQueue _playbackQueue;
     private readonly IAudioPlaybackDeviceCatalog? _playbackDevices;
+    private readonly object _sessionSync = new();
+    private readonly SemaphoreSlim _enqueueGate = new(1, 1);
+    private readonly Dictionary<Guid, TtsPlaybackSession> _sessions = [];
+    private readonly HashSet<Guid> _recentlyCompletedPlaybackIds = [];
 
     public TtsUseCases(
         IEnumerable<ITtsSynthesisProvider> providers,
@@ -34,6 +38,10 @@ public sealed class TtsUseCases : ITtsUseCases
         _outputWriter = outputWriter ?? throw new ArgumentNullException(nameof(outputWriter));
         _playbackQueue = playbackQueue ?? throw new ArgumentNullException(nameof(playbackQueue));
         _playbackDevices = playbackDevices;
+        if (playbackQueue is IAudioPlaybackLifecycle lifecycle)
+        {
+            lifecycle.PlaybackCompleted += OnPlaybackCompleted;
+        }
     }
 
     public IReadOnlyList<TtsProviderDescriptor> GetProviders() =>
@@ -57,8 +65,14 @@ public sealed class TtsUseCases : ITtsUseCases
         ArgumentException.ThrowIfNullOrWhiteSpace(languageId);
         var provider = ResolveProvider(providerId);
         var preferences = _settings.Current.Tts.ProviderVoicePreferences;
-        if (preferences.TryGetValue(provider.ProviderId, out var voices)
-            && TryResolveConfiguredVoice(voices, languageId, out var configuredVoice))
+        preferences.TryGetValue(provider.ProviderId, out var voices);
+        if (voices is not null
+            && TryResolveConfiguredVoice(
+                voices,
+                languageId,
+                exactOnly: true,
+                genericOnly: false,
+                out var configuredVoice))
         {
             return Result<string?>.Success(configuredVoice);
         }
@@ -67,22 +81,60 @@ public sealed class TtsUseCases : ITtsUseCases
         if (available.IsFailure)
             return Result<string?>.Failure(available.Error);
 
-        var language = languageId.Split('-', StringSplitOptions.RemoveEmptyEntries)[0];
-        var voice = available.Value.FirstOrDefault(candidate =>
-                        candidate.LanguageId.StartsWith(language, StringComparison.OrdinalIgnoreCase))
-                    ?? available.Value.FirstOrDefault(candidate =>
-                        candidate.Id.Contains("en", StringComparison.OrdinalIgnoreCase));
+        var hasRegion = languageId.Contains('-', StringComparison.Ordinal);
+        var voice = hasRegion
+            ? available.Value.FirstOrDefault(candidate =>
+                string.Equals(candidate.LanguageId, languageId, StringComparison.OrdinalIgnoreCase))
+            : null;
+        if (voice is not null)
+            return Result<string?>.Success(voice.Id);
+
+        if (voices is not null
+            && TryResolveConfiguredVoice(
+                voices,
+                languageId,
+                exactOnly: hasRegion,
+                genericOnly: hasRegion,
+                out configuredVoice))
+        {
+            return Result<string?>.Success(configuredVoice);
+        }
+
+        var language = GetPrimaryLanguage(languageId);
+        voice ??= available.Value.FirstOrDefault(candidate =>
+            string.Equals(GetPrimaryLanguage(candidate.LanguageId), language, StringComparison.OrdinalIgnoreCase));
+        voice ??= available.Value.FirstOrDefault(candidate =>
+            candidate.LanguageId.StartsWith(language, StringComparison.OrdinalIgnoreCase));
+        voice ??= available.Value.FirstOrDefault(candidate =>
+            candidate.LanguageId.StartsWith("en-", StringComparison.OrdinalIgnoreCase)
+            || candidate.Id.Contains("en", StringComparison.OrdinalIgnoreCase));
         return Result<string?>.Success(voice?.Id);
     }
 
     private static bool TryResolveConfiguredVoice(
         IReadOnlyDictionary<string, string> voices,
         string languageId,
+        bool exactOnly,
+        bool genericOnly,
         out string configuredVoice)
     {
+        var exact = voices.FirstOrDefault(pair =>
+            string.Equals(pair.Key, languageId, StringComparison.OrdinalIgnoreCase));
+        if (!string.IsNullOrWhiteSpace(exact.Value))
+        {
+            configuredVoice = exact.Value;
+            return true;
+        }
+        if (exactOnly)
+        {
+            configuredVoice = string.Empty;
+            return false;
+        }
+
         var primaryLanguage = GetPrimaryLanguage(languageId);
         var configured = voices
             .Where(pair => !string.IsNullOrWhiteSpace(pair.Value)
+                           && (!genericOnly || !pair.Key.Contains('-', StringComparison.Ordinal))
                            && string.Equals(
                                GetPrimaryLanguage(pair.Key),
                                primaryLanguage,
@@ -145,15 +197,41 @@ public sealed class TtsUseCases : ITtsUseCases
         AudioPlaybackContext context,
         CancellationToken cancellationToken = default)
     {
+        var result = await EnqueueWithSessionAsync(
+            request, interruptCurrent, target, context, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Result.Success() : Result.Failure(result.Error);
+    }
+
+    public ValueTask<Result<ITtsPlaybackSession>> EnqueueWithSessionAsync(
+        TtsSynthesisRequest request,
+        bool interruptCurrent = false,
+        CancellationToken cancellationToken = default) =>
+        EnqueueWithSessionAsync(request, interruptCurrent, AudioPlaybackTarget.Default,
+            AudioPlaybackContext.None, cancellationToken);
+
+    public ValueTask<Result<ITtsPlaybackSession>> EnqueueWithSessionAsync(
+        TtsSynthesisRequest request,
+        bool interruptCurrent,
+        AudioPlaybackTarget target,
+        CancellationToken cancellationToken = default) =>
+        EnqueueWithSessionAsync(request, interruptCurrent, target, AudioPlaybackContext.None, cancellationToken);
+
+    public async ValueTask<Result<ITtsPlaybackSession>> EnqueueWithSessionAsync(
+        TtsSynthesisRequest request,
+        bool interruptCurrent,
+        AudioPlaybackTarget target,
+        AudioPlaybackContext context,
+        CancellationToken cancellationToken = default)
+    {
         var synthesized = await SynthesizeAsync(request, cancellationToken).ConfigureAwait(false);
         if (synthesized.IsFailure)
-            return Result.Failure(synthesized.Error);
+            return Result<ITtsPlaybackSession>.Failure(synthesized.Error);
 
         if (target == AudioPlaybackTarget.VirtualCable)
         {
             if (_playbackDevices is null)
             {
-                return Result.Failure(new Error(
+                return Result<ITtsPlaybackSession>.Failure(new Error(
                     "audio.virtual_cable_unavailable",
                     "VB-Audio Cable playback device 'CABLE Input' is not available."));
             }
@@ -170,36 +248,49 @@ public sealed class TtsUseCases : ITtsUseCases
             }
             catch (Exception exception)
             {
-                return Result.Failure(new Error(
+                return Result<ITtsPlaybackSession>.Failure(new Error(
                     "audio.virtual_cable_unavailable",
                     exception.Message));
             }
             if (!devices.Any(device => device.IsVirtualCable))
             {
-                return Result.Failure(new Error(
+                return Result<ITtsPlaybackSession>.Failure(new Error(
                     "audio.virtual_cable_unavailable",
                     "VB-Audio Cable playback device 'CABLE Input' is not available."));
             }
         }
+
+        await _enqueueGate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
             if (interruptCurrent)
-                await _playbackQueue.StopAsync(cancellationToken).ConfigureAwait(false);
+                await StopAllSessionsAsync(cancellationToken).ConfigureAwait(false);
+
+            Guid playbackId;
             if (target == AudioPlaybackTarget.Default && context == AudioPlaybackContext.None)
             {
-                await _playbackQueue.EnqueueAsync(
+                playbackId = await _playbackQueue.EnqueueAsync(
                     synthesized.Value,
                     cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                await _playbackQueue.EnqueueAsync(
+                playbackId = await _playbackQueue.EnqueueAsync(
                     synthesized.Value,
                     target,
                     context,
                     cancellationToken).ConfigureAwait(false);
             }
-            return Result.Success();
+
+            var session = new TtsPlaybackSession(this, playbackId);
+            lock (_sessionSync)
+            {
+                if (_recentlyCompletedPlaybackIds.Remove(playbackId))
+                    session.Complete();
+                else
+                    _sessions[playbackId] = session;
+            }
+            return Result<ITtsPlaybackSession>.Success(session);
         }
         catch (OperationCanceledException)
         {
@@ -207,7 +298,58 @@ public sealed class TtsUseCases : ITtsUseCases
         }
         catch (Exception exception)
         {
-            return Result.Failure(new Error("audio.playback_unavailable", exception.Message));
+            return Result<ITtsPlaybackSession>.Failure(new Error("audio.playback_unavailable", exception.Message));
+        }
+        finally
+        {
+            _enqueueGate.Release();
+        }
+    }
+
+    private async ValueTask StopAllSessionsAsync(CancellationToken cancellationToken)
+    {
+        TtsPlaybackSession[] sessions;
+        lock (_sessionSync)
+        {
+            sessions = _sessions.Values.ToArray();
+            _sessions.Clear();
+            foreach (var session in sessions)
+                session.Complete();
+        }
+        await _playbackQueue.StopAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private async ValueTask StopSessionAsync(TtsPlaybackSession session, CancellationToken cancellationToken)
+    {
+        var shouldStop = false;
+        lock (_sessionSync)
+        {
+            if (_sessions.ContainsKey(session.PlaybackId))
+            {
+                shouldStop = true;
+                var sessions = _sessions.Values.ToArray();
+                _sessions.Clear();
+                foreach (var current in sessions)
+                    current.Complete();
+            }
+        }
+        if (shouldStop)
+            await _playbackQueue.StopAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private void OnPlaybackCompleted(object? sender, AudioPlaybackEventArgs args)
+    {
+        TtsPlaybackSession? session = null;
+        lock (_sessionSync)
+        {
+            if (_sessions.Remove(args.PlaybackId, out session))
+                session.Complete();
+            else
+            {
+                _recentlyCompletedPlaybackIds.Add(args.PlaybackId);
+                if (_recentlyCompletedPlaybackIds.Count > 64)
+                    _recentlyCompletedPlaybackIds.Remove(_recentlyCompletedPlaybackIds.First());
+            }
         }
     }
 
@@ -226,5 +368,19 @@ public sealed class TtsUseCases : ITtsUseCases
         ArgumentNullException.ThrowIfNull(request);
         ArgumentException.ThrowIfNullOrWhiteSpace(request.Text);
         ArgumentException.ThrowIfNullOrWhiteSpace(request.VoiceId);
+    }
+
+    private sealed class TtsPlaybackSession(TtsUseCases owner, Guid playbackId) : ITtsPlaybackSession
+    {
+        private readonly TaskCompletionSource<object?> _completion =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public Guid PlaybackId { get; } = playbackId;
+        public Task Completion => _completion.Task;
+
+        public ValueTask StopAsync(CancellationToken cancellationToken = default) =>
+            owner.StopSessionAsync(this, cancellationToken);
+
+        public void Complete() => _completion.TrySetResult(null);
     }
 }

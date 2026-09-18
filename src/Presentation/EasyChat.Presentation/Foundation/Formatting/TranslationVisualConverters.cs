@@ -352,7 +352,9 @@ internal static class AssetIconLoader
 
 internal static class LanguageFlagAssetLoader
 {
-    private const string AssetRoot = "avares://EasyChat.Desktop/Assets/Images/Flags/mini/";
+    // Pronunciation controls are small but frequently rendered on high-DPI displays. Decode
+    // from the normal-resolution asset instead of the 40px mini asset, then downsample once.
+    private const string AssetRoot = "avares://EasyChat.Desktop/Assets/Images/Flags/normal/";
 
     public static Bitmap? Load(string? file)
     {
@@ -362,7 +364,7 @@ internal static class LanguageFlagAssetLoader
         try
         {
             using var stream = AssetLoader.Open(new Uri($"{AssetRoot}{file}"));
-            return new Bitmap(stream);
+            return Bitmap.DecodeToHeight(stream, 64, BitmapInterpolationMode.HighQuality);
         }
         catch
         {

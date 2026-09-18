@@ -75,6 +75,106 @@ public sealed class TtsUseCasesTests
     }
 
     [TestMethod]
+    public async Task ResolvePreferredVoiceAsync_PrefersConfiguredRegionalVoices()
+    {
+        var initial = SettingsTestData.CreateBundle();
+        var settings = new MutableSettingsUseCases(initial with
+        {
+            Tts = new TtsSettings(
+                TtsProviderIds.EdgeTts,
+                new Dictionary<string, IReadOnlyDictionary<string, string>>
+                {
+                    [TtsProviderIds.EdgeTts] = new Dictionary<string, string>
+                    {
+                        ["en-GB"] = "en-GB-ConfiguredNeural",
+                        ["en-US"] = "en-US-ConfiguredNeural"
+                    }
+                })
+        });
+        var useCases = new TtsUseCases(
+            [new FakeProvider(TtsProviderIds.EdgeTts)],
+            settings,
+            new FakeOutputWriter(),
+            new FakePlaybackQueue());
+
+        var british = await useCases.ResolvePreferredVoiceAsync("en-GB");
+        var american = await useCases.ResolvePreferredVoiceAsync("en-US");
+
+        Assert.AreEqual("en-GB-ConfiguredNeural", british.Value);
+        Assert.AreEqual("en-US-ConfiguredNeural", american.Value);
+    }
+
+    [TestMethod]
+    public async Task ResolvePreferredVoiceAsync_DoesNotUseAnotherRegionAsGenericFallback()
+    {
+        var initial = SettingsTestData.CreateBundle();
+        var settings = new MutableSettingsUseCases(initial with
+        {
+            Tts = new TtsSettings(
+                TtsProviderIds.EdgeTts,
+                new Dictionary<string, IReadOnlyDictionary<string, string>>
+                {
+                    [TtsProviderIds.EdgeTts] = new Dictionary<string, string>
+                    {
+                        ["en-GB"] = "en-GB-ConfiguredNeural"
+                    }
+                })
+        });
+        var useCases = new TtsUseCases(
+            [new FakeProvider(TtsProviderIds.EdgeTts)],
+            settings,
+            new FakeOutputWriter(),
+            new FakePlaybackQueue());
+
+        var american = await useCases.ResolvePreferredVoiceAsync("en-US");
+
+        Assert.AreEqual("en-US-DefaultNeural", american.Value);
+    }
+
+    [TestMethod]
+    public async Task PlaybackSession_StopStopsQueueAndCompletesSession()
+    {
+        var settings = new MutableSettingsUseCases(SettingsTestData.CreateBundle());
+        var playback = new FakePlaybackQueue();
+        var useCases = new TtsUseCases(
+            [new FakeProvider(TtsProviderIds.EdgeTts)],
+            settings,
+            new FakeOutputWriter(),
+            playback);
+
+        var result = await useCases.EnqueueWithSessionAsync(
+            new TtsSynthesisRequest("hello", "en-US-DefaultNeural"),
+            interruptCurrent: true);
+
+        Assert.IsTrue(result.IsSuccess);
+        await result.Value.StopAsync();
+        await result.Value.Completion.WaitAsync(TimeSpan.FromSeconds(1));
+
+        CollectionAssert.Contains(playback.Operations, "stop");
+    }
+
+    [TestMethod]
+    public async Task PlaybackSession_CompletesWhenLifecycleReportsNaturalCompletion()
+    {
+        var settings = new MutableSettingsUseCases(SettingsTestData.CreateBundle());
+        var playback = new FakePlaybackQueue();
+        var useCases = new TtsUseCases(
+            [new FakeProvider(TtsProviderIds.EdgeTts)],
+            settings,
+            new FakeOutputWriter(),
+            playback);
+
+        var result = await useCases.EnqueueWithSessionAsync(
+            new TtsSynthesisRequest("hello", "en-US-DefaultNeural"),
+            interruptCurrent: true);
+
+        Assert.IsTrue(result.IsSuccess);
+        Assert.IsFalse(result.Value.Completion.IsCompleted);
+        playback.CompleteLast();
+        await result.Value.Completion.WaitAsync(TimeSpan.FromSeconds(1));
+    }
+
+    [TestMethod]
     public async Task VirtualCableTargetIsValidatedAndForwardedToPlaybackQueue()
     {
         var settings = new MutableSettingsUseCases(SettingsTestData.CreateBundle());
@@ -146,7 +246,8 @@ public sealed class TtsUseCasesTests
         public ValueTask<Result<IReadOnlyList<TtsVoice>>> GetVoicesAsync(
             CancellationToken cancellationToken = default) =>
             ValueTask.FromResult(Result<IReadOnlyList<TtsVoice>>.Success([
-                new TtsVoice("en-US-DefaultNeural", "Default", "en-US", "Female", [], [])
+                new TtsVoice("en-GB-DefaultNeural", "British", "en-GB", "Female", [], []),
+                new TtsVoice("en-US-DefaultNeural", "American", "en-US", "Female", [], [])
             ]));
 
         public ValueTask<Result<IReadOnlyList<TtsLanguage>>> GetLanguagesAsync(
@@ -163,29 +264,40 @@ public sealed class TtsUseCasesTests
         }
     }
 
-    private sealed class FakePlaybackQueue : IAudioPlaybackQueue
+    private sealed class FakePlaybackQueue : IAudioPlaybackQueue, IAudioPlaybackLifecycle
     {
         public List<string> Operations { get; } = [];
         public List<AudioPlaybackTarget> Targets { get; } = [];
         public List<AudioPlaybackContext> Contexts { get; } = [];
+        public List<Guid> PlaybackIds { get; } = [];
+        event EventHandler<AudioPlaybackEventArgs>? IAudioPlaybackLifecycle.PlaybackStarted
+        {
+            add { }
+            remove { }
+        }
+        public event EventHandler<AudioPlaybackEventArgs>? PlaybackCompleted;
 
-        public ValueTask EnqueueAsync(AudioTrack track, CancellationToken cancellationToken = default)
+        public ValueTask<Guid> EnqueueAsync(AudioTrack track, CancellationToken cancellationToken = default)
         {
             Operations.Add("enqueue");
-            return ValueTask.CompletedTask;
+            var id = Guid.NewGuid();
+            PlaybackIds.Add(id);
+            return ValueTask.FromResult(id);
         }
 
-        public ValueTask EnqueueAsync(
+        public ValueTask<Guid> EnqueueAsync(
             AudioTrack track,
             AudioPlaybackTarget target,
             CancellationToken cancellationToken = default)
         {
             Operations.Add($"enqueue:{target}");
             Targets.Add(target);
-            return ValueTask.CompletedTask;
+            var id = Guid.NewGuid();
+            PlaybackIds.Add(id);
+            return ValueTask.FromResult(id);
         }
 
-        public ValueTask EnqueueAsync(
+        public ValueTask<Guid> EnqueueAsync(
             AudioTrack track,
             AudioPlaybackTarget target,
             AudioPlaybackContext context,
@@ -194,7 +306,9 @@ public sealed class TtsUseCasesTests
             Operations.Add($"enqueue:{target}:{context}");
             Targets.Add(target);
             Contexts.Add(context);
-            return ValueTask.CompletedTask;
+            var id = Guid.NewGuid();
+            PlaybackIds.Add(id);
+            return ValueTask.FromResult(id);
         }
 
         public ValueTask StopAsync(CancellationToken cancellationToken = default)
@@ -202,6 +316,13 @@ public sealed class TtsUseCasesTests
             Operations.Add("stop");
             return ValueTask.CompletedTask;
         }
+
+        public void CompleteLast() => PlaybackCompleted?.Invoke(
+            this,
+            new AudioPlaybackEventArgs(
+                PlaybackIds[^1],
+                AudioPlaybackTarget.Default,
+                AudioPlaybackContext.None));
     }
 
     private sealed class FakePlaybackDeviceCatalog(bool hasVirtualCable) : IAudioPlaybackDeviceCatalog

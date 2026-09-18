@@ -50,13 +50,17 @@
                         Content="{x:Static lang:Resources.Close}" />
                 <Button Classes="Primary"
                         MinWidth="96"
-                        Command="{Binding PlayCommand}"
-                        IsEnabled="{Binding !IsPlaying}">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        Command="{Binding PlayCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="6" IsHitTestVisible="False">
                         <avalonia:MaterialIcon Kind="Play" Width="16" Height="16"
-                                               IsVisible="{Binding !IsPlaying}" />
-                        <shad:Loading IsVisible="{Binding IsPlaying}" Width="16" Height="16" />
-                        <TextBlock Text="{x:Static lang:Resources.Tts_Play}" VerticalAlignment="Center" />
+                                               IsVisible="{Binding ShowPlayIcon}" />
+                        <avalonia:MaterialIcon Kind="Stop" Width="16" Height="16"
+                                               IsVisible="{Binding IsPlaying}" />
+                        <shad:Loading IsVisible="{Binding IsLoading}" Width="16" Height="16" />
+                        <TextBlock Text="{x:Static lang:Resources.Tts_Play}" VerticalAlignment="Center"
+                                   IsVisible="{Binding ShowPlayIcon}" />
+                        <TextBlock Text="{x:Static lang:Resources.LongScreenshot_Stop}" VerticalAlignment="Center"
+                                   IsVisible="{Binding IsPlaying}" />
                     </StackPanel>
                 </Button>
             </StackPanel>

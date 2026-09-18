@@ -117,6 +117,8 @@ public sealed class TtsVoiceSettingsDialogViewModel : ConventionViewModelBase
         ConfiguredVoices = new ObservableCollection<ConfiguredVoiceItem>(configured.Select(preference =>
         {
             var language = _languages.FirstOrDefault(item =>
+                               string.Equals(item.Id, preference.Key, StringComparison.OrdinalIgnoreCase))
+                           ?? _languages.FirstOrDefault(item =>
                                string.Equals(
                                    GetPrimaryLanguage(item.Id),
                                    GetPrimaryLanguage(preference.Key),
@@ -324,6 +326,9 @@ public sealed class TtsPreviewInputDialogViewModel : ConventionViewModelBase
     private readonly string _provider;
     private readonly string _voiceId;
     private string _inputText = Resources.Tts_PreviewDefaultText;
+    private ITtsPlaybackSession? _session;
+    private CancellationTokenSource? _playbackCancellation;
+    private bool _isLoading;
     private bool _isPlaying;
 
     public TtsPreviewInputDialogViewModel(
@@ -336,14 +341,31 @@ public sealed class TtsPreviewInputDialogViewModel : ConventionViewModelBase
         _tts = tts;
         _provider = provider;
         _voiceId = voiceId;
-        PlayCommand = ReactiveCommand.CreateFromTask(
-            PlayAsync,
-            this.WhenAnyValue(viewModel => viewModel.IsPlaying).Select(playing => !playing));
-        CloseCommand = ReactiveCommand.Create(Close);
+        // This command must stay executable while the preview is playing so it can stop it.
+        PlayCommand = ReactiveCommand.Create(() => { _ = PlayAsync(); });
+        CloseCommand = ReactiveCommand.CreateFromTask(CloseAsync);
     }
 
     public string InputText { get => _inputText; set => this.RaiseAndSetIfChanged(ref _inputText, value); }
-    public bool IsPlaying { get => _isPlaying; private set => this.RaiseAndSetIfChanged(ref _isPlaying, value); }
+    public bool IsLoading
+    {
+        get => _isLoading;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isLoading, value);
+            this.RaisePropertyChanged(nameof(ShowPlayIcon));
+        }
+    }
+    public bool IsPlaying
+    {
+        get => _isPlaying;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isPlaying, value);
+            this.RaisePropertyChanged(nameof(ShowPlayIcon));
+        }
+    }
+    public bool ShowPlayIcon => !IsLoading && !IsPlaying;
     public ReactiveCommand<Unit, Unit> PlayCommand { get; }
     public ReactiveCommand<Unit, Unit> CloseCommand { get; }
     public Action? OnDismiss { get; init; }
@@ -352,21 +374,76 @@ public sealed class TtsPreviewInputDialogViewModel : ConventionViewModelBase
     {
         if (string.IsNullOrWhiteSpace(InputText))
             return;
-        IsPlaying = true;
+
+        if (IsPlaying)
+        {
+            await StopCurrentAsync().ConfigureAwait(false);
+            return;
+        }
+        if (IsLoading)
+        {
+            _playbackCancellation?.Cancel();
+            return;
+        }
+
+        using var cancellation = new CancellationTokenSource();
+        _playbackCancellation = cancellation;
+        ITtsPlaybackSession? session = null;
+        IsLoading = true;
         try
         {
-            await _tts.EnqueueAsync(
+            var result = await _tts.EnqueueWithSessionAsync(
                 new TtsSynthesisRequest(InputText, _voiceId, _provider),
-                interruptCurrent: true);
+                interruptCurrent: true,
+                cancellationToken: cancellation.Token).ConfigureAwait(false);
+            if (result.IsFailure)
+                return;
+
+            session = result.Value;
+            if (cancellation.IsCancellationRequested)
+            {
+                await session.StopAsync().ConfigureAwait(false);
+                return;
+            }
+            _session = session;
+            IsPlaying = true;
+            IsLoading = false;
+            await session.Completion.ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+        {
         }
         finally
         {
-            IsPlaying = false;
+            if (ReferenceEquals(_session, session))
+            {
+                _session = null;
+                IsPlaying = false;
+            }
+            IsLoading = false;
+            if (ReferenceEquals(_playbackCancellation, cancellation))
+                _playbackCancellation = null;
         }
     }
 
-    private void Close()
+    private async Task StopCurrentAsync()
     {
+        _playbackCancellation?.Cancel();
+        var session = _session;
+        if (session is null)
+        {
+            IsPlaying = false;
+            return;
+        }
+
+        _session = null;
+        IsPlaying = false;
+        await session.StopAsync().ConfigureAwait(false);
+    }
+
+    private async Task CloseAsync()
+    {
+        await StopCurrentAsync().ConfigureAwait(false);
         _dialogManager.Close(this);
         OnDismiss?.Invoke();
     }

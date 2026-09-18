@@ -2745,6 +2745,27 @@ public sealed class SubtitleSessionCoordinatorTests
             CancellationToken cancellationToken = default) =>
             ValueTask.FromResult(Result<string?>.Success("en-US-DefaultNeural"));
 
+        public ValueTask<Result<ITtsPlaybackSession>> EnqueueWithSessionAsync(
+            TtsSynthesisRequest request,
+            bool interruptCurrent = false,
+            CancellationToken cancellationToken = default) =>
+            ValueTask.FromResult(Result<ITtsPlaybackSession>.Success(new StubPlaybackSession(Guid.NewGuid())));
+
+        public ValueTask<Result<ITtsPlaybackSession>> EnqueueWithSessionAsync(
+            TtsSynthesisRequest request,
+            bool interruptCurrent,
+            AudioPlaybackTarget target,
+            CancellationToken cancellationToken = default) =>
+            EnqueueWithSessionAsync(request, interruptCurrent, cancellationToken);
+
+        public ValueTask<Result<ITtsPlaybackSession>> EnqueueWithSessionAsync(
+            TtsSynthesisRequest request,
+            bool interruptCurrent,
+            AudioPlaybackTarget target,
+            AudioPlaybackContext context,
+            CancellationToken cancellationToken = default) =>
+            EnqueueWithSessionAsync(request, interruptCurrent, cancellationToken);
+
         public ValueTask<Result<AudioTrack>> SynthesizeAsync(
             TtsSynthesisRequest request,
             CancellationToken cancellationToken = default) =>
@@ -2766,6 +2787,13 @@ public sealed class SubtitleSessionCoordinatorTests
             Texts.Add(request.Text);
             Targets.Add(AudioPlaybackTarget.Default);
             return ValueTask.FromResult(Result.Success());
+        }
+
+        private sealed class StubPlaybackSession(Guid id) : ITtsPlaybackSession
+        {
+            public Guid PlaybackId { get; } = id;
+            public Task Completion { get; } = Task.CompletedTask;
+            public ValueTask StopAsync(CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
         }
 
         public ValueTask<Result> EnqueueAsync(

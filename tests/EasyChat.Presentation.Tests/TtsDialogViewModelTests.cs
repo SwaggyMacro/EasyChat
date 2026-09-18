@@ -126,6 +126,37 @@ public sealed class TtsDialogViewModelTests
             CancellationToken cancellationToken = default) =>
             ValueTask.FromResult(Result<string?>.Success(Voice.Id));
 
+        public ValueTask<Result<ITtsPlaybackSession>> EnqueueWithSessionAsync(
+            TtsSynthesisRequest request,
+            bool interruptCurrent = false,
+            CancellationToken cancellationToken = default) =>
+            RecordSession(request, interruptCurrent);
+
+        public ValueTask<Result<ITtsPlaybackSession>> EnqueueWithSessionAsync(
+            TtsSynthesisRequest request,
+            bool interruptCurrent,
+            AudioPlaybackTarget target,
+            CancellationToken cancellationToken = default) =>
+            EnqueueWithSessionAsync(request, interruptCurrent, cancellationToken);
+
+        public ValueTask<Result<ITtsPlaybackSession>> EnqueueWithSessionAsync(
+            TtsSynthesisRequest request,
+            bool interruptCurrent,
+            AudioPlaybackTarget target,
+            AudioPlaybackContext context,
+            CancellationToken cancellationToken = default) =>
+            EnqueueWithSessionAsync(request, interruptCurrent, cancellationToken);
+
+        private ValueTask<Result<ITtsPlaybackSession>> RecordSession(
+            TtsSynthesisRequest request,
+            bool interruptCurrent)
+        {
+            EnqueuedRequest = request;
+            InterruptCurrent = interruptCurrent;
+            return ValueTask.FromResult(Result<ITtsPlaybackSession>.Success(
+                new StubPlaybackSession(Guid.NewGuid())));
+        }
+
         public ValueTask<Result<AudioTrack>> SynthesizeAsync(
             TtsSynthesisRequest request,
             CancellationToken cancellationToken = default) =>
@@ -157,6 +188,13 @@ public sealed class TtsDialogViewModelTests
             EnqueuedRequest = request;
             InterruptCurrent = interruptCurrent;
             return ValueTask.FromResult(Result.Success());
+        }
+
+        private sealed class StubPlaybackSession(Guid id) : ITtsPlaybackSession
+        {
+            public Guid PlaybackId { get; } = id;
+            public Task Completion { get; } = Task.CompletedTask;
+            public ValueTask StopAsync(CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
         }
     }
 }

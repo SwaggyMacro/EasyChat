@@ -55,14 +55,14 @@ public interface IAudioPlaybackDeviceCatalog
 
 public interface IAudioPlaybackQueue
 {
-    ValueTask EnqueueAsync(AudioTrack track, CancellationToken cancellationToken = default);
+    ValueTask<Guid> EnqueueAsync(AudioTrack track, CancellationToken cancellationToken = default);
 
-    ValueTask EnqueueAsync(
+    ValueTask<Guid> EnqueueAsync(
         AudioTrack track,
         AudioPlaybackTarget target,
         CancellationToken cancellationToken = default);
 
-    ValueTask EnqueueAsync(
+    ValueTask<Guid> EnqueueAsync(
         AudioTrack track,
         AudioPlaybackTarget target,
         AudioPlaybackContext context,
