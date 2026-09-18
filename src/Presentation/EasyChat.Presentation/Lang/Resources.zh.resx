@@ -318,6 +318,7 @@
     <data name="Speech_InstallDriverTutorial" xml:space="preserve"><value>安装教程</value></data>
     <data name="Speech_UsageTutorial" xml:space="preserve"><value>使用教程</value></data>
     <data name="Speech_RecheckVirtualCable" xml:space="preserve"><value>重新检测</value></data>
+    <data name="Speech_SkipVirtualCableCheck" xml:space="preserve"><value>跳过检测，继续使用</value></data>
     <data name="Speech_SubtitleOriginAudio" xml:space="preserve"><value>音频</value></data>
     <data name="Speech_SubtitleOriginInterpretation" xml:space="preserve"><value>口译</value></data>
     <data name="AfterTextInput" xml:space="preserve">

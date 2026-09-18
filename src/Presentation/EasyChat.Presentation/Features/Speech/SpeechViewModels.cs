@@ -271,6 +271,7 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
     private bool _isRealtimeInterpretationRecording;
     private bool _isRealtimeInterpretationArmed;
     private bool _isVirtualCableAvailable;
+    private bool _isVirtualCableCheckSkipped;
     private bool _isCheckingVirtualCable;
     private bool _isFloatingWindowOpen;
 #if DEBUG
@@ -339,6 +340,7 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
             () => ToggleInterpretationArmedAsync());
         RefreshSourcesCommand = ReactiveCommand.CreateFromTask(RefreshSourcesAsync);
         RefreshVirtualCableCommand = ReactiveCommand.CreateFromTask(RefreshVirtualCableAsync);
+        SkipVirtualCableCheckCommand = ReactiveCommand.Create(SkipVirtualCableCheck);
         OpenAudioTranslationTutorialCommand = ReactiveCommand.Create(OpenAudioTranslationTutorial);
         OpenInterpretationTutorialCommand = ReactiveCommand.Create(OpenInterpretationTutorial);
         OpenVirtualCableInstallationTutorialCommand = ReactiveCommand.Create(OpenVirtualCableInstallationTutorial);
@@ -402,6 +404,7 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
     public ReactiveCommand<Unit, Unit> ToggleRealtimeInterpretationCommand { get; }
     public ReactiveCommand<Unit, Unit> RefreshSourcesCommand { get; }
     public ReactiveCommand<Unit, Unit> RefreshVirtualCableCommand { get; }
+    public ReactiveCommand<Unit, Unit> SkipVirtualCableCheckCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenAudioTranslationTutorialCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenInterpretationTutorialCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenVirtualCableInstallationTutorialCommand { get; }
@@ -575,11 +578,22 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
             this.RaisePropertyChanged(nameof(CanToggleRealtimeInterpretation));
         }
     }
+    public bool IsVirtualCableCheckSkipped
+    {
+        get => _isVirtualCableCheckSkipped;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isVirtualCableCheckSkipped, value);
+            this.RaisePropertyChanged(nameof(IsRealtimeInterpretationAvailable));
+            this.RaisePropertyChanged(nameof(IsRealtimeInterpretationDriverMissing));
+            this.RaisePropertyChanged(nameof(CanToggleRealtimeInterpretation));
+        }
+    }
     public bool IsVirtualCableMissing => !IsVirtualCableAvailable;
     public bool IsRealtimeInterpretationDriverMissing =>
-        IsVoiceTranslationMode && IsVirtualCableMissing;
+        IsVoiceTranslationMode && IsVirtualCableMissing && !IsVirtualCableCheckSkipped;
     public bool IsRealtimeInterpretationAvailable =>
-        IsVirtualCableAvailable && !IsCheckingVirtualCable;
+        (IsVirtualCableAvailable || IsVirtualCableCheckSkipped) && !IsCheckingVirtualCable;
     public bool CanToggleRealtimeInterpretation =>
         IsRealtimeInterpretationAvailable || IsRealtimeInterpretationArmed;
     public bool IsCheckingVirtualCable
@@ -1085,6 +1099,7 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
 
     private async Task RefreshVirtualCableAsync(CancellationToken cancellationToken = default)
     {
+        IsVirtualCableCheckSkipped = false;
 #if DEBUG
         _debugVirtualCableNeedsManualCheck = false;
 #endif
@@ -1121,6 +1136,11 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
         {
             IsCheckingVirtualCable = false;
         }
+    }
+
+    private void SkipVirtualCableCheck()
+    {
+        IsVirtualCableCheckSkipped = true;
     }
 
     private void OpenAudioTranslationTutorial()

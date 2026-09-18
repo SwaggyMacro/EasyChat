@@ -209,6 +209,9 @@ namespace EasyChat.Presentation.Lang {
         public static string Speech_RecheckVirtualCable =>
             ResourceManager.GetString("Speech_RecheckVirtualCable", resourceCulture);
 
+        public static string Speech_SkipVirtualCableCheck =>
+            ResourceManager.GetString("Speech_SkipVirtualCableCheck", resourceCulture);
+
         public static string Speech_SubtitleOriginAudio =>
             ResourceManager.GetString("Speech_SubtitleOriginAudio", resourceCulture);
 

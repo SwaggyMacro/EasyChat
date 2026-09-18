@@ -341,6 +341,9 @@
     <data name="Speech_RecheckVirtualCable" xml:space="preserve">
     <value>Check again</value>
   </data>
+    <data name="Speech_SkipVirtualCableCheck" xml:space="preserve">
+    <value>Skip check and continue</value>
+  </data>
     <data name="Speech_SubtitleOriginAudio" xml:space="preserve">
     <value>Audio</value>
   </data>
