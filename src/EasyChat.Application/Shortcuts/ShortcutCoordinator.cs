@@ -50,10 +50,63 @@ public sealed class ShortcutCoordinator : IShortcutUseCases
         try
         {
             DisposeRegistrations();
+            if (_actions.TryGetValue("AutomaticKey", out var resetAutomaticState)
+                && resetAutomaticState.Action is IAutomaticShortcutAction resetAutomaticAction)
+            {
+                await resetAutomaticAction.ResetAsync(cancellationToken).ConfigureAwait(false);
+            }
             var entries = _settings.Current.Shortcut.Entries
                 .Where(entry => entry.IsEnabled && !string.IsNullOrWhiteSpace(entry.KeyCombination))
                 .ToArray();
             var issues = new List<ShortcutRegistrationIssue>();
+
+            var automaticEntries = entries
+                .Where(entry => string.Equals(entry.ActionType, "AutomaticKey", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+            var globalEntries = entries
+                .Where(entry => !string.Equals(entry.ActionType, "AutomaticKey", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+            var registeredCount = 0;
+
+            if (automaticEntries.Length > 0)
+            {
+                if (!_actions.TryGetValue("AutomaticKey", out var automaticState)
+                    || automaticState.Action is not IAutomaticShortcutAction automaticAction)
+                {
+                    issues.AddRange(automaticEntries.Select(entry => new ShortcutRegistrationIssue(
+                        entry.ActionType,
+                        entry.KeyCombination,
+                        new Error(
+                            "shortcut.action-unavailable",
+                            "No automatic shortcut action is registered."))));
+                }
+                else
+                {
+                    var automaticAccess = await _platformAccess.EnsureAvailableAsync(
+                        PlatformCapability.TextDelivery,
+                        cancellationToken).ConfigureAwait(false);
+                    if (automaticAccess.IsFailure)
+                    {
+                        issues.AddRange(automaticEntries.Select(entry => new ShortcutRegistrationIssue(
+                            entry.ActionType,
+                            entry.KeyCombination,
+                            automaticAccess.Error)));
+                    }
+                    else
+                    {
+                        var automaticIssues = await automaticAction.ConfigureAsync(
+                            automaticEntries,
+                            cancellationToken).ConfigureAwait(false);
+                        issues.AddRange(automaticIssues);
+                        registeredCount += automaticEntries.Length - automaticIssues.Count;
+                    }
+                }
+            }
+
+            if (globalEntries.Length == 0)
+            {
+                return new ShortcutRegistrationReport(entries.Length, registeredCount, issues);
+            }
 
             var access = await _platformAccess.EnsureAvailableAsync(
                 PlatformCapability.GlobalHotkeys,
@@ -64,10 +117,10 @@ public sealed class ShortcutCoordinator : IShortcutUseCases
                     "GlobalHotkeys",
                     string.Empty,
                     access.Error));
-                return new ShortcutRegistrationReport(entries.Length, 0, issues);
+                return new ShortcutRegistrationReport(entries.Length, registeredCount, issues);
             }
 
-            foreach (var entry in entries)
+            foreach (var entry in globalEntries)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 if (!_actions.TryGetValue(entry.ActionType, out var action))
@@ -129,11 +182,12 @@ public sealed class ShortcutCoordinator : IShortcutUseCases
                 }
 
                 _registrations.Add(registration.Value);
+                registeredCount++;
             }
 
             return new ShortcutRegistrationReport(
                 entries.Length,
-                _registrations.Count,
+                registeredCount,
                 issues);
         }
         finally
@@ -171,6 +225,11 @@ public sealed class ShortcutCoordinator : IShortcutUseCases
         try
         {
             DisposeRegistrations();
+            if (_actions.TryGetValue("AutomaticKey", out var automaticState)
+                && automaticState.Action is IAutomaticShortcutAction automaticAction)
+            {
+                await automaticAction.ResetAsync().ConfigureAwait(false);
+            }
         }
         finally
         {

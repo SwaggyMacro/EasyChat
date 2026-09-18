@@ -96,6 +96,27 @@ public sealed class TtsUseCasesTests
     }
 
     [TestMethod]
+    public async Task PlaybackContextIsForwardedForDefaultTarget()
+    {
+        var settings = new MutableSettingsUseCases(SettingsTestData.CreateBundle());
+        var playback = new FakePlaybackQueue();
+        var useCases = new TtsUseCases(
+            [new FakeProvider(TtsProviderIds.EdgeTts)],
+            settings,
+            new FakeOutputWriter(),
+            playback);
+
+        var result = await useCases.EnqueueAsync(
+            new TtsSynthesisRequest("hello", "en-US-DefaultNeural"),
+            interruptCurrent: false,
+            target: AudioPlaybackTarget.Default,
+            context: AudioPlaybackContext.RealtimeInterpretation);
+
+        Assert.IsTrue(result.IsSuccess);
+        Assert.AreEqual(AudioPlaybackContext.RealtimeInterpretation, playback.Contexts.Single());
+    }
+
+    [TestMethod]
     public async Task VirtualCableTargetFailsWithoutCableAndDoesNotEnqueue()
     {
         var settings = new MutableSettingsUseCases(SettingsTestData.CreateBundle());
@@ -146,6 +167,7 @@ public sealed class TtsUseCasesTests
     {
         public List<string> Operations { get; } = [];
         public List<AudioPlaybackTarget> Targets { get; } = [];
+        public List<AudioPlaybackContext> Contexts { get; } = [];
 
         public ValueTask EnqueueAsync(AudioTrack track, CancellationToken cancellationToken = default)
         {
@@ -160,6 +182,18 @@ public sealed class TtsUseCasesTests
         {
             Operations.Add($"enqueue:{target}");
             Targets.Add(target);
+            return ValueTask.CompletedTask;
+        }
+
+        public ValueTask EnqueueAsync(
+            AudioTrack track,
+            AudioPlaybackTarget target,
+            AudioPlaybackContext context,
+            CancellationToken cancellationToken = default)
+        {
+            Operations.Add($"enqueue:{target}:{context}");
+            Targets.Add(target);
+            Contexts.Add(context);
             return ValueTask.CompletedTask;
         }
 

@@ -13,7 +13,7 @@ using SoundFlow.Structs;
 namespace EasyChat.Infrastructure.Windows.Audio;
 
 [SupportedOSPlatform("windows")]
-public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, IDisposable
+public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, IAudioPlaybackLifecycle, IDisposable
 {
     private readonly object _sync = new();
     private readonly ConcurrentQueue<QueuedPlayback> _queue = new();
@@ -24,6 +24,10 @@ public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, ID
     private Task? _runner;
     private bool _disposed;
     private AudioPlaybackTarget _deviceTarget;
+
+    public event EventHandler<AudioPlaybackEventArgs>? PlaybackStarted;
+
+    public event EventHandler<AudioPlaybackEventArgs>? PlaybackCompleted;
 
     public WindowsSoundFlowAudioPlaybackQueue(
         ILogger<WindowsSoundFlowAudioPlaybackQueue> logger)
@@ -40,13 +44,20 @@ public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, ID
         AudioTrack track,
         AudioPlaybackTarget target,
         CancellationToken cancellationToken = default)
+        => EnqueueAsync(track, target, AudioPlaybackContext.None, cancellationToken);
+
+    public ValueTask EnqueueAsync(
+        AudioTrack track,
+        AudioPlaybackTarget target,
+        AudioPlaybackContext context,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(track);
         cancellationToken.ThrowIfCancellationRequested();
         lock (_sync)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
-            _queue.Enqueue(new QueuedPlayback(track, target));
+            _queue.Enqueue(new QueuedPlayback(Guid.NewGuid(), track, target, context));
             if (_runner is null || _runner.IsCompleted)
                 _runner = Task.Run(RunAsync);
         }
@@ -113,7 +124,7 @@ public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, ID
 
             try
             {
-                await PlayAsync(queued.Track, queued.Target, token).ConfigureAwait(false);
+                await PlayAsync(queued, token).ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
@@ -126,27 +137,63 @@ public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, ID
     }
 
     private async Task PlayAsync(
-        AudioTrack track,
-        AudioPlaybackTarget target,
+        QueuedPlayback queued,
         CancellationToken cancellationToken)
     {
-        EnsureInitialized(target);
+        EnsureInitialized(queued.Target);
         if (_engine is null || _device is null)
             return;
-        using var stream = new MemoryStream(track.Content.ToArray(), writable: false);
+        using var stream = new MemoryStream(queued.Track.Content.ToArray(), writable: false);
         using var provider = new StreamDataProvider(_engine, _device.Format, stream);
         using var player = new SoundPlayer(_engine, _device.Format, provider);
         _device.MasterMixer.AddComponent(player);
+        var started = false;
         try
         {
             player.Play();
+            started = true;
+            Publish(PlaybackStarted, queued);
             while (player.State == PlaybackState.Playing)
                 await Task.Delay(50, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
-            player.Stop();
-            _device.MasterMixer.RemoveComponent(player);
+            try
+            {
+                player.Stop();
+            }
+            finally
+            {
+                try
+                {
+                    _device.MasterMixer.RemoveComponent(player);
+                }
+                finally
+                {
+                    if (started)
+                        Publish(PlaybackCompleted, queued);
+                }
+            }
+        }
+    }
+
+    private static void Publish(
+        EventHandler<AudioPlaybackEventArgs>? handlers,
+        QueuedPlayback queued)
+    {
+        if (handlers is null)
+            return;
+        var args = new AudioPlaybackEventArgs(queued.Id, queued.Target, queued.Context);
+        foreach (EventHandler<AudioPlaybackEventArgs> handler in handlers.GetInvocationList())
+        {
+            try
+            {
+                handler(null, args);
+            }
+            catch
+            {
+                // A playback observer must not interrupt the audio queue.
+            }
         }
     }
 
@@ -189,5 +236,9 @@ public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, ID
         }
     }
 
-    private readonly record struct QueuedPlayback(AudioTrack Track, AudioPlaybackTarget Target);
+    private readonly record struct QueuedPlayback(
+        Guid Id,
+        AudioTrack Track,
+        AudioPlaybackTarget Target,
+        AudioPlaybackContext Context);
 }

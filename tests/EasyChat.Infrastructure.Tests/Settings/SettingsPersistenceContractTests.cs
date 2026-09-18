@@ -365,6 +365,55 @@ public sealed class SettingsPersistenceContractTests
     }
 
     [TestMethod]
+    public async Task AutomaticShortcutSettings_RoundTrip()
+    {
+        var directory = CreateTemporaryDirectory();
+        try
+        {
+            var gateway = new JsonSettingsPersistenceGateway(directory);
+            var initial = await gateway.ReadAllAsync();
+            Assert.IsTrue(initial.IsSuccess, initial.Error.Message);
+            var changed = initial.Value with
+            {
+                Shortcut = new ShortcutSettings([
+                    new ShortcutEntrySettings(
+                        "AutomaticKey",
+                        new ShortcutParameterSettings(
+                            string.Empty,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            AutomaticShortcutTrigger.RealtimeInterpretationPlayback,
+                            AutomaticShortcutPressMode.Hold),
+                        "V",
+                        true)
+                ])
+            };
+
+            var write = await gateway.WriteAsync(SettingsSection.Shortcut, changed);
+            var reread = await gateway.ReadAllAsync();
+
+            Assert.IsTrue(write.IsSuccess, write.Error.Message);
+            Assert.IsTrue(reread.IsSuccess, reread.Error.Message);
+            var parameter = reread.Value.Shortcut.Entries.Single().Parameter;
+            Assert.IsNotNull(parameter);
+            Assert.AreEqual(AutomaticShortcutTrigger.RealtimeInterpretationPlayback, parameter.AutomaticTrigger);
+            Assert.AreEqual(AutomaticShortcutPressMode.Hold, parameter.AutomaticPressMode);
+        }
+        finally
+        {
+            DeleteTemporaryDirectory(directory);
+        }
+    }
+
+    [TestMethod]
     public async Task SpeechRecognitionPromptId_RoundTripsAndOldFilesRemainCompatible()
     {
         var directory = CreateTemporaryDirectory();

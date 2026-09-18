@@ -25,6 +25,15 @@ public interface IHoldShortcutAction : IShortcutAction
         CancellationToken cancellationToken = default);
 }
 
+public interface IAutomaticShortcutAction : IShortcutAction
+{
+    ValueTask<IReadOnlyList<ShortcutRegistrationIssue>> ConfigureAsync(
+        IReadOnlyList<ShortcutEntrySettings> entries,
+        CancellationToken cancellationToken = default);
+
+    ValueTask ResetAsync(CancellationToken cancellationToken = default);
+}
+
 public sealed record ShortcutRegistrationIssue(
     string ActionType,
     string KeyCombination,

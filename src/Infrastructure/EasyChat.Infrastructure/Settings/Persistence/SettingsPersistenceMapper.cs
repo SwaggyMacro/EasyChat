@@ -349,7 +349,13 @@ internal static class SettingsPersistenceMapper
         source.TextAssistMode is null
             ? null
             : (TextAssistShortcutMode)(int)source.TextAssistMode.Value,
-        source.ShowSelectionToolbar);
+        source.ShowSelectionToolbar,
+        source.AutomaticTrigger is null
+            ? null
+            : (AutomaticShortcutTrigger)(int)source.AutomaticTrigger.Value,
+        source.AutomaticPressMode is null
+            ? null
+            : (AutomaticShortcutPressMode)(int)source.AutomaticPressMode.Value);
 
     private static ShortcutParameterSettingsDto ToDto(ShortcutParameterSettings source) => new()
     {
@@ -365,7 +371,13 @@ internal static class SettingsPersistenceMapper
         TextAssistMode = source.TextAssistMode is null
             ? null
             : (TextAssistShortcutModeDto)(int)source.TextAssistMode.Value,
-        ShowSelectionToolbar = source.ShowSelectionToolbar
+        ShowSelectionToolbar = source.ShowSelectionToolbar,
+        AutomaticTrigger = source.AutomaticTrigger is null
+            ? null
+            : (AutomaticShortcutTriggerDto)(int)source.AutomaticTrigger.Value,
+        AutomaticPressMode = source.AutomaticPressMode is null
+            ? null
+            : (AutomaticShortcutPressModeDto)(int)source.AutomaticPressMode.Value
     };
 
     private static PromptSettings ToContract(PromptSettingsDto source) => new(

@@ -44,6 +44,7 @@ public static class WindowsInfrastructureServiceCollectionExtensions
         services.AddSingleton<IClipboardText, WindowsClipboardText>();
         services.AddSingleton<IClipboardImage, WindowsClipboardImage>();
         services.AddSingleton<ITextDelivery, WindowsTextDelivery>();
+        services.AddSingleton<IKeyboardInput, WindowsKeyboardInput>();
         services.AddSingleton<ISelectedTextCapture, WindowsSelectedTextCapture>();
         services.AddSingleton<IAudioCaptureSourceCatalog, WindowsAudioCaptureSourceCatalog>();
         services.AddSingleton<WindowsPcmAudioCapture>();
@@ -51,6 +52,9 @@ public static class WindowsInfrastructureServiceCollectionExtensions
             provider.GetRequiredService<WindowsPcmAudioCapture>());
         services.AddSingleton<IAudioPlaybackDeviceCatalog, WindowsAudioPlaybackDeviceCatalog>();
         services.AddSingleton<IAudioPlaybackQueue, WindowsSoundFlowAudioPlaybackQueue>();
+        services.AddSingleton<IAudioPlaybackLifecycle>(provider =>
+            provider.GetRequiredService<IAudioPlaybackQueue>() as IAudioPlaybackLifecycle
+            ?? throw new InvalidOperationException("The registered playback queue has no lifecycle."));
         services.AddSingleton<IAudioFeedbackCuePlayer, WindowsAudioFeedbackCuePlayer>();
         services.AddSingleton<WindowsImageTranslationModelStore>();
         services.AddSingleton<IImageTranslationModelStore>(provider =>

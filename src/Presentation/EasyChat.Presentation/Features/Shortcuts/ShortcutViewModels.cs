@@ -27,7 +27,8 @@ namespace EasyChat.Presentation.Features.Shortcuts
                 ["zh", "en", "ja", "ko", "fr", "de", "es", "ru"]),
             new("SwitchTargetLang", "Action_SwitchTargetLang", true, "Hint_TargetLangCode",
                 ["zh", "en", "ja", "ko", "fr", "de", "es", "ru"]),
-            new("SwitchEngineSourceTarget", "Action_SwitchEngineSourceTarget", true, "Hint_SwitchConfig")
+            new("SwitchEngineSourceTarget", "Action_SwitchEngineSourceTarget", true, "Hint_SwitchConfig"),
+            new("AutomaticKey", "Action_AutomaticKey")
         ];
 
         public static EasyChat.Presentation.Features.Shortcuts.ShortcutActionOption? Get(string actionType) =>
@@ -47,13 +48,15 @@ namespace EasyChat.Presentation.Features.Shortcuts
             ["Screenshot", "ScreenshotOcr", "InputTranslate", "RealtimeInterpretation", "SelectionTranslate", "QuickTranslate", "QuickCorrect"];
         private static readonly string[] TextAssistTypes = ["QuickTranslate", "QuickCorrect"];
         private static readonly string[] LanguageTypes = ["SwitchEngineSourceTarget"];
+        private static readonly string[] AutomaticTypes = ["AutomaticKey"];
         private readonly SettingsSession _settings;
         private readonly DialogManager _dialogManager;
         private readonly TranslationLanguageOptions _languages;
         private ObservableCollection<ShortcutEntryState> _basicShortcuts = [];
         private ObservableCollection<ShortcutEntryState> _languageShortcuts = [];
+        private ObservableCollection<ShortcutEntryState> _automaticShortcuts = [];
         private ObservableCollection<ShortcutEntryState> _activeShortcuts = [];
-        private bool _isBasicCategory = true;
+        private int _categoryTabIndex;
 
         public ShortcutViewModel(
             SettingsSession settings,
@@ -71,7 +74,8 @@ namespace EasyChat.Presentation.Features.Shortcuts
             EditEntryCommand = ReactiveCommand.Create<ShortcutEntryState>(EditEntry);
             RemoveEntryCommand = ReactiveCommand.Create<ShortcutEntryState>(RemoveEntry);
             SelectBasicCategoryCommand = ReactiveCommand.Create(() => { IsBasicCategory = true; });
-            SelectLanguageCategoryCommand = ReactiveCommand.Create(() => { IsBasicCategory = false; });
+            SelectLanguageCategoryCommand = ReactiveCommand.Create(() => { IsLanguageCategory = true; });
+            SelectAutomaticCategoryCommand = ReactiveCommand.Create(() => { IsAutomaticCategory = true; });
         }
 
         public ObservableCollection<ShortcutEntryState> BasicShortcuts
@@ -84,6 +88,11 @@ namespace EasyChat.Presentation.Features.Shortcuts
             get => _languageShortcuts;
             private set => this.RaiseAndSetIfChanged(ref _languageShortcuts, value);
         }
+        public ObservableCollection<ShortcutEntryState> AutomaticShortcuts
+        {
+            get => _automaticShortcuts;
+            private set => this.RaiseAndSetIfChanged(ref _automaticShortcuts, value);
+        }
         public ObservableCollection<ShortcutEntryState> ActiveShortcuts
         {
             get => _activeShortcuts;
@@ -92,55 +101,68 @@ namespace EasyChat.Presentation.Features.Shortcuts
 
         public bool IsBasicCategory
         {
-            get => _isBasicCategory;
+            get => _categoryTabIndex == 0;
             set
             {
-                if (_isBasicCategory == value)
+                if (!value || _categoryTabIndex == 0)
                     return;
-                this.RaiseAndSetIfChanged(ref _isBasicCategory, value);
-                this.RaisePropertyChanged(nameof(IsLanguageCategory));
-                this.RaisePropertyChanged(nameof(ActiveCategoryTitle));
-                this.RaisePropertyChanged(nameof(AddButtonLabel));
-                this.RaisePropertyChanged(nameof(EmptyStateMessage));
-                // Update the source collection before notifying visibility bindings.
-                // Otherwise the empty state and the list can remain out of sync when
-                // switching between a populated and an empty category.
-                SyncActiveList();
-                this.RaisePropertyChanged(nameof(ActiveShortcutCount));
-                this.RaisePropertyChanged(nameof(HasActiveShortcuts));
-                this.RaisePropertyChanged(nameof(HasNoActiveShortcuts));
-                this.RaisePropertyChanged(nameof(CategoryTabIndex));
+                SetCategory(0);
             }
         }
 
         public bool IsLanguageCategory
         {
-            get => !_isBasicCategory;
+            get => _categoryTabIndex == 1;
             set
             {
                 if (value)
-                    IsBasicCategory = false;
+                    SetCategory(1);
             }
         }
 
-        /// <summary>0 = basic shortcuts, 1 = language shortcuts. Backs the TabControl switch.</summary>
-        public int CategoryTabIndex
+        public bool IsAutomaticCategory
         {
-            get => _isBasicCategory ? 0 : 1;
+            get => _categoryTabIndex == 2;
             set
             {
-                if (value is not (0 or 1))
+                if (value)
+                    SetCategory(2);
+            }
+        }
+
+        /// <summary>0 = basic, 1 = language, 2 = automatic shortcuts.</summary>
+        public int CategoryTabIndex
+        {
+            get => _categoryTabIndex;
+            set
+            {
+                if (value is < 0 or > 2)
                     return;
-                IsBasicCategory = value == 0;
+                SetCategory(value);
             }
         }
 
         public string ActiveCategoryTitle =>
-            IsBasicCategory ? Resources.BasicShortcuts : Resources.LanguageShortcuts;
+            CategoryTabIndex switch
+            {
+                0 => Resources.BasicShortcuts,
+                1 => Resources.LanguageShortcuts,
+                _ => Resources.AutomaticShortcuts
+            };
         public string AddButtonLabel =>
-            IsBasicCategory ? Resources.AddBasicShortcut : Resources.AddLanguageShortcut;
+            CategoryTabIndex switch
+            {
+                0 => Resources.AddBasicShortcut,
+                1 => Resources.AddLanguageShortcut,
+                _ => Resources.AddAutomaticShortcut
+            };
         public string EmptyStateMessage =>
-            IsBasicCategory ? Resources.HomeHealthShortcutTodo : Resources.LanguageShortcutEmptyState;
+            CategoryTabIndex switch
+            {
+                0 => Resources.HomeHealthShortcutTodo,
+                1 => Resources.LanguageShortcutEmptyState,
+                _ => Resources.AutomaticShortcutEmptyState
+            };
         public int ActiveShortcutCount => ActiveShortcuts.Count;
         public bool HasActiveShortcuts => ActiveShortcuts.Count > 0;
         public bool HasNoActiveShortcuts => !HasActiveShortcuts;
@@ -151,6 +173,7 @@ namespace EasyChat.Presentation.Features.Shortcuts
         public ReactiveCommand<ShortcutEntryState, Unit> RemoveEntryCommand { get; }
         public ReactiveCommand<Unit, Unit> SelectBasicCategoryCommand { get; }
         public ReactiveCommand<Unit, Unit> SelectLanguageCategoryCommand { get; }
+        public ReactiveCommand<Unit, Unit> SelectAutomaticCategoryCommand { get; }
 
         private void Refresh()
         {
@@ -158,6 +181,8 @@ namespace EasyChat.Presentation.Features.Shortcuts
                 _settings.Shortcut.Entries.Where(entry => BasicTypes.Contains(entry.ActionType)));
             LanguageShortcuts = new ObservableCollection<ShortcutEntryState>(
                 _settings.Shortcut.Entries.Where(entry => LanguageTypes.Contains(entry.ActionType)));
+            AutomaticShortcuts = new ObservableCollection<ShortcutEntryState>(
+                _settings.Shortcut.Entries.Where(entry => AutomaticTypes.Contains(entry.ActionType)));
             SyncActiveList();
             this.RaisePropertyChanged(nameof(ActiveShortcutCount));
             this.RaisePropertyChanged(nameof(HasActiveShortcuts));
@@ -165,10 +190,38 @@ namespace EasyChat.Presentation.Features.Shortcuts
         }
 
         private void SyncActiveList() =>
-            ActiveShortcuts = IsBasicCategory ? BasicShortcuts : LanguageShortcuts;
+            ActiveShortcuts = CategoryTabIndex switch
+            {
+                0 => BasicShortcuts,
+                1 => LanguageShortcuts,
+                _ => AutomaticShortcuts
+            };
+
+        private void SetCategory(int category)
+        {
+            if (_categoryTabIndex == category)
+                return;
+            _categoryTabIndex = category;
+            this.RaisePropertyChanged(nameof(IsBasicCategory));
+            this.RaisePropertyChanged(nameof(IsLanguageCategory));
+            this.RaisePropertyChanged(nameof(IsAutomaticCategory));
+            this.RaisePropertyChanged(nameof(CategoryTabIndex));
+            this.RaisePropertyChanged(nameof(ActiveCategoryTitle));
+            this.RaisePropertyChanged(nameof(AddButtonLabel));
+            this.RaisePropertyChanged(nameof(EmptyStateMessage));
+            SyncActiveList();
+            this.RaisePropertyChanged(nameof(ActiveShortcutCount));
+            this.RaisePropertyChanged(nameof(HasActiveShortcuts));
+            this.RaisePropertyChanged(nameof(HasNoActiveShortcuts));
+        }
 
         private void AddCurrentCategoryEntry() =>
-            AddEntry(IsBasicCategory ? "Basic" : "Language");
+            AddEntry(CategoryTabIndex switch
+            {
+                0 => "Basic",
+                1 => "Language",
+                _ => "Automatic"
+            });
 
         private void AddEntry(string category)
         {
@@ -176,12 +229,14 @@ namespace EasyChat.Presentation.Features.Shortcuts
             {
                 "TextAssist" => TextAssistTypes,
                 "Basic" => BasicTypes,
+                "Automatic" => AutomaticTypes,
                 _ => LanguageTypes
             };
             ShowEditor(null, allowed, category switch
             {
                 "TextAssist" => "QuickTranslate",
                 "Basic" => "Screenshot",
+                "Automatic" => "AutomaticKey",
                 _ => "SwitchEngineSourceTarget"
             });
         }
@@ -190,7 +245,9 @@ namespace EasyChat.Presentation.Features.Shortcuts
         {
             var allowed = TextAssistTypes.Contains(entry.ActionType)
                 ? TextAssistTypes
-                : BasicTypes.Contains(entry.ActionType) ? BasicTypes : LanguageTypes;
+                : AutomaticTypes.Contains(entry.ActionType)
+                    ? AutomaticTypes
+                    : BasicTypes.Contains(entry.ActionType) ? BasicTypes : LanguageTypes;
             ShowEditor(entry, allowed, entry.ActionType);
         }
 
@@ -250,6 +307,8 @@ namespace EasyChat.Presentation.Features.Shortcuts
         private bool _readSelectedText;
         private bool _showSelectionToolbar;
         private TextAssistShortcutMode _textAssistMode;
+        private AutomaticShortcutTrigger _automaticTrigger = AutomaticShortcutTrigger.RealtimeInterpretationPlayback;
+        private AutomaticShortcutPressMode _automaticPressMode = AutomaticShortcutPressMode.Tap;
         private string _remark = string.Empty;
 
         public ShortcutEditDialogViewModel(
@@ -320,6 +379,10 @@ namespace EasyChat.Presentation.Features.Shortcuts
         public IReadOnlyList<LanguageSettings> AvailableLanguages { get; private set; } = [];
         public IReadOnlyList<string>? AvailableParameterOptions => SelectedAction.ParameterOptions;
         public IReadOnlyList<TextAssistShortcutMode> TextAssistModes { get; } = Enum.GetValues<TextAssistShortcutMode>();
+        public IReadOnlyList<string> AutomaticTriggers { get; } =
+            [Resources.AutomaticShortcutTriggerRealtimeInterpretationPlayback];
+        public IReadOnlyList<string> AutomaticPressModes { get; } =
+            [Resources.AutomaticShortcutPressModeTap, Resources.AutomaticShortcutPressModeHold];
         public string ButtonText => _existing is null ? Resources.Add : Resources.Save;
         public string DialogTitle => _existing is null ? Resources.Add : Resources.Edit;
         public MaterialIconKind Icon => _existing is null ? MaterialIconKind.Plus : MaterialIconKind.Pencil;
@@ -328,6 +391,10 @@ namespace EasyChat.Presentation.Features.Shortcuts
         public bool IsModeSelectableTextAssistAction => false;
         public bool IsSelectionTranslateAction => SelectedAction.ActionType == "SelectionTranslate";
         public bool IsInputTranslateAction => SelectedAction.ActionType == "InputTranslate";
+        public bool IsAutomaticAction => SelectedAction.ActionType == "AutomaticKey";
+        public string KeyCombinationLabel => IsAutomaticAction
+            ? Resources.AutomaticShortcutKey
+            : Resources.KeyCombination;
         public string Remark { get => _remark; set => this.RaiseAndSetIfChanged(ref _remark, value); }
         public string SelectionToolbarOptionText => Resources.SelectionTranslation;
         public string SelectionToolbarOptionTip => Resources.ResourceManager.GetString("SelectionShortcutToolbarTip", Resources.Culture)
@@ -348,6 +415,8 @@ namespace EasyChat.Presentation.Features.Shortcuts
                     ReadSelectedText = false;
                     ShowSelectionToolbar = false;
                     ReplaceCurrentInput = false;
+                    AutomaticTrigger = AutomaticShortcutTrigger.RealtimeInterpretationPlayback;
+                    AutomaticPressMode = AutomaticShortcutPressMode.Tap;
                 }
             }
         }
@@ -448,6 +517,37 @@ namespace EasyChat.Presentation.Features.Shortcuts
         public bool ReplaceCurrentInput { get => _replaceCurrentInput; set => this.RaiseAndSetIfChanged(ref _replaceCurrentInput, value); }
         public bool ReadSelectedText { get => _readSelectedText; set => this.RaiseAndSetIfChanged(ref _readSelectedText, value); }
         public bool ShowSelectionToolbar { get => _showSelectionToolbar; set => this.RaiseAndSetIfChanged(ref _showSelectionToolbar, value); }
+        public AutomaticShortcutTrigger AutomaticTrigger
+        {
+            get => _automaticTrigger;
+            set => this.RaiseAndSetIfChanged(ref _automaticTrigger, value);
+        }
+        public AutomaticShortcutPressMode AutomaticPressMode
+        {
+            get => _automaticPressMode;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _automaticPressMode, value);
+                this.RaisePropertyChanged(nameof(SelectedAutomaticPressModeOption));
+            }
+        }
+        public string SelectedAutomaticTriggerOption
+        {
+            get => Resources.AutomaticShortcutTriggerRealtimeInterpretationPlayback;
+            set => AutomaticTrigger = AutomaticShortcutTrigger.RealtimeInterpretationPlayback;
+        }
+        public string SelectedAutomaticPressModeOption
+        {
+            get => AutomaticPressMode == AutomaticShortcutPressMode.Hold
+                ? Resources.AutomaticShortcutPressModeHold
+                : Resources.AutomaticShortcutPressModeTap;
+            set => AutomaticPressMode = string.Equals(
+                value,
+                Resources.AutomaticShortcutPressModeHold,
+                StringComparison.CurrentCulture)
+                ? AutomaticShortcutPressMode.Hold
+                : AutomaticShortcutPressMode.Tap;
+        }
         public TextAssistShortcutMode TextAssistMode
         {
             get => _textAssistMode;
@@ -513,6 +613,10 @@ namespace EasyChat.Presentation.Features.Shortcuts
             ReplaceCurrentInput = entry.Parameter?.ReplaceCurrentInput ?? false;
             ShowSelectionToolbar = entry.Parameter?.ShowSelectionToolbar ?? false;
             TextAssistMode = entry.Parameter?.TextAssistMode ?? TextAssistShortcutMode.Simple;
+            AutomaticTrigger = entry.Parameter?.AutomaticTrigger
+                ?? AutomaticShortcutTrigger.RealtimeInterpretationPlayback;
+            AutomaticPressMode = entry.Parameter?.AutomaticPressMode
+                ?? AutomaticShortcutPressMode.Tap;
             if (!IsComplexSwitchAction || entry.Parameter is null)
                 return;
             SelectedEngineOption = AvailableEngineOptions.FirstOrDefault(option => option.Id == entry.Parameter.EngineId)
@@ -549,6 +653,8 @@ namespace EasyChat.Presentation.Features.Shortcuts
             this.RaisePropertyChanged(nameof(IsModeSelectableTextAssistAction));
             this.RaisePropertyChanged(nameof(IsSelectionTranslateAction));
             this.RaisePropertyChanged(nameof(IsInputTranslateAction));
+            this.RaisePropertyChanged(nameof(IsAutomaticAction));
+            this.RaisePropertyChanged(nameof(KeyCombinationLabel));
             this.RaisePropertyChanged(nameof(AvailableParameterOptions));
         }
 
@@ -569,10 +675,12 @@ namespace EasyChat.Presentation.Features.Shortcuts
                     IsInputTranslateAction ? NullIfEmpty(InputTranslateAfterKey) : null,
                     IsInputTranslateAction ? ReplaceCurrentInput : null,
                     IsModeSelectableTextAssistAction ? TextAssistMode : null,
-                    IsSelectionTranslateAction ? ShowSelectionToolbar : null);
+                    IsSelectionTranslateAction ? ShowSelectionToolbar : null,
+                    IsAutomaticAction ? AutomaticTrigger : null,
+                    IsAutomaticAction ? AutomaticPressMode : null);
             OnClose?.Invoke(new ShortcutEntrySettings(
                 SelectedAction.ActionType,
-                SelectedAction.RequiresParameter || IsTextAssistAction || IsInputTranslateAction || IsSelectionTranslateAction
+                SelectedAction.RequiresParameter || IsTextAssistAction || IsInputTranslateAction || IsSelectionTranslateAction || IsAutomaticAction
                     ? parameter
                     : null,
                 KeyCombination,

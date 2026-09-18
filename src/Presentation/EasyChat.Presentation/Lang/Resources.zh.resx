@@ -276,9 +276,16 @@
     <data name="AddLanguageShortcut" xml:space="preserve">
     <value>添加语种切换热键</value>
   </data>
-    <data name="LanguageShortcutEmptyState" xml:space="preserve">
+  <data name="LanguageShortcutEmptyState" xml:space="preserve">
     <value>请添加切换语种的热键</value>
   </data>
+  <data name="AutomaticShortcuts" xml:space="preserve"><value>自动热键</value></data>
+  <data name="AddAutomaticShortcut" xml:space="preserve"><value>添加自动热键</value></data>
+  <data name="AutomaticShortcutEmptyState" xml:space="preserve"><value>添加一个在实时口译 TTS 播放时触发的按键。</value></data>
+  <data name="Action_AutomaticKey" xml:space="preserve"><value>自动热键</value></data>
+  <data name="AutomaticShortcutTrigger" xml:space="preserve"><value>触发事件</value></data>
+  <data name="AutomaticShortcutPressMode" xml:space="preserve"><value>按键模式</value></data>
+  <data name="AutomaticShortcutKey" xml:space="preserve"><value>模拟按键</value></data>
     <data name="Edit" xml:space="preserve">
     <value>编辑</value>
   </data>
@@ -300,9 +307,12 @@
     <data name="Action_InputTranslate" xml:space="preserve">
     <value>输入翻译</value>
   </data>
-    <data name="Action_RealtimeInterpretation" xml:space="preserve">
+  <data name="Action_RealtimeInterpretation" xml:space="preserve">
     <value>实时口译（按住说话）</value>
   </data>
+  <data name="AutomaticShortcutTriggerRealtimeInterpretationPlayback" xml:space="preserve"><value>实时口译 TTS 播放</value></data>
+  <data name="AutomaticShortcutPressModeTap" xml:space="preserve"><value>短按</value></data>
+  <data name="AutomaticShortcutPressModeHold" xml:space="preserve"><value>长按至播放结束</value></data>
     <data name="Speech_VirtualCableRequiredTitle" xml:space="preserve"><value>需要虚拟音频驱动</value></data>
     <data name="Speech_VirtualCableRequiredMessage" xml:space="preserve"><value>实时口译会将译文发送到虚拟麦克风。请安装 VB-CABLE 后重新检测。</value></data>
     <data name="Speech_InstallDriverTutorial" xml:space="preserve"><value>安装教程</value></data>

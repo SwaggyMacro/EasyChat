@@ -61,6 +61,11 @@ public static class EasyChatApplicationServiceCollectionExtensions
         services.AddSingleton<IInputTranslationUseCases, InputTranslationUseCases>();
         services.AddSingleton<ISelectedTextUseCases, SelectedTextUseCases>();
         services.AddSingleton<ISelectionInteractionUseCases, SelectionInteractionCoordinator>();
+        services.AddSingleton<AutomaticShortcutAction>();
+        services.AddSingleton<IAutomaticShortcutAction>(provider =>
+            provider.GetRequiredService<AutomaticShortcutAction>());
+        services.AddSingleton<IShortcutAction>(provider =>
+            provider.GetRequiredService<AutomaticShortcutAction>());
         services.AddSingleton<IShortcutUseCases, ShortcutCoordinator>();
         services.AddSingleton<IShellLifecycle, ShellLifecycle>();
         return services;

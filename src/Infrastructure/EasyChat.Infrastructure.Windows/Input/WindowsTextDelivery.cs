@@ -141,19 +141,19 @@ public sealed class WindowsTextDelivery : ITextDelivery
             if (character == '\r')
                 continue;
 
-            IReadOnlyList<WindowsKeyboardInput> inputs = character == '\n'
+            IReadOnlyList<WindowsKeyboardInputEvent> inputs = character == '\n'
                 ?
                 [
-                    new WindowsKeyboardInput(0x0D, 0, 0),
-                    new WindowsKeyboardInput(0x0D, 0, WindowsKeyboardInput.KeyUp)
+                    new WindowsKeyboardInputEvent(0x0D, 0, 0),
+                    new WindowsKeyboardInputEvent(0x0D, 0, WindowsKeyboardInputEvent.KeyUp)
                 ]
                 :
                 [
-                    new WindowsKeyboardInput(0, character, WindowsKeyboardInput.Unicode),
-                    new WindowsKeyboardInput(
+                    new WindowsKeyboardInputEvent(0, character, WindowsKeyboardInputEvent.Unicode),
+                    new WindowsKeyboardInputEvent(
                         0,
                         character,
-                        WindowsKeyboardInput.Unicode | WindowsKeyboardInput.KeyUp)
+                        WindowsKeyboardInputEvent.Unicode | WindowsKeyboardInputEvent.KeyUp)
                 ];
 
             _native.SendInputs(inputs);
@@ -201,10 +201,54 @@ internal static class WindowsKeyCombination
             ["Down"] = 0x28,
             ["Insert"] = 0x2D,
             ["Delete"] = 0x2E,
-            ["Del"] = 0x2E
+            ["Del"] = 0x2E,
+            ["LWin"] = 0x5B,
+            ["RWin"] = 0x5C,
+            ["Apps"] = 0x5D,
+            ["CapsLock"] = 0x14,
+            ["PrintScreen"] = 0x2C,
+            ["Scroll"] = 0x91,
+            ["ScrollLock"] = 0x91,
+            ["Pause"] = 0x13,
+            ["NumLock"] = 0x90,
+            ["Oem1"] = 0xBA,
+            ["OemSemicolon"] = 0xBA,
+            ["OemPlus"] = 0xBB,
+            ["OemComma"] = 0xBC,
+            ["OemMinus"] = 0xBD,
+            ["OemPeriod"] = 0xBE,
+            ["Oem2"] = 0xBF,
+            ["OemQuestion"] = 0xBF,
+            ["Oem3"] = 0xC0,
+            ["OemTilde"] = 0xC0,
+            ["Oem4"] = 0xDB,
+            ["OemOpenBrackets"] = 0xDB,
+            ["Oem5"] = 0xDC,
+            ["OemPipe"] = 0xDC,
+            ["Oem6"] = 0xDD,
+            ["OemCloseBrackets"] = 0xDD,
+            ["Oem7"] = 0xDE,
+            ["OemQuotes"] = 0xDE
         };
 
-    public static IReadOnlyList<WindowsKeyboardInput> Parse(string combination)
+    public static IReadOnlyList<WindowsKeyboardInputEvent> Parse(string combination)
+        => ParseParts(combination, includeRelease: true);
+
+    public static IReadOnlyList<WindowsKeyboardInputEvent> ParsePress(string combination)
+        => ParseParts(combination, includeRelease: false);
+
+    public static IReadOnlyList<WindowsKeyboardInputEvent> ParseRelease(string combination)
+    {
+        var parts = ParseParts(combination, includeRelease: false);
+        return parts
+            .Reverse()
+            .Select(input => input with { Flags = input.Flags | WindowsKeyboardInputEvent.KeyUp })
+            .ToArray();
+    }
+
+    private static IReadOnlyList<WindowsKeyboardInputEvent> ParseParts(
+        string combination,
+        bool includeRelease)
     {
         var parts = combination.Split(
             '+',
@@ -230,12 +274,15 @@ internal static class WindowsKeyCombination
         if (!key.HasValue)
             throw new ArgumentException($"Invalid key combination: {combination}", nameof(combination));
 
-        var inputs = new List<WindowsKeyboardInput>();
-        inputs.AddRange(modifiers.Select(value => new WindowsKeyboardInput(value, 0, 0)));
-        inputs.Add(new WindowsKeyboardInput(key.Value, 0, 0));
-        inputs.Add(new WindowsKeyboardInput(key.Value, 0, WindowsKeyboardInput.KeyUp));
-        for (var index = modifiers.Count - 1; index >= 0; index--)
-            inputs.Add(new WindowsKeyboardInput(modifiers[index], 0, WindowsKeyboardInput.KeyUp));
+        var inputs = new List<WindowsKeyboardInputEvent>();
+        inputs.AddRange(modifiers.Select(value => new WindowsKeyboardInputEvent(value, 0, 0)));
+        inputs.Add(new WindowsKeyboardInputEvent(key.Value, 0, 0));
+        if (includeRelease)
+        {
+            inputs.Add(new WindowsKeyboardInputEvent(key.Value, 0, WindowsKeyboardInputEvent.KeyUp));
+            for (var index = modifiers.Count - 1; index >= 0; index--)
+                inputs.Add(new WindowsKeyboardInputEvent(modifiers[index], 0, WindowsKeyboardInputEvent.KeyUp));
+        }
         return inputs;
     }
 
@@ -259,6 +306,22 @@ internal static class WindowsKeyCombination
             var character = char.ToUpperInvariant(value[0]);
             if (character is >= 'A' and <= 'Z' or >= '0' and <= '9')
                 return character;
+        }
+
+        if (value.Length is 2 or 3
+            && value[0] is 'D' or 'd'
+            && value[1..].All(char.IsAsciiDigit)
+            && int.TryParse(value[1..], out var digit)
+            && digit is >= 0 and <= 9)
+        {
+            return (ushort)('0' + digit);
+        }
+
+        if (value.StartsWith("NumPad", StringComparison.OrdinalIgnoreCase)
+            && int.TryParse(value.AsSpan(6), out var numPad)
+            && numPad is >= 0 and <= 9)
+        {
+            return (ushort)(0x60 + numPad);
         }
 
         if (value.Length is 2 or 3

@@ -68,7 +68,7 @@ internal sealed class WindowsNativeInputBackend
     public void SendMessage(IntPtr window, uint message, IntPtr wParam, IntPtr lParam) =>
         SendMessageNative(window, message, wParam, lParam);
 
-    public uint SendInputs(IReadOnlyList<WindowsKeyboardInput> keyboardInputs)
+    public uint SendInputs(IReadOnlyList<WindowsKeyboardInputEvent> keyboardInputs)
     {
         ArgumentNullException.ThrowIfNull(keyboardInputs);
 
@@ -204,7 +204,7 @@ internal sealed class WindowsNativeInputBackend
         public ushort ParamHigh;
     }
 }
-internal readonly record struct WindowsKeyboardInput(
+internal readonly record struct WindowsKeyboardInputEvent(
     ushort VirtualKey,
     ushort ScanCode,
     uint Flags)

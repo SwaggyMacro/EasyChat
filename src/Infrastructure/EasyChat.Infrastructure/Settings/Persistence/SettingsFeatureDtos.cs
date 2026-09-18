@@ -10,6 +10,17 @@ internal enum TextAssistShortcutModeDto
     Complex = 1
 }
 
+internal enum AutomaticShortcutTriggerDto
+{
+    RealtimeInterpretationPlayback = 0
+}
+
+internal enum AutomaticShortcutPressModeDto
+{
+    Tap = 0,
+    Hold = 1
+}
+
 internal enum ResultWindowModeDto
 {
     Classic = 0,
@@ -132,6 +143,12 @@ internal sealed class ShortcutParameterSettingsDto
 
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     public bool? ShowSelectionToolbar { get; set; }
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public AutomaticShortcutTriggerDto? AutomaticTrigger { get; set; }
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public AutomaticShortcutPressModeDto? AutomaticPressMode { get; set; }
 }
 
 [JsonObject(MemberSerialization.OptIn)]

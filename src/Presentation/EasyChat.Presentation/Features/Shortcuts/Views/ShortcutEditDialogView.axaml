@@ -153,6 +153,13 @@
             </StackPanel>
         </StackPanel>
 
+        <StackPanel Spacing="10" IsVisible="{Binding IsAutomaticAction}">
+            <TextBlock Classes="Small" Text="{x:Static lang:Resources.AutomaticShortcutTrigger}" />
+            <ComboBox ItemsSource="{Binding AutomaticTriggers}" SelectedItem="{Binding SelectedAutomaticTriggerOption}" />
+            <TextBlock Classes="Small" Text="{x:Static lang:Resources.AutomaticShortcutPressMode}" />
+            <ComboBox ItemsSource="{Binding AutomaticPressModes}" SelectedItem="{Binding SelectedAutomaticPressModeOption}" />
+        </StackPanel>
+
         <CheckBox Content="{x:Static lang:Resources.ReadSelectedText}"
                   IsChecked="{Binding ReadSelectedText}"
                   IsEnabled="{Binding !IsReadSelectionLocked}"
@@ -284,7 +291,7 @@
 
         <!-- Hotkey Recording: focusable Border (not Button) so keys are not eaten by button chrome. -->
         <StackPanel Spacing="10">
-            <TextBlock Text="{x:Static lang:Resources.KeyCombination}" Classes="Small" />
+            <TextBlock Text="{Binding KeyCombinationLabel}" Classes="Small" />
             <Border x:Name="HotkeyCapturePad"
                     Classes="HotkeyCaptureArea"
                     Classes.Recording="{Binding IsRecording}"

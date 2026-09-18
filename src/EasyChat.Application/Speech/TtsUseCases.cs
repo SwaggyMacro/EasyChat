@@ -127,12 +127,22 @@ public sealed class TtsUseCases : ITtsUseCases
         TtsSynthesisRequest request,
         bool interruptCurrent = false,
         CancellationToken cancellationToken = default) =>
-        EnqueueAsync(request, interruptCurrent, AudioPlaybackTarget.Default, cancellationToken);
+        EnqueueAsync(request, interruptCurrent, AudioPlaybackTarget.Default,
+            AudioPlaybackContext.None, cancellationToken);
 
     public async ValueTask<Result> EnqueueAsync(
         TtsSynthesisRequest request,
         bool interruptCurrent,
         AudioPlaybackTarget target,
+        CancellationToken cancellationToken = default)
+        => await EnqueueAsync(request, interruptCurrent, target, AudioPlaybackContext.None, cancellationToken)
+            .ConfigureAwait(false);
+
+    public async ValueTask<Result> EnqueueAsync(
+        TtsSynthesisRequest request,
+        bool interruptCurrent,
+        AudioPlaybackTarget target,
+        AudioPlaybackContext context,
         CancellationToken cancellationToken = default)
     {
         var synthesized = await SynthesizeAsync(request, cancellationToken).ConfigureAwait(false);
@@ -175,7 +185,7 @@ public sealed class TtsUseCases : ITtsUseCases
         {
             if (interruptCurrent)
                 await _playbackQueue.StopAsync(cancellationToken).ConfigureAwait(false);
-            if (target == AudioPlaybackTarget.Default)
+            if (target == AudioPlaybackTarget.Default && context == AudioPlaybackContext.None)
             {
                 await _playbackQueue.EnqueueAsync(
                     synthesized.Value,
@@ -186,6 +196,7 @@ public sealed class TtsUseCases : ITtsUseCases
                 await _playbackQueue.EnqueueAsync(
                     synthesized.Value,
                     target,
+                    context,
                     cancellationToken).ConfigureAwait(false);
             }
             return Result.Success();

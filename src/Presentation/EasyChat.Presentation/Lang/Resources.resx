@@ -289,9 +289,16 @@
     <data name="AddLanguageShortcut" xml:space="preserve">
     <value>Add Language Shortcut</value>
   </data>
-    <data name="LanguageShortcutEmptyState" xml:space="preserve">
+  <data name="LanguageShortcutEmptyState" xml:space="preserve">
     <value>Please add a language switch hotkey.</value>
   </data>
+  <data name="AutomaticShortcuts" xml:space="preserve"><value>Automatic Shortcuts</value></data>
+  <data name="AddAutomaticShortcut" xml:space="preserve"><value>Add Automatic Shortcut</value></data>
+  <data name="AutomaticShortcutEmptyState" xml:space="preserve"><value>Add a key to trigger while realtime interpretation audio is playing.</value></data>
+  <data name="Action_AutomaticKey" xml:space="preserve"><value>Automatic Key</value></data>
+  <data name="AutomaticShortcutTrigger" xml:space="preserve"><value>Trigger</value></data>
+  <data name="AutomaticShortcutPressMode" xml:space="preserve"><value>Press mode</value></data>
+  <data name="AutomaticShortcutKey" xml:space="preserve"><value>Key to simulate</value></data>
     <data name="Edit" xml:space="preserve">
         <value>Edit</value>
     </data>
@@ -313,9 +320,12 @@
     <data name="Action_InputTranslate" xml:space="preserve">
     <value>Typing Translate</value>
   </data>
-    <data name="Action_RealtimeInterpretation" xml:space="preserve">
+  <data name="Action_RealtimeInterpretation" xml:space="preserve">
     <value>Realtime Interpretation (Hold)</value>
   </data>
+  <data name="AutomaticShortcutTriggerRealtimeInterpretationPlayback" xml:space="preserve"><value>Realtime interpretation TTS playback</value></data>
+  <data name="AutomaticShortcutPressModeTap" xml:space="preserve"><value>Tap</value></data>
+  <data name="AutomaticShortcutPressModeHold" xml:space="preserve"><value>Hold until playback ends</value></data>
     <data name="Speech_VirtualCableRequiredTitle" xml:space="preserve">
     <value>Virtual audio driver required</value>
   </data>

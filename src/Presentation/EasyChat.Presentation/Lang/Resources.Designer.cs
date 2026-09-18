@@ -331,6 +331,16 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("AddLanguageShortcut", resourceCulture);
             }
         }
+
+        public static string AutomaticShortcuts { get { return ResourceManager.GetString("AutomaticShortcuts", resourceCulture); } }
+        public static string AddAutomaticShortcut { get { return ResourceManager.GetString("AddAutomaticShortcut", resourceCulture); } }
+        public static string AutomaticShortcutEmptyState { get { return ResourceManager.GetString("AutomaticShortcutEmptyState", resourceCulture); } }
+        public static string AutomaticShortcutKey { get { return ResourceManager.GetString("AutomaticShortcutKey", resourceCulture); } }
+        public static string AutomaticShortcutTrigger { get { return ResourceManager.GetString("AutomaticShortcutTrigger", resourceCulture); } }
+        public static string AutomaticShortcutPressMode { get { return ResourceManager.GetString("AutomaticShortcutPressMode", resourceCulture); } }
+        public static string AutomaticShortcutTriggerRealtimeInterpretationPlayback { get { return ResourceManager.GetString("AutomaticShortcutTriggerRealtimeInterpretationPlayback", resourceCulture); } }
+        public static string AutomaticShortcutPressModeTap { get { return ResourceManager.GetString("AutomaticShortcutPressModeTap", resourceCulture); } }
+        public static string AutomaticShortcutPressModeHold { get { return ResourceManager.GetString("AutomaticShortcutPressModeHold", resourceCulture); } }
         
         /// <summary>
         ///   Looks up a localized string similar to Add Model.

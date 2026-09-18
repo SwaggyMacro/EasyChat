@@ -235,6 +235,17 @@ public sealed record ProxySettings
 
 public sealed record ShortcutSettings(IReadOnlyList<ShortcutEntrySettings> Entries);
 
+public enum AutomaticShortcutTrigger
+{
+    RealtimeInterpretationPlayback = 0
+}
+
+public enum AutomaticShortcutPressMode
+{
+    Tap = 0,
+    Hold = 1
+}
+
 public sealed record ShortcutEntrySettings(
     string ActionType,
     ShortcutParameterSettings? Parameter,
@@ -253,7 +264,9 @@ public sealed record ShortcutParameterSettings(
     string? InputTranslateAfterKey,
     bool? ReplaceCurrentInput,
     TextAssistShortcutMode? TextAssistMode,
-    bool? ShowSelectionToolbar);
+    bool? ShowSelectionToolbar,
+    AutomaticShortcutTrigger? AutomaticTrigger = null,
+    AutomaticShortcutPressMode? AutomaticPressMode = null);
 
 public sealed record PromptSettings(
     string SelectedPromptId,

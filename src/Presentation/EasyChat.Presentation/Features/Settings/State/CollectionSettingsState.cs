@@ -119,6 +119,8 @@ public sealed class ShortcutParameterState
         ReplaceCurrentInput = value.ReplaceCurrentInput;
         TextAssistMode = value.TextAssistMode;
         ShowSelectionToolbar = value.ShowSelectionToolbar;
+        AutomaticTrigger = value.AutomaticTrigger;
+        AutomaticPressMode = value.AutomaticPressMode;
     }
 
     public string Engine { get; set; }
@@ -132,11 +134,13 @@ public sealed class ShortcutParameterState
     public bool? ReplaceCurrentInput { get; set; }
     public TextAssistShortcutMode? TextAssistMode { get; set; }
     public bool? ShowSelectionToolbar { get; set; }
+    public AutomaticShortcutTrigger? AutomaticTrigger { get; set; }
+    public AutomaticShortcutPressMode? AutomaticPressMode { get; set; }
 
     public ShortcutParameterSettings ToContract() => new(
         Engine, EngineId, Source, Target, Value, ReadSelectedText,
         InputTranslateBeforeKey, InputTranslateAfterKey, ReplaceCurrentInput,
-        TextAssistMode, ShowSelectionToolbar);
+        TextAssistMode, ShowSelectionToolbar, AutomaticTrigger, AutomaticPressMode);
 }
 
 public sealed class ShortcutEntryState : LiveSettingsSection

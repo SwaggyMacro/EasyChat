@@ -234,7 +234,8 @@ internal sealed class SubtitleSessionCoordinator
                 var queued = await _tts.EnqueueAsync(
                     new TtsSynthesisRequest(item.Text, voice.Value),
                     interruptCurrent: false,
-                    target: AudioPlaybackTarget.VirtualCable).ConfigureAwait(false);
+                    target: AudioPlaybackTarget.VirtualCable,
+                    context: AudioPlaybackContext.RealtimeInterpretation).ConfigureAwait(false);
                 if (queued.IsFailure)
                     _publish(new SpeechSessionErrorEvent(queued.Error.Message));
             }

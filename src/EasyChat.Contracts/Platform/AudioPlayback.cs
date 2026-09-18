@@ -8,6 +8,29 @@ public enum AudioPlaybackTarget
     VirtualCable
 }
 
+public enum AudioPlaybackContext
+{
+    None,
+    RealtimeInterpretation
+}
+
+public sealed class AudioPlaybackEventArgs(
+    Guid playbackId,
+    AudioPlaybackTarget target,
+    AudioPlaybackContext context) : EventArgs
+{
+    public Guid PlaybackId { get; } = playbackId;
+    public AudioPlaybackTarget Target { get; } = target;
+    public AudioPlaybackContext Context { get; } = context;
+}
+
+public interface IAudioPlaybackLifecycle
+{
+    event EventHandler<AudioPlaybackEventArgs>? PlaybackStarted;
+
+    event EventHandler<AudioPlaybackEventArgs>? PlaybackCompleted;
+}
+
 /// <summary>
 /// Platform-owned identifier for a playback endpoint. Consumers must treat it as opaque and
 /// must not persist it.
@@ -38,6 +61,13 @@ public interface IAudioPlaybackQueue
         AudioTrack track,
         AudioPlaybackTarget target,
         CancellationToken cancellationToken = default);
+
+    ValueTask EnqueueAsync(
+        AudioTrack track,
+        AudioPlaybackTarget target,
+        AudioPlaybackContext context,
+        CancellationToken cancellationToken = default) =>
+        EnqueueAsync(track, target, cancellationToken);
 
     ValueTask StopAsync(CancellationToken cancellationToken = default);
 }
