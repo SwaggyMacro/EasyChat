@@ -292,8 +292,8 @@
   <data name="LanguageShortcutEmptyState" xml:space="preserve">
     <value>Please add a language switch hotkey.</value>
   </data>
-  <data name="AutomaticShortcuts" xml:space="preserve"><value>Automatic Shortcuts</value></data>
-  <data name="AddAutomaticShortcut" xml:space="preserve"><value>Add Automatic Shortcut</value></data>
+  <data name="AutomaticShortcuts" xml:space="preserve"><value>Automatic Keys</value></data>
+  <data name="AddAutomaticShortcut" xml:space="preserve"><value>Add Automatic Key</value></data>
   <data name="AutomaticShortcutEmptyState" xml:space="preserve"><value>Add a key to trigger while realtime interpretation audio is playing.</value></data>
   <data name="Action_AutomaticKey" xml:space="preserve"><value>Automatic Key</value></data>
   <data name="AutomaticShortcutTrigger" xml:space="preserve"><value>Trigger</value></data>

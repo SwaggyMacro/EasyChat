@@ -25,7 +25,12 @@ public interface IHoldShortcutAction : IShortcutAction
         CancellationToken cancellationToken = default);
 }
 
-public interface IAutomaticShortcutAction : IShortcutAction
+/// <summary>
+/// Configures key input that is emitted by an application event. This is deliberately separate
+/// from <see cref="IShortcutAction"/> because automatic input must never be registered as a
+/// global hotkey.
+/// </summary>
+public interface IAutomaticShortcutAction
 {
     ValueTask<IReadOnlyList<ShortcutRegistrationIssue>> ConfigureAsync(
         IReadOnlyList<ShortcutEntrySettings> entries,

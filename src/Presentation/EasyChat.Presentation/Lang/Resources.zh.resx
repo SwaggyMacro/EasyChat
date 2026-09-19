@@ -279,10 +279,10 @@
   <data name="LanguageShortcutEmptyState" xml:space="preserve">
     <value>请添加切换语种的热键</value>
   </data>
-  <data name="AutomaticShortcuts" xml:space="preserve"><value>自动热键</value></data>
-  <data name="AddAutomaticShortcut" xml:space="preserve"><value>添加自动热键</value></data>
+  <data name="AutomaticShortcuts" xml:space="preserve"><value>自动按键</value></data>
+  <data name="AddAutomaticShortcut" xml:space="preserve"><value>添加自动按键</value></data>
   <data name="AutomaticShortcutEmptyState" xml:space="preserve"><value>添加一个在实时口译 TTS 播放时触发的按键。</value></data>
-  <data name="Action_AutomaticKey" xml:space="preserve"><value>自动热键</value></data>
+  <data name="Action_AutomaticKey" xml:space="preserve"><value>自动按键</value></data>
   <data name="AutomaticShortcutTrigger" xml:space="preserve"><value>触发事件</value></data>
   <data name="AutomaticShortcutPressMode" xml:space="preserve"><value>按键模式</value></data>
   <data name="AutomaticShortcutKey" xml:space="preserve"><value>模拟按键</value></data>

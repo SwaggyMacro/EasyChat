@@ -30,6 +30,7 @@ public static class WindowsInfrastructureServiceCollectionExtensions
         services.AddSingleton<IScreenCatalog, WindowsScreenCatalog>();
         services.AddSingleton<ILongScreenshotStitcher, OpenCvLongScreenshotStitcher>();
         services.AddSingleton<IGlobalHotkeys, WindowsGlobalHotkeys>();
+        services.AddSingleton<IGlobalKeyboardMonitor, WindowsGlobalKeyboardMonitor>();
         services.AddSingleton<IWindowFocus, WindowsWindowFocus>();
         services.AddSingleton<IWindowInputTransparency, WindowsWindowInputTransparency>();
         services.AddSingleton<IRunningProcessCatalog, WindowsRunningProcessCatalog>();

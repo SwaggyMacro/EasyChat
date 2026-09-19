@@ -28,7 +28,8 @@ public sealed class ShortcutCoordinatorTests
             new FakeSettingsUseCases(bundle),
             new AvailablePlatformAccess(),
             hotkeys,
-            [action]);
+            [action],
+            new FakeAutomaticShortcutAction());
 
         var report = await coordinator.StartAsync();
 
@@ -62,7 +63,8 @@ public sealed class ShortcutCoordinatorTests
             new FakeSettingsUseCases(bundle),
             new AvailablePlatformAccess(),
             hotkeys,
-            [action]);
+            [action],
+            new FakeAutomaticShortcutAction());
 
         var report = await coordinator.StartAsync();
 
@@ -92,7 +94,8 @@ public sealed class ShortcutCoordinatorTests
             new FakeSettingsUseCases(bundle),
             new AvailablePlatformAccess(),
             hotkeys,
-            [action]);
+            [action],
+            new FakeAutomaticShortcutAction());
 
         await coordinator.StartAsync();
 
@@ -104,6 +107,51 @@ public sealed class ShortcutCoordinatorTests
         await Task.WhenAll(firstExecution, secondExecution);
 
         Assert.AreEqual(1, action.ExecutionCount);
+    }
+
+    [TestMethod]
+    public async Task StartAsync_ConfiguresAutomaticKeysWithoutRegisteringGlobalHotkeys()
+    {
+        var bundle = SettingsTestData.CreateBundle() with
+        {
+            Shortcut = new ShortcutSettings(
+            [
+                new ShortcutEntrySettings(
+                    "AutomaticKey",
+                    new ShortcutParameterSettings(
+                        string.Empty,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        AutomaticShortcutTrigger.RealtimeInterpretationPlayback,
+                        AutomaticShortcutPressMode.Hold),
+                    "V",
+                    true)
+            ])
+        };
+        var hotkeys = new FakeGlobalHotkeys();
+        var automaticAction = new FakeAutomaticShortcutAction();
+        await using var coordinator = new ShortcutCoordinator(
+            new FakeSettingsUseCases(bundle),
+            new AvailablePlatformAccess(),
+            hotkeys,
+            [],
+            automaticAction);
+
+        var report = await coordinator.StartAsync();
+
+        Assert.AreEqual(1, report.RequestedCount);
+        Assert.AreEqual(0, report.RegisteredCount);
+        Assert.IsEmpty(report.Issues);
+        Assert.AreEqual(1, automaticAction.ConfigureCount);
+        Assert.AreEqual(0, hotkeys.RegisterCount);
     }
 
     private sealed class FakeShortcutAction : IShortcutAction
@@ -177,17 +225,35 @@ public sealed class ShortcutCoordinatorTests
         public void Complete() => _completion.TrySetResult();
     }
 
+    private sealed class FakeAutomaticShortcutAction : IAutomaticShortcutAction
+    {
+        public int ConfigureCount { get; private set; }
+
+        public ValueTask<IReadOnlyList<ShortcutRegistrationIssue>> ConfigureAsync(
+            IReadOnlyList<ShortcutEntrySettings> entries,
+            CancellationToken cancellationToken = default)
+        {
+            ConfigureCount++;
+            return ValueTask.FromResult<IReadOnlyList<ShortcutRegistrationIssue>>([]);
+        }
+
+        public ValueTask ResetAsync(CancellationToken cancellationToken = default) =>
+            ValueTask.CompletedTask;
+    }
+
     private sealed class FakeGlobalHotkeys : IGlobalHotkeys
     {
         public ShortcutGesture? Gesture { get; private set; }
         public Func<CancellationToken, ValueTask>? Callback { get; private set; }
         public FakeRegistration Registration { get; } = new();
+        public int RegisterCount { get; private set; }
 
         public ValueTask<Result<IHotkeyRegistration>> RegisterAsync(
             ShortcutGesture gesture,
             Func<CancellationToken, ValueTask> callback,
             CancellationToken cancellationToken = default)
         {
+            RegisterCount++;
             Gesture = gesture;
             Callback = callback;
             return ValueTask.FromResult(Result<IHotkeyRegistration>.Success(Registration));

@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Reactive;
+using Avalonia.Threading;
+using EasyChat.Contracts.Platform;
 using EasyChat.Contracts.Settings;
 using EasyChat.Contracts.Translation;
 using EasyChat.Presentation.Lang;
@@ -52,6 +54,7 @@ namespace EasyChat.Presentation.Features.Shortcuts
         private readonly SettingsSession _settings;
         private readonly DialogManager _dialogManager;
         private readonly TranslationLanguageOptions _languages;
+        private readonly IGlobalKeyboardMonitor _keyboardMonitor;
         private ObservableCollection<ShortcutEntryState> _basicShortcuts = [];
         private ObservableCollection<ShortcutEntryState> _languageShortcuts = [];
         private ObservableCollection<ShortcutEntryState> _automaticShortcuts = [];
@@ -61,12 +64,14 @@ namespace EasyChat.Presentation.Features.Shortcuts
         public ShortcutViewModel(
             SettingsSession settings,
             DialogManager dialogManager,
-            TranslationLanguageOptions languages)
+            TranslationLanguageOptions languages,
+            IGlobalKeyboardMonitor keyboardMonitor)
             : base(Resources.Shortcut, MaterialIconKind.Keyboard, 2)
         {
             _settings = settings;
             _dialogManager = dialogManager;
             _languages = languages;
+            _keyboardMonitor = keyboardMonitor ?? throw new ArgumentNullException(nameof(keyboardMonitor));
             Refresh();
             settings.Shortcut.Entries.CollectionChanged += (_, _) => Refresh();
             AddEntryCommand = ReactiveCommand.Create(AddCurrentCategoryEntry);
@@ -254,7 +259,13 @@ namespace EasyChat.Presentation.Features.Shortcuts
         private void ShowEditor(ShortcutEntryState? entry, IReadOnlyList<string> allowed, string defaultAction)
         {
             var viewModel = new ShortcutEditDialogViewModel(
-                _dialogManager, _settings, _languages, allowed, entry, defaultAction)
+                _dialogManager,
+                _settings,
+                _languages,
+                _keyboardMonitor,
+                allowed,
+                entry,
+                defaultAction)
             {
                 OnClose = result =>
                 {
@@ -291,6 +302,8 @@ namespace EasyChat.Presentation.Features.Shortcuts
         private readonly ShortcutEntryState? _existing;
         private readonly SettingsSession _settings;
         private readonly TranslationLanguageOptions _languageOptions;
+        private readonly IGlobalKeyboardMonitor _keyboardMonitor;
+        private IKeyboardMonitorRegistration? _keyboardMonitorRegistration;
         private ShortcutActionOption _selectedAction;
         private EngineOption? _selectedEngineOption;
         private LanguageSettings? _selectedSourceLang;
@@ -315,6 +328,7 @@ namespace EasyChat.Presentation.Features.Shortcuts
             DialogManager dialogManager,
             SettingsSession settings,
             TranslationLanguageOptions languageOptions,
+            IGlobalKeyboardMonitor keyboardMonitor,
             IReadOnlyList<string> allowedActionTypes,
             ShortcutEntryState? existing = null,
             string? defaultAction = null)
@@ -322,6 +336,7 @@ namespace EasyChat.Presentation.Features.Shortcuts
             _dialogManager = dialogManager;
             _settings = settings;
             _languageOptions = languageOptions;
+            _keyboardMonitor = keyboardMonitor ?? throw new ArgumentNullException(nameof(keyboardMonitor));
             _existing = existing;
             AvailableActions = ShortcutActionCatalog.All
                 .Where(action => allowedActionTypes.Contains(action.ActionType))
@@ -571,6 +586,7 @@ namespace EasyChat.Presentation.Features.Shortcuts
             IsRecordingBeforeInputKey = false;
             IsRecordingAfterInputKey = false;
             IsRecording = true;
+            StartKeyboardMonitor();
         }
 
         public void SetRecordedKeyCombination(string combination)
@@ -586,6 +602,7 @@ namespace EasyChat.Presentation.Features.Shortcuts
 
         public void StopRecording()
         {
+            StopKeyboardMonitor();
             IsRecording = false;
             IsRecordingBeforeInputKey = false;
             IsRecordingAfterInputKey = false;
@@ -594,11 +611,69 @@ namespace EasyChat.Presentation.Features.Shortcuts
 
         private void StartInputKeyRecording(bool before)
         {
+            StopKeyboardMonitor();
             RecordingPreview = string.Empty;
             IsRecording = false;
             IsRecordingBeforeInputKey = before;
             IsRecordingAfterInputKey = !before;
+            StartKeyboardMonitor();
         }
+
+        private void StartKeyboardMonitor()
+        {
+            StopKeyboardMonitor();
+            try
+            {
+                _keyboardMonitorRegistration = _keyboardMonitor.Start(OnGlobalKeyboardEvent);
+            }
+            catch
+            {
+                // The window-level Avalonia handlers remain available as a local fallback.
+                _keyboardMonitorRegistration = null;
+            }
+        }
+
+        private void StopKeyboardMonitor() =>
+            Interlocked.Exchange(ref _keyboardMonitorRegistration, null)?.Dispose();
+
+        private void OnGlobalKeyboardEvent(GlobalKeyboardEvent keyboardEvent)
+        {
+            if (!keyboardEvent.IsPressed || IsModifierKey(keyboardEvent.Key))
+                return;
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (!IsRecording && !IsRecordingBeforeInputKey && !IsRecordingAfterInputKey)
+                    return;
+
+                if (keyboardEvent.Key is "Escape")
+                {
+                    StopRecording();
+                    return;
+                }
+
+                if (keyboardEvent.Key is "Tab")
+                {
+                    StopRecording();
+                    return;
+                }
+
+                var parts = new List<string>();
+                if (keyboardEvent.Modifiers.HasFlag(ShortcutModifiers.Control))
+                    parts.Add("Ctrl");
+                if (keyboardEvent.Modifiers.HasFlag(ShortcutModifiers.Alt))
+                    parts.Add("Alt");
+                if (keyboardEvent.Modifiers.HasFlag(ShortcutModifiers.Shift))
+                    parts.Add("Shift");
+                if (keyboardEvent.Modifiers.HasFlag(ShortcutModifiers.Meta))
+                    parts.Add("Win");
+                parts.Add(keyboardEvent.Key);
+                SetRecordedKeyCombination(string.Join(" + ", parts));
+            });
+        }
+
+        private static bool IsModifierKey(string key) => key is
+            "Ctrl" or "Control" or "Alt" or "Shift" or "LWin" or "RWin";
 
         private void Restore(ShortcutEntryState? entry)
         {
@@ -660,6 +735,7 @@ namespace EasyChat.Presentation.Features.Shortcuts
 
         private void Save()
         {
+            StopKeyboardMonitor();
             var parameter = IsComplexSwitchAction
                 ? new ShortcutParameterSettings(
                     SelectedEngineOption?.Name ?? string.Empty,
@@ -691,6 +767,7 @@ namespace EasyChat.Presentation.Features.Shortcuts
 
         private void Cancel()
         {
+            StopKeyboardMonitor();
             OnClose?.Invoke(null);
             _dialogManager.Close(this);
         }

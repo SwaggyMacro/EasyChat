@@ -64,8 +64,6 @@ public static class EasyChatApplicationServiceCollectionExtensions
         services.AddSingleton<AutomaticShortcutAction>();
         services.AddSingleton<IAutomaticShortcutAction>(provider =>
             provider.GetRequiredService<AutomaticShortcutAction>());
-        services.AddSingleton<IShortcutAction>(provider =>
-            provider.GetRequiredService<AutomaticShortcutAction>());
         services.AddSingleton<IShortcutUseCases, ShortcutCoordinator>();
         services.AddSingleton<IShellLifecycle, ShellLifecycle>();
         return services;

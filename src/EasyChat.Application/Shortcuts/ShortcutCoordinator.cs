@@ -10,9 +10,10 @@ public sealed class ShortcutCoordinator : IShortcutUseCases
     private readonly ISettingsUseCases _settings;
     private readonly IPlatformAccessUseCases _platformAccess;
     private readonly IGlobalHotkeys _hotkeys;
+    private readonly IAutomaticShortcutAction _automaticAction;
     private readonly IReadOnlyDictionary<string, ActionState> _actions;
     private readonly SemaphoreSlim _reloadLock = new(1, 1);
-    private readonly List<IHotkeyRegistration> _registrations = [];
+    private readonly List<IHotkeyRegistration> _hotkeyRegistrations = [];
     private int _started;
     private int _disposed;
 
@@ -20,11 +21,13 @@ public sealed class ShortcutCoordinator : IShortcutUseCases
         ISettingsUseCases settings,
         IPlatformAccessUseCases platformAccess,
         IGlobalHotkeys hotkeys,
-        IEnumerable<IShortcutAction> actions)
+        IEnumerable<IShortcutAction> actions,
+        IAutomaticShortcutAction automaticAction)
     {
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         _platformAccess = platformAccess ?? throw new ArgumentNullException(nameof(platformAccess));
         _hotkeys = hotkeys ?? throw new ArgumentNullException(nameof(hotkeys));
+        _automaticAction = automaticAction ?? throw new ArgumentNullException(nameof(automaticAction));
         ArgumentNullException.ThrowIfNull(actions);
         _actions = actions.ToDictionary(
             action => action.ActionType,
@@ -49,12 +52,8 @@ public sealed class ShortcutCoordinator : IShortcutUseCases
         await _reloadLock.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            DisposeRegistrations();
-            if (_actions.TryGetValue("AutomaticKey", out var resetAutomaticState)
-                && resetAutomaticState.Action is IAutomaticShortcutAction resetAutomaticAction)
-            {
-                await resetAutomaticAction.ResetAsync(cancellationToken).ConfigureAwait(false);
-            }
+            DisposeHotkeyRegistrations();
+            await _automaticAction.ResetAsync(cancellationToken).ConfigureAwait(false);
             var entries = _settings.Current.Shortcut.Entries
                 .Where(entry => entry.IsEnabled && !string.IsNullOrWhiteSpace(entry.KeyCombination))
                 .ToArray();
@@ -70,36 +69,22 @@ public sealed class ShortcutCoordinator : IShortcutUseCases
 
             if (automaticEntries.Length > 0)
             {
-                if (!_actions.TryGetValue("AutomaticKey", out var automaticState)
-                    || automaticState.Action is not IAutomaticShortcutAction automaticAction)
+                var automaticAccess = await _platformAccess.EnsureAvailableAsync(
+                    PlatformCapability.TextDelivery,
+                    cancellationToken).ConfigureAwait(false);
+                if (automaticAccess.IsFailure)
                 {
                     issues.AddRange(automaticEntries.Select(entry => new ShortcutRegistrationIssue(
                         entry.ActionType,
                         entry.KeyCombination,
-                        new Error(
-                            "shortcut.action-unavailable",
-                            "No automatic shortcut action is registered."))));
+                        automaticAccess.Error)));
                 }
                 else
                 {
-                    var automaticAccess = await _platformAccess.EnsureAvailableAsync(
-                        PlatformCapability.TextDelivery,
+                    var automaticIssues = await _automaticAction.ConfigureAsync(
+                        automaticEntries,
                         cancellationToken).ConfigureAwait(false);
-                    if (automaticAccess.IsFailure)
-                    {
-                        issues.AddRange(automaticEntries.Select(entry => new ShortcutRegistrationIssue(
-                            entry.ActionType,
-                            entry.KeyCombination,
-                            automaticAccess.Error)));
-                    }
-                    else
-                    {
-                        var automaticIssues = await automaticAction.ConfigureAsync(
-                            automaticEntries,
-                            cancellationToken).ConfigureAwait(false);
-                        issues.AddRange(automaticIssues);
-                        registeredCount += automaticEntries.Length - automaticIssues.Count;
-                    }
+                    issues.AddRange(automaticIssues);
                 }
             }
 
@@ -181,7 +166,7 @@ public sealed class ShortcutCoordinator : IShortcutUseCases
                     continue;
                 }
 
-                _registrations.Add(registration.Value);
+                _hotkeyRegistrations.Add(registration.Value);
                 registeredCount++;
             }
 
@@ -224,12 +209,8 @@ public sealed class ShortcutCoordinator : IShortcutUseCases
         await _reloadLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            DisposeRegistrations();
-            if (_actions.TryGetValue("AutomaticKey", out var automaticState)
-                && automaticState.Action is IAutomaticShortcutAction automaticAction)
-            {
-                await automaticAction.ResetAsync().ConfigureAwait(false);
-            }
+            DisposeHotkeyRegistrations();
+            await _automaticAction.ResetAsync().ConfigureAwait(false);
         }
         finally
         {
@@ -255,11 +236,11 @@ public sealed class ShortcutCoordinator : IShortcutUseCases
         }
     }
 
-    private void DisposeRegistrations()
+    private void DisposeHotkeyRegistrations()
     {
-        foreach (var registration in _registrations)
+        foreach (var registration in _hotkeyRegistrations)
             registration.Dispose();
-        _registrations.Clear();
+        _hotkeyRegistrations.Clear();
     }
 
     private void ThrowIfDisposed() =>

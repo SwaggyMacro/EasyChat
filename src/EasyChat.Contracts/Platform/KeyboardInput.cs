@@ -21,3 +21,19 @@ public interface IKeyboardInput
         string combination,
         CancellationToken cancellationToken = default);
 }
+
+/// <summary>
+/// A key transition observed while a shortcut is being recorded. Observers must not consume the
+/// native event; the platform continues dispatching it to the owning application.
+/// </summary>
+public sealed record GlobalKeyboardEvent(
+    string Key,
+    ShortcutModifiers Modifiers,
+    bool IsPressed);
+
+public interface IKeyboardMonitorRegistration : IDisposable;
+
+public interface IGlobalKeyboardMonitor
+{
+    IKeyboardMonitorRegistration Start(Action<GlobalKeyboardEvent> callback);
+}

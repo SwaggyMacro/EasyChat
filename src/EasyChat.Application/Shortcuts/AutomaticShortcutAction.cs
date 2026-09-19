@@ -27,14 +27,6 @@ public sealed class AutomaticShortcutAction : IAutomaticShortcutAction, IDisposa
         _playback.PlaybackCompleted += OnPlaybackCompleted;
     }
 
-    public string ActionType => "AutomaticKey";
-
-    public bool PreventConcurrentExecution => false;
-
-    public ValueTask ExecuteAsync(
-        ShortcutParameterSettings? parameter,
-        CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
-
     public async ValueTask<IReadOnlyList<ShortcutRegistrationIssue>> ConfigureAsync(
         IReadOnlyList<ShortcutEntrySettings> entries,
         CancellationToken cancellationToken = default)
