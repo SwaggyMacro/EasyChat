@@ -18,7 +18,9 @@ public sealed class WindowsAudioPlaybackDeviceCatalog : IAudioPlaybackDeviceCata
         engine.UpdateAudioDevicesInfo();
         var devices = engine.PlaybackDevices
             .Select(device => new AudioPlaybackDeviceDescriptor(
-                FromDeviceId(device.Id.ToInt64().ToString(CultureInfo.InvariantCulture)),
+                FromDeviceId(
+                    device.Id.ToInt64().ToString(CultureInfo.InvariantCulture),
+                    device.Name),
                 device.Name,
                 device.Name,
                 device.IsDefault ? "Default playback device" : null,
@@ -27,8 +29,10 @@ public sealed class WindowsAudioPlaybackDeviceCatalog : IAudioPlaybackDeviceCata
         return ValueTask.FromResult<IReadOnlyList<AudioPlaybackDeviceDescriptor>>(devices);
     }
 
-    internal static AudioPlaybackDeviceToken FromDeviceId(string deviceId) =>
-        new($"{DeviceTokenPrefix}{deviceId}");
+    internal static AudioPlaybackDeviceToken FromDeviceId(
+        string deviceId,
+        string? deviceName = null) =>
+        new($"{DeviceTokenPrefix}{deviceId}", deviceName);
 
     internal static bool IsVirtualCableName(string? name) =>
         !string.IsNullOrWhiteSpace(name)

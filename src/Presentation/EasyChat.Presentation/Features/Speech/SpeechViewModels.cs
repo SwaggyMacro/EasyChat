@@ -932,18 +932,22 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
             return false;
         }
 
+        var commandSettings = mode == SpeechSessionMode.RealtimeInterpretation
+            ? modeSettings with { RecognitionLanguage = modelId, IsTranslationEnabled = true }
+            : modeSettings with { RecognitionLanguage = modelId };
         command = new SpeechRecognitionCommand(
             modelId,
             modelId,
             sources,
-            modeSettings with { RecognitionLanguage = modelId },
+            commandSettings,
             CompleteOnCancellation: mode == SpeechSessionMode.RealtimeInterpretation,
-            SubtitleOrigin: mode == SpeechSessionMode.RealtimeInterpretation
-                ? SpeechSubtitleOrigin.RealtimeInterpretation
-                : SpeechSubtitleOrigin.AudioTranslation,
-            SegmentationMode: mode == SpeechSessionMode.RealtimeInterpretation
-                ? SpeechRecognitionSegmentationMode.SingleUtterance
-                : SpeechRecognitionSegmentationMode.Standard);
+             SubtitleOrigin: mode == SpeechSessionMode.RealtimeInterpretation
+                 ? SpeechSubtitleOrigin.RealtimeInterpretation
+                 : SpeechSubtitleOrigin.AudioTranslation,
+             SegmentationMode: mode == SpeechSessionMode.RealtimeInterpretation
+                 ? SpeechRecognitionSegmentationMode.SingleUtterance
+                 : SpeechRecognitionSegmentationMode.Standard,
+             AllowConcurrentSessions: true);
         return true;
     }
 

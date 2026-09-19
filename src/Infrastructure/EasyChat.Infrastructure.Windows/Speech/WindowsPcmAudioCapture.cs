@@ -397,19 +397,12 @@ public sealed class WindowsPcmAudioCapture : IPcmAudioCapture, IPreparablePcmAud
     {
         private const int Capacity = 8;
         private readonly CancellationTokenSource _lifetime = new();
-        private readonly Channel<ReadOnlyMemory<byte>> _frames = Channel.CreateBounded<ReadOnlyMemory<byte>>(
-            new BoundedChannelOptions(Capacity)
-            {
-                SingleReader = true,
-                SingleWriter = true,
-                FullMode = BoundedChannelFullMode.DropOldest,
-                AllowSynchronousContinuations = false
-            });
+        private readonly object _readersSync = new();
+        private readonly List<Channel<ReadOnlyMemory<byte>>> _readers = [];
         private readonly TaskCompletionSource _ready = new(
             TaskCreationOptions.RunContinuationsAsynchronously);
         private readonly object _startSync = new();
         private Task? _runner;
-        private int _readerActive;
         private int _disposed;
 
         public async ValueTask StartAsync(CancellationToken cancellationToken)
@@ -437,16 +430,29 @@ public sealed class WindowsPcmAudioCapture : IPcmAudioCapture, IPreparablePcmAud
         public async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadAsync(
             [EnumeratorCancellation] CancellationToken cancellationToken)
         {
-            if (Interlocked.CompareExchange(ref _readerActive, 1, 0) != 0)
+            var frames = Channel.CreateBounded<ReadOnlyMemory<byte>>(
+                new BoundedChannelOptions(Capacity)
+                {
+                    SingleReader = true,
+                    SingleWriter = false,
+                    FullMode = BoundedChannelFullMode.DropOldest,
+                    AllowSynchronousContinuations = false
+                });
+            lock (_readersSync)
             {
-                throw new InvalidOperationException(
-                    "A prepared audio capture can only be consumed by one recognizer at a time.");
+                if (Volatile.Read(ref _disposed) != 0)
+                {
+                    frames.Writer.TryComplete();
+                }
+                else
+                {
+                    _readers.Add(frames);
+                }
             }
 
-            DrainFrames();
             try
             {
-                await foreach (var frame in _frames.Reader.ReadAllAsync(cancellationToken)
+                await foreach (var frame in frames.Reader.ReadAllAsync(cancellationToken)
                                    .ConfigureAwait(false))
                 {
                     yield return frame;
@@ -454,8 +460,9 @@ public sealed class WindowsPcmAudioCapture : IPcmAudioCapture, IPreparablePcmAud
             }
             finally
             {
-                Interlocked.Exchange(ref _readerActive, 0);
-                DrainFrames();
+                lock (_readersSync)
+                    _readers.Remove(frames);
+                frames.Writer.TryComplete();
             }
         }
 
@@ -492,8 +499,11 @@ public sealed class WindowsPcmAudioCapture : IPcmAudioCapture, IPreparablePcmAud
                 {
                     // A timed PCM frame proves all native sessions have started successfully.
                     _ready.TrySetResult();
-                    if (Volatile.Read(ref _readerActive) != 0)
-                        _frames.Writer.TryWrite(frame);
+                    Channel<ReadOnlyMemory<byte>>[] readers;
+                    lock (_readersSync)
+                        readers = _readers.ToArray();
+                    foreach (var reader in readers)
+                        reader.Writer.TryWrite(frame);
                 }
 
                 if (!_lifetime.IsCancellationRequested)
@@ -519,16 +529,16 @@ public sealed class WindowsPcmAudioCapture : IPcmAudioCapture, IPreparablePcmAud
                     _ready.TrySetException(new InvalidOperationException(
                         "The prepared Windows audio capture stopped before it became ready."));
 
-                _frames.Writer.TryComplete(failure);
+                Channel<ReadOnlyMemory<byte>>[] readers;
+                lock (_readersSync)
+                {
+                    readers = _readers.ToArray();
+                    _readers.Clear();
+                }
+                foreach (var reader in readers)
+                    reader.Writer.TryComplete(failure);
                 if (failure is not null)
                     owner.RemovePreparedCapture(key, this);
-            }
-        }
-
-        private void DrainFrames()
-        {
-            while (_frames.Reader.TryRead(out _))
-            {
             }
         }
     }

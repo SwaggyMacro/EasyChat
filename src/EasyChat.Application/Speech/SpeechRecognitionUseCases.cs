@@ -312,5 +312,6 @@ public sealed class SpeechRecognitionUseCases : ISpeechRecognitionUseCases
         new(
             command.ModelPath,
             command.Language,
-            command.Sources.Select(source => source.Token).ToArray());
+            command.Sources.Select(source => source.Token).ToArray(),
+            command.AllowConcurrentSessions);
 }

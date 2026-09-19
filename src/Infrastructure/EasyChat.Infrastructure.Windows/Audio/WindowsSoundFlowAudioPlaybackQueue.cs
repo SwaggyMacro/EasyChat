@@ -233,18 +233,15 @@ public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, IA
             AudioPlaybackTarget.VirtualCable => devices.FirstOrDefault(device =>
                 WindowsAudioPlaybackDeviceCatalog.IsVirtualCableName(device.Name)),
             AudioPlaybackTarget.SelectedDevice => devices.FirstOrDefault(device =>
-                deviceToken is not null
-                && WindowsAudioPlaybackDeviceCatalog.FromDeviceId(
-                    device.Id.ToInt64().ToString(CultureInfo.InvariantCulture)) == deviceToken.Value),
+                IsSelectedDevice(device, deviceToken)),
             _ => devices.FirstOrDefault(device => device.IsDefault)
         };
         var hasSelected = target switch
         {
             AudioPlaybackTarget.VirtualCable => devices.Any(device =>
                 WindowsAudioPlaybackDeviceCatalog.IsVirtualCableName(device.Name)),
-            AudioPlaybackTarget.SelectedDevice => deviceToken is not null && devices.Any(device =>
-                WindowsAudioPlaybackDeviceCatalog.FromDeviceId(
-                    device.Id.ToInt64().ToString(CultureInfo.InvariantCulture)) == deviceToken.Value),
+            AudioPlaybackTarget.SelectedDevice => devices.Any(device =>
+                IsSelectedDevice(device, deviceToken)),
             _ => devices.Any(device => device.IsDefault)
         };
         if (!hasSelected)
@@ -275,6 +272,26 @@ public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, IA
             _device = null;
             throw;
         }
+    }
+
+    private static bool IsSelectedDevice(
+        SoundFlow.Structs.DeviceInfo device,
+        AudioPlaybackDeviceToken? deviceToken)
+    {
+        if (deviceToken is null)
+            return false;
+
+        var currentToken = WindowsAudioPlaybackDeviceCatalog.FromDeviceId(
+            device.Id.ToInt64().ToString(CultureInfo.InvariantCulture),
+            device.Name);
+        if (currentToken == deviceToken.Value)
+            return true;
+
+        return !string.IsNullOrWhiteSpace(deviceToken.Value.DeviceName)
+               && string.Equals(
+                   device.Name,
+                   deviceToken.Value.DeviceName,
+                   StringComparison.OrdinalIgnoreCase);
     }
 
     private readonly record struct QueuedPlayback(

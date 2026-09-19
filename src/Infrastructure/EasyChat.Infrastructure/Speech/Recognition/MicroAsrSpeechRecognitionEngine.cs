@@ -11,6 +11,7 @@ public sealed class MicroAsrSpeechRecognitionEngine : ISpeechRecognitionEngine, 
     private readonly IMicroAsrRecognizerFactory _recognizers;
     private readonly Func<string> _modelsDirectory;
     private readonly SemaphoreSlim _sessionGate = new(1, 1);
+    private readonly SemaphoreSlim _preparationGate = new(1, 1);
     private readonly object _lifecycleSync = new();
     private readonly object _preparationSync = new();
     private readonly Dictionary<PreparedRecognitionKey, PreparedRecognizer> _preparedRecognizers = [];
@@ -53,54 +54,60 @@ public sealed class MicroAsrSpeechRecognitionEngine : ISpeechRecognitionEngine, 
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
-        using var session = await EnterSessionAsync(cancellationToken).ConfigureAwait(false);
+        using var session = await EnterSessionAsync(
+            cancellationToken,
+            options.AllowConcurrentSessions).ConfigureAwait(false);
+        await _preparationGate.WaitAsync(cancellationToken).ConfigureAwait(false);
         var key = PreparedRecognitionKey.Create(options);
-        lock (_preparationSync)
-        {
-            if (_preparedRecognizers.ContainsKey(key))
-                return;
-        }
-
-        IMicroAsrRecognizer? recognizer = null;
-        var added = false;
         try
         {
+            lock (_preparationSync)
+            {
+                if (_preparedRecognizers.TryGetValue(key, out var existing))
+                {
+                    existing.ReferenceCount++;
+                    return;
+                }
+            }
+
+            IMicroAsrRecognizer? recognizer = null;
+            var capturePrepared = false;
             var modelDirectory = ResolveModelDirectory(options.ModelPath);
             recognizer = await Task.Run(
                 () => _recognizers.Create(modelDirectory),
                 cancellationToken).ConfigureAwait(false);
-            lock (_preparationSync)
+            try
             {
-                if (_preparedRecognizers.ContainsKey(key))
-                    return;
+                if (_audioCapture is IPreparablePcmAudioCapture preparable)
+                {
+                    await preparable.PrepareCaptureAsync(
+                        options.Sources,
+                        PcmAudioFormat.SpeechRecognition,
+                        cancellationToken).ConfigureAwait(false);
+                    capturePrepared = true;
+                }
 
-                _preparedRecognizers.Add(key, new PreparedRecognizer(options, recognizer));
-                added = true;
-            }
-
-            if (_audioCapture is IPreparablePcmAudioCapture preparable)
-            {
-                await preparable.PrepareCaptureAsync(
-                    options.Sources,
-                    PcmAudioFormat.SpeechRecognition,
-                    cancellationToken).ConfigureAwait(false);
-            }
-        }
-        catch
-        {
-            if (added)
-            {
                 lock (_preparationSync)
-                    _preparedRecognizers.Remove(key);
+                {
+                    _preparedRecognizers.Add(key, new PreparedRecognizer(options, recognizer));
+                }
+                recognizer = null;
             }
-            if (recognizer is not null)
-                await recognizer.DisposeAsync().ConfigureAwait(false);
-            throw;
+            finally
+            {
+                if (recognizer is not null)
+                    await recognizer.DisposeAsync().ConfigureAwait(false);
+                if (capturePrepared && _audioCapture is IPreparablePcmAudioCapture preparable)
+                {
+                    await preparable.ReleasePreparedCaptureAsync(
+                        options.Sources,
+                        PcmAudioFormat.SpeechRecognition).ConfigureAwait(false);
+                }
+            }
         }
         finally
         {
-            if (!added && recognizer is not null)
-                await recognizer.DisposeAsync().ConfigureAwait(false);
+            _preparationGate.Release();
         }
     }
 
@@ -109,26 +116,31 @@ public sealed class MicroAsrSpeechRecognitionEngine : ISpeechRecognitionEngine, 
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
-        using var session = await EnterSessionAsync(cancellationToken).ConfigureAwait(false);
+        using var session = await EnterSessionAsync(
+            cancellationToken,
+            options.AllowConcurrentSessions).ConfigureAwait(false);
+        await _preparationGate.WaitAsync(cancellationToken).ConfigureAwait(false);
         var key = PreparedRecognitionKey.Create(options);
         PreparedRecognizer? prepared;
-        lock (_preparationSync)
-            _preparedRecognizers.Remove(key, out prepared);
-
         try
         {
-            if (prepared is not null)
-                await prepared.Recognizer.DisposeAsync().ConfigureAwait(false);
+            lock (_preparationSync)
+            {
+                if (!_preparedRecognizers.TryGetValue(key, out prepared))
+                    return;
+
+                prepared.ReferenceCount--;
+                if (prepared.ReferenceCount > 0 || prepared.ActiveSessions > 0)
+                    return;
+                _preparedRecognizers.Remove(key);
+            }
+
+            await prepared.Recognizer.DisposeAsync().ConfigureAwait(false);
+            await ReleasePreparedCaptureAsync(prepared.Options).ConfigureAwait(false);
         }
         finally
         {
-            if (_audioCapture is IPreparablePcmAudioCapture preparable)
-            {
-                await preparable.ReleasePreparedCaptureAsync(
-                    options.Sources,
-                    PcmAudioFormat.SpeechRecognition,
-                    cancellationToken).ConfigureAwait(false);
-            }
+            _preparationGate.Release();
         }
     }
 
@@ -137,11 +149,14 @@ public sealed class MicroAsrSpeechRecognitionEngine : ISpeechRecognitionEngine, 
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
-        using var session = await EnterSessionAsync(cancellationToken).ConfigureAwait(false);
+        using var session = await EnterSessionAsync(
+            cancellationToken,
+            options.AllowConcurrentSessions).ConfigureAwait(false);
 
         var key = PreparedRecognitionKey.Create(options);
         IMicroAsrRecognizer? recognizer = null;
-        var retainsModelAfterSession = false;
+        PreparedRecognizer? preparedCaptureSession = null;
+        var retainsPreparedRecognizer = false;
         Exception? startFailure = null;
         try
         {
@@ -149,8 +164,13 @@ public sealed class MicroAsrSpeechRecognitionEngine : ISpeechRecognitionEngine, 
             {
                 if (_preparedRecognizers.TryGetValue(key, out var prepared))
                 {
-                    recognizer = prepared.Recognizer;
-                    retainsModelAfterSession = true;
+                    prepared.ActiveSessions++;
+                    preparedCaptureSession = prepared;
+                    if (prepared.ActiveSessions == 1)
+                    {
+                        recognizer = prepared.Recognizer;
+                        retainsPreparedRecognizer = true;
+                    }
                 }
             }
             recognizer ??= _recognizers.Create(ResolveModelDirectory(options.ModelPath));
@@ -158,6 +178,9 @@ public sealed class MicroAsrSpeechRecognitionEngine : ISpeechRecognitionEngine, 
         catch (Exception exception)
         {
             startFailure = exception;
+            if (preparedCaptureSession is not null)
+                await ReleasePreparedRecognizerSessionAsync(key, preparedCaptureSession)
+                    .ConfigureAwait(false);
         }
 
         if (startFailure is not null)
@@ -204,7 +227,7 @@ public sealed class MicroAsrSpeechRecognitionEngine : ISpeechRecognitionEngine, 
                 recognizer,
                 options.Sources,
                 events,
-                retainsModelAfterSession,
+                retainsPreparedRecognizer,
                 lifetime.Token,
                 eventLifetime.Token),
             CancellationToken.None);
@@ -234,8 +257,10 @@ public sealed class MicroAsrSpeechRecognitionEngine : ISpeechRecognitionEngine, 
             finally
             {
                 recognizer.ResultAvailable -= OnResult;
-                if (!retainsModelAfterSession)
+                if (!retainsPreparedRecognizer)
                     await recognizer.DisposeAsync().ConfigureAwait(false);
+                if (preparedCaptureSession is not null)
+                    await ReleasePreparedRecognizerSessionAsync(key, preparedCaptureSession).ConfigureAwait(false);
             }
         }
     }
@@ -253,17 +278,22 @@ public sealed class MicroAsrSpeechRecognitionEngine : ISpeechRecognitionEngine, 
         }
     }
 
-    private async Task<SessionLease> EnterSessionAsync(CancellationToken cancellationToken)
+    private async Task<SessionLease> EnterSessionAsync(
+        CancellationToken cancellationToken,
+        bool allowConcurrent)
     {
         RegisterSessionOperation();
         var gateEntered = false;
         try
         {
-            await _sessionGate.WaitAsync(cancellationToken).ConfigureAwait(false);
-            gateEntered = true;
+            if (!allowConcurrent)
+            {
+                await _sessionGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+                gateEntered = true;
+            }
             lock (_lifecycleSync)
                 ObjectDisposedException.ThrowIf(_disposed, this);
-            return new SessionLease(this);
+            return new SessionLease(this, gateEntered);
         }
         catch
         {
@@ -311,6 +341,7 @@ public sealed class MicroAsrSpeechRecognitionEngine : ISpeechRecognitionEngine, 
         finally
         {
             _sessionGate.Dispose();
+            _preparationGate.Dispose();
         }
     }
 
@@ -329,19 +360,7 @@ public sealed class MicroAsrSpeechRecognitionEngine : ISpeechRecognitionEngine, 
             try
             {
                 await entry.Recognizer.DisposeAsync().ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                (failures ??= []).Add(exception);
-            }
-
-            if (_audioCapture is not IPreparablePcmAudioCapture preparable)
-                continue;
-            try
-            {
-                await preparable.ReleasePreparedCaptureAsync(
-                    entry.Options.Sources,
-                    PcmAudioFormat.SpeechRecognition).ConfigureAwait(false);
+                await ReleasePreparedCaptureAsync(entry.Options).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -417,6 +436,57 @@ public sealed class MicroAsrSpeechRecognitionEngine : ISpeechRecognitionEngine, 
         }
     }
 
+    private async Task ReleasePreparedRecognizerSessionAsync(
+        PreparedRecognitionKey key,
+        PreparedRecognizer prepared)
+    {
+        await _preparationGate.WaitAsync().ConfigureAwait(false);
+        var shouldDispose = false;
+        try
+        {
+            lock (_preparationSync)
+            {
+                if (prepared.ActiveSessions > 0)
+                    prepared.ActiveSessions--;
+                if (prepared.ActiveSessions == 0 && prepared.ReferenceCount == 0)
+                {
+                    if (_preparedRecognizers.TryGetValue(key, out var current)
+                        && ReferenceEquals(current, prepared))
+                    {
+                        _preparedRecognizers.Remove(key);
+                        shouldDispose = true;
+                    }
+                }
+            }
+            if (!shouldDispose)
+                return;
+
+            await prepared.Recognizer.DisposeAsync().ConfigureAwait(false);
+        }
+        finally
+        {
+            try
+            {
+                if (shouldDispose)
+                    await ReleasePreparedCaptureAsync(prepared.Options).ConfigureAwait(false);
+            }
+            finally
+            {
+                _preparationGate.Release();
+            }
+        }
+    }
+
+    private async Task ReleasePreparedCaptureAsync(SpeechRecognitionOptions options)
+    {
+        if (_audioCapture is IPreparablePcmAudioCapture preparable)
+        {
+            await preparable.ReleasePreparedCaptureAsync(
+                options.Sources,
+                PcmAudioFormat.SpeechRecognition).ConfigureAwait(false);
+        }
+    }
+
     private string ResolveModelDirectory(string modelPath)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(modelPath);
@@ -450,9 +520,15 @@ public sealed class MicroAsrSpeechRecognitionEngine : ISpeechRecognitionEngine, 
 
     private sealed record PreparedRecognizer(
         SpeechRecognitionOptions Options,
-        IMicroAsrRecognizer Recognizer);
+        IMicroAsrRecognizer Recognizer)
+    {
+        public int ReferenceCount { get; set; } = 1;
+        public int ActiveSessions { get; set; }
+    }
 
-    private sealed class SessionLease(MicroAsrSpeechRecognitionEngine owner) : IDisposable
+    private sealed class SessionLease(
+        MicroAsrSpeechRecognitionEngine owner,
+        bool gateEntered) : IDisposable
     {
         private MicroAsrSpeechRecognitionEngine? _owner = owner;
 
@@ -463,7 +539,8 @@ public sealed class MicroAsrSpeechRecognitionEngine : ISpeechRecognitionEngine, 
                 return;
             try
             {
-                current._sessionGate.Release();
+                if (gateEntered)
+                    current._sessionGate.Release();
             }
             finally
             {

@@ -13,7 +13,8 @@ public sealed record SpeechRecognitionCommand(
     SpeechRecognitionSettings? SettingsOverride = null,
     bool CompleteOnCancellation = false,
     SpeechSubtitleOrigin SubtitleOrigin = SpeechSubtitleOrigin.AudioTranslation,
-    SpeechRecognitionSegmentationMode SegmentationMode = SpeechRecognitionSegmentationMode.Standard);
+    SpeechRecognitionSegmentationMode SegmentationMode = SpeechRecognitionSegmentationMode.Standard,
+    bool AllowConcurrentSessions = false);
 
 public enum SpeechRecognitionSegmentationMode
 {

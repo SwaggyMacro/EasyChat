@@ -268,6 +268,40 @@ public sealed class MicroAsrSpeechRecognitionEngineTests
     }
 
     [TestMethod]
+    public async Task ConcurrentSessionsCanRunWhenAllowed()
+    {
+        using var firstCancellation = new CancellationTokenSource();
+        using var secondCancellation = new CancellationTokenSource();
+        var firstRecognizer = new ReusableRecognizer();
+        var secondRecognizer = new ReusableRecognizer();
+        var factory = new SequenceRecognizerFactory(firstRecognizer, secondRecognizer);
+        await using var engine = new MicroAsrSpeechRecognitionEngine(
+            new BlockingPcmCapture(),
+            factory,
+            Path.Combine(Path.GetTempPath(), "easychat-microasr-tests", "models"));
+        var options = CreateOptions() with { AllowConcurrentSessions = true };
+        await using var first = engine.RecognizeAsync(options, firstCancellation.Token).GetAsyncEnumerator();
+        await using var second = engine.RecognizeAsync(options, secondCancellation.Token).GetAsyncEnumerator();
+
+        Assert.IsTrue(await first.MoveNextAsync());
+        Assert.AreEqual(SpeechRecognitionEventKind.Started, first.Current.Kind);
+        Assert.IsTrue(await second.MoveNextAsync());
+        Assert.AreEqual(SpeechRecognitionEventKind.Started, second.Current.Kind);
+
+        firstCancellation.Cancel();
+        secondCancellation.Cancel();
+        while (await first.MoveNextAsync())
+        {
+        }
+        while (await second.MoveNextAsync())
+        {
+        }
+
+        Assert.IsTrue(firstRecognizer.Completed);
+        Assert.IsTrue(secondRecognizer.Completed);
+    }
+
+    [TestMethod]
     public async Task CaptureAndCompletionFailuresStillPublishErrorThenStopped()
     {
         var recognizer = new ThrowingCompleteRecognizer("completion failed");

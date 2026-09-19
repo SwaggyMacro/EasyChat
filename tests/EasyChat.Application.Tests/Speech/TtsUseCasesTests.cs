@@ -217,6 +217,33 @@ public sealed class TtsUseCasesTests
     }
 
     [TestMethod]
+    public async Task SelectedOutputDeviceAndPlaybackContextAreForwarded()
+    {
+        var settings = new MutableSettingsUseCases(SettingsTestData.CreateBundle());
+        var playback = new FakePlaybackQueue();
+        ITtsUseCases useCases = new TtsUseCases(
+            [new FakeProvider(TtsProviderIds.EdgeTts)],
+            settings,
+            new FakeOutputWriter(),
+            playback,
+            new FakePlaybackDeviceCatalog(hasVirtualCable: false, selectedDeviceName: "Speakers"));
+
+        var result = await useCases.EnqueueAsync(
+            new TtsSynthesisRequest("hello", "en-US-DefaultNeural"),
+            interruptCurrent: false,
+            target: AudioPlaybackTarget.SelectedDevice,
+            context: AudioPlaybackContext.RealtimeInterpretation,
+            outputDeviceName: "Speakers");
+
+        Assert.IsTrue(result.IsSuccess);
+        Assert.AreEqual(AudioPlaybackTarget.SelectedDevice, playback.Targets.Single());
+        Assert.AreEqual(AudioPlaybackContext.RealtimeInterpretation, playback.Contexts.Single());
+        Assert.AreEqual(
+            new AudioPlaybackDeviceToken("test:speakers", "Speakers"),
+            playback.DeviceTokens.Single());
+    }
+
+    [TestMethod]
     public async Task VirtualCableTargetFailsWithoutCableAndDoesNotEnqueue()
     {
         var settings = new MutableSettingsUseCases(SettingsTestData.CreateBundle());
@@ -269,6 +296,7 @@ public sealed class TtsUseCasesTests
         public List<string> Operations { get; } = [];
         public List<AudioPlaybackTarget> Targets { get; } = [];
         public List<AudioPlaybackContext> Contexts { get; } = [];
+        public List<AudioPlaybackDeviceToken?> DeviceTokens { get; } = [];
         public List<Guid> PlaybackIds { get; } = [];
         event EventHandler<AudioPlaybackEventArgs>? IAudioPlaybackLifecycle.PlaybackStarted
         {
@@ -311,6 +339,22 @@ public sealed class TtsUseCasesTests
             return ValueTask.FromResult(id);
         }
 
+        public ValueTask<Guid> EnqueueAsync(
+            AudioTrack track,
+            AudioPlaybackTarget target,
+            AudioPlaybackContext context,
+            AudioPlaybackDeviceToken? deviceToken,
+            CancellationToken cancellationToken = default)
+        {
+            Operations.Add($"enqueue:{target}:{context}:{deviceToken?.Value}");
+            Targets.Add(target);
+            Contexts.Add(context);
+            DeviceTokens.Add(deviceToken);
+            var id = Guid.NewGuid();
+            PlaybackIds.Add(id);
+            return ValueTask.FromResult(id);
+        }
+
         public ValueTask StopAsync(CancellationToken cancellationToken = default)
         {
             Operations.Add("stop");
@@ -325,19 +369,42 @@ public sealed class TtsUseCasesTests
                 AudioPlaybackContext.None));
     }
 
-    private sealed class FakePlaybackDeviceCatalog(bool hasVirtualCable) : IAudioPlaybackDeviceCatalog
+    private sealed class FakePlaybackDeviceCatalog(
+        bool hasVirtualCable,
+        string? selectedDeviceName = null) : IAudioPlaybackDeviceCatalog
     {
         public ValueTask<IReadOnlyList<AudioPlaybackDeviceDescriptor>> GetDevicesAsync(
             CancellationToken cancellationToken = default) =>
             ValueTask.FromResult<IReadOnlyList<AudioPlaybackDeviceDescriptor>>(
-                hasVirtualCable
-                    ? [new(
+                (hasVirtualCable, selectedDeviceName) switch
+                {
+                    (true, not null) => [
+                        new(
+                            new AudioPlaybackDeviceToken("test:cable"),
+                            "CABLE Input",
+                            "CABLE Input",
+                            null,
+                            true),
+                        new(
+                            new AudioPlaybackDeviceToken("test:speakers", selectedDeviceName),
+                            selectedDeviceName,
+                            selectedDeviceName,
+                            null,
+                            false)],
+                    (true, null) => [new(
                         new AudioPlaybackDeviceToken("test:cable"),
                         "CABLE Input",
                         "CABLE Input",
                         null,
-                        true)]
-                    : []);
+                        true)],
+                    (false, not null) => [new(
+                        new AudioPlaybackDeviceToken("test:speakers", selectedDeviceName),
+                        selectedDeviceName,
+                        selectedDeviceName,
+                        null,
+                        false)],
+                    _ => []
+                });
     }
 
     private sealed class FakeOutputWriter : ITtsOutputWriter

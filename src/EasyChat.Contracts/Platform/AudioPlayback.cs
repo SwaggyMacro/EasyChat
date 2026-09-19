@@ -36,7 +36,9 @@ public interface IAudioPlaybackLifecycle
 /// Platform-owned identifier for a playback endpoint. Consumers must treat it as opaque and
 /// must not persist it.
 /// </summary>
-public readonly record struct AudioPlaybackDeviceToken(string Value)
+public readonly record struct AudioPlaybackDeviceToken(
+    string Value,
+    string? DeviceName = null)
 {
     public bool IsEmpty => string.IsNullOrWhiteSpace(Value);
 }

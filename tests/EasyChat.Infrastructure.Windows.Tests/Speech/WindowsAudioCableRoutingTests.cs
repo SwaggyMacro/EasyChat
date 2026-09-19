@@ -31,4 +31,13 @@ public sealed class WindowsAudioCableRoutingTests
             out var deviceId));
         Assert.AreEqual("{0.0.1.00000000}.{device-id}", deviceId);
     }
+
+    [TestMethod]
+    public void PlaybackDeviceTokenRetainsNameForEnumerationFallback()
+    {
+        var token = WindowsAudioPlaybackDeviceCatalog.FromDeviceId("42", "Speakers");
+
+        Assert.AreEqual("windows:playback:42", token.Value);
+        Assert.AreEqual("Speakers", token.DeviceName);
+    }
 }

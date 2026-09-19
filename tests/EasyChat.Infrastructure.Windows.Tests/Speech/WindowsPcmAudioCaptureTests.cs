@@ -95,6 +95,35 @@ public sealed class WindowsPcmAudioCaptureTests
     }
 
     [TestMethod]
+    public async Task PreparedCaptureBroadcastsFramesToMultipleReaders()
+    {
+        var factory = new FakeSessionFactory();
+        await using var capture = new WindowsPcmAudioCapture(factory);
+        var token = WindowsAudioCaptureSourceCatalog.FromCaptureDeviceId("device-id");
+
+        await capture.PrepareCaptureAsync([token], PcmAudioFormat.SpeechRecognition);
+        await using var first = capture.CaptureAsync(
+                [token],
+                PcmAudioFormat.SpeechRecognition)
+            .GetAsyncEnumerator();
+        await using var second = capture.CaptureAsync(
+                [token],
+                PcmAudioFormat.SpeechRecognition)
+            .GetAsyncEnumerator();
+
+        var firstFrame = first.MoveNextAsync().AsTask();
+        var secondFrame = second.MoveNextAsync().AsTask();
+        await Task.WhenAll(
+            firstFrame.WaitAsync(TimeSpan.FromSeconds(1)),
+            secondFrame.WaitAsync(TimeSpan.FromSeconds(1)));
+
+        Assert.IsTrue(firstFrame.Result);
+        Assert.IsTrue(secondFrame.Result);
+        Assert.AreEqual(640, first.Current.Length);
+        Assert.AreEqual(640, second.Current.Length);
+    }
+
+    [TestMethod]
     public async Task ExplicitSystemAudioAndMicrophoneAreMixedTogether()
     {
         var factory = new FakeSessionFactory();

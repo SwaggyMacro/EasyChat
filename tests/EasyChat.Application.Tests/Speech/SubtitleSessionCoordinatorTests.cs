@@ -18,7 +18,7 @@ namespace EasyChat.Application.Tests.Speech;
 public sealed class SubtitleSessionCoordinatorTests
 {
     [TestMethod]
-    public async Task FinalTranslationQueuesTranslatedSpeechToVirtualCable()
+    public async Task AudioTranslationDoesNotQueueTranslatedSpeech()
     {
         var tts = new RecordingTtsUseCases();
         var settings = CreateSettings(translationEnabled: true) with
@@ -32,12 +32,11 @@ public sealed class SubtitleSessionCoordinatorTests
         await harness.SendAsync(SpeechRecognitionEventKind.Stopped);
         await harness.Completion.WaitAsync(TimeSpan.FromSeconds(2));
 
-        Assert.AreEqual("即时翻译", tts.LastText);
-        Assert.AreEqual(AudioPlaybackTarget.VirtualCable, tts.LastTarget);
+        Assert.IsEmpty(tts.Texts);
     }
 
     [TestMethod]
-    public async Task FinalTranslationsEnterTheVirtualCableQueueInRecognitionOrder()
+    public async Task AudioTranslationDoesNotEnterTheTranslatedSpeechQueue()
     {
         var tts = new RecordingTtsUseCases();
         var settings = CreateSettings(translationEnabled: true) with
@@ -55,12 +54,7 @@ public sealed class SubtitleSessionCoordinatorTests
         await harness.SendAsync(SpeechRecognitionEventKind.Stopped);
         await harness.Completion.WaitAsync(TimeSpan.FromSeconds(2));
 
-        CollectionAssert.AreEqual(
-            new[] { "translated:first.", "translated:second." },
-            tts.Texts);
-        CollectionAssert.AreEqual(
-            new[] { AudioPlaybackTarget.VirtualCable, AudioPlaybackTarget.VirtualCable },
-            tts.Targets);
+        Assert.IsEmpty(tts.Texts);
     }
 
     [TestMethod]
@@ -69,7 +63,17 @@ public sealed class SubtitleSessionCoordinatorTests
         var tts = new RecordingTtsUseCases();
         var settings = CreateSettings(translationEnabled: true) with
         {
-            IsTranslatedSpeechEnabled = true
+            IsTranslatedSpeechEnabled = true,
+            RealtimeInterpretationConfiguration = new SpeechTranslationConfiguration(
+                "en",
+                true,
+                true,
+                true,
+                "zh-Hans",
+                "test",
+                1,
+                null,
+                ["Virtual Cable"])
         };
         await using var harness = new CoordinatorHarness(
             settings,
