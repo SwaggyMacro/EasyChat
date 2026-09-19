@@ -119,6 +119,15 @@ public interface ITtsUseCases
         AudioPlaybackContext context,
         CancellationToken cancellationToken = default) =>
         EnqueueAsync(request, interruptCurrent, target, cancellationToken);
+
+    ValueTask<Result> EnqueueAsync(
+        TtsSynthesisRequest request,
+        bool interruptCurrent,
+        AudioPlaybackTarget target,
+        AudioPlaybackContext context,
+        string? outputDeviceName,
+        CancellationToken cancellationToken = default) =>
+        EnqueueAsync(request, interruptCurrent, target, context, cancellationToken);
 }
 
 public interface ITtsPlaybackSession

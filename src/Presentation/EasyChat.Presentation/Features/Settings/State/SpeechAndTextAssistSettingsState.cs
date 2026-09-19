@@ -14,6 +14,8 @@ public sealed class LiveSpeechRecognitionSettings : LiveSettingsSection
     private string _engineId = string.Empty;
     private int _engineType;
     private string? _promptId;
+    private IReadOnlyList<string> _translatedSpeechOutputDeviceNames = [];
+    private IReadOnlyList<string> _audioOutputDeviceNames = [];
     private SpeechTranslationConfiguration _audioTranslationConfiguration;
     private SpeechTranslationConfiguration _realtimeInterpretationConfiguration;
     private SpeechTranslationMode _activeMode;
@@ -85,6 +87,17 @@ public sealed class LiveSpeechRecognitionSettings : LiveSettingsSection
     public string EngineId { get => _engineId; set => Set(ref _engineId, value); }
     public int EngineType { get => _engineType; set => Set(ref _engineType, value); }
     public string? PromptId { get => _promptId; set => Set(ref _promptId, value); }
+    public IReadOnlyList<string> TranslatedSpeechOutputDeviceNames
+    {
+        get => _translatedSpeechOutputDeviceNames;
+        set => SetOutputDeviceNames(ref _translatedSpeechOutputDeviceNames, value);
+    }
+
+    public IReadOnlyList<string> AudioOutputDeviceNames
+    {
+        get => _audioOutputDeviceNames;
+        set => SetOutputDeviceNames(ref _audioOutputDeviceNames, value);
+    }
     public SpeechTranslationMode ActiveMode => _activeMode;
     public int MaxSentencesPerLine { get => _maxSentencesPerLine; set => Set(ref _maxSentencesPerLine, value); }
     public FloatingDisplayMode FloatingDisplayMode { get => _floatingDisplayMode; set => Set(ref _floatingDisplayMode, value); }
@@ -174,7 +187,9 @@ public sealed class LiveSpeechRecognitionSettings : LiveSettingsSection
             _targetLanguage,
             _engineId,
             _engineType,
-            _promptId);
+            _promptId,
+            _translatedSpeechOutputDeviceNames,
+            _audioOutputDeviceNames);
         if (_activeMode == SpeechTranslationMode.AudioTranslation)
             _audioTranslationConfiguration = current;
         else
@@ -191,6 +206,8 @@ public sealed class LiveSpeechRecognitionSettings : LiveSettingsSection
         _engineId = configuration.EngineId;
         _engineType = configuration.EngineType;
         _promptId = configuration.PromptId;
+        _translatedSpeechOutputDeviceNames = configuration.TranslatedSpeechOutputDeviceNames?.ToArray() ?? [];
+        _audioOutputDeviceNames = configuration.AudioOutputDeviceNames?.ToArray() ?? [];
         if (!raiseChanges)
             return;
 
@@ -198,9 +215,29 @@ public sealed class LiveSpeechRecognitionSettings : LiveSettingsSection
                  {
                      nameof(RecognitionLanguage), nameof(IsTranslationEnabled),
                      nameof(IsTranslatedSpeechEnabled), nameof(IsRealTimePreviewEnabled),
-                     nameof(TargetLanguage), nameof(EngineId), nameof(EngineType), nameof(PromptId)
+                     nameof(TargetLanguage), nameof(EngineId), nameof(EngineType), nameof(PromptId),
+                     nameof(TranslatedSpeechOutputDeviceNames), nameof(AudioOutputDeviceNames)
                  })
             this.RaisePropertyChanged(property);
+    }
+
+    private bool SetOutputDeviceNames(ref IReadOnlyList<string> field, IReadOnlyList<string>? value,
+        [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+    {
+        var next = value is null
+            ? Array.Empty<string>()
+            : value
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Select(name => name.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        if (field.SequenceEqual(next, StringComparer.OrdinalIgnoreCase))
+            return false;
+
+        field = next;
+        this.RaisePropertyChanged(propertyName);
+        Commit();
+        return true;
     }
 
     private static SpeechTranslationConfiguration ToModeConfiguration(SpeechRecognitionSettings source) => new(

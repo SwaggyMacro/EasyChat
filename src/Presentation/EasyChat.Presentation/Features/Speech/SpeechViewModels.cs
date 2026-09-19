@@ -73,6 +73,38 @@ public sealed class SpeechAudioSourceItem : ReactiveObject, IDisposable
     public void Dispose() => AppIcon?.Dispose();
 }
 
+public sealed class SpeechPlaybackOutputItem : ReactiveObject
+{
+    private bool _isSelected;
+
+    public SpeechPlaybackOutputItem(string noOperationLabel)
+    {
+        IsNoOperation = true;
+        DisplayName = noOperationLabel;
+    }
+
+    public SpeechPlaybackOutputItem(AudioPlaybackDeviceDescriptor device, bool isSelected)
+    {
+        Device = device;
+        DisplayName = string.IsNullOrWhiteSpace(device.DisplayName)
+            ? device.Name
+            : device.DisplayName;
+        _isSelected = isSelected;
+    }
+
+    public AudioPlaybackDeviceDescriptor? Device { get; }
+    public string? DeviceName => Device?.Name;
+    public string DisplayName { get; }
+    public string Description => Device?.Description ?? string.Empty;
+    public bool HasDescription => !string.IsNullOrWhiteSpace(Description);
+    public bool IsNoOperation { get; }
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => this.RaiseAndSetIfChanged(ref _isSelected, value);
+    }
+}
+
 public sealed class SpeechSubtitleItemViewModel : ReactiveObject
 {
     private string _originalText = string.Empty;
@@ -255,6 +287,7 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
     private readonly SpeechModeSnapshot[] _modeSnapshots = new SpeechModeSnapshot[2];
     private readonly CancellationTokenSource?[] _recognitionCancellations = new CancellationTokenSource?[2];
     private readonly Task?[] _recognitionTasks = new Task?[2];
+    private bool _synchronizingOutputSelection;
     private IReadOnlyList<AudioCaptureSourceDescriptor> _availableAudioSources = [];
     private SpeechRecognitionCommand? _preparedAudioTranslationCommand;
     private SpeechRecognitionCommand? _preparedRealtimeInterpretationCommand;
@@ -328,6 +361,8 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
         AvailableFonts = new ObservableCollection<string>(
             FontManager.Current.SystemFonts.Select(font => font.Name).Order(StringComparer.CurrentCulture));
         AudioSources = [];
+        VirtualMicrophoneOptions = [];
+        AudioOutputOptions = [];
         SubtitleItems = _subtitleProjection.SubtitleItems;
         FloatingSubtitles = _subtitleProjection.FloatingSubtitles;
 
@@ -339,8 +374,8 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
         ToggleRealtimeInterpretationCommand = ReactiveCommand.CreateFromTask(
             () => ToggleInterpretationArmedAsync());
         RefreshSourcesCommand = ReactiveCommand.CreateFromTask(RefreshSourcesAsync);
-        RefreshVirtualCableCommand = ReactiveCommand.CreateFromTask(RefreshVirtualCableAsync);
-        SkipVirtualCableCheckCommand = ReactiveCommand.Create(SkipVirtualCableCheck);
+        RefreshVirtualCableCommand = ReactiveCommand.CreateFromTask(() => RefreshVirtualCableAsync());
+        SkipVirtualCableCheckCommand = ReactiveCommand.CreateFromTask(SkipVirtualCableCheckAsync);
         OpenAudioTranslationTutorialCommand = ReactiveCommand.Create(OpenAudioTranslationTutorial);
         OpenInterpretationTutorialCommand = ReactiveCommand.Create(OpenInterpretationTutorial);
         OpenVirtualCableInstallationTutorialCommand = ReactiveCommand.Create(OpenVirtualCableInstallationTutorial);
@@ -396,6 +431,8 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
                 new TranslationConfigurationOption(prompt.Id, prompt.Name, false, MaterialIconKind.TextBox)));
     public ObservableCollection<string> AvailableFonts { get; }
     public ObservableCollection<SpeechAudioSourceItem> AudioSources { get; }
+    public ObservableCollection<SpeechPlaybackOutputItem> VirtualMicrophoneOptions { get; }
+    public ObservableCollection<SpeechPlaybackOutputItem> AudioOutputOptions { get; }
     public ObservableCollection<SpeechSubtitleItemViewModel> SubtitleItems { get; }
     public ObservableCollection<SpeechSubtitleItemViewModel> FloatingSubtitles { get; }
 
@@ -431,6 +468,8 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
     public MaterialIconKind RecordingIcon => IsRecording ? MaterialIconKind.MicrophoneOff : MaterialIconKind.Microphone;
     public bool IsFloatingWindowOpen { get => _isFloatingWindowOpen; private set => this.RaiseAndSetIfChanged(ref _isFloatingWindowOpen, value); }
     public string SelectedSourcesSummary { get => _selectedSourcesSummary; private set => this.RaiseAndSetIfChanged(ref _selectedSourcesSummary, value); }
+    public string SelectedVirtualMicrophonesSummary => GetOutputSummary(VirtualMicrophoneOptions);
+    public string SelectedAudioOutputsSummary => GetOutputSummary(AudioOutputOptions);
     public SpeechRecognitionModel? SelectedRecognitionModel
     {
         get => _selectedRecognitionModel;
@@ -530,6 +569,53 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
         get => _settings.SpeechRecognition.IsTranslatedSpeechEnabled;
         set => Set(value, _settings.SpeechRecognition.IsTranslatedSpeechEnabled,
             next => _settings.SpeechRecognition.IsTranslatedSpeechEnabled = next);
+    }
+    private void OnOutputSelectionChanged(object? sender, PropertyChangedEventArgs eventArgs)
+    {
+        if (eventArgs.PropertyName != nameof(SpeechPlaybackOutputItem.IsSelected)
+            || sender is not SpeechPlaybackOutputItem changed
+            || _synchronizingOutputSelection)
+            return;
+
+        var options = VirtualMicrophoneOptions.Contains(changed)
+            ? VirtualMicrophoneOptions
+            : AudioOutputOptions;
+        _synchronizingOutputSelection = true;
+        try
+        {
+            if (changed.IsNoOperation && changed.IsSelected)
+            {
+                foreach (var option in options.Where(option => !option.IsNoOperation && option.IsSelected))
+                    option.IsSelected = false;
+            }
+            else if (!changed.IsNoOperation && changed.IsSelected)
+            {
+                var noOperation = options.FirstOrDefault(option => option.IsNoOperation);
+                if (noOperation is not null)
+                    noOperation.IsSelected = false;
+            }
+
+            var selectedDevices = GetSelectedOutputNames(options);
+            if (selectedDevices.Length == 0)
+            {
+                var noOperation = options.FirstOrDefault(option => option.IsNoOperation);
+                if (noOperation is not null)
+                    noOperation.IsSelected = true;
+            }
+
+            if (ReferenceEquals(options, VirtualMicrophoneOptions))
+                _settings.SpeechRecognition.TranslatedSpeechOutputDeviceNames = selectedDevices;
+            else
+                _settings.SpeechRecognition.AudioOutputDeviceNames = selectedDevices;
+        }
+        finally
+        {
+            _synchronizingOutputSelection = false;
+        }
+
+        this.RaisePropertyChanged(ReferenceEquals(options, VirtualMicrophoneOptions)
+            ? nameof(SelectedVirtualMicrophonesSummary)
+            : nameof(SelectedAudioOutputsSummary));
     }
     public bool IsAudioTranslationRecording
     {
@@ -1097,9 +1183,12 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
         _subtitleProjection.Update(line);
     }
 
-    private async Task RefreshVirtualCableAsync(CancellationToken cancellationToken = default)
+    private async Task RefreshVirtualCableAsync(
+        CancellationToken cancellationToken = default,
+        bool resetCheck = true)
     {
-        IsVirtualCableCheckSkipped = false;
+        if (resetCheck)
+            IsVirtualCableCheckSkipped = false;
 #if DEBUG
         _debugVirtualCableNeedsManualCheck = false;
 #endif
@@ -1115,6 +1204,22 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
 
             var playbackDevices = playbackDevicesTask.Result;
             var captureSources = captureSourcesTask.Result;
+            VirtualMicrophoneOptions.Clear();
+            AudioOutputOptions.Clear();
+            AddOutputOptions(VirtualMicrophoneOptions, playbackDevices);
+            AddOutputOptions(AudioOutputOptions, playbackDevices);
+            ApplyOutputSelections(VirtualMicrophoneOptions, _settings.SpeechRecognition.TranslatedSpeechOutputDeviceNames);
+            ApplyOutputSelections(AudioOutputOptions, _settings.SpeechRecognition.AudioOutputDeviceNames);
+            ReplaceUnavailableOutputNames(
+                VirtualMicrophoneOptions,
+                _settings.SpeechRecognition.TranslatedSpeechOutputDeviceNames,
+                names => _settings.SpeechRecognition.TranslatedSpeechOutputDeviceNames = names);
+            ReplaceUnavailableOutputNames(
+                AudioOutputOptions,
+                _settings.SpeechRecognition.AudioOutputDeviceNames,
+                names => _settings.SpeechRecognition.AudioOutputDeviceNames = names);
+            this.RaisePropertyChanged(nameof(SelectedVirtualMicrophonesSummary));
+            this.RaisePropertyChanged(nameof(SelectedAudioOutputsSummary));
             IsVirtualCableAvailable = HasVirtualCableEndpoints(playbackDevices, captureSources);
             _logger.LogInformation(
                 "VB-CABLE endpoint check: Available={Available}; Playback={PlaybackDevices}; Capture={CaptureDevices}",
@@ -1138,9 +1243,91 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
         }
     }
 
-    private void SkipVirtualCableCheck()
+    private void AddOutputOptions(
+        ObservableCollection<SpeechPlaybackOutputItem> options,
+        IEnumerable<AudioPlaybackDeviceDescriptor> devices)
+    {
+        var noOperation = new SpeechPlaybackOutputItem(Resources.Speech_NoAudioOutput)
+        {
+            IsSelected = true
+        };
+        noOperation.PropertyChanged += OnOutputSelectionChanged;
+        options.Add(noOperation);
+        foreach (var device in devices)
+        {
+            var item = new SpeechPlaybackOutputItem(device, isSelected: false);
+            item.PropertyChanged += OnOutputSelectionChanged;
+            options.Add(item);
+        }
+    }
+
+    private void ApplyOutputSelections(
+        ObservableCollection<SpeechPlaybackOutputItem> options,
+        IReadOnlyList<string>? configuredNames)
+    {
+        var names = configuredNames ?? [];
+        _synchronizingOutputSelection = true;
+        try
+        {
+            var matched = 0;
+            foreach (var option in options)
+            {
+                var selected = !option.IsNoOperation
+                               && option.DeviceName is not null
+                               && names.Any(name => string.Equals(
+                                   name,
+                                   option.DeviceName,
+                                   StringComparison.OrdinalIgnoreCase));
+                option.IsSelected = selected;
+                if (selected)
+                    matched++;
+            }
+
+            var noOperation = options.FirstOrDefault(option => option.IsNoOperation);
+            if (noOperation is not null)
+                noOperation.IsSelected = matched == 0;
+        }
+        finally
+        {
+            _synchronizingOutputSelection = false;
+        }
+    }
+
+    private static string GetOutputSummary(IEnumerable<SpeechPlaybackOutputItem> options)
+    {
+        var selected = options
+            .Where(option => !option.IsNoOperation && option.IsSelected)
+            .ToArray();
+        return selected.Length switch
+        {
+            0 => Resources.Speech_NoAudioOutput,
+            1 => selected[0].DisplayName,
+            _ => string.Format(Resources.Speech_SelectedOutputsCount, selected.Length)
+        };
+    }
+
+    private static string[] GetSelectedOutputNames(IEnumerable<SpeechPlaybackOutputItem> options) =>
+        options
+            .Where(option => !option.IsNoOperation && option.IsSelected)
+            .Select(option => option.DeviceName)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Cast<string>()
+            .ToArray();
+
+    private static void ReplaceUnavailableOutputNames(
+        ObservableCollection<SpeechPlaybackOutputItem> options,
+        IReadOnlyList<string>? configuredNames,
+        Action<IReadOnlyList<string>> replace)
+    {
+        var selected = GetSelectedOutputNames(options);
+        if (!(configuredNames ?? []).SequenceEqual(selected, StringComparer.OrdinalIgnoreCase))
+            replace(selected);
+    }
+
+    private async Task SkipVirtualCableCheckAsync()
     {
         IsVirtualCableCheckSkipped = true;
+        await RefreshVirtualCableAsync(resetCheck: false);
     }
 
     private void OpenAudioTranslationTutorial()
@@ -1286,9 +1473,12 @@ public sealed class SpeechRecognitionViewModel : NavigationPageViewModel, IDispo
 
     private void RaiseModePropertiesChanged()
     {
+        ApplyOutputSelections(VirtualMicrophoneOptions, _settings.SpeechRecognition.TranslatedSpeechOutputDeviceNames);
+        ApplyOutputSelections(AudioOutputOptions, _settings.SpeechRecognition.AudioOutputDeviceNames);
         foreach (var property in new[]
                  {
-                      nameof(IsTranslationEnabled), nameof(IsTranslatedSpeechEnabled),
+                     nameof(IsTranslationEnabled), nameof(IsTranslatedSpeechEnabled),
+                      nameof(SelectedVirtualMicrophonesSummary), nameof(SelectedAudioOutputsSummary),
                       nameof(IsRealTimePreviewEnabled), nameof(IsRealTimePreviewVisible),
                       nameof(IsAudioTranslationTargetLanguageVisible),
                       nameof(IsPromptSelectionVisible), nameof(SelectedPromptId),

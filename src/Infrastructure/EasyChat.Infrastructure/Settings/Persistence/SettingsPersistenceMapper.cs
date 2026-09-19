@@ -634,7 +634,9 @@ internal static class SettingsPersistenceMapper
         source.TargetLanguage,
         source.EngineId,
         source.EngineType,
-        source.PromptId);
+        source.PromptId,
+        NormalizeOutputDeviceNames(source.TranslatedSpeechOutputDeviceNames),
+        NormalizeOutputDeviceNames(source.AudioOutputDeviceNames));
 
     private static SpeechTranslationConfigurationDto ToDto(SpeechTranslationConfiguration source) => new()
     {
@@ -645,8 +647,19 @@ internal static class SettingsPersistenceMapper
         TargetLanguage = source.TargetLanguage,
         EngineId = source.EngineId,
         EngineType = source.EngineType,
-        PromptId = source.PromptId
+        PromptId = source.PromptId,
+        TranslatedSpeechOutputDeviceNames = NormalizeOutputDeviceNames(source.TranslatedSpeechOutputDeviceNames).ToList(),
+        AudioOutputDeviceNames = NormalizeOutputDeviceNames(source.AudioOutputDeviceNames).ToList()
     };
+
+    private static IReadOnlyList<string> NormalizeOutputDeviceNames(IEnumerable<string>? names) =>
+        names is null
+            ? []
+            : names
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Select(name => name.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
 
     private static SpeechTranslationConfiguration ToSpeechConfiguration(SpeechRecognitionSettings source) => new(
         source.RecognitionLanguage,

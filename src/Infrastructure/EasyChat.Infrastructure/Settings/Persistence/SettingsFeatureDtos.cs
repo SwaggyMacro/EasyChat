@@ -549,6 +549,12 @@ internal sealed class SpeechTranslationConfigurationDto
 
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     public string? PromptId { get; set; } = TranslationConfigurationOptionIds.FollowGlobal;
+
+    [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Replace)]
+    public List<string>? TranslatedSpeechOutputDeviceNames { get; set; }
+
+    [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Replace)]
+    public List<string>? AudioOutputDeviceNames { get; set; }
 }
 
 [JsonObject(MemberSerialization.OptIn)]

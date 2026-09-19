@@ -642,7 +642,28 @@
         <value>Send translated speech to virtual microphone</value>
     </data>
     <data name="Speech_TranslatedSpeechTip" xml:space="preserve">
-        <value>Requires VB-Audio Cable. TTS is sent to CABLE Input and appears as CABLE Output.</value>
+        <value>Choose the playback endpoint paired with the microphone you want to push to. VB-CABLE uses CABLE Input and appears as CABLE Output.</value>
+    </data>
+    <data name="Speech_TranslatedSpeechOutputDevice" xml:space="preserve">
+        <value>Target microphone</value>
+    </data>
+    <data name="Speech_AudioOutput" xml:space="preserve">
+        <value>Play translated speech to audio output</value>
+    </data>
+    <data name="Speech_AudioOutputTip" xml:space="preserve">
+        <value>Also play the translated speech through the default audio output.</value>
+    </data>
+    <data name="Speech_TargetVirtualMicrophones" xml:space="preserve">
+        <value>Push to microphones</value>
+    </data>
+    <data name="Speech_PlaybackOutputs" xml:space="preserve">
+        <value>Play to audio outputs</value>
+    </data>
+    <data name="Speech_NoAudioOutput" xml:space="preserve">
+        <value>No output</value>
+    </data>
+    <data name="Speech_SelectedOutputsCount" xml:space="preserve">
+        <value>{0} devices selected</value>
     </data>
     <data name="Speech_RealTimePreview" xml:space="preserve">
         <value>Real-time Preview</value>

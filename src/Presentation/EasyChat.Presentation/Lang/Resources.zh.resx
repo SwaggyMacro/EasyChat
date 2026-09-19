@@ -628,7 +628,28 @@
         <value>翻译后推送虚拟麦克风</value>
     </data>
     <data name="Speech_TranslatedSpeechTip" xml:space="preserve">
-        <value>需要 VB-Audio Cable。TTS 会发送到 CABLE Input，并从 CABLE Output 提供给外部应用。</value>
+        <value>请选择与目标麦克风对应的播放端点。VB-CABLE 使用 CABLE Input，外部应用中显示为 CABLE Output。</value>
+    </data>
+    <data name="Speech_TranslatedSpeechOutputDevice" xml:space="preserve">
+        <value>目标麦克风</value>
+    </data>
+    <data name="Speech_AudioOutput" xml:space="preserve">
+        <value>同时播放到音频输出</value>
+    </data>
+    <data name="Speech_AudioOutputTip" xml:space="preserve">
+        <value>同时通过默认音频输出播放译文语音。</value>
+    </data>
+    <data name="Speech_TargetVirtualMicrophones" xml:space="preserve">
+        <value>推送到麦克风</value>
+    </data>
+    <data name="Speech_PlaybackOutputs" xml:space="preserve">
+        <value>播放到音频输出</value>
+    </data>
+    <data name="Speech_NoAudioOutput" xml:space="preserve">
+        <value>不操作</value>
+    </data>
+    <data name="Speech_SelectedOutputsCount" xml:space="preserve">
+        <value>已选择 {0} 个设备</value>
     </data>
     <data name="Speech_RealTimePreview" xml:space="preserve">
         <value>实时预览</value>

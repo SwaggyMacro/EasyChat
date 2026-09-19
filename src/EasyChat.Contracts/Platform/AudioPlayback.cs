@@ -5,7 +5,8 @@ public sealed record AudioTrack(ReadOnlyMemory<byte> Content, string MediaType);
 public enum AudioPlaybackTarget
 {
     Default,
-    VirtualCable
+    VirtualCable,
+    SelectedDevice
 }
 
 public enum AudioPlaybackContext
@@ -68,6 +69,14 @@ public interface IAudioPlaybackQueue
         AudioPlaybackContext context,
         CancellationToken cancellationToken = default) =>
         EnqueueAsync(track, target, cancellationToken);
+
+    ValueTask<Guid> EnqueueAsync(
+        AudioTrack track,
+        AudioPlaybackTarget target,
+        AudioPlaybackContext context,
+        AudioPlaybackDeviceToken? deviceToken,
+        CancellationToken cancellationToken = default) =>
+        EnqueueAsync(track, target, context, cancellationToken);
 
     ValueTask StopAsync(CancellationToken cancellationToken = default);
 }

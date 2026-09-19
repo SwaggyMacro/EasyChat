@@ -2725,6 +2725,48 @@ namespace EasyChat.Presentation.Lang {
                 return ResourceManager.GetString("Speech_TranslatedSpeechTip", resourceCulture);
             }
         }
+
+        public static string Speech_TranslatedSpeechOutputDevice {
+            get {
+                return ResourceManager.GetString("Speech_TranslatedSpeechOutputDevice", resourceCulture);
+            }
+        }
+
+        public static string Speech_AudioOutput {
+            get {
+                return ResourceManager.GetString("Speech_AudioOutput", resourceCulture);
+            }
+        }
+
+        public static string Speech_AudioOutputTip {
+            get {
+                return ResourceManager.GetString("Speech_AudioOutputTip", resourceCulture);
+            }
+        }
+
+        public static string Speech_TargetVirtualMicrophones {
+            get {
+                return ResourceManager.GetString("Speech_TargetVirtualMicrophones", resourceCulture);
+            }
+        }
+
+        public static string Speech_PlaybackOutputs {
+            get {
+                return ResourceManager.GetString("Speech_PlaybackOutputs", resourceCulture);
+            }
+        }
+
+        public static string Speech_NoAudioOutput {
+            get {
+                return ResourceManager.GetString("Speech_NoAudioOutput", resourceCulture);
+            }
+        }
+
+        public static string Speech_SelectedOutputsCount {
+            get {
+                return ResourceManager.GetString("Speech_SelectedOutputsCount", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Max Visible Lines.

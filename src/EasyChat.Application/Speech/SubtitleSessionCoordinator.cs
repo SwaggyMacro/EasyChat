@@ -231,13 +231,36 @@ internal sealed class SubtitleSessionCoordinator
                     continue;
                 }
 
-                var queued = await _tts.EnqueueAsync(
-                    new TtsSynthesisRequest(item.Text, voice.Value),
-                    interruptCurrent: false,
-                    target: AudioPlaybackTarget.VirtualCable,
-                    context: AudioPlaybackContext.RealtimeInterpretation).ConfigureAwait(false);
-                if (queued.IsFailure)
-                    _publish(new SpeechSessionErrorEvent(queued.Error.Message));
+                var settings = _getSettings();
+                var realtimeSettings = _subtitleOrigin == SpeechSubtitleOrigin.RealtimeInterpretation
+                    ? settings.RealtimeInterpretationConfiguration
+                    : null;
+                if (_subtitleOrigin == SpeechSubtitleOrigin.RealtimeInterpretation
+                    && realtimeSettings is not null)
+                {
+                    foreach (var deviceName in (realtimeSettings.TranslatedSpeechOutputDeviceNames ?? [])
+                                 .Concat(realtimeSettings.AudioOutputDeviceNames ?? []))
+                    {
+                        var queued = await _tts.EnqueueAsync(
+                            new TtsSynthesisRequest(item.Text, voice.Value),
+                            interruptCurrent: false,
+                            target: AudioPlaybackTarget.SelectedDevice,
+                            context: AudioPlaybackContext.RealtimeInterpretation,
+                            outputDeviceName: deviceName).ConfigureAwait(false);
+                        if (queued.IsFailure)
+                            _publish(new SpeechSessionErrorEvent(queued.Error.Message));
+                    }
+                }
+                else if (settings.IsTranslatedSpeechEnabled)
+                {
+                    var queued = await _tts.EnqueueAsync(
+                        new TtsSynthesisRequest(item.Text, voice.Value),
+                        interruptCurrent: false,
+                        target: AudioPlaybackTarget.VirtualCable,
+                        context: AudioPlaybackContext.RealtimeInterpretation).ConfigureAwait(false);
+                    if (queued.IsFailure)
+                        _publish(new SpeechSessionErrorEvent(queued.Error.Message));
+                }
             }
         }
         catch (OperationCanceledException)
@@ -2170,8 +2193,15 @@ internal sealed class SubtitleSessionCoordinator
     private void QueueTranslatedSpeech(ManagedSubtitleLine line, string targetLanguage)
     {
         var settings = _getSettings();
+        var realtimeSettings = settings.RealtimeInterpretationConfiguration;
+        var hasSpeechOutput = _subtitleOrigin == SpeechSubtitleOrigin.RealtimeInterpretation
+            ? realtimeSettings is null
+                ? settings.IsTranslatedSpeechEnabled
+                : (realtimeSettings.TranslatedSpeechOutputDeviceNames?.Count ?? 0) > 0
+                  || (realtimeSettings.AudioOutputDeviceNames?.Count ?? 0) > 0
+            : settings.IsTranslatedSpeechEnabled;
         if (_tts is null
-            || !settings.IsTranslatedSpeechEnabled
+            || !hasSpeechOutput
             || line.IsSpeechQueued
             || string.IsNullOrWhiteSpace(line.DisplayTranslatedText)
             || string.IsNullOrWhiteSpace(targetLanguage))

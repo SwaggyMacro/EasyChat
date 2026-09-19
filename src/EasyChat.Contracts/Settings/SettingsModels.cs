@@ -376,7 +376,9 @@ public sealed record SpeechTranslationConfiguration(
     string TargetLanguage,
     string EngineId,
     int EngineType,
-    string? PromptId);
+    string? PromptId,
+    IReadOnlyList<string>? TranslatedSpeechOutputDeviceNames = null,
+    IReadOnlyList<string>? AudioOutputDeviceNames = null);
 
 /// <summary>A persisted application list entry for the selection blacklist/whitelist.</summary>
 public sealed record SelectionAppEntrySettings(

@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Runtime.Versioning;
 using EasyChat.Contracts.Platform;
 using Microsoft.Extensions.Logging;
@@ -24,6 +25,7 @@ public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, IA
     private Task? _runner;
     private bool _disposed;
     private AudioPlaybackTarget _deviceTarget;
+    private AudioPlaybackDeviceToken? _deviceToken;
 
     public event EventHandler<AudioPlaybackEventArgs>? PlaybackStarted;
 
@@ -51,6 +53,14 @@ public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, IA
         AudioPlaybackTarget target,
         AudioPlaybackContext context,
         CancellationToken cancellationToken = default)
+        => EnqueueAsync(track, target, context, null, cancellationToken);
+
+    public ValueTask<Guid> EnqueueAsync(
+        AudioTrack track,
+        AudioPlaybackTarget target,
+        AudioPlaybackContext context,
+        AudioPlaybackDeviceToken? deviceToken,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(track);
         cancellationToken.ThrowIfCancellationRequested();
@@ -58,7 +68,7 @@ public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, IA
         lock (_sync)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
-            _queue.Enqueue(new QueuedPlayback(playbackId, track, target, context));
+            _queue.Enqueue(new QueuedPlayback(playbackId, track, target, context, deviceToken));
             if (_runner is null || _runner.IsCompleted)
                 _runner = Task.Run(RunAsync);
         }
@@ -145,7 +155,7 @@ public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, IA
         var attached = false;
         try
         {
-            EnsureInitialized(queued.Target);
+            EnsureInitialized(queued.Target, queued.DeviceToken);
             if (_engine is null || _device is null)
                 return;
             using var stream = new MemoryStream(queued.Track.Content.ToArray(), writable: false);
@@ -205,26 +215,48 @@ public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, IA
         }
     }
 
-    private void EnsureInitialized(AudioPlaybackTarget target)
+    private void EnsureInitialized(
+        AudioPlaybackTarget target,
+        AudioPlaybackDeviceToken? deviceToken)
     {
-        if (_engine is not null && _device is not null && _deviceTarget == target)
+        if (_engine is not null
+            && _device is not null
+            && _deviceTarget == target
+            && _deviceToken == deviceToken)
             return;
 
         _engine ??= new MiniAudioEngine();
         _engine.UpdateAudioDevicesInfo();
         var devices = _engine.PlaybackDevices;
-        var selected = target == AudioPlaybackTarget.VirtualCable
-            ? devices.FirstOrDefault(device =>
-                WindowsAudioPlaybackDeviceCatalog.IsVirtualCableName(device.Name))
-            : devices.FirstOrDefault(device => device.IsDefault);
-        var hasSelected = target == AudioPlaybackTarget.VirtualCable
-            ? devices.Any(device => WindowsAudioPlaybackDeviceCatalog.IsVirtualCableName(device.Name))
-            : devices.Any(device => device.IsDefault);
+        var selected = target switch
+        {
+            AudioPlaybackTarget.VirtualCable => devices.FirstOrDefault(device =>
+                WindowsAudioPlaybackDeviceCatalog.IsVirtualCableName(device.Name)),
+            AudioPlaybackTarget.SelectedDevice => devices.FirstOrDefault(device =>
+                deviceToken is not null
+                && WindowsAudioPlaybackDeviceCatalog.FromDeviceId(
+                    device.Id.ToInt64().ToString(CultureInfo.InvariantCulture)) == deviceToken.Value),
+            _ => devices.FirstOrDefault(device => device.IsDefault)
+        };
+        var hasSelected = target switch
+        {
+            AudioPlaybackTarget.VirtualCable => devices.Any(device =>
+                WindowsAudioPlaybackDeviceCatalog.IsVirtualCableName(device.Name)),
+            AudioPlaybackTarget.SelectedDevice => deviceToken is not null && devices.Any(device =>
+                WindowsAudioPlaybackDeviceCatalog.FromDeviceId(
+                    device.Id.ToInt64().ToString(CultureInfo.InvariantCulture)) == deviceToken.Value),
+            _ => devices.Any(device => device.IsDefault)
+        };
         if (!hasSelected)
         {
-            throw new InvalidOperationException(target == AudioPlaybackTarget.VirtualCable
-                ? "VB-Audio Cable playback device 'CABLE Input' is not available."
-                : "No default audio playback device is available.");
+            throw new InvalidOperationException(target switch
+            {
+                AudioPlaybackTarget.VirtualCable =>
+                    "VB-Audio Cable playback device 'CABLE Input' is not available.",
+                AudioPlaybackTarget.SelectedDevice =>
+                    "The selected audio playback device is not available.",
+                _ => "No default audio playback device is available."
+            });
         }
 
         _device?.Stop();
@@ -235,6 +267,7 @@ public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, IA
             _device = _engine.InitializePlaybackDevice(selected, AudioFormat.DvdHq);
             _device.Start();
             _deviceTarget = target;
+            _deviceToken = deviceToken;
         }
         catch
         {
@@ -248,5 +281,6 @@ public sealed class WindowsSoundFlowAudioPlaybackQueue : IAudioPlaybackQueue, IA
         Guid Id,
         AudioTrack Track,
         AudioPlaybackTarget Target,
-        AudioPlaybackContext Context);
+        AudioPlaybackContext Context,
+        AudioPlaybackDeviceToken? DeviceToken);
 }

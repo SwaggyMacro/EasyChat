@@ -195,10 +195,21 @@ public sealed class TtsUseCases : ITtsUseCases
         bool interruptCurrent,
         AudioPlaybackTarget target,
         AudioPlaybackContext context,
+        CancellationToken cancellationToken = default) =>
+        await EnqueueAsync(request, interruptCurrent, target, context, null, cancellationToken)
+            .ConfigureAwait(false);
+
+    public async ValueTask<Result> EnqueueAsync(
+        TtsSynthesisRequest request,
+        bool interruptCurrent,
+        AudioPlaybackTarget target,
+        AudioPlaybackContext context,
+        string? outputDeviceName,
         CancellationToken cancellationToken = default)
     {
         var result = await EnqueueWithSessionAsync(
-            request, interruptCurrent, target, context, cancellationToken).ConfigureAwait(false);
+            request, interruptCurrent, target, context, outputDeviceName, cancellationToken)
+            .ConfigureAwait(false);
         return result.IsSuccess ? Result.Success() : Result.Failure(result.Error);
     }
 
@@ -214,20 +225,31 @@ public sealed class TtsUseCases : ITtsUseCases
         bool interruptCurrent,
         AudioPlaybackTarget target,
         CancellationToken cancellationToken = default) =>
-        EnqueueWithSessionAsync(request, interruptCurrent, target, AudioPlaybackContext.None, cancellationToken);
+        EnqueueWithSessionAsync(request, interruptCurrent, target, AudioPlaybackContext.None, null, cancellationToken);
 
     public async ValueTask<Result<ITtsPlaybackSession>> EnqueueWithSessionAsync(
         TtsSynthesisRequest request,
         bool interruptCurrent,
         AudioPlaybackTarget target,
         AudioPlaybackContext context,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default) =>
+        await EnqueueWithSessionAsync(
+            request, interruptCurrent, target, context, null, cancellationToken).ConfigureAwait(false);
+
+    private async ValueTask<Result<ITtsPlaybackSession>> EnqueueWithSessionAsync(
+        TtsSynthesisRequest request,
+        bool interruptCurrent,
+        AudioPlaybackTarget target,
+        AudioPlaybackContext context,
+        string? outputDeviceName,
+        CancellationToken cancellationToken)
     {
         var synthesized = await SynthesizeAsync(request, cancellationToken).ConfigureAwait(false);
         if (synthesized.IsFailure)
             return Result<ITtsPlaybackSession>.Failure(synthesized.Error);
 
-        if (target == AudioPlaybackTarget.VirtualCable)
+        AudioPlaybackDeviceToken? deviceToken = null;
+        if (target is AudioPlaybackTarget.VirtualCable or AudioPlaybackTarget.SelectedDevice)
         {
             if (_playbackDevices is null)
             {
@@ -252,12 +274,22 @@ public sealed class TtsUseCases : ITtsUseCases
                     "audio.virtual_cable_unavailable",
                     exception.Message));
             }
-            if (!devices.Any(device => device.IsVirtualCable))
+            AudioPlaybackDeviceDescriptor? selected = target == AudioPlaybackTarget.SelectedDevice
+                ? devices.FirstOrDefault(device =>
+                    !string.IsNullOrWhiteSpace(outputDeviceName)
+                    && string.Equals(device.Name, outputDeviceName, StringComparison.OrdinalIgnoreCase))
+                : devices.FirstOrDefault(device => device.IsVirtualCable);
+            if (selected is null)
             {
                 return Result<ITtsPlaybackSession>.Failure(new Error(
-                    "audio.virtual_cable_unavailable",
-                    "VB-Audio Cable playback device 'CABLE Input' is not available."));
+                    target == AudioPlaybackTarget.SelectedDevice
+                        ? "audio.playback_device_unavailable"
+                        : "audio.virtual_cable_unavailable",
+                    target == AudioPlaybackTarget.SelectedDevice
+                        ? $"Audio playback device '{outputDeviceName}' is not available."
+                        : "VB-Audio Cable playback device 'CABLE Input' is not available."));
             }
+            deviceToken = selected.Token;
         }
 
         await _enqueueGate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -279,6 +311,7 @@ public sealed class TtsUseCases : ITtsUseCases
                     synthesized.Value,
                     target,
                     context,
+                    deviceToken,
                     cancellationToken).ConfigureAwait(false);
             }
 
