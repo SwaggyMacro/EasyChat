@@ -1,8 +1,12 @@
+using EasyChat.Contracts.ImageTranslation;
+using EasyChat.Contracts.Ocr;
 using EasyChat.Contracts.Platform;
 using EasyChat.Infrastructure.MacOS.ApplicationStartup;
 using EasyChat.Infrastructure.MacOS.Audio;
 using EasyChat.Infrastructure.MacOS.Capture;
+using EasyChat.Infrastructure.MacOS.ImageTranslation;
 using EasyChat.Infrastructure.MacOS.Input;
+using EasyChat.Infrastructure.MacOS.Ocr;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyChat.Infrastructure.MacOS.DependencyInjection;
@@ -49,6 +53,17 @@ public static class MacOSInfrastructureServiceCollectionExtensions
         services.AddSingleton<IPreparablePcmAudioCapture>(provider => provider.GetRequiredService<MacPcmAudioCapture>());
         services.AddSingleton<IGlobalPointerMonitor, MacGlobalPointerMonitor>();
         services.AddSingleton<ISelectedTextCapture, MacSelectedTextCapture>();
+
+        // OCR and image text removal are suspended (phases 10 and 11); these fail explicitly so the
+        // rest of the app can compose and run.
+        services.AddSingleton<MacUnavailableOcr>();
+        services.AddSingleton<IOcrRecognizer>(provider => provider.GetRequiredService<MacUnavailableOcr>());
+        services.AddSingleton<IOcrModelStore>(provider => provider.GetRequiredService<MacUnavailableOcr>());
+        services.AddSingleton<MacUnavailableImageTranslation>();
+        services.AddSingleton<IImageBackgroundCleaner>(provider =>
+            provider.GetRequiredService<MacUnavailableImageTranslation>());
+        services.AddSingleton<IImageTranslationModelStore>(provider =>
+            provider.GetRequiredService<MacUnavailableImageTranslation>());
         return services;
     }
 }

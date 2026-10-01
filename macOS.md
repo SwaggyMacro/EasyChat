@@ -1,4 +1,5 @@
 # macOS 适配详细实施计划（审核版）
+- dotnet run --project src/Host/EasyChat.Desktop.MacOS
 
 ## 1. 范围基线
 

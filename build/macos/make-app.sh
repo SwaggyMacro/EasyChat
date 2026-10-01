@@ -68,18 +68,25 @@ echo "==> Signing"
 identity="${EASYCHAT_SIGN_IDENTITY:--}"
 
 # A secure timestamp is required for notarisation but cannot be obtained for an ad-hoc signature.
+#
+# The hardened runtime is likewise only applied with a real identity. Its library validation
+# requires every dylib to carry the main executable's Team ID, and ad-hoc signatures have none, so
+# an ad-hoc hardened bundle passes codesign --verify yet fails to dlopen libSkiaSharp the moment it
+# draws its first window. Notarisation needs the hardened runtime; a local build does not.
 if [[ "${identity}" == "-" ]]; then
     timestamp=(--timestamp=none)
+    runtime=()
 else
     timestamp=(--timestamp)
+    runtime=(--options runtime)
 fi
 
 # Inside out: signing a nested file after the bundle would invalidate the bundle's signature.
 while IFS= read -r -d '' binary; do
-    codesign --force "${timestamp[@]}" --options runtime --sign "${identity}" "${binary}"
+    codesign --force "${timestamp[@]}" ${runtime[@]+"${runtime[@]}"} --sign "${identity}" "${binary}"
 done < <(find "${contents}/MacOS" -type f -name '*.dylib' -print0)
 
-codesign --force "${timestamp[@]}" --options runtime \
+codesign --force "${timestamp[@]}" ${runtime[@]+"${runtime[@]}"} \
     --entitlements "${entitlements}" \
     --sign "${identity}" "${bundle}"
 rm -rf "${staging}"
