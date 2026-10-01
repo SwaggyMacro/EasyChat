@@ -216,7 +216,7 @@ public partial class ShortcutEditDialogView : UserControl
         if (control) combination.Append("Ctrl + ");
         if (alt) combination.Append("Alt + ");
         if (shift) combination.Append("Shift + ");
-        if (meta) combination.Append("Win + ");
+        if (meta) combination.Append("Meta + ");
         if (!isModifier && !string.IsNullOrWhiteSpace(keyName))
             combination.Append(keyName);
 

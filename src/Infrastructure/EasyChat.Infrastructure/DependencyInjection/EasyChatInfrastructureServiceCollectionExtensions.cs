@@ -59,7 +59,7 @@ public static class EasyChatInfrastructureServiceCollectionExtensions
         services.AddSingleton<ITranslationFailureSink, LoggingTranslationFailureSink>();
         services.AddSingleton<IExternalUriLauncher, ShellExternalUriLauncher>();
         services.AddSingleton<IApplicationUpdateService, VelopackApplicationUpdateService>();
-        var assetsDirectory = Path.Combine(AppContext.BaseDirectory, "Assets");
+        var assetsDirectory = Path.Combine(ApplicationResourceDirectory.Current, "Assets");
         services.AddSingleton<ITtsSynthesisProvider>(provider => new EdgeTtsProvider(
             assetsDirectory,
             provider.GetRequiredService<ISettingsUseCases>()));

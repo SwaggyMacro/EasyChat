@@ -37,6 +37,16 @@ public sealed class CompositionRegistrationTests
     [TestMethod]
     public async Task CurrentModules_BuildAndResolveToOwnedImplementations()
     {
+        if (!OperatingSystem.IsWindows())
+        {
+            // This composes the Windows module, whose adapters refuse to register anywhere else, so
+            // there is nothing meaningful to assert off Windows. The macOS composition is checked by
+            // running the bundle with --verify-composition, because that also exercises the real
+            // .app identity and native library resolution, which a test host cannot.
+            Assert.Inconclusive("The Windows composition can only be verified on Windows.");
+            return;
+        }
+
         var services = new ServiceCollection();
         services.AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance);
         services.AddSingleton<ILogger<LoggingTranslationFailureSink>>(

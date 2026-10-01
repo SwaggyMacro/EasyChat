@@ -2,15 +2,67 @@ name: Build CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "macOS" ]
   pull_request:
     branches: [ "master" ]
   workflow_dispatch:
 
 jobs:
-  build:
+  tests:
+    name: Tests (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # Both platforms always run: a failure on one is a fact worth having about the other.
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: Windows
+          - os: macos-latest
+            name: macOS arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build
+        run: dotnet build ./EasyChat.sln -c Release
+
+      # These must pass on both platforms. The architecture tests in particular are run on both on
+      # purpose: they read project files and compare paths, and a Windows-only run once let a
+      # backslash-separated ProjectReference through that broke the macOS checkout.
+      - name: Run cross-platform tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          for project in Domain Application Infrastructure Presentation; do
+            dotnet test "./tests/EasyChat.${project}.Tests/EasyChat.${project}.Tests.csproj" \
+              -c Release --no-build
+          done
+          dotnet test ./tests/EasyChat.ArchitectureTests/EasyChat.ArchitectureTests.csproj \
+            -c Release --no-build
+          dotnet test ./tests/EasyChat.AcceptanceTests/EasyChat.AcceptanceTests.csproj \
+            -c Release --no-build
+          dotnet test ./tests/EasyChat.Infrastructure.MacOS.Tests/EasyChat.Infrastructure.MacOS.Tests.csproj \
+            -c Release --no-build
+
+      # The Windows adapters call Win32, OpenCV and OpenVINO directly, so this suite is only
+      # meaningful on a Windows runner.
+      - name: Run Windows platform tests
+        if: matrix.os == 'windows-latest'
+        run: dotnet test ./tests/EasyChat.Infrastructure.Windows.Tests/EasyChat.Infrastructure.Windows.Tests.csproj -c Release --no-build
+
+  windows-package:
+    name: Package (Windows)
+    needs: tests
     runs-on: windows-latest
-    name: Build and Test
 
     steps:
       - name: Checkout code
@@ -28,10 +80,6 @@ jobs:
         shell: bash
         run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Run tests
-        continue-on-error: true
-        run: dotnet test ./EasyChat.sln -c Release
-
       - name: Restore Windows dependencies
         run: dotnet restore ./src/Host/EasyChat.Desktop.Windows/EasyChat.Desktop.Windows.csproj -r win-x64 -p:SelfContained=true
 
@@ -48,3 +96,42 @@ jobs:
         with:
           name: EasyChat-Build-${{ steps.vars.outputs.SHORT_SHA }}
           path: ./EasyChat-Build-${{ steps.vars.outputs.SHORT_SHA }}.zip
+
+  macos-package:
+    name: Package (macOS arm64)
+    needs: tests
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Get Short SHA
+        id: vars
+        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      # Ad-hoc signed. A Developer ID certificate and an Apple account are needed for a bundle
+      # anyone else can open, so this artifact is for testing on the machine that downloads it, not
+      # for distribution — which is also why no macOS job exists in the release workflow yet.
+      - name: Build the app bundle
+        run: ./build/macos/make-app.sh
+
+      - name: Verify the signature
+        run: codesign --verify --deep --strict --verbose=2 ./publish/macos/EasyChat.app
+
+      - name: Compress the bundle
+        # ditto preserves the signature and the bundle's symlinks; zip does not.
+        run: ditto -c -k --sequesterRsrc --keepParent ./publish/macos/EasyChat.app ./EasyChat-macOS-${{ steps.vars.outputs.SHORT_SHA }}.zip
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: EasyChat-macOS-${{ steps.vars.outputs.SHORT_SHA }}
+          path: ./EasyChat-macOS-${{ steps.vars.outputs.SHORT_SHA }}.zip

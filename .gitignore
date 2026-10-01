@@ -27,3 +27,5 @@ Desktop.ini
 # llm agent
 /.reasonix/
 reasonix.toml
+DDD_ARCHITECTURE.md
+CLAUDE.md

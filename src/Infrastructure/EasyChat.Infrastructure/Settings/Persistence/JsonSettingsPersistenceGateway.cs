@@ -1,5 +1,6 @@
 using EasyChat.Contracts.Settings.Persistence;
 using EasyChat.Contracts.Settings;
+using EasyChat.Infrastructure.ApplicationData;
 using EasyChat.Shared.Results;
 using Newtonsoft.Json;
 
@@ -377,5 +378,5 @@ public sealed class JsonSettingsPersistenceGateway : ISettingsPersistenceGateway
     private string ConfigurationDirectory => Path.GetFullPath(_configurationDirectory());
 
     private static string GetDefaultAssetsDirectory() =>
-        Path.Combine(AppContext.BaseDirectory, "Assets");
+        Path.Combine(ApplicationResourceDirectory.Current, "Assets");
 }

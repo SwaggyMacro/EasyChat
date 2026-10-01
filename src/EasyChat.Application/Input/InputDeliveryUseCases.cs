@@ -59,16 +59,16 @@ public sealed class InputDeliveryUseCases : IInputDeliveryUseCases
             var selection = await _textSelection.SelectAllAsync(cancellationToken);
             if (selection.IsFailure || !IsCompleteSelection(selection.Value))
             {
-                var selectAll = await _textDelivery.SendKeyCombinationAsync(
-                    "Ctrl + A",
+                var selectAll = await _textDelivery.SendCommandAsync(
+                    StandardTextCommand.SelectAll,
                     cancellationToken);
                 if (selectAll.IsFailure)
                     return selectAll;
             }
 
             await _delay.DelayAsync(50, cancellationToken);
-            var delete = await _textDelivery.SendKeyCombinationAsync(
-                "Delete",
+            var delete = await _textDelivery.SendCommandAsync(
+                StandardTextCommand.Delete,
                 cancellationToken);
             if (delete.IsFailure)
                 return delete;

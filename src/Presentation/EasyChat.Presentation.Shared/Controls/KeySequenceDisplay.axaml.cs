@@ -65,37 +65,5 @@ public partial class KeySequenceDisplay : UserControl
         Keys = parts.ToList();
     }
 
-    private string FormatKey(string key)
-    {
-        // Handle digits D0-D9
-        if (key.Length == 2 && key.StartsWith("D") && char.IsDigit(key[1])) return key[1].ToString();
-
-        return key switch
-        {
-            "OemMinus" => "-",
-            "OemPlus" => "+",
-            "OemPeriod" => ".",
-            "OemComma" => ",",
-            "OemQuestion" => "?",
-            "OemOpenBrackets" => "[",
-            "OemCloseBrackets" => "]",
-            "OemQuotes" => "\"",
-            "OemSemicolon" => ";",
-            "OemTilde" => "~",
-            "OemPipe" => "|",
-            "Oem1" => ";",
-            "Oem2" => "/",
-            "Oem3" => "`",
-            "Oem4" => "[",
-            "Oem5" => "\\",
-            "Oem6" => "]",
-            "Oem7" => "'",
-            "Return" => "Enter",
-            "Next" => "PgDn",
-            "Prior" => "PgUp",
-            "Back" => "Backspace",
-            "Capital" => "Caps",
-            _ => key
-        };
-    }
+    private static string FormatKey(string key) => KeyGlyphs.Format(key);
 }

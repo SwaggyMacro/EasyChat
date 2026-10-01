@@ -1,8 +1,14 @@
-using System.Threading;
+using EasyChat.Desktop.ApplicationLifecycle;
 
-namespace EasyChat.Desktop;
+namespace EasyChat.Desktop.Windows.ApplicationLifecycle;
 
-internal sealed class DesktopSingleInstance : IDisposable
+internal sealed class WindowsDesktopInstanceCoordinator : IDesktopInstanceCoordinator
+{
+    public IDesktopInstanceLease? AcquireOrSignal(bool waitForExistingRelease = false) =>
+        WindowsDesktopInstanceLease.AcquireOrSignal(waitForExistingRelease);
+}
+
+internal sealed class WindowsDesktopInstanceLease : IDesktopInstanceLease
 {
     private const string MutexName = @"Local\EasyChat.Desktop.SingleInstance";
     private const string ActivationEventName = @"Local\EasyChat.Desktop.Activate";
@@ -18,19 +24,19 @@ internal sealed class DesktopSingleInstance : IDisposable
     private bool _activationPending;
     private bool _disposed;
 
-    private DesktopSingleInstance(Mutex mutex, EventWaitHandle activationEvent)
+    private WindowsDesktopInstanceLease(Mutex mutex, EventWaitHandle activationEvent)
     {
         _mutex = mutex;
         _activationEvent = activationEvent;
         _listener = new Thread(ListenForActivation)
         {
             IsBackground = true,
-            Name = "EasyChat single-instance listener"
+            Name = "EasyChat Windows single-instance listener"
         };
         _listener.Start();
     }
 
-    public static DesktopSingleInstance? AcquireOrSignal(bool waitForExistingRelease = false)
+    public static WindowsDesktopInstanceLease? AcquireOrSignal(bool waitForExistingRelease)
     {
         var mutex = new Mutex(true, MutexName, out var createdNew);
         var ownsMutex = createdNew;
@@ -71,32 +77,6 @@ internal sealed class DesktopSingleInstance : IDisposable
         return CreateOwner(mutex);
     }
 
-    private static DesktopSingleInstance CreateOwner(Mutex mutex)
-    {
-        try
-        {
-            var activationEvent = new EventWaitHandle(
-                initialState: false,
-                EventResetMode.AutoReset,
-                ActivationEventName);
-            return new DesktopSingleInstance(mutex, activationEvent);
-        }
-        catch
-        {
-            try
-            {
-                mutex.ReleaseMutex();
-            }
-            catch (ApplicationException)
-            {
-                // The mutex may already have been abandoned while startup failed.
-            }
-
-            mutex.Dispose();
-            throw;
-        }
-    }
-
     public void SetActivationHandler(Action handler)
     {
         ArgumentNullException.ThrowIfNull(handler);
@@ -123,13 +103,11 @@ internal sealed class DesktopSingleInstance : IDisposable
         {
             if (_disposed)
                 return;
-
             _disposed = true;
             _activationHandler = null;
             _activationPending = false;
         }
 
-        // Wake the listener so shutdown does not leave a background thread blocked.
         try
         {
             _activationEvent.Set();
@@ -151,6 +129,31 @@ internal sealed class DesktopSingleInstance : IDisposable
         }
 
         _mutex.Dispose();
+    }
+
+    private static WindowsDesktopInstanceLease CreateOwner(Mutex mutex)
+    {
+        try
+        {
+            var activationEvent = new EventWaitHandle(
+                initialState: false,
+                EventResetMode.AutoReset,
+                ActivationEventName);
+            return new WindowsDesktopInstanceLease(mutex, activationEvent);
+        }
+        catch
+        {
+            try
+            {
+                mutex.ReleaseMutex();
+            }
+            catch (ApplicationException)
+            {
+            }
+
+            mutex.Dispose();
+            throw;
+        }
     }
 
     private static void SignalActivation()
@@ -187,7 +190,6 @@ internal sealed class DesktopSingleInstance : IDisposable
                 {
                     if (_disposed)
                         return;
-
                     handler = _activationHandler;
                     if (handler is null)
                         _activationPending = true;
@@ -199,13 +201,11 @@ internal sealed class DesktopSingleInstance : IDisposable
                 }
                 catch
                 {
-                    // A late activation must not terminate the desktop process during shutdown.
                 }
             }
         }
         catch (ObjectDisposedException)
         {
-            // Disposal closes the event after waking the listener.
         }
     }
 }

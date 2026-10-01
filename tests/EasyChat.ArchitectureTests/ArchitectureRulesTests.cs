@@ -18,15 +18,21 @@ public sealed class ArchitectureRulesTests
             "src/EasyChat.Application/EasyChat.Application.csproj",
             "src/Infrastructure/EasyChat.Infrastructure/EasyChat.Infrastructure.csproj",
             "src/Infrastructure/EasyChat.Infrastructure.Windows/EasyChat.Infrastructure.Windows.csproj",
+            "src/Infrastructure/EasyChat.Infrastructure.MacOS/EasyChat.Infrastructure.MacOS.csproj",
             "src/Infrastructure/MicroASR/MicroASR.csproj",
             "src/Presentation/EasyChat.Presentation.Shared/EasyChat.Presentation.Shared.csproj",
             "src/Presentation/EasyChat.Presentation/EasyChat.Presentation.csproj",
             "src/Host/EasyChat.Desktop/EasyChat.Desktop.csproj",
-            "src/Host/EasyChat.Desktop.Windows/EasyChat.Desktop.Windows.csproj"
+            "src/Host/EasyChat.Desktop.Windows/EasyChat.Desktop.Windows.csproj",
+            "src/Host/EasyChat.Desktop.MacOS/EasyChat.Desktop.MacOS.csproj"
         ];
 
         foreach (var relative in expected)
             Assert.IsTrue(File.Exists(Path.Combine(root, relative)), relative);
+
+        const string macOSTestProject =
+            "tests/EasyChat.Infrastructure.MacOS.Tests/EasyChat.Infrastructure.MacOS.Tests.csproj";
+        Assert.IsTrue(File.Exists(Path.Combine(root, macOSTestProject)), macOSTestProject);
 
         var actual = Directory.EnumerateFiles(Path.Combine(root, "src"), "*.csproj", SearchOption.AllDirectories)
             .Select(path => Path.GetRelativePath(root, path).Replace('\\', '/'))
@@ -98,6 +104,7 @@ public sealed class ArchitectureRulesTests
             ["EasyChat.Application"] = Set("EasyChat.Contracts", "EasyChat.Domain", "EasyChat.Shared"),
             ["EasyChat.Infrastructure"] = Set("EasyChat.Contracts", "EasyChat.Shared", "MicroASR"),
             ["EasyChat.Infrastructure.Windows"] = Set("EasyChat.Contracts", "EasyChat.Shared"),
+            ["EasyChat.Infrastructure.MacOS"] = Set("EasyChat.Contracts", "EasyChat.Shared"),
             ["MicroASR"] = Set(),
             ["EasyChat.Presentation.Shared"] = Set(),
             ["EasyChat.Presentation"] = Set("EasyChat.Contracts", "EasyChat.Presentation.Shared"),
@@ -105,6 +112,10 @@ public sealed class ArchitectureRulesTests
             ["EasyChat.Desktop.Windows"] = Set(
                 "EasyChat.Desktop",
                 "EasyChat.Infrastructure.Windows",
+                "EasyChat.Presentation"),
+            ["EasyChat.Desktop.MacOS"] = Set(
+                "EasyChat.Desktop",
+                "EasyChat.Infrastructure.MacOS",
                 "EasyChat.Presentation")
         };
 
@@ -113,7 +124,8 @@ public sealed class ArchitectureRulesTests
             var name = Path.GetFileNameWithoutExtension(project);
             var actual = XDocument.Load(project)
                 .Descendants("ProjectReference")
-                .Select(node => Path.GetFileNameWithoutExtension(node.Attribute("Include")!.Value))
+                .Select(node => node.Attribute("Include")!.Value.Replace('\\', '/'))
+                .Select(path => Path.GetFileNameWithoutExtension(path)!)
                 .ToHashSet(StringComparer.Ordinal);
             Assert.IsTrue(allowed[name].SetEquals(actual), $"{name}: [{string.Join(", ", actual)}]");
         }
@@ -127,7 +139,8 @@ public sealed class ArchitectureRulesTests
         string[] forbidden =
         [
             "Avalonia", "ReactiveUI", "DllImport", "LibraryImport", "Microsoft.Win32",
-            "OpenCv", "OpenVINO", "Paddle", "SoundFlow", "Velopack", "user32", "kernel32", "HWND", "AXUIElement"
+            "OpenCv", "OpenVINO", "Paddle", "SoundFlow", "Velopack", "user32", "kernel32", "HWND", "AXUIElement",
+            "NSWindow", "SCDisplay", "AudioDeviceID"
         ];
 
         foreach (var layer in layers)
@@ -179,11 +192,13 @@ public sealed class ArchitectureRulesTests
         string[] forbiddenPackages =
         [
             "GlobalHotKeys.Windows", "OpenCvSharp4.Windows", "Sdcb.OpenVINO",
-            "Sdcb.PaddleInference", "Sdcb.PaddleOCR", "SoundFlow"
+            "Sdcb.PaddleInference", "Sdcb.PaddleOCR", "SoundFlow", "Xamarin.Mac",
+            "Microsoft.macOS", "Microsoft.MacCatalyst"
         ];
 
         foreach (var project in Directory.EnumerateFiles(Path.Combine(root, "src"), "*.csproj", SearchOption.AllDirectories)
-                     .Where(path => !path.Contains("Infrastructure.Windows", StringComparison.Ordinal)))
+                     .Where(path => !path.Contains("Infrastructure.Windows", StringComparison.Ordinal)
+                                    && !path.Contains("Infrastructure.MacOS", StringComparison.Ordinal)))
         {
             var document = XDocument.Load(project);
             foreach (var package in forbiddenPackages)
@@ -224,6 +239,20 @@ public sealed class ArchitectureRulesTests
             var source = File.ReadAllText(file);
             Assert.DoesNotContain("Avalonia", source, Path.GetRelativePath(root, file));
             Assert.DoesNotContain("EasyChat.Presentation", source, Path.GetRelativePath(root, file));
+            Assert.DoesNotContain("Infrastructure.MacOS", source, Path.GetRelativePath(root, file));
+        }
+
+        var macInfrastructure = Path.Combine(
+            root,
+            "src",
+            "Infrastructure",
+            "EasyChat.Infrastructure.MacOS");
+        foreach (var file in SourceFiles(macInfrastructure))
+        {
+            var source = File.ReadAllText(file);
+            Assert.DoesNotContain("Avalonia", source, Path.GetRelativePath(root, file));
+            Assert.DoesNotContain("EasyChat.Presentation", source, Path.GetRelativePath(root, file));
+            Assert.DoesNotContain("Infrastructure.Windows", source, Path.GetRelativePath(root, file));
         }
 
         var sharedDesktop = Path.Combine(root, "src", "Host", "EasyChat.Desktop");
@@ -249,6 +278,30 @@ public sealed class ArchitectureRulesTests
         Assert.DoesNotContain("AddEasyChatInfrastructure", windowsProgram);
         Assert.DoesNotContain("AddEasyChatApplication", windowsProgram);
         Assert.DoesNotContain("AddEasyChatPresentation", windowsProgram);
+
+        var macProgram = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "Host",
+            "EasyChat.Desktop.MacOS",
+            "Program.cs"));
+        StringAssert.Contains(macProgram, "DesktopApplication.Run");
+        Assert.DoesNotContain("AddEasyChatInfrastructure", macProgram);
+        Assert.DoesNotContain("AddEasyChatApplication", macProgram);
+        Assert.DoesNotContain("AddEasyChatPresentation", macProgram);
+
+        foreach (var projectRoot in new[]
+                 {
+                     Path.Combine(root, "src", "EasyChat.Application"),
+                     Path.Combine(root, "src", "Presentation", "EasyChat.Presentation")
+                 })
+        {
+            foreach (var file in SourceFiles(projectRoot))
+                Assert.DoesNotContain(
+                    "OperatingSystem.IsMacOS",
+                    File.ReadAllText(file),
+                    Path.GetRelativePath(root, file));
+        }
 
         var presentation = Path.Combine(root, "src", "Presentation", "EasyChat.Presentation");
         foreach (var file in Directory.EnumerateFiles(presentation, "*", SearchOption.AllDirectories)

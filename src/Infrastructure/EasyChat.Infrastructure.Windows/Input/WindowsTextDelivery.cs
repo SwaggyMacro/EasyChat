@@ -90,6 +90,18 @@ public sealed class WindowsTextDelivery : ITextDelivery
         }
     }
 
+    public ValueTask<Result> SendCommandAsync(
+        StandardTextCommand command,
+        CancellationToken cancellationToken = default) =>
+        SendKeyCombinationAsync(command switch
+        {
+            StandardTextCommand.SelectAll => "Ctrl + A",
+            StandardTextCommand.Delete => "Delete",
+            StandardTextCommand.Copy => "Ctrl + C",
+            StandardTextCommand.Paste => "Ctrl + V",
+            _ => throw new ArgumentOutOfRangeException(nameof(command), command, null)
+        }, cancellationToken);
+
     private async ValueTask<Result> PasteAsync(
         string text,
         CancellationToken cancellationToken)
@@ -110,7 +122,7 @@ public sealed class WindowsTextDelivery : ITextDelivery
                 return setText;
 
             await Task.Delay(50, cancellationToken);
-            var paste = await SendKeyCombinationAsync("Ctrl + V", cancellationToken);
+            var paste = await SendCommandAsync(StandardTextCommand.Paste, cancellationToken);
             if (paste.IsFailure)
                 return paste;
 

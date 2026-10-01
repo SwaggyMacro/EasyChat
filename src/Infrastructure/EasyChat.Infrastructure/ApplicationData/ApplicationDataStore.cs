@@ -107,7 +107,7 @@ internal sealed class ApplicationDataStore : IApplicationDataStore
             ApplicationName);
         return new ApplicationDataStore(
             defaultRoot,
-            AppContext.BaseDirectory,
+            ApplicationResourceDirectory.Current,
             persistLocation: true,
             migrateLegacyData: true,
             legacyDataRootDirectory: legacyRoot);
@@ -122,7 +122,7 @@ internal sealed class ApplicationDataStore : IApplicationDataStore
                        nameof(configurationDirectory));
         return new ApplicationDataStore(
             root,
-            AppContext.BaseDirectory,
+            ApplicationResourceDirectory.Current,
             persistLocation: false,
             migrateLegacyData: false,
             configurationDirectoryOverride: fullConfigurationDirectory);
